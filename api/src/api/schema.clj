@@ -93,10 +93,10 @@
   [context args value]
   (db/delete-habit args))
 
-(defn resolve-mutation-set-suspend-habit
-  "@refer `db/set-suspend-habit`."
-  [context args value]
-  (db/set-suspend-habit args))
+(defn resolve-mutation-toggle-suspended-habit
+  "@refer `db/toggle-suspended-habit`."
+  [context {:keys [toggle_date] :as all} value]
+  (db/toggle-suspended-habit (assoc (dissoc all :toggle_date) :toggle-date-time (date-from-y-m-d-map toggle_date))))
 
 (defn resolve-query-get-frequency-stats
   "@refer `db/get-frequency-stats`."
@@ -113,7 +113,7 @@
    :query/get-habit-data (create-async-resolver resolve-get-habit-data)
    :query/date-to-y-m-d-format (create-date-to-y-m-d-resolver :date)
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
-   :query/resolve-mutation-set-suspend-habit (create-async-resolver resolve-mutation-set-suspend-habit)
+   :query/resolve-mutation-toggle-suspended-habit (create-async-resolver resolve-mutation-toggle-suspended-habit)
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)})
 
 (defn load-schema

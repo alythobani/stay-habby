@@ -14,6 +14,12 @@
                            :month {:type (non-null Int)}
                            :day {:type (non-null Int)}}}
 
+           :suspended_toggle_event {:description "A record of a habit being suspended/resumed on a specific date."
+                                    :fields {:_id {:type (non-null ID)}
+                                              :habit_id {:type (non-null ID)}
+                                              :suspended {:type (non-null Boolean)}
+                                              :toggle_date {:type (non-null :date)}}}
+
            :specific_day_of_week_frequency {:description "A frequency that happens on specific days of the week."
                                             :fields {:monday {:type Int}
                                                      :tuesday {:type Int}
@@ -32,7 +38,6 @@
 
            :good_habit {:description "A good habit that we are trying to maintain."
                         :fields {:_id {:type (non-null ID)}
-                                 :suspended {:type (non-null Boolean)}
                                  :name {:type (non-null String)}
                                  :description {:type String}
                                  :unit_name_singular {:type (non-null String)}
@@ -43,7 +48,6 @@
 
            :bad_habit {:description "A bad habit we are trying to reduce."
                        :fields {:_id {:type (non-null ID)}
-                                :suspended {:type (non-null Boolean)}
                                 :name {:type (non-null String)}
                                 :description {:type String}
                                 :unit_name_singular {:type (non-null String)}
@@ -154,8 +158,9 @@
                             :args {:habit_id {:type (non-null ID)}}
                             :resolve :query/resolve-mutation-delete-habit}
 
-             :set_suspend_habit {:type (non-null Boolean)
-                                 :description "Set the `suspended` for a habit found by ID, returns true if the update was performed."
-                                 :args {:habit_id {:type (non-null ID)}
-                                        :suspended {:type (non-null Boolean)}}
-                                 :resolve :query/resolve-mutation-set-suspend-habit}}}
+             :toggle_suspended_habit {:type (non-null :suspended_toggle_event)
+                                      :description "Add a record of a habit being suspended/resumed on a specific date."
+                                      :args {:habit_id {:type (non-null ID)}
+                                             :suspended {:type (non-null Boolean)}
+                                             :toggle_date {:type (non-null :date_data)}}
+                                      :resolve :query/resolve-mutation-toggle-suspended-habit}}}

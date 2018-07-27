@@ -14,7 +14,8 @@
 (def collection-names
   "The names of all the collections in the database."
   {:habits "habits"
-   :habit_data "habit_data"})
+   :habit_data "habit_data"
+   :suspended_toggle_events "suspended_toggle_events"})
 
 (defonce connection (mg/connect))
 
@@ -22,11 +23,9 @@
 
 (defn add-habit
   "Add a habit to the database and returns that habit including the ID.
-  Will create an ID if the habit passed doesn't have an ID. Will set `suspended` to false."
+  Will create an ID if the habit passed doesn't have an ID."
   [{:keys [db habit] :or {db habby_db}}]
-  (let [ final_habit (as-> habit habit
-                          (if (contains? habit :_id) habit (assoc habit :_id (ObjectId.)))
-                          (assoc habit :suspended false))]
+  (let [final_habit (if (contains? habit :_id) habit (assoc habit :_id (ObjectId.)))]
     (mc/insert-and-return db (:habits collection-names) final_habit)))
 
 (defn delete-habit
@@ -34,10 +33,17 @@
   [{:keys [db habit_id] :or {db habby_db}}]
   (= 1 (.getN (mc/remove-by-id db (:habits collection-names) (ObjectId. habit_id)))))
 
-(defn set-suspend-habit
-  "Set the `suspended` for a habit, returns true if the update was performed on the habit."
-  [{:keys [db habit_id suspended] :or {db habby_db}}]
-  (= 1 (.getN (mc/update db (:habits collection-names) {:_id (ObjectId. habit_id)} {$set {:suspended suspended}}))))
+(defn toggle-suspended-habit
+  "Add a record of a habit being suspended/resumed on a specific date.
+  If a `suspended_toggle_event` already exists for the given date, overwrites it.
+  Returns the created/modified `suspended_toggle_event`."
+  [{:keys [db habit_id suspended toggle-date-time] :or {db habby_db}}]
+  (mc/find-and-modify db
+                      (:suspended_toggle_events collection-names)
+                      {:toggle_date toggle-date-time, :habit_id (ObjectId. habit_id)}
+                      {$set {:suspended suspended}
+                       $setOnInsert {:toggle_date toggle-date-time, :habit_id (ObjectId. habit_id), :_id (ObjectId.)}}
+                      {:upsert true, :return-new true}))
 
 (defn get-habits
   "Retrieves all habits sync from the database as clojure maps."

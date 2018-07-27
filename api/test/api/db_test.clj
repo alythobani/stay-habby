@@ -51,7 +51,6 @@
     (testing "One habit"
       (is (= 1 (count all_habits)) "There should be one habit in the db")
       (is (some #(compare_clojure_habit_with_db_habit habit_1 %) all_habits) "Habit 1 not added properly")
-      (is (every? #(= false (:suspended %)) all_habits) ":suspended field not set to false")
       (is (every? #(not (nil? (:_id %))) all_habits) ":_id field not set"))
     (let [habit_2 (assoc default_habit
                          :type_name "bad_habit"
@@ -64,7 +63,6 @@
         (is (= 2 (count all_habits)) "There should be two habits in the db")
         (is (some #(compare_clojure_habit_with_db_habit habit_1 %) all_habits) "Habit 1 not added properly")
         (is (some #(compare_clojure_habit_with_db_habit habit_2 %) all_habits) "Habit 2 not added properly")
-        (is (every? #(= false (:suspended %)) all_habits) ":suspended field not set to false")
         (is (every? #(not (nil? (:_id %))) all_habits) ":_id field not set")))))
 
 (deftest get-frequency-stats-test

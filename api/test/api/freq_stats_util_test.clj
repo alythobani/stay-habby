@@ -108,7 +108,6 @@
 (def gen-good-habit
   (gen/hash-map :type_name (gen/return "good_habit"),
                 :_id gen-objectId,
-                :suspended gen/boolean,
                 :name gen/string,
                 :description gen/string,
                 :unit_name_singular gen/string,
@@ -119,7 +118,6 @@
 (def gen-bad-habit
   (gen/hash-map :type_name (gen/return "bad_habit"),
                 :_id gen-objectId,
-                :suspended gen/boolean,
                 :name gen/string,
                 :description gen/string,
                 :unit_name_singular gen/string,

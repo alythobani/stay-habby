@@ -20,7 +20,6 @@ type alias GoodHabitRecord =
     { id : String
     , name : String
     , description : Maybe String
-    , suspended : Bool
     , unitNameSingular : String
     , unitNamePlural : String
     , frequency : Frequency
@@ -32,7 +31,6 @@ type alias BadHabitRecord =
     { id : String
     , name : String
     , description : Maybe String
-    , suspended : Bool
     , unitNameSingular : String
     , unitNamePlural : String
     , frequency : Frequency
@@ -317,7 +315,6 @@ decodeHabit =
                 |> required "_id" Decode.string
                 |> required "name" Decode.string
                 |> optional "description" (Decode.maybe Decode.string) Nothing
-                |> required "suspended" Decode.bool
                 |> required "unit_name_singular" Decode.string
                 |> required "unit_name_plural" Decode.string
                 |> required "target_frequency" decodeFrequency
@@ -328,7 +325,6 @@ decodeHabit =
                 |> required "_id" Decode.string
                 |> required "name" Decode.string
                 |> optional "description" (Decode.maybe Decode.string) Nothing
-                |> required "suspended" Decode.bool
                 |> required "unit_name_singular" Decode.string
                 |> required "unit_name_plural" Decode.string
                 |> required "threshold_frequency" decodeFrequency

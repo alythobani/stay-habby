@@ -45,7 +45,6 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
       _id
       description
       name
-      suspended
       unit_name_singular
       unit_name_plural
       target_frequency {
@@ -73,7 +72,6 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
       _id
       description
       name
-      suspended
       unit_name_singular
       unit_name_plural
       threshold_frequency {
@@ -288,7 +286,6 @@ mutationAddHabit createHabit =
         \t\t\t_id,
         \t\t\tdescription,
         \t\t\tname,
-        \t\t\tsuspended,
         \t\t\ttarget_frequency {
         \t\t\t\t__typename,
         \t\t\t\t... on every_x_days_frequency {
@@ -316,7 +313,6 @@ mutationAddHabit createHabit =
         \t\t\t\t_id,
         \t\t\tdescription,
         \t\t\tname,
-        \t\t\tsuspended,
         \t\t\tthreshold_frequency {
         \t\t\t\t__typename,
         \t\t\t\t... on every_x_days_frequency {

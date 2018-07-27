@@ -65,6 +65,19 @@
                  :date {$lt (t/plus (date-from-y-m-d-map before_date) (t/days 1))}))
         (mc/find-maps db (:habit_data collection-names) find-query-filter)))
 
+(defn get-suspended-toggle-events
+  "Gets `suspended_toggle_event`s from the db, optionally after/before a specific date or for specific habits."
+  [{:keys [db after_date before_date habit_ids] :or {db habby_db}}]
+  (as-> {} find-query-filter
+        (if (nil? habit_ids) find-query-filter (assoc find-query-filter :habit_id {$in (map #(ObjectId. %) habit_ids)}))
+        (if (nil? after_date) find-query-filter (assoc find-query-filter :toggle_date {$gte (date-from-y-m-d-map after_date)}))
+        (if (nil? before_date)
+          find-query-filter
+          (assoc find-query-filter
+                 ; Require dates be earlier than midnight the day after `before_date`, so that times don't interfere
+                 :toggle_date {$lt (t/plus (date-from-y-m-d-map before_date) (t/days 1))}))
+        (mc/find-maps db (:suspended_toggle_events collection-names) find-query-filter)))
+
 (defn set-habit-data
   "Set the `amount` for a habit on a specfic day."
   [{:keys [db habit_id amount date-time] :or {db habby_db}}]
@@ -85,5 +98,12 @@
                                 :habit_ids habit_ids}),
         all-habit-data-until-current-date (get-habit-data {:db db,
                                                            :before_date (date-to-y-m-d-map current_client_date),
-                                                           :habit_ids habit_ids})]
-    (map #(get-freq-stats-for-habit % all-habit-data-until-current-date current_client_date) all-habits)))
+                                                           :habit_ids habit_ids}),
+        all-suspended-toggle-events-until-current-date (get-suspended-toggle-events {:db db,
+                                                                                     :before_date (date-to-y-m-d-map current_client_date),
+                                                                                     :habit_ids habit_ids})]
+    (map #(get-freq-stats-for-habit %
+                                    all-habit-data-until-current-date
+                                    all-suspended-toggle-events-until-current-date
+                                    current_client_date)
+         all-habits)))

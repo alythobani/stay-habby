@@ -8,7 +8,7 @@
 (def default-frequency-stats {:total_fragments 0, :successful_fragments 0, :total_done 0,
                               :current_fragment_streak 0, :best_fragment_streak 0,
                               :current_fragment_total 0, :current_fragment_goal 0, :current_fragment_days_left 0,
-                              :habit_has_started false})
+                              :habit_has_started false, :currently_suspended false})
 
 (defn get-habit-goal-fragment-length
   "Returns the number of days within each habit goal fragment, given a goal frequency `freq`.
@@ -108,6 +108,11 @@
           habit-goal-fragments (map #(create-habit-goal-fragment %) partitioned-datetimes)]
       (map #(evaluate-habit-goal-fragment % sorted-habit-data habit-type freq) habit-goal-fragments))))
 
+(defn filter-out-suspended-fragments
+  "Filters out habit goal fragments that occured while the habit was suspended."
+  [habit-goal-fragments sorted-suspended-toggle-events]
+  habit-goal-fragments)  ; TODO: this is a stub
+
 (defn update-freq-stats-with-past-fragment
   "Updates fields of a `habit_frequency_stats` based on a past habit goal fragment."
   [habit-frequency-stats habit-goal-fragment]
@@ -141,27 +146,34 @@
           (assoc $ :current_fragment_days_left (- (get-habit-goal-fragment-length freq)
                                                   (span-of-habit-goal-fragment current-fragment))))))
 
-(defn compute-freq-stats-from-habit-goal-fragments
-  "Computes a `habit_frequency_stats` based on a non-empty list of habit goal fragments with goal `freq`."
-  [habit-goal-fragments habit freq]
-  (let [past-fragments (butlast habit-goal-fragments)
-        current-fragment (last habit-goal-fragments)]
-    (as-> (assoc default-frequency-stats :habit_id (:_id habit)) freq-stats
-          (reduce update-freq-stats-with-past-fragment
-                  freq-stats
-                  past-fragments)
-          (update-freq-stats-with-current-fragment freq-stats current-fragment freq (:type_name habit)))))
+(defn update-freq-stats-with-habit-goal-fragments
+  "Updates a `habit_frequency_stats` based on a non-empty list of habit goal fragments with goal `freq`.
+  Only look at fragments when the habit wasn't suspended."
+  [freq-stats habit-goal-fragments habit freq sorted-suspended-toggle-events]
+  (let [habit-goal-fragments (filter-out-suspended-fragments habit-goal-fragments sorted-suspended-toggle-events),
+        past-fragments (butlast habit-goal-fragments),
+        current-fragment (last habit-goal-fragments),
+        updated-with-past-fragments-freq-stats (reduce update-freq-stats-with-past-fragment freq-stats past-fragments)]
+    (update-freq-stats-with-current-fragment updated-with-past-fragments-freq-stats current-fragment freq (:type_name habit))))
 
 (defn get-freq-stats-for-habit
   "Computes a `habit_frequency_stats` for `habit` based on habit data from `current-date` or earlier.
-  `all-habit-data-until-current-date` may include data from other habits."
-  [habit all-habit-data-until-current-date current-date]
+  `all-habit-data-until-current-date` may include data from other habits.
+  Uses `all-suspended-toggle-events-until-current-date` to determine when to exclude dates from performance calculation."
+  [habit all-habit-data-until-current-date all-suspended-toggle-events-until-current-date current-date]
   (let [sorted-habit-data (->> all-habit-data-until-current-date
                                (filter #(= (:habit_id %) (:_id habit)))
                                (sort-by :date)),
+        sorted-suspended-toggle-events (->> all-suspended-toggle-events-until-current-date
+                                            (filter #(= (:habit_id %) (:_id habit)))
+                                            (sort-by :toggle_date)),
         freq (get-frequency habit),
         habit-goal-fragments (get-habit-goal-fragments sorted-habit-data current-date (:type_name habit) freq)]
-    (if (nil? habit-goal-fragments)
-      (assoc default-frequency-stats :habit_id (:_id habit))
-      (-> (compute-freq-stats-from-habit-goal-fragments habit-goal-fragments habit freq)
-          (assoc :habit_has_started true)))))
+    (as-> (assoc default-frequency-stats :habit_id (:_id habit)) freq-stats
+          (if (seq sorted-suspended-toggle-events)
+            (assoc freq-stats :currently_suspended (:suspended (last sorted-suspended-toggle-events)))
+            freq-stats)
+          (if (nil? habit-goal-fragments)
+            freq-stats
+            (-> (update-freq-stats-with-habit-goal-fragments freq-stats habit-goal-fragments habit freq sorted-suspended-toggle-events)
+                (assoc :habit_has_started true))))))

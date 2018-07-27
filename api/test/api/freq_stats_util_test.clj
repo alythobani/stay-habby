@@ -481,16 +481,20 @@
                                                                          total-week-frequency
                                                                          habit-type)))))
 
-(defspec compute-freq-stats-from-habit-goal-fragments-total-done-test
+(defspec update-freq-stats-with-habit-goal-fragments-total-done-test
          number-of-test-check-iterations
-         (prop/for-all [habit-goal-fragments (gen/not-empty (gen/vector (gen-habit-goal-fragment {}))),
+         (prop/for-all [habit-frequency-stats (gen-habit-frequency-stats {}),
+                        habit-goal-fragments (gen/not-empty (gen/vector (gen-habit-goal-fragment {}))),
                         habit gen-habit]
-           (let [total-done (reduce #(+ %1 (:total-done %2)) 0 habit-goal-fragments),
-                 freq (habit-util/get-frequency habit)]
+           (let [total-done (reduce #(+ %1 (:total-done %2)) (:total_done habit-frequency-stats) habit-goal-fragments),
+                 freq (habit-util/get-frequency habit),
+                 sorted-suspended-toggle-events []]
              (= total-done
-                (:total_done (freq-stats-util/compute-freq-stats-from-habit-goal-fragments habit-goal-fragments
-                                                                                           habit
-                                                                                           freq))))))
+                (:total_done (freq-stats-util/update-freq-stats-with-habit-goal-fragments habit-frequency-stats
+                                                                                          habit-goal-fragments
+                                                                                          habit
+                                                                                          freq
+                                                                                          sorted-suspended-toggle-events))))))
 
 (defspec get-freq-stats-for-habit-total-done-test
          number-of-test-check-iterations
@@ -503,6 +507,10 @@
                  this-habit-data (gen/generate (gen/vector (gen-habit-day-record {:gen-habit-id (gen/return (:_id habit)),
                                                                                   :gen-date gen-dt-before-current-date}))),
                  all-habit-data-until-current-date (concat other-habits-data this-habit-data),
-                 this-habit-total-done (reduce #(+ %1 (:amount %2)) 0 this-habit-data)]
+                 this-habit-total-done (reduce #(+ %1 (:amount %2)) 0 this-habit-data),
+                 all-suspended-toggle-events-until-current-date []]
              (= this-habit-total-done
-                (:total_done (freq-stats-util/get-freq-stats-for-habit habit all-habit-data-until-current-date current-date))))))
+                (:total_done (freq-stats-util/get-freq-stats-for-habit habit
+                                                                       all-habit-data-until-current-date
+                                                                       all-suspended-toggle-events-until-current-date
+                                                                       current-date))))))

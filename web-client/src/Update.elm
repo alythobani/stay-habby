@@ -341,6 +341,20 @@ update msg model =
             , Cmd.none
             )
 
+        ToggleTodayViewerHabitActionsDropdown habitId newState ->
+            let
+                updatedTodayViewerHabitActionsDropdowns =
+                    Dict.update habitId (always <| Just newState) model.todayViewerHabitActionsDropdowns
+            in
+            ( { model | todayViewerHabitActionsDropdowns = updatedTodayViewerHabitActionsDropdowns }, Cmd.none )
+
+        ToggleHistoryViewerHabitActionsDropdown habitId newState ->
+            let
+                updatedHistoryViewerHabitActionsDropdowns =
+                    Dict.update habitId (always <| Just newState) model.historyViewerHabitActionsDropdowns
+            in
+            ( { model | historyViewerHabitActionsDropdowns = updatedHistoryViewerHabitActionsDropdowns }, Cmd.none )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

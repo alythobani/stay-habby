@@ -3,6 +3,7 @@ module View exposing (..)
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
+import Dropdown
 import HabitUtil
 import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
 import Html.Attributes exposing (class, classList, placeholder, value)
@@ -31,6 +32,7 @@ view model =
             model.addHabit
             model.editingTodayHabitAmount
             model.openTodayViewer
+            model.todayViewerHabitActionsDropdowns
         , renderHistoryViewerPanel
             model.openHistoryViewer
             model.historyViewerDateInput
@@ -39,6 +41,7 @@ view model =
             model.allHabitData
             model.historyViewerFrequencyStats
             model.editingHistoryHabitAmount
+            model.historyViewerHabitActionsDropdowns
         ]
 
 
@@ -50,8 +53,9 @@ renderTodayPanel :
     -> Habit.AddHabitInputData
     -> Dict.Dict String Int
     -> Bool
+    -> Dict.Dict String Dropdown.State
     -> Html Msg
-renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView =
+renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns =
     let
         createHabitData =
             Habit.extractCreateHabit addHabit
@@ -99,6 +103,8 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             OnHabitDataInput
                             SetHabitData
                             currentlySuspended
+                            habitActionsDropdowns
+                            ToggleTodayViewerHabitActionsDropdown
                             habit
                 in
                 div [ classList [ ( "display-none", not openView ) ] ]
@@ -328,8 +334,9 @@ renderHistoryViewerPanel :
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Dict.Dict String (Dict.Dict String Int)
+    -> Dict.Dict String Dropdown.State
     -> Html Msg
-renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict =
+renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns =
     case ( rdHabits, rdHabitData ) of
         ( RemoteData.Success habits, RemoteData.Success habitData ) ->
             div
@@ -404,6 +411,8 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                         (OnHistoryViewerHabitDataInput selectedDate)
                                         SetHabitData
                                         currentlySuspended
+                                        habitActionsDropdowns
+                                        ToggleHistoryViewerHabitActionsDropdown
                                         habit
                             in
                             div
@@ -454,9 +463,11 @@ renderHabitBox :
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
     -> Bool
+    -> Dict.Dict String Dropdown.State
+    -> (String -> Dropdown.State -> Msg)
     -> Habit.Habit
     -> Html Msg
-renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData currentlySuspended habit =
+renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData currentlySuspended habitActionsDropdowns toggleHabitActionsDropdown habit =
     let
         habitRecord =
             Habit.getCommonFields habit
@@ -476,6 +487,9 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
         editingHabitData =
             Dict.get habitRecord.id editingHabitDataDict
 
+        actionsDropdown =
+            Dict.get habitRecord.id habitActionsDropdowns ?> False
+
         isCurrentFragmentSuccessful =
             case habitStats of
                 Nothing ->
@@ -488,6 +502,13 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             div
                 [ class "frequency-statistic" ]
                 [ text str ]
+
+        actionsDropdownConfig =
+            Dropdown.Config
+                ("history viewer actions dropdown for habit " ++ habitRecord.id)
+                Dropdown.OnClick
+                (class "visible")
+                (toggleHabitActionsDropdown habitRecord.id)
     in
     div
         [ class
@@ -498,6 +519,18 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             )
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
+        , div [ class "actions-dropdown" ]
+            [ Dropdown.dropdown
+                actionsDropdown
+                actionsDropdownConfig
+                (Dropdown.toggle button [] [ text "E" ])
+                (Dropdown.drawer div
+                    []
+                    [ button [] [ text "Option 1" ]
+                    , button [] [ text "Option 2" ]
+                    ]
+                )
+            ]
         , case habitStats of
             Nothing ->
                 frequencyStatisticDiv "Error retriving performance stats"

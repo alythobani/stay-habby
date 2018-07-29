@@ -31,6 +31,8 @@ init { apiBaseUrl, currentTime } location =
       , historyViewerDateInput = ""
       , historyViewerSelectedDate = Nothing
       , historyViewerFrequencyStats = RemoteData.NotAsked
+      , todayViewerHabitActionsDropdowns = Dict.empty
+      , historyViewerHabitActionsDropdowns = Dict.empty
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

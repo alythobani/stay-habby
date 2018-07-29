@@ -67,15 +67,20 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     ( goodHabits, badHabits ) =
                         Habit.splitHabits habits
 
-                    ( sortedGoodHabits, sortedBadHabits ) =
+                    ( sortedGoodHabits, sortedBadHabits, sortedSuspendedHabits ) =
                         case rdFrequencyStatsList of
                             RemoteData.Success frequencyStatsList ->
-                                ( HabitUtil.sortHabitsByCurrentFragment frequencyStatsList goodHabits
-                                , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList badHabits
+                                let
+                                    ( goodActiveHabits, badActiveHabits, suspendedHabits ) =
+                                        HabitUtil.splitHabitsByCurrentlySuspended frequencyStatsList goodHabits badHabits
+                                in
+                                ( HabitUtil.sortHabitsByCurrentFragment frequencyStatsList goodActiveHabits
+                                , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList badActiveHabits
+                                , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList suspendedHabits
                                 )
 
                             _ ->
-                                ( goodHabits, badHabits )
+                                ( goodHabits, badHabits, [] )
 
                     renderHabit habit =
                         renderHabitBox
@@ -102,6 +107,9 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     , div
                         [ class "habit-list bad-habits" ]
                         (List.map renderHabit sortedBadHabits)
+                    , div
+                        [ class "habit-list suspended-habits" ]
+                        (List.map renderHabit sortedSuspendedHabits)
                     , button
                         [ class "add-habit"
                         , onClick <|

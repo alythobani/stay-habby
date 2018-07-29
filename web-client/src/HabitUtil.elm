@@ -197,3 +197,38 @@ sortHabitsByCurrentFragment frequencyStatsList habits =
                         ( habitTwo, statsTwo )
     in
     List.sortWith compareHabitsByCurrentFragment habits
+
+
+{-| Returns True iff the habit is currently suspended. Returns False if we can't find the habit's
+frequency stats for some reason.
+-}
+isHabitCurrentlySuspended : List FrequencyStats.FrequencyStats -> Habit.Habit -> Bool
+isHabitCurrentlySuspended frequencyStatsList habit =
+    let
+        habitFrequencyStats =
+            findFrequencyStatsForHabit habit frequencyStatsList
+    in
+    case habitFrequencyStats of
+        Nothing ->
+            False
+
+        Just stats ->
+            stats.currentlySuspended
+
+
+{-| Returns the habits split by good/bad/suspended: (good habits, bad habits, suspended habits).
+-}
+splitHabitsByCurrentlySuspended :
+    List FrequencyStats.FrequencyStats
+    -> List Habit.Habit
+    -> List Habit.Habit
+    -> ( List Habit.Habit, List Habit.Habit, List Habit.Habit )
+splitHabitsByCurrentlySuspended frequencyStatsList goodHabits badHabits =
+    let
+        ( goodSuspendedHabits, goodActiveHabits ) =
+            List.partition (isHabitCurrentlySuspended frequencyStatsList) goodHabits
+
+        ( badSuspendedHabits, badActiveHabits ) =
+            List.partition (isHabitCurrentlySuspended frequencyStatsList) badHabits
+    in
+    ( goodActiveHabits, badActiveHabits, List.append goodSuspendedHabits badSuspendedHabits )

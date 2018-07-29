@@ -15,6 +15,7 @@ type alias FrequencyStats =
     , currentFragmentGoal : Int
     , currentFragmentDaysLeft : Int
     , habitHasStarted : Bool
+    , currentlySuspended : Bool
     }
 
 
@@ -31,3 +32,4 @@ decodeFrequencyStats =
         |> required "current_fragment_goal" Decode.int
         |> required "current_fragment_days_left" Decode.int
         |> required "habit_has_started" Decode.bool
+        |> required "currently_suspended" Decode.bool

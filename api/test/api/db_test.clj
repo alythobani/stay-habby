@@ -108,7 +108,25 @@
                              :total_fragments 3 :successful_fragments 2 :total_done 8
                              :current_fragment_streak 2 :best_fragment_streak 2
                              :current_fragment_total 3 :current_fragment_goal 2 :current_fragment_days_left 0
-                             :habit_has_started true, :currently_suspended false}]))))))))
+                             :habit_has_started true, :currently_suspended false}])))
+            (testing "and two days ago the user suspended the habit"
+              (let [_ (toggle-suspended-habit {:db test_db :habit_id habit_id_str :suspended true
+                                               :toggle-date-time (t/minus today (t/days 2))})
+                    stats (get-frequency-stats {:db test_db :habit_ids [habit_id_str]})]
+                (is (= stats [{:habit_id habit_id
+                               :total_fragments 0 :successful_fragments 0 :total_done 8
+                               :current_fragment_streak 0 :best_fragment_streak 0
+                               :current_fragment_total 3 :current_fragment_goal 2 :current_fragment_days_left 0
+                               :habit_has_started true, :currently_suspended true}])))
+              (testing "and then the user resumed the habit yesterday"
+                (let [_ (toggle-suspended-habit {:db test_db :habit_id habit_id_str :suspended false
+                                                 :toggle-date-time (t/minus today (t/days 1))})
+                      stats (get-frequency-stats {:db test_db :habit_ids [habit_id_str]})]
+                  (is (= stats [{:habit_id habit_id
+                                 :total_fragments 2 :successful_fragments 2 :total_done 8
+                                 :current_fragment_streak 2 :best_fragment_streak 2
+                                 :current_fragment_total 3 :current_fragment_goal 2 :current_fragment_days_left 0
+                                 :habit_has_started true, :currently_suspended false}]))))))))))
   (testing "Good habit, total week frequency"
     (let [habit (assoc default_habit
                        :type_name "good_habit"
@@ -170,7 +188,23 @@
                                    :total_fragments 3 :successful_fragments 1 :total_done 202
                                    :current_fragment_streak 1 :best_fragment_streak 1
                                    :current_fragment_total 0 :current_fragment_goal 3
-                                   :habit_has_started true, :currently_suspended false}])))))))
+                                   :habit_has_started true, :currently_suspended false}])))
+          (testing "and today the user did 4 units making the current fragment successful"
+            (let [_ (set-habit-data {:db test_db :habit_id habit_id_str :amount 4 :date-time today})
+                  stats (get-frequency-stats {:db test_db :habit_ids [habit_id_str]})]
+              (is (supermap? stats [{:habit_id habit_id
+                                     :total_fragments 4 :successful_fragments 2 :total_done 206
+                                     :current_fragment_streak 2 :best_fragment_streak 2
+                                     :current_fragment_total 4 :current_fragment_goal 3
+                                     :habit_has_started true, :currently_suspended false}])))
+            (testing "but the user also suspended the habit today"
+              (let [_ (toggle-suspended-habit {:db test_db :habit_id habit_id_str :suspended true :toggle-date-time today})
+                    stats (get-frequency-stats {:db test_db :habit_ids [habit_id_str]})]
+                (is (supermap? stats [{:habit_id habit_id
+                                       :total_fragments 3 :successful_fragments 1 :total_done 206
+                                       :current_fragment_streak 1 :best_fragment_streak 1
+                                       :current_fragment_total 4 :current_fragment_goal 3
+                                       :habit_has_started true, :currently_suspended true}])))))))))
   (testing "Bad habit, total week frequency"
     (let [habit (assoc default_habit
                        :type_name "bad_habit"

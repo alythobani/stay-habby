@@ -6,7 +6,8 @@
             [api.freq-stats-util :as freq-stats-util]
             [api.dt-util :as dt-util]
             [api.dt-util-test :as dt-util-test]
-            [api.habit-util :as habit-util])
+            [api.habit-util :as habit-util]
+            [proto-repl.saved-values])
   (:import org.bson.types.ObjectId))
 
 (def number-of-test-check-iterations 30)
@@ -212,7 +213,7 @@
 (defspec create-habit-goal-fragment-single-date-fragment-test
          number-of-test-check-iterations
          (prop/for-all [single-date dt-util-test/gen-datetime]
-           (= {:start-date single-date, :end-date single-date, :total-done 0, :successful false}
+           (= {:start-date single-date, :end-date single-date, :total-done 0, :successful false, :suspended false}
               (freq-stats-util/create-habit-goal-fragment [single-date]))))
 
 (defspec create-habit-goal-fragment-multiple-date-fragment-test
@@ -220,7 +221,7 @@
          (prop/for-all [{:keys [from-date until-date num-days-apart]} dt-util-test/gen-two-datetimes-with-num-days-apart]
            (let [middle-dates (gen/generate (gen/vector (gen/fmap #(t/plus from-date (t/days %)) (gen/choose 0 num-days-apart)))),
                  datetimes (cons from-date (conj middle-dates until-date))]
-             (= {:start-date from-date, :end-date until-date, :total-done 0, :successful false}
+             (= {:start-date from-date, :end-date until-date, :total-done 0, :successful false, :suspended false}
                 (freq-stats-util/create-habit-goal-fragment datetimes)))))
 
 (defspec span-of-habit-goal-fragment-test
@@ -323,16 +324,22 @@
                  sorted-habit-data (map #(random-habit-day-record {:gen-date (gen/return %1)
                                                                    :gen-amount (gen/return %2)})
                                         habit-record-dates
-                                        habit-record-amounts)]
+                                        habit-record-amounts),
+                 suspended-intervals []]
              (= (map (fn [date amount day-of-week]
                        {:start-date date,
                         :end-date date,
                         :total-done amount,
-                        :successful (<= amount (nth week-amount-vector (dec day-of-week)))})
+                        :successful (<= amount (nth week-amount-vector (dec day-of-week))),
+                        :suspended false})
                      habit-record-dates
                      habit-record-amounts
                      habit-record-days-of-week)
-                (freq-stats-util/get-habit-goal-fragments sorted-habit-data current-date habit-type specific-day-of-week-frequency)))))
+                (freq-stats-util/get-habit-goal-fragments sorted-habit-data
+                                                          current-date
+                                                          habit-type
+                                                          specific-day-of-week-frequency
+                                                          suspended-intervals)))))
 
 (defspec get-habit-goal-fragments-good-habit-every-x-days-frequency-test
          number-of-test-check-iterations
@@ -348,16 +355,22 @@
                                         habit-record-dates
                                         habit-record-amounts)
                  partitioned-habit-record-dates (partition-all (:days every-x-days-frequency) habit-record-dates)
-                 partitioned-habit-record-amounts (partition-all (:days every-x-days-frequency) habit-record-amounts)]
+                 partitioned-habit-record-amounts (partition-all (:days every-x-days-frequency) habit-record-amounts),
+                 suspended-intervals []]
              (= (map (fn [dates amounts]
                        (let [amounts-sum (reduce + amounts)]
                          {:start-date (first dates),
                           :end-date (last dates),
                           :total-done amounts-sum,
-                          :successful (>= amounts-sum (:times every-x-days-frequency))}))
+                          :successful (>= amounts-sum (:times every-x-days-frequency)),
+                          :suspended false}))
                      partitioned-habit-record-dates
                      partitioned-habit-record-amounts)
-                (freq-stats-util/get-habit-goal-fragments sorted-habit-data current-date habit-type every-x-days-frequency)))))
+                (freq-stats-util/get-habit-goal-fragments sorted-habit-data
+                                                          current-date
+                                                          habit-type
+                                                          every-x-days-frequency
+                                                          suspended-intervals)))))
 
 (defspec update-freq-stats-with-past-fragment-failed-fragment-test
          number-of-test-check-iterations
@@ -487,14 +500,12 @@
                         habit-goal-fragments (gen/not-empty (gen/vector (gen-habit-goal-fragment {}))),
                         habit gen-habit]
            (let [total-done (reduce #(+ %1 (:total-done %2)) (:total_done habit-frequency-stats) habit-goal-fragments),
-                 freq (habit-util/get-frequency habit),
-                 sorted-suspended-toggle-events []]
+                 freq (habit-util/get-frequency habit)]
              (= total-done
                 (:total_done (freq-stats-util/update-freq-stats-with-habit-goal-fragments habit-frequency-stats
                                                                                           habit-goal-fragments
                                                                                           habit
-                                                                                          freq
-                                                                                          sorted-suspended-toggle-events))))))
+                                                                                          freq))))))
 
 (defspec get-freq-stats-for-habit-total-done-test
          number-of-test-check-iterations

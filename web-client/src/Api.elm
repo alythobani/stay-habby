@@ -10,6 +10,7 @@ import Models.ApiError exposing (ApiError)
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.HabitData as HabitData
+import Models.SuspendedToggleEvent as SuspendedToggleEvent
 import Models.YmdDate as YmdDate
 
 
@@ -372,3 +373,40 @@ mutationSetHabitData { day, month, year } habitId amount =
                 |> Util.templater templateDict
     in
     graphQLRequest query (Decode.at [ "data", "set_habit_data" ] HabitData.decodeHabitData)
+
+
+mutationToggleSuspendedHabit :
+    YmdDate.YmdDate
+    -> String
+    -> Bool
+    -> String
+    -> (ApiError -> b)
+    -> (SuspendedToggleEvent.SuspendedToggleEvent -> b)
+    -> Cmd b
+mutationToggleSuspendedHabit { day, month, year } habitId suspended =
+    let
+        templateDict =
+            Dict.fromList <|
+                [ ( "day", toString day )
+                , ( "month", toString month )
+                , ( "year", toString year )
+                , ( "suspended", toString suspended )
+                , ( "habit_id", habitId )
+                ]
+
+        query =
+            """mutation {
+\ttoggle_suspended_habit(date: { day: {{day}}, month: {{month}}, year: {{year}}}, suspended: {{suspended}}, habit_id: "{{habit_id}}") {
+\t\t_id,
+\t\tsuspended,
+\t\ttoggle_date {
+\t\t\tyear,
+\t\t\tmonth,
+\t\t\tday
+\t\t},
+\t\thabit_id
+\t}
+}"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest query (Decode.at [ "data", "toggle_suspended_habit" ] SuspendedToggleEvent.decodeSuspendedToggleEvent)

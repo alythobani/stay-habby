@@ -4,6 +4,7 @@ import Api
 import Models.ApiError exposing (ApiError)
 import Models.Habit as Habit
 import Models.HabitData as HabitData
+import Models.SuspendedToggleEvent as SuspendedToggleEvent
 import Models.YmdDate as YmdDate
 import Navigation
 import Time
@@ -41,6 +42,9 @@ type Msg
     | SetHabitData YmdDate.YmdDate String (Maybe Int)
     | OnSetHabitDataFailure ApiError
     | OnSetHabitDataSuccess HabitData.HabitData
+    | ToggleSuspendedHabit YmdDate.YmdDate String Bool
+    | OnToggleSuspendedHabitFailure ApiError
+    | OnToggleSuspendedHabitSuccess SuspendedToggleEvent.SuspendedToggleEvent
     | OnToggleHistoryViewer
     | OnToggleTodayViewer
     | OnHistoryViewerDateInput String

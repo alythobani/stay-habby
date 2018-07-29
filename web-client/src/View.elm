@@ -82,7 +82,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             _ ->
                                 ( goodHabits, badHabits, [] )
 
-                    renderHabit habit =
+                    renderHabit currentlySuspended habit =
                         renderHabitBox
                             (case rdFrequencyStatsList of
                                 RemoteData.Success frequencyStatsList ->
@@ -98,18 +98,19 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             editingHabitDataDict
                             OnHabitDataInput
                             SetHabitData
+                            currentlySuspended
                             habit
                 in
                 div [ classList [ ( "display-none", not openView ) ] ]
                     [ div
                         [ class "habit-list good-habits" ]
-                        (List.map renderHabit sortedGoodHabits)
+                        (List.map (renderHabit False) sortedGoodHabits)
                     , div
                         [ class "habit-list bad-habits" ]
-                        (List.map renderHabit sortedBadHabits)
+                        (List.map (renderHabit False) sortedBadHabits)
                     , div
                         [ class "habit-list suspended-habits" ]
-                        (List.map renderHabit sortedSuspendedHabits)
+                        (List.map (renderHabit True) sortedSuspendedHabits)
                     , button
                         [ class "add-habit"
                         , onClick <|
@@ -367,21 +368,26 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                 ( goodHabits, badHabits ) =
                                     Habit.splitHabits habits
 
-                                ( sortedGoodHabits, sortedBadHabits ) =
+                                ( sortedGoodHabits, sortedBadHabits, sortedSuspendedHabits ) =
                                     case rdFrequencyStatsList of
                                         RemoteData.Success frequencyStatsList ->
-                                            ( HabitUtil.sortHabitsByCurrentFragment frequencyStatsList goodHabits
-                                            , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList badHabits
+                                            let
+                                                ( goodActiveHabits, badActiveHabits, suspendedHabits ) =
+                                                    HabitUtil.splitHabitsByCurrentlySuspended frequencyStatsList goodHabits badHabits
+                                            in
+                                            ( HabitUtil.sortHabitsByCurrentFragment frequencyStatsList goodActiveHabits
+                                            , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList badActiveHabits
+                                            , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList suspendedHabits
                                             )
 
                                         _ ->
-                                            ( goodHabits, badHabits )
+                                            ( goodHabits, badHabits, [] )
 
                                 editingHabitDataDict =
                                     Dict.get (YmdDate.toSimpleString selectedDate) editingHabitDataDictDict
                                         ?> Dict.empty
 
-                                renderHabit habit =
+                                renderHabit currentlySuspended habit =
                                     renderHabitBox
                                         (case rdFrequencyStatsList of
                                             RemoteData.Success frequencyStatsList ->
@@ -397,14 +403,16 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                         editingHabitDataDict
                                         (OnHistoryViewerHabitDataInput selectedDate)
                                         SetHabitData
+                                        currentlySuspended
                                         habit
                             in
                             div
                                 []
                                 [ span [ class "selected-date-title" ] [ text <| YmdDate.prettyPrint selectedDate ]
                                 , span [ class "change-date", onClick OnHistoryViewerChangeDate ] [ text "change date" ]
-                                , div [ class "habit-list good-habits" ] <| List.map renderHabit sortedGoodHabits
-                                , div [ class "habit-list bad-habits" ] <| List.map renderHabit sortedBadHabits
+                                , div [ class "habit-list good-habits" ] <| List.map (renderHabit False) sortedGoodHabits
+                                , div [ class "habit-list bad-habits" ] <| List.map (renderHabit False) sortedBadHabits
+                                , div [ class "habit-list suspended-habits" ] <| List.map (renderHabit True) sortedSuspendedHabits
                                 ]
                 ]
 
@@ -445,9 +453,10 @@ renderHabitBox :
     -> Dict.Dict String Int
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
+    -> Bool
     -> Habit.Habit
     -> Html Msg
-renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData habit =
+renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData currentlySuspended habit =
     let
         habitRecord =
             Habit.getCommonFields habit

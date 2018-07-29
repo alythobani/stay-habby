@@ -235,6 +235,32 @@ update msg model =
                             Cmd.none
                   ]
 
+        ToggleSuspendedHabit ymd habitId suspended ->
+            ( model
+            , Api.mutationToggleSuspendedHabit
+                ymd
+                habitId
+                suspended
+                model.apiBaseUrl
+                OnToggleSuspendedHabitFailure
+                OnToggleSuspendedHabitSuccess
+            )
+
+        OnToggleSuspendedHabitFailure apiError ->
+            -- TODO
+            ( model, Cmd.none )
+
+        OnToggleSuspendedHabitSuccess updatedSuspendedToggleEvent ->
+            model
+                ! [ getHabitsAndHabitDataAndFrequencyStats
+                  , case model.historyViewerSelectedDate of
+                        Just ymd ->
+                            getHistoryViewerFrequencyStats ymd
+
+                        Nothing ->
+                            Cmd.none
+                  ]
+
         OnToggleHistoryViewer ->
             ( { model | openHistoryViewer = not model.openHistoryViewer }
             , Cmd.none

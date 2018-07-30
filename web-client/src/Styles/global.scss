@@ -300,8 +300,10 @@
         }
 
         &.suspended-habits {
-          background-color: #a3a3a3;
-          border: 1px solid #747474;
+          .habit-success, .habit-failure {
+            background-color: #a3a3a3;
+            border: 1px solid #747474;
+          }
           .frequency-statistic {
               color: rgb(66, 66, 66);
           }

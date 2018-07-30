@@ -345,6 +345,9 @@
                   cursor: pointer;
                   content: "▾";
                 }
+                &.hide-toggler {
+                  visibility: hidden;
+                }
               }
               .action-buttons {
                 z-index: 1;

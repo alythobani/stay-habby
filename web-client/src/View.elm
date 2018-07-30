@@ -7,13 +7,14 @@ import Dropdown
 import HabitUtil
 import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
 import Html.Attributes exposing (class, classList, placeholder, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Keyboard.Extra as KK
 import Maybe.Extra as Maybe
 import Model exposing (Model)
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
+import Models.HabitActionsDropdown as HabitActionsDropdown
 import Models.HabitData as HabitData
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
@@ -53,7 +54,7 @@ renderTodayPanel :
     -> Habit.AddHabitInputData
     -> Dict.Dict String Int
     -> Bool
-    -> Dict.Dict String Dropdown.State
+    -> Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
     -> Html Msg
 renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns =
     let
@@ -334,7 +335,7 @@ renderHistoryViewerPanel :
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Dict.Dict String (Dict.Dict String Int)
-    -> Dict.Dict String Dropdown.State
+    -> Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
     -> Html Msg
 renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns =
     case ( rdHabits, rdHabitData ) of
@@ -449,14 +450,21 @@ dropdownIcon openView msg =
         ]
 
 
-habitActionsDropdown : Dropdown.State -> Dropdown.Config msg -> Html msg
-habitActionsDropdown state config =
+habitActionsDropdownDiv : HabitActionsDropdown.HabitActionsDropdown -> Dropdown.Config msg -> Html msg
+habitActionsDropdownDiv dropdown config =
     div [ class "actions-dropdown" ]
         [ Dropdown.dropdown
-            state
+            dropdown.state
             config
             (Dropdown.toggle div
-                [ class "actions-dropdown-toggler" ]
+                [ class <|
+                    "actions-dropdown-toggler"
+                        ++ (if dropdown.showToggler then
+                                ""
+                            else
+                                " hide-toggler"
+                           )
+                ]
                 [ text "" ]
             )
             (Dropdown.drawer div
@@ -482,7 +490,7 @@ renderHabitBox :
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
     -> Bool
-    -> Dict.Dict String Dropdown.State
+    -> Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
     -> (String -> Dropdown.State -> Msg)
     -> Habit.Habit
     -> Html Msg
@@ -507,7 +515,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             Dict.get habitRecord.id editingHabitDataDict
 
         actionsDropdown =
-            Dict.get habitRecord.id habitActionsDropdowns ?> False
+            Dict.get habitRecord.id habitActionsDropdowns ?> { state = False, showToggler = False }
 
         isCurrentFragmentSuccessful =
             case habitStats of
@@ -536,9 +544,11 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
              else
                 "habit-failure"
             )
+        , onMouseEnter <| OnHabitMouseEnter habitRecord.id
+        , onMouseLeave <| OnHabitMouseLeave habitRecord.id
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
-        , habitActionsDropdown actionsDropdown actionsDropdownConfig
+        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig
         , case habitStats of
             Nothing ->
                 frequencyStatisticDiv "Error retriving performance stats"

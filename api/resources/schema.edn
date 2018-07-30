@@ -18,7 +18,8 @@
                                     :fields {:_id {:type (non-null ID)}
                                               :habit_id {:type (non-null ID)}
                                               :suspended {:type (non-null Boolean)}
-                                              :toggle_date {:type (non-null :date)}}}
+                                              :toggle_date {:type (non-null :date)
+                                                            :resolve :query/toggle-date-to-y-m-d-format}}}
 
            :specific_day_of_week_frequency {:description "A frequency that happens on specific days of the week."
                                             :fields {:monday {:type Int}

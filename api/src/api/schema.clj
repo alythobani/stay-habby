@@ -112,6 +112,7 @@
    :query/resolve-mutation-set-habit-data (create-async-resolver resolve-mutation-set-habit-data)
    :query/get-habit-data (create-async-resolver resolve-get-habit-data)
    :query/date-to-y-m-d-format (create-date-to-y-m-d-resolver :date)
+   :query/toggle-date-to-y-m-d-format (create-date-to-y-m-d-resolver :toggle_date)
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
    :query/resolve-mutation-toggle-suspended-habit (create-async-resolver resolve-mutation-toggle-suspended-habit)
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)})

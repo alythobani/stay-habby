@@ -450,8 +450,14 @@ dropdownIcon openView msg =
         ]
 
 
-habitActionsDropdownDiv : HabitActionsDropdown.HabitActionsDropdown -> Dropdown.Config msg -> Html msg
-habitActionsDropdownDiv dropdown config =
+habitActionsDropdownDiv :
+    HabitActionsDropdown.HabitActionsDropdown
+    -> Dropdown.Config Msg
+    -> YmdDate.YmdDate
+    -> String
+    -> Bool
+    -> Html Msg
+habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended =
     div [ class "actions-dropdown" ]
         [ Dropdown.dropdown
             dropdown.state
@@ -469,8 +475,19 @@ habitActionsDropdownDiv dropdown config =
             )
             (Dropdown.drawer div
                 [ class "action-buttons" ]
-                [ button [ class "action-button" ] [ text "Suspend" ]
-                , button [ class "action-button" ] [ text "Edit" ]
+                [ button
+                    [ class "action-button"
+                    , onClick <| ToggleSuspendedHabit ymd habitId (not currentlySuspended)
+                    ]
+                    [ text <|
+                        if currentlySuspended then
+                            "Resume"
+                        else
+                            "Suspend"
+                    ]
+                , button
+                    [ class "action-button" ]
+                    [ text "Edit" ]
                 ]
             )
         ]
@@ -548,7 +565,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
         , onMouseLeave <| OnHabitMouseLeave habitRecord.id
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
-        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig
+        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig ymd habitRecord.id currentlySuspended
         , case habitStats of
             Nothing ->
                 frequencyStatisticDiv "Error retriving performance stats"

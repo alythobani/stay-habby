@@ -14,5 +14,5 @@ decodeSuspendedToggleEvent =
     decode SuspendedToggleEvent
         |> required "_id" Decode.string
         |> required "habit_id" Decode.string
-        |> required "date" decodeYmdDate
+        |> required "toggle_date" decodeYmdDate
         |> required "suspended" Decode.bool

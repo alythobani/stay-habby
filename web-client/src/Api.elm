@@ -390,13 +390,13 @@ mutationToggleSuspendedHabit { day, month, year } habitId suspended =
                 [ ( "day", toString day )
                 , ( "month", toString month )
                 , ( "year", toString year )
-                , ( "suspended", toString suspended )
+                , ( "suspended", Util.encodeBool suspended )
                 , ( "habit_id", habitId )
                 ]
 
         query =
             """mutation {
-\ttoggle_suspended_habit(date: { day: {{day}}, month: {{month}}, year: {{year}}}, suspended: {{suspended}}, habit_id: "{{habit_id}}") {
+\ttoggle_suspended_habit(toggle_date: { day: {{day}}, month: {{month}}, year: {{year}}}, suspended: {{suspended}}, habit_id: "{{habit_id}}") {
 \t\t_id,
 \t\tsuspended,
 \t\ttoggle_date {

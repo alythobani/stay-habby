@@ -1,7 +1,7 @@
 module Models.SuspendedToggleEvent exposing (..)
 
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (decode, required)
 import Models.YmdDate exposing (YmdDate, decodeYmdDate)
 
 

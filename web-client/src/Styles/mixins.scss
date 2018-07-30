@@ -45,6 +45,24 @@
   }
 }
 
+.button-style-3 {
+  color: #444;
+  display: block;
+  cursor: pointer;
+  background-color: white;
+  font-weight: 410;
+  border: 1px solid #eee;
+
+  &:hover {
+    background-color: #eee;
+  }
+
+  &.selected {
+    border: 1px solid #888;
+    background-color: #eee;
+  }
+}
+
 // Different input styles.
 .input-style-1 {
   box-sizing: border-box;

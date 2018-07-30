@@ -449,6 +449,25 @@ dropdownIcon openView msg =
         ]
 
 
+habitActionsDropdown : Dropdown.State -> Dropdown.Config msg -> Html msg
+habitActionsDropdown state config =
+    div [ class "actions-dropdown" ]
+        [ Dropdown.dropdown
+            state
+            config
+            (Dropdown.toggle div
+                [ class "actions-dropdown-toggler" ]
+                [ text "" ]
+            )
+            (Dropdown.drawer div
+                [ class "action-buttons" ]
+                [ button [ class "action-button" ] [ text "Suspend" ]
+                , button [ class "action-button" ] [ text "Edit" ]
+                ]
+            )
+        ]
+
+
 {-| Renders a habit box with the habit data loaded for that particular date.
 
 Requires 2 event handlers, 1 for handling when data is input into the habit box and 1 for when the user wants to
@@ -519,18 +538,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             )
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
-        , div [ class "actions-dropdown" ]
-            [ Dropdown.dropdown
-                actionsDropdown
-                actionsDropdownConfig
-                (Dropdown.toggle button [] [ text "E" ])
-                (Dropdown.drawer div
-                    []
-                    [ button [] [ text "Option 1" ]
-                    , button [] [ text "Option 2" ]
-                    ]
-                )
-            ]
+        , habitActionsDropdown actionsDropdown actionsDropdownConfig
         , case habitStats of
             Nothing ->
                 frequencyStatisticDiv "Error retriving performance stats"

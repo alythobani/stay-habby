@@ -316,6 +316,7 @@
             position: relative;
             padding: 7px;
             margin: 15px 15px 0 2px;
+            width: 310px;
             min-width: 200px;
             min-height: 80px;
             box-sizing: content-box;
@@ -323,8 +324,38 @@
 
             .habit-name {
                 font-weight: 600;
-                width: 150px;
+                max-width: 130px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 float: left;
+            }
+
+            .actions-dropdown {
+              float: left;
+              margin-left: 11px;
+              margin-top: -4px;
+              .actions-dropdown-toggler {
+                font-size: 20px;
+                text-align: center;
+                &:after {
+                  content: "▿";
+                }
+                &:hover:after {
+                  cursor: pointer;
+                  content: "▾";
+                }
+              }
+              .action-buttons {
+                z-index: 1;
+                position: relative;
+                top: 21px;
+                .action-button {
+                  @extend .button-style-3;
+                  height: 23px;
+                  width: 80px;
+                }
+              }
             }
 
             .frequency-stats-list {

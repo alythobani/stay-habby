@@ -76,56 +76,6 @@ update msg model =
             , Cmd.none
             )
 
-        OnHabitMouseEnter habitId ->
-            let
-                updateMaybeDropdown maybeDropdown =
-                    case maybeDropdown of
-                        Just dropdown ->
-                            Just { dropdown | showToggler = True }
-
-                        Nothing ->
-                            Just { showToggler = True, state = False }
-            in
-            ( { model
-                | todayViewerHabitActionsDropdowns =
-                    Dict.update
-                        habitId
-                        updateMaybeDropdown
-                        model.todayViewerHabitActionsDropdowns
-                , historyViewerHabitActionsDropdowns =
-                    Dict.update
-                        habitId
-                        updateMaybeDropdown
-                        model.historyViewerHabitActionsDropdowns
-              }
-            , Cmd.none
-            )
-
-        OnHabitMouseLeave habitId ->
-            let
-                updateMaybeDropdown maybeDropdown =
-                    case maybeDropdown of
-                        Just dropdown ->
-                            Just { dropdown | showToggler = False }
-
-                        Nothing ->
-                            Just { showToggler = False, state = False }
-            in
-            ( { model
-                | todayViewerHabitActionsDropdowns =
-                    Dict.update
-                        habitId
-                        updateMaybeDropdown
-                        model.todayViewerHabitActionsDropdowns
-                , historyViewerHabitActionsDropdowns =
-                    Dict.update
-                        habitId
-                        updateMaybeDropdown
-                        model.historyViewerHabitActionsDropdowns
-              }
-            , Cmd.none
-            )
-
         OnOpenAddHabit ->
             ( updateAddHabit (\addHabit -> { addHabit | openView = True }), Cmd.none )
 
@@ -394,14 +344,14 @@ update msg model =
         ToggleTodayViewerHabitActionsDropdown habitId newState ->
             let
                 updatedTodayViewerHabitActionsDropdowns =
-                    Dict.update habitId (Maybe.map <| \dropdown -> { dropdown | state = newState }) model.todayViewerHabitActionsDropdowns
+                    Dict.update habitId (always <| Just newState) model.todayViewerHabitActionsDropdowns
             in
             ( { model | todayViewerHabitActionsDropdowns = updatedTodayViewerHabitActionsDropdowns }, Cmd.none )
 
         ToggleHistoryViewerHabitActionsDropdown habitId newState ->
             let
                 updatedHistoryViewerHabitActionsDropdowns =
-                    Dict.update habitId (Maybe.map <| \dropdown -> { dropdown | state = newState }) model.historyViewerHabitActionsDropdowns
+                    Dict.update habitId (always <| Just newState) model.historyViewerHabitActionsDropdowns
             in
             ( { model | historyViewerHabitActionsDropdowns = updatedHistoryViewerHabitActionsDropdowns }, Cmd.none )
 

@@ -5,7 +5,6 @@ import Dropdown
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
-import Models.HabitActionsDropdown as HabitActionsDropdown
 import Models.HabitData as HabitData
 import Models.YmdDate as YmdDate
 import RemoteData
@@ -44,6 +43,6 @@ type alias Model =
     , historyViewerDateInput : String
     , historyViewerSelectedDate : Maybe YmdDate.YmdDate
     , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
-    , todayViewerHabitActionsDropdowns : Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
-    , historyViewerHabitActionsDropdowns : Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
+    , todayViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
+    , historyViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
     }

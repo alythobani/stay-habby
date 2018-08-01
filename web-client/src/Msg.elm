@@ -16,8 +16,6 @@ type Msg
     | TickMinute Time.Time
     | OnGetHabitsAndHabitDataAndFrequencyStatsFailure ApiError
     | OnGetHabitsAndHabitDataAndFrequencyStatsSuccess Api.HabitsAndHabitDataAndFrequencyStats
-    | OnHabitMouseEnter String
-    | OnHabitMouseLeave String
     | OnOpenAddHabit
     | OnCancelAddHabit
     | OnSelectAddHabitKind Habit.HabitKind

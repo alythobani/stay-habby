@@ -14,7 +14,6 @@ import Model exposing (Model)
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
-import Models.HabitActionsDropdown as HabitActionsDropdown
 import Models.HabitData as HabitData
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
@@ -54,7 +53,7 @@ renderTodayPanel :
     -> Habit.AddHabitInputData
     -> Dict.Dict String Int
     -> Bool
-    -> Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
+    -> Dict.Dict String Dropdown.State
     -> Html Msg
 renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns =
     let
@@ -335,7 +334,7 @@ renderHistoryViewerPanel :
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Dict.Dict String (Dict.Dict String Int)
-    -> Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
+    -> Dict.Dict String Dropdown.State
     -> Html Msg
 renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns =
     case ( rdHabits, rdHabitData ) of
@@ -451,7 +450,7 @@ dropdownIcon openView msg =
 
 
 habitActionsDropdownDiv :
-    HabitActionsDropdown.HabitActionsDropdown
+    Dropdown.State
     -> Dropdown.Config Msg
     -> YmdDate.YmdDate
     -> String
@@ -460,11 +459,11 @@ habitActionsDropdownDiv :
 habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended =
     div [ class "actions-dropdown" ]
         [ Dropdown.dropdown
-            dropdown.state
+            dropdown
             config
             (Dropdown.toggle div
                 [ class <|
-                    if dropdown.state then
+                    if dropdown then
                         "actions-dropdown-toggler-full"
                     else
                         "actions-dropdown-toggler-default"
@@ -505,7 +504,7 @@ renderHabitBox :
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
     -> Bool
-    -> Dict.Dict String HabitActionsDropdown.HabitActionsDropdown
+    -> Dict.Dict String Dropdown.State
     -> (String -> Dropdown.State -> Msg)
     -> Habit.Habit
     -> Html Msg
@@ -530,7 +529,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             Dict.get habitRecord.id editingHabitDataDict
 
         actionsDropdown =
-            Dict.get habitRecord.id habitActionsDropdowns ?> { state = False, showToggler = False }
+            Dict.get habitRecord.id habitActionsDropdowns ?> False
 
         isCurrentFragmentSuccessful =
             case habitStats of
@@ -559,8 +558,6 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
              else
                 "habit-failure"
             )
-        , onMouseEnter <| OnHabitMouseEnter habitRecord.id
-        , onMouseLeave <| OnHabitMouseLeave habitRecord.id
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
         , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig ymd habitRecord.id currentlySuspended

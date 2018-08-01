@@ -324,6 +324,14 @@
             box-sizing: content-box;
             color: white;
 
+            &:hover {
+              .actions-dropdown {
+                .actions-dropdown-toggler-default {
+                  visibility: visible;
+                }
+              }
+            }
+
             .habit-name {
                 font-weight: 600;
                 max-width: 130px;
@@ -337,18 +345,27 @@
               float: left;
               margin-left: 11px;
               margin-top: -4px;
-              .actions-dropdown-toggler {
+              &:hover {
+                .actions-dropdown-toggler-default:after {
+                  content: "▾";
+                }
+              }
+              .actions-dropdown-toggler-default {
                 font-size: 20px;
                 text-align: center;
+                visibility: hidden;
                 &:after {
                   content: "▿";
                 }
-                &:hover:after {
+                &:hover {
                   cursor: pointer;
-                  content: "▾";
                 }
-                &.hide-toggler {
-                  visibility: hidden;
+              }
+              .actions-dropdown-toggler-full {
+                @extend .actions-dropdown-toggler-default;
+                visibility: visible;
+                &:after {
+                  content: "▾";
                 }
               }
               .action-buttons {

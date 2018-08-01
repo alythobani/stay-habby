@@ -464,12 +464,10 @@ habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended =
             config
             (Dropdown.toggle div
                 [ class <|
-                    "actions-dropdown-toggler"
-                        ++ (if dropdown.showToggler then
-                                ""
-                            else
-                                " hide-toggler"
-                           )
+                    if dropdown.state then
+                        "actions-dropdown-toggler-full"
+                    else
+                        "actions-dropdown-toggler-default"
                 ]
                 [ text "" ]
             )

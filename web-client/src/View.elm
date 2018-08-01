@@ -455,8 +455,9 @@ habitActionsDropdownDiv :
     -> YmdDate.YmdDate
     -> String
     -> Bool
+    -> Bool
     -> Html Msg
-habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended =
+habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended onTodayViewer =
     div [ class "actions-dropdown" ]
         [ Dropdown.dropdown
             dropdown
@@ -474,7 +475,7 @@ habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended =
                 [ class "action-buttons" ]
                 [ button
                     [ class "action-button"
-                    , onClick <| ToggleSuspendedHabit ymd habitId (not currentlySuspended)
+                    , onClick <| ToggleSuspendedHabit ymd habitId (not currentlySuspended) onTodayViewer
                     ]
                     [ text <|
                         if currentlySuspended then
@@ -550,6 +551,9 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                 Dropdown.OnClick
                 (class "visible")
                 (toggleHabitActionsDropdown habitRecord.id)
+
+        onTodayViewer =
+            toggleHabitActionsDropdown == ToggleTodayViewerHabitActionsDropdown
     in
     div
         [ class
@@ -560,7 +564,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             )
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
-        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig ymd habitRecord.id currentlySuspended
+        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig ymd habitRecord.id currentlySuspended onTodayViewer
         , case habitStats of
             Nothing ->
                 frequencyStatisticDiv "Error retriving performance stats"

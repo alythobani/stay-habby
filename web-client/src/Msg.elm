@@ -1,6 +1,7 @@
 module Msg exposing (..)
 
 import Api
+import Dropdown
 import Models.ApiError exposing (ApiError)
 import Models.Habit as Habit
 import Models.HabitData as HabitData
@@ -42,7 +43,7 @@ type Msg
     | SetHabitData YmdDate.YmdDate String (Maybe Int)
     | OnSetHabitDataFailure ApiError
     | OnSetHabitDataSuccess HabitData.HabitData
-    | ToggleSuspendedHabit YmdDate.YmdDate String Bool
+    | ToggleSuspendedHabit YmdDate.YmdDate String Bool Bool
     | OnToggleSuspendedHabitFailure ApiError
     | OnToggleSuspendedHabitSuccess SuspendedToggleEvent.SuspendedToggleEvent
     | OnToggleHistoryViewer

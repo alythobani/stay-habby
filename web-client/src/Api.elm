@@ -145,20 +145,27 @@ type alias QueriedFrequencyStats =
 -}
 queryPastFrequencyStats :
     YmdDate.YmdDate
+    -> List String
     -> String
     -> (ApiError -> b)
     -> (QueriedFrequencyStats -> b)
     -> Cmd b
-queryPastFrequencyStats ymd =
+queryPastFrequencyStats ymd habitIds =
     let
         queryString =
-            """{frequencyStatsList: get_frequency_stats(current_client_date: {year: """
+            "{frequencyStatsList: get_frequency_stats(current_client_date: {year: "
                 ++ toString ymd.year
                 ++ ", month: "
                 ++ toString ymd.month
                 ++ ", day: "
                 ++ toString ymd.day
-                ++ """}) {
+                ++ "}"
+                ++ (if List.isEmpty habitIds then
+                        ""
+                    else
+                        ", habit_ids: " ++ toString habitIds
+                   )
+                ++ """) {
     habit_id
     total_fragments
     successful_fragments

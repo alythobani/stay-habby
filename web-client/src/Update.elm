@@ -6,6 +6,7 @@ import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
 import Model exposing (Model)
+import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
@@ -26,10 +27,20 @@ update msg model =
                 OnGetHabitsAndHabitDataAndFrequencyStatsFailure
                 OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
 
-        getHistoryViewerFrequencyStats : YmdDate.YmdDate -> Cmd Msg
-        getHistoryViewerFrequencyStats ymd =
+        getTodayViewerFrequencyStats : List String -> Cmd Msg
+        getTodayViewerFrequencyStats habitIds =
+            Api.queryPastFrequencyStats
+                model.ymd
+                habitIds
+                model.apiBaseUrl
+                OnGetTodayFrequencyStatsFailure
+                OnGetTodayFrequencyStatsSuccess
+
+        getHistoryViewerFrequencyStats : YmdDate.YmdDate -> List String -> Cmd Msg
+        getHistoryViewerFrequencyStats ymd habitIds =
             Api.queryPastFrequencyStats
                 ymd
+                habitIds
                 model.apiBaseUrl
                 OnGetPastFrequencyStatsFailure
                 OnGetPastFrequencyStatsSuccess
@@ -226,10 +237,10 @@ update msg model =
                     }
             in
             newModel
-                ! [ getHabitsAndHabitDataAndFrequencyStats
+                ! [ getTodayViewerFrequencyStats [ updatedHabitDatum.habitId ]
                   , case newModel.historyViewerSelectedDate of
                         Just ymd ->
-                            getHistoryViewerFrequencyStats ymd
+                            getHistoryViewerFrequencyStats ymd [ updatedHabitDatum.habitId ]
 
                         Nothing ->
                             Cmd.none
@@ -271,10 +282,10 @@ update msg model =
 
         OnToggleSuspendedHabitSuccess updatedSuspendedToggleEvent ->
             model
-                ! [ getHabitsAndHabitDataAndFrequencyStats
+                ! [ getTodayViewerFrequencyStats [ updatedSuspendedToggleEvent.habitId ]
                   , case model.historyViewerSelectedDate of
                         Just ymd ->
-                            getHistoryViewerFrequencyStats ymd
+                            getHistoryViewerFrequencyStats ymd [ updatedSuspendedToggleEvent.habitId ]
 
                         Nothing ->
                             Cmd.none
@@ -326,13 +337,53 @@ update msg model =
                     ( model, Cmd.none )
 
         SetHistoryViewerSelectedDate ymd ->
-            { model | historyViewerSelectedDate = Just ymd } ! [ getHistoryViewerFrequencyStats ymd ]
+            { model | historyViewerSelectedDate = Just ymd } ! [ getHistoryViewerFrequencyStats ymd [] ]
+
+        OnGetTodayFrequencyStatsFailure apiError ->
+            ( model, Cmd.none )
+
+        OnGetTodayFrequencyStatsSuccess { frequencyStatsList } ->
+            let
+                updateAllFrequencyStats : List FrequencyStats.FrequencyStats -> List FrequencyStats.FrequencyStats
+                updateAllFrequencyStats allFrequencyStats =
+                    List.foldl
+                        (\newStats allFrequencyStats ->
+                            Util.replaceOrAdd allFrequencyStats (\stats -> stats.habitId == newStats.habitId) newStats
+                        )
+                        allFrequencyStats
+                        frequencyStatsList
+            in
+            ( { model
+                | allFrequencyStats =
+                    RemoteData.map
+                        updateAllFrequencyStats
+                        model.allFrequencyStats
+              }
+            , Cmd.none
+            )
 
         OnGetPastFrequencyStatsFailure apiError ->
             ( { model | historyViewerFrequencyStats = RemoteData.Failure apiError }, Cmd.none )
 
         OnGetPastFrequencyStatsSuccess { frequencyStatsList } ->
-            ( { model | historyViewerFrequencyStats = RemoteData.Success frequencyStatsList }, Cmd.none )
+            let
+                updateHistoryViewerFrequencyStats : List FrequencyStats.FrequencyStats -> List FrequencyStats.FrequencyStats
+                updateHistoryViewerFrequencyStats historyViewerFrequencyStats =
+                    List.foldl
+                        (\newStats historyViewerFrequencyStats ->
+                            Util.replaceOrAdd historyViewerFrequencyStats (\stats -> stats.habitId == newStats.habitId) newStats
+                        )
+                        historyViewerFrequencyStats
+                        frequencyStatsList
+            in
+            ( { model
+                | historyViewerFrequencyStats =
+                    RemoteData.map
+                        updateHistoryViewerFrequencyStats
+                        model.historyViewerFrequencyStats
+              }
+            , Cmd.none
+            )
 
         OnHistoryViewerChangeDate ->
             ( { model | historyViewerSelectedDate = Nothing }, Cmd.none )

@@ -59,5 +59,5 @@ type Msg
     | OnGetPastFrequencyStatsSuccess Api.QueriedFrequencyStats
     | OnHistoryViewerChangeDate
     | OnHistoryViewerHabitDataInput YmdDate.YmdDate String String
-    | ToggleTodayViewerHabitActionsDropdown String Bool
-    | ToggleHistoryViewerHabitActionsDropdown String Bool
+    | ToggleTodayViewerHabitActionsDropdown String Dropdown.State
+    | ToggleHistoryViewerHabitActionsDropdown String Dropdown.State

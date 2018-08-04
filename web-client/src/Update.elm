@@ -19,14 +19,6 @@ update msg model =
         updateAddHabit updater =
             { model | addHabit = updater model.addHabit }
 
-        getHabitsAndHabitDataAndFrequencyStats : Cmd Msg
-        getHabitsAndHabitDataAndFrequencyStats =
-            Api.queryHabitsAndHabitDataAndFrequencyStats
-                model.ymd
-                model.apiBaseUrl
-                OnGetHabitsAndHabitDataAndFrequencyStatsFailure
-                OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
-
         getTodayViewerFrequencyStats : List String -> Cmd Msg
         getTodayViewerFrequencyStats habitIds =
             Api.queryPastFrequencyStats

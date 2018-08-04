@@ -105,6 +105,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             currentlySuspended
                             habitActionsDropdowns
                             ToggleTodayViewerHabitActionsDropdown
+                            True
                             habit
                 in
                 div [ classList [ ( "display-none", not openView ) ] ]
@@ -413,6 +414,7 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                         currentlySuspended
                                         habitActionsDropdowns
                                         ToggleHistoryViewerHabitActionsDropdown
+                                        False
                                         habit
                             in
                             div
@@ -507,9 +509,10 @@ renderHabitBox :
     -> Bool
     -> Dict.Dict String Dropdown.State
     -> (String -> Dropdown.State -> Msg)
+    -> Bool
     -> Habit.Habit
     -> Html Msg
-renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData currentlySuspended habitActionsDropdowns toggleHabitActionsDropdown habit =
+renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData currentlySuspended habitActionsDropdowns toggleHabitActionsDropdown onTodayViewer habit =
     let
         habitRecord =
             Habit.getCommonFields habit
@@ -551,9 +554,6 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                 Dropdown.OnClick
                 (class "visible")
                 (toggleHabitActionsDropdown habitRecord.id)
-
-        onTodayViewer =
-            toggleHabitActionsDropdown == ToggleTodayViewerHabitActionsDropdown
     in
     div
         [ class

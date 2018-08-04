@@ -347,9 +347,14 @@ update msg model =
             in
             ( { model
                 | allFrequencyStats =
-                    RemoteData.map
-                        updateAllFrequencyStats
-                        model.allFrequencyStats
+                    case model.allFrequencyStats of
+                        RemoteData.Success frequencyStatsFrequencyStatsList ->
+                            RemoteData.map
+                                updateAllFrequencyStats
+                                model.allFrequencyStats
+
+                        _ ->
+                            RemoteData.Success frequencyStatsList
               }
             , Cmd.none
             )
@@ -370,9 +375,14 @@ update msg model =
             in
             ( { model
                 | historyViewerFrequencyStats =
-                    RemoteData.map
-                        updateHistoryViewerFrequencyStats
-                        model.historyViewerFrequencyStats
+                    case model.historyViewerFrequencyStats of
+                        RemoteData.Success frequencyStatsFrequencyStatsList ->
+                            RemoteData.map
+                                updateHistoryViewerFrequencyStats
+                                model.historyViewerFrequencyStats
+
+                        _ ->
+                            RemoteData.Success frequencyStatsList
               }
             , Cmd.none
             )

@@ -1,9 +1,10 @@
 @import './mixins.scss';
+@import './variables.scss';
 
 .view {
     font-family: 'Raleway', sans-serif;
     padding: 5px;
-    color: #444;
+    color: $cape-cod;
 
     .today-panel {
         @extend .panel;
@@ -18,7 +19,7 @@
         }
 
         .today-panel-date {
-            color: #AAA;
+            color: $silver-chalice;
             font-size: 16px;
             display: inline-block;
             font-style: italic;
@@ -188,7 +189,7 @@
         }
 
         .selected-date-title {
-            color: #AAA;
+            color: $silver-chalice;
             font-size: 16px;
             display: inline-block;
             font-style: italic;
@@ -210,12 +211,12 @@
 
             .separating-text {
                 margin-left: 5px;
-                color: #444;
+                color: $cape-cod;
             }
 
             .select-yesterday, .before-yesterday {
-                border: 1px solid #777;
-                color: #999;
+                border: 1px solid $boulder;
+                color: $star-dust;
                 border-radius: 5px;
                 padding: 5px;
                 margin-right: 10px;
@@ -223,16 +224,16 @@
                 cursor: pointer;
 
                 &:hover {
-                    background-color: #CCC;
-                    color: #777;
+                    background-color: $cloud;
+                    color: $boulder;
                 }
             }
         }
 
         .change-date {
             position: absolute;
-            border: 1px solid #AAA;
-            color: #999;
+            border: 1px solid $silver-chalice;
+            color: $star-dust;
             border-radius: 5px;
             margin-left: 10px;
             cursor: pointer;
@@ -241,8 +242,8 @@
             top: 48px;
 
             &:hover {
-                background-color: #CCC;
-                color: #777;
+                background-color: $cloud;
+                color: $boulder;
             }
         }
     }
@@ -254,46 +255,46 @@
 
         &.good-habits {
             .habit-success {
-                background-color: rgba(14, 238, 70, 0.59);
-                border: 1px solid rgba(100, 182, 120, 1);
+                background-color: $screamin-green;
+                border: 1px solid $de-york;
                 .frequency-statistic {
-                    color: rgb(16, 147, 0);
+                    color: $forest-green;
                 }
                 .current-progress {
-                    color: rgb(35, 126, 27);
+                    color: $bilbao;
                 }
             }
             .habit-failure {
-                background-color: rgb(132, 132, 231);
-                border: 1px solid rgb(93, 93, 230);
+                background-color: $chetwode-blue;
+                border: 1px solid $blue-ribbon;
                 .frequency-statistic {
-                    color: rgb(79, 79, 79);
+                    color: $fuscous-grey;
                 }
                 .current-progress {
-                    color: rgb(66, 66, 66);
+                    color: $cape-cod;
                 }
             }
         }
 
         &.bad-habits {
             .habit-success {
-                background-color: #ffc971;
-                border: 1px solid #e9b155;
+                background-color: $koromiko;
+                border: 1px solid $casablanca;
                 .frequency-statistic {
-                    color: rgb(91, 79, 0);
+                    color: $himalaya;
                 }
                 .current-progress {
-                    color: rgb(99, 84, 0);
+                    color: $spicy-mustard;
                 }
             }
             .habit-failure {
-                background-color: rgb(203, 68, 68);
-                border: rgb(153, 0, 0);
+                background-color: $well-read;
+                border: $red-berry;
                 .frequency-statistic {
-                  color: rgb(32, 0, 0);
+                  color: $kilamanjaro;
                 }
                 .current-progress {
-                    color: rgb(56, 0, 0);
+                    color: $chocolate;
                     font-weight: 700;
                 }
             }
@@ -301,14 +302,14 @@
 
         &.suspended-habits {
           .habit-success, .habit-failure {
-            background-color: #a3a3a3;
-            border: 1px solid #747474;
+            background-color: $star-dust;
+            border: 1px solid $boulder;
           }
           .frequency-statistic {
-              color: rgb(66, 66, 66);
+              color: $cape-cod;
           }
           .current-progress {
-              color: rgb(56, 56, 56);
+              color: $tuatara;
           }
         }
 
@@ -430,10 +431,10 @@
                         top: -4px;
                         font-size: 33px;
                         cursor: pointer;
-                        color: #444;
+                        color: $cape-cod;
 
                         &:hover {
-                            color: #222;
+                            color: $shark;
                         }
                     }
                 }
@@ -473,13 +474,13 @@
 }
 
 .panel-title {
-    color: #555;
+    color: $chicago;
     font-size: 26px;
     font-weight: 600;
     cursor: pointer;
 
     &:hover {
-        color: #333;
+        color: $mine-shaft;
     }
 }
 
@@ -488,5 +489,5 @@
     right: 0px;
     top: 10px;
     font-size: 48px;
-    color: #999;
+    color: $star-dust;
 }

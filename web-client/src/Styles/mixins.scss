@@ -1,35 +1,37 @@
+@import './variables.scss';
+
 // @refer http://cssdeck.com/labs/16-box-shadows-to-save-your-time/
 .box-shadow-5 {
-  box-shadow: 0 0 1px rgba(34, 25, 25, 0.4);
+  box-shadow: 0 0 1px $night-rider-40;
 }
 .box-shadow-4{
-  box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 4px 1px $black-20;
 
   &:hover {
-    box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 4px 1px $black-40;
   }
 }
 .box-shadow-14 {
-  -webkit-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  -moz-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  -webkit-box-shadow:0 1px 4px $black-30, 0 0 40px $black-10 inset;
+  -moz-box-shadow:0 1px 4px $black-30, 0 0 40px $black-10 inset;
+  box-shadow:0 1px 4px $black-30, 0 0 40px $black-10 inset;
 }
 
 // Different button styles.
 .button-style-1 {
-  color: #444;
+  color: $cape-cod;
   display: block;
   cursor: pointer;
-  background-color: #eee;
-  border: 1px solid #ddd;
+  background-color: $gallery;
+  border: 1px solid $alto;
 
   &:hover {
-    background-color: #ddd;
+    background-color: $alto;
   }
 
   &.selected {
-    border: 1px solid #888;
-    background-color: #ddd;
+    border: 1px solid $gunsmoke;
+    background-color: $alto;
   }
 }
 
@@ -37,7 +39,7 @@
   color: white;
   display: block;
   cursor: pointer;
-  background-color: #4caf50;
+  background-color: $apple;
   border: 1px solid green;
 
   &:hover {
@@ -46,20 +48,20 @@
 }
 
 .button-style-3 {
-  color: #444;
+  color: $cape-cod;
   display: block;
   cursor: pointer;
   background-color: white;
   font-weight: 410;
-  border: 1px solid #eee;
+  border: 1px solid $gallery;
 
   &:hover {
-    background-color: #eee;
+    background-color: $gallery;
   }
 
   &.selected {
-    border: 1px solid #888;
-    background-color: #eee;
+    border: 1px solid $gunsmoke;
+    background-color: $gallery;
   }
 }
 
@@ -70,7 +72,7 @@
   display: inline-block;
   resize: none;
   box-shadow: none;
-  border: 1px solid #777;
+  border: 1px solid $boulder;
   border-radius: 2px;
   font-size: 16px;
 }

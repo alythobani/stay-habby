@@ -2,8 +2,11 @@
 $cape-cod: #444;
 $silver-chalice: #AAA;
 $boulder: #777;
+$gunsmoke: #888;
 $star-dust: #999;
 $cloud: #CCC;
+$alto: #ddd;
+$gallery: #eee;
 
 // good habit box success
 $screamin-green: rgba(14, 238, 70, 0.59);
@@ -37,3 +40,11 @@ $shark: #222;
 // panel title
 $chicago: #555;
 $mine-shaft: #333;
+
+// mixins
+$night-rider-40: rgba(34, 25, 25, 0.4);
+$black-10: rgba(0, 0, 0, 0.1);
+$black-20: rgba(0, 0, 0, 0.2);
+$black-30: rgba(0, 0, 0, 0.3);
+$black-40: rgba(0, 0, 0, 0.4);
+$apple: #4caf50;

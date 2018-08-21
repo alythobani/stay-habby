@@ -83,6 +83,44 @@ body {
           border-color: $woodsmoke;
         }
       }
+
+      .habit-list {
+
+        &.good-habits {
+            .habit-success {
+                border-color: rgb(54, 154, 0);
+                .frequency-statistic {
+                    color: rgb(43, 167, 23);
+                }
+                .current-progress {
+                    color: rgb(0, 207, 8);
+                }
+            }
+            .habit-failure {
+                border-color: rgb(0, 23, 142);
+                .frequency-statistic {
+                    color: $dark-blue;
+                }
+                .current-progress {
+                    color: $dark-blue;
+                }
+            }
+        }
+
+        .habit {
+          border-width: 2px;
+          background-color: inherit !important;
+          .habit-name {
+            color: $cloud;
+          }
+          .habit-amount-complete {
+            input {
+              background-color: $shark;
+              color: $gallery;
+            }
+          }
+        }
+      }
     }
 
     .today-panel {
@@ -346,7 +384,7 @@ body {
         &.good-habits {
             .habit-success {
                 background-color: $screamin-green;
-                border: 1px solid $de-york;
+                border-color:  $de-york;
                 .frequency-statistic {
                     color: $forest-green;
                 }
@@ -356,7 +394,7 @@ body {
             }
             .habit-failure {
                 background-color: $chetwode-blue;
-                border: 1px solid $blue-ribbon;
+                border-color:  $blue-ribbon;
                 .frequency-statistic {
                     color: $fuscous-grey;
                 }
@@ -369,7 +407,7 @@ body {
         &.bad-habits {
             .habit-success {
                 background-color: $koromiko;
-                border: 1px solid $casablanca;
+                border-color:  $casablanca;
                 .frequency-statistic {
                     color: $himalaya;
                 }
@@ -379,7 +417,7 @@ body {
             }
             .habit-failure {
                 background-color: $well-read;
-                border: $red-berry;
+                border-color: $red-berry;
                 .frequency-statistic {
                   color: $kilamanjaro;
                 }
@@ -393,7 +431,7 @@ body {
         &.suspended-habits {
           .habit-success, .habit-failure {
             background-color: $star-dust;
-            border: 1px solid $boulder;
+            border-color: $boulder;
           }
           .frequency-statistic {
               color: $cape-cod;
@@ -409,11 +447,13 @@ body {
             position: relative;
             padding: 7px;
             margin: 15px 15px 0 2px;
-            width: 310px;
+            width: 325px;
             min-width: 200px;
             min-height: 80px;
-            box-sizing: content-box;
+            box-sizing: border-box;
             color: white;
+            border-width: 1px;
+            border-style: solid;
 
             &:hover {
               .actions-dropdown {

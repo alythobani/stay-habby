@@ -79,14 +79,11 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 , Toggles.ripple
                 , Toggles.value darkModeOn
                 ]
-                [ span
-                    [ class "dark-mode-switch-text" ]
-                    [ text <|
-                        if darkModeOn then
-                            "Dark Mode"
-                        else
-                            "Light Mode"
-                    ]
+                [ text <|
+                    if darkModeOn then
+                        "Dark Mode"
+                    else
+                        "Light Mode"
                 ]
             ]
         , dropdownIcon openView NoOp

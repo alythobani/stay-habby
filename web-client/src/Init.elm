@@ -21,7 +21,7 @@ init { apiBaseUrl, currentTime } location =
     in
     ( { ymd = ymd
       , apiBaseUrl = apiBaseUrl
-      , darkModeOn = True
+      , darkModeOn = False
       , editingTodayHabitAmount = Dict.empty
       , editingHistoryHabitAmount = Dict.empty
       , allHabitData = RemoteData.Loading

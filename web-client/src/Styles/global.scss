@@ -38,6 +38,10 @@ body {
       .button-style-2 {
         background-color: black;
         border-width: 2px;
+        color: $gallery;
+        &:hover {
+          background-color: green;
+        }
       }
 
       .panel {

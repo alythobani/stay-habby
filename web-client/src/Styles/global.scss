@@ -27,7 +27,12 @@ body {
         }
 
         .dark-mode-switch {
-          
+          position: absolute;
+          top: 25px;
+          right: 60px;
+          .dark-mode-switch-text {
+            margin-left: 5px;
+          }
         }
 
         .today-panel-date {

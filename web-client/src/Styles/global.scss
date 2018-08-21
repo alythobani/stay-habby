@@ -16,10 +16,14 @@ body {
     &.dark-mode {
       background-color: black;
 
+      .panel {
+        box-shadow: 0 0 1px $gunsmoke;
+      }
+
       .panel-title {
         color: $alto;
         &:hover {
-            color: $star-dust;
+            color: $silver-chalice;
         }
       }
 
@@ -37,6 +41,18 @@ body {
         }
         .today-panel-date {
           color: $cloud;
+        }
+        .add-habit {
+          background-color: black;
+          box-shadow: 0 0 1px $gallery;
+          color: $silver-chalice;
+          &:hover {
+            border: 1px solid $boulder;
+            color: $gallery;
+          }
+        }
+        .add-habit-line-breaker {
+          border-color: $woodsmoke;
         }
       }
     }
@@ -90,7 +106,7 @@ body {
         .add-habit-line-breaker {
             display: block;
             width: 100%;
-            border: 0.5px solid #ddd;
+            border: 0.5px solid $alto;
         }
 
         .add-habit-input-form {

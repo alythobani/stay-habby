@@ -13,6 +13,7 @@ import RemoteData
 type alias Model =
     { ymd : YmdDate.YmdDate
     , apiBaseUrl : String
+    , darkModeOn : Bool
     , editingTodayHabitAmount : Dict.Dict String Int
     , editingHistoryHabitAmount : Dict.Dict String (Dict.Dict String Int)
     , allHabits : RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)

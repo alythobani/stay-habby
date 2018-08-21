@@ -23,7 +23,7 @@ import RemoteData
 view : Model -> Html Msg
 view model =
     div
-        [ class "view" ]
+        [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]
         [ renderTodayPanel
             model.ymd
             model.allHabits

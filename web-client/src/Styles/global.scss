@@ -1,10 +1,18 @@
 @import './mixins.scss';
 @import './variables.scss';
 
+body {
+  margin: 0px;
+}
+
 .view {
     font-family: 'Raleway', sans-serif;
+    position: absolute;
     padding: 5px;
     color: $cape-cod;
+    &.dark-mode {
+      background-color: black;
+    }
 
     .today-panel {
         @extend .panel;

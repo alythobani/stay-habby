@@ -10,10 +10,22 @@ body {
     position: absolute;
     box-sizing: border-box;
     width: 100%;
+    min-height: 100%;
     padding: 5px;
     color: $cape-cod;
     &.dark-mode {
       background-color: black;
+      .today-panel {
+        .today-panel-title {
+          color: $alto;
+          &:hover {
+              color: $star-dust;
+          }
+        }
+        .today-panel-date {
+          color: $cloud;
+        }
+      }
     }
 
     .today-panel {

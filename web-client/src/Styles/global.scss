@@ -16,6 +16,25 @@ body {
     &.dark-mode {
       background-color: black;
 
+      .input-style-1 {
+        background-color: black;
+        border-color: $mine-shaft;
+        color: $gallery;
+        &::placeholder {
+          color: $chicago;
+        }
+      }
+
+      .button-style-1 {
+        background-color: black;
+        border-color: $gunsmoke;
+        color: $gunsmoke;
+        &.selected {
+          border-color: $alto;
+          color: $gallery;
+        }
+      }
+
       .panel {
         box-shadow: 0 0 1px $gunsmoke;
       }

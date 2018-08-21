@@ -5,6 +5,7 @@ import Date
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
+import Material
 import Model exposing (Model)
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
@@ -426,6 +427,12 @@ update msg model =
                     Dict.update habitId (always <| Just newState) model.historyViewerHabitActionsDropdowns
             in
             ( { model | historyViewerHabitActionsDropdowns = updatedHistoryViewerHabitActionsDropdowns }, Cmd.none )
+
+        OnToggleDarkMode ->
+            ( { model | darkModeOn = not model.darkModeOn }, Cmd.none )
+
+        Mdl msg_ ->
+            Material.update Mdl msg_ model
 
 
 extractInt : String -> Maybe Int -> Maybe Int

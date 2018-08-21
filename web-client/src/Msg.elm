@@ -2,6 +2,7 @@ module Msg exposing (..)
 
 import Api
 import Dropdown
+import Material
 import Models.ApiError exposing (ApiError)
 import Models.Habit as Habit
 import Models.HabitData as HabitData
@@ -61,3 +62,5 @@ type Msg
     | OnHistoryViewerHabitDataInput YmdDate.YmdDate String String
     | ToggleTodayViewerHabitActionsDropdown String Dropdown.State
     | ToggleHistoryViewerHabitActionsDropdown String Dropdown.State
+    | OnToggleDarkMode
+    | Mdl (Material.Msg Msg)

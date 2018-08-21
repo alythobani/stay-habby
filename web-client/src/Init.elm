@@ -4,6 +4,7 @@ import Api
 import Date
 import Dict
 import Flags exposing (Flags)
+import Material
 import Model exposing (Model)
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
@@ -34,6 +35,7 @@ init { apiBaseUrl, currentTime } location =
       , historyViewerFrequencyStats = RemoteData.NotAsked
       , todayViewerHabitActionsDropdowns = Dict.empty
       , historyViewerHabitActionsDropdowns = Dict.empty
+      , mdl = Material.model
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

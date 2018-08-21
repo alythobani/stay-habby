@@ -2,6 +2,7 @@ module Model exposing (..)
 
 import Dict
 import Dropdown
+import Material
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
@@ -46,4 +47,5 @@ type alias Model =
     , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     , todayViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
     , historyViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
+    , mdl : Material.Model
     }

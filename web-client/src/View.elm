@@ -9,6 +9,9 @@ import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
 import Html.Attributes exposing (class, classList, placeholder, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Keyboard.Extra as KK
+import Material
+import Material.Options as Options
+import Material.Toggles as Toggles
 import Maybe.Extra as Maybe
 import Model exposing (Model)
 import Models.ApiError as ApiError
@@ -33,6 +36,8 @@ view model =
             model.editingTodayHabitAmount
             model.openTodayViewer
             model.todayViewerHabitActionsDropdowns
+            model.darkModeOn
+            model.mdl
         , renderHistoryViewerPanel
             model.openHistoryViewer
             model.historyViewerDateInput
@@ -54,8 +59,10 @@ renderTodayPanel :
     -> Dict.Dict String Int
     -> Bool
     -> Dict.Dict String Dropdown.State
+    -> Bool
+    -> Material.Model
     -> Html Msg
-renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns =
+renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns darkModeOn mdl =
     let
         createHabitData =
             Habit.extractCreateHabit addHabit
@@ -63,6 +70,22 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
     div
         [ class "today-panel" ]
         [ div [ class "today-panel-title", onClick OnToggleTodayViewer ] [ text "Today's Progress" ]
+        , div [ class "dark-mode-switch" ]
+            [ Toggles.switch
+                Mdl
+                [ 0 ]
+                mdl
+                [ Options.onToggle OnToggleDarkMode
+                , Toggles.ripple
+                , Toggles.value darkModeOn
+                ]
+                [ text <|
+                    if darkModeOn then
+                        "Dark Mode"
+                    else
+                        "Light Mode"
+                ]
+            ]
         , dropdownIcon openView NoOp
         , div [ class "today-panel-date" ] [ text <| YmdDate.prettyPrint ymd ]
         , case ( rdHabits, rdHabitData ) of

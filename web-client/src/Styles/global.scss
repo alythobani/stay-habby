@@ -15,11 +15,24 @@ body {
     color: $cape-cod;
     &.dark-mode {
       background-color: black;
+
+      .panel-title {
+        color: $alto;
+        &:hover {
+            color: $star-dust;
+        }
+      }
+
+      .panel-open-close-arrow {
+        color: $cloud;
+      }
+
       .today-panel {
-        .today-panel-title {
+        .dark-mode-switch {
           color: $alto;
           &:hover {
-              color: $star-dust;
+              color: $cloud;
+              cursor: pointer;
           }
         }
         .today-panel-date {
@@ -44,6 +57,11 @@ body {
           position: absolute;
           top: 25px;
           right: 80px;
+          color: $chicago;
+          &:hover {
+            color: black;
+            cursor: pointer;
+          }
         }
 
         .today-panel-date {
@@ -477,6 +495,37 @@ body {
             @extend .habit;
         }
     }
+    .panel {
+        position: relative;
+        box-sizing: border-box;
+        display: block;
+        padding: 20px;
+        float: left;
+        width: 100%;
+
+        @extend .box-shadow-5;
+    }
+
+    .panel-title {
+        color: $chicago;
+        font-size: 26px;
+        font-weight: 600;
+        margin-top: 3px;
+        margin-bottom: 5px;
+        cursor: pointer;
+
+        &:hover {
+            color: $mine-shaft;
+        }
+    }
+
+    .panel-open-close-arrow {
+        position: absolute;
+        right: 0px;
+        top: 10px;
+        font-size: 48px;
+        color: $star-dust;
+    }
 }
 
 .display-none {
@@ -489,36 +538,4 @@ body {
     width: 0;
     padding: 0;
     margin: 0;
-}
-
-.panel {
-    position: relative;
-    box-sizing: border-box;
-    display: block;
-    padding: 20px;
-    float: left;
-    width: 100%;
-
-    @extend .box-shadow-5;
-}
-
-.panel-title {
-    color: $chicago;
-    font-size: 26px;
-    font-weight: 600;
-    margin-top: 3px;
-    margin-bottom: 5px;
-    cursor: pointer;
-
-    &:hover {
-        color: $mine-shaft;
-    }
-}
-
-.panel-open-close-arrow {
-    position: absolute;
-    right: 0px;
-    top: 10px;
-    font-size: 48px;
-    color: $star-dust;
 }

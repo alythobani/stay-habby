@@ -68,7 +68,7 @@ body {
           }
         }
         .today-panel-date {
-          color: $cloud;
+          color: $silver-chalice;
         }
         .add-habit {
           background-color: black;
@@ -110,13 +110,25 @@ body {
         .habit {
           border-width: 2px;
           background-color: inherit !important;
-          .habit-name {
-            color: $cloud;
-          }
+          color: $cloud;
           .habit-amount-complete {
             input {
               background-color: $shark;
               color: $gallery;
+            }
+          }
+          .actions-dropdown {
+            .action-buttons {
+              .action-button {
+                background-color: black;
+                color: $cloud;
+                border: none;
+                box-shadow: 0 0 1px $gallery;
+                &:hover {
+                  border: 1px solid $boulder;
+                  color: $gallery;
+                }
+              }
             }
           }
         }

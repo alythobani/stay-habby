@@ -119,21 +119,21 @@ body {
 
         &.good-habits {
             .habit-success {
-                border-color: rgb(54, 154, 0);
+                border-color: $christi;
                 .frequency-statistic {
-                    color: rgb(43, 167, 23);
+                    color: $la-palma;
                 }
                 .current-progress {
-                    color: rgb(0, 207, 8);
+                    color: $la-palma;
                 }
             }
             .habit-failure {
-                border-color: rgb(0, 23, 142);
+                border-color: $blue-gem;
                 .frequency-statistic {
-                    color: $dark-blue;
+                    color: $jacksons-purple;
                 }
                 .current-progress {
-                    color: $dark-blue;
+                    color: $jacksons-purple;
                 }
             }
         }

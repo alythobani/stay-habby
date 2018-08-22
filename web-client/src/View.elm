@@ -158,13 +158,13 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     ]
 
             ( RemoteData.Failure apiError, _ ) ->
-                text "Failure..."
+                span [ class "retrieving-habits-status" ] [ text "Failure..." ]
 
             ( _, RemoteData.Failure apiError ) ->
-                text "Failure..."
+                span [ class "retrieving-habits-status" ] [ text "Failure..." ]
 
             _ ->
-                text "Loading..."
+                span [ class "retrieving-habits-status" ] [ text "Loading..." ]
         , hr [ classList [ ( "add-habit-line-breaker", True ), ( "visibility-hidden height-0", not addHabit.openView ) ] ] []
         , div
             [ classList [ ( "add-habit-input-form", True ), ( "display-none", not addHabit.openView ) ] ]
@@ -451,13 +451,13 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                 ]
 
         ( RemoteData.Failure apiError, _ ) ->
-            text "Failure..."
+            span [ class "retrieving-habits-status" ] [ text "Failure..." ]
 
         ( _, RemoteData.Failure apiError ) ->
-            text "Failure..."
+            span [ class "retrieving-habits-status" ] [ text "Failure..." ]
 
         _ ->
-            text "Loading..."
+            span [ class "retrieving-habits-status" ] [ text "Loading..." ]
 
 
 dropdownIcon : Bool -> msg -> Html msg

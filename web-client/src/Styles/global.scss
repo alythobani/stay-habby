@@ -104,6 +104,15 @@ body {
             }
           }
         }
+        .change-date {
+          border-color: $cape-cod;
+          color: $silver-chalice;
+          &:hover {
+            background-color: transparent;
+            border-color: $star-dust;
+            color: $gallery;
+          }
+        }
       }
 
       .habit-list {
@@ -355,6 +364,7 @@ body {
             font-size: 16px;
             display: inline-block;
             font-style: italic;
+            margin-bottom: 5px;
         }
 
         i {
@@ -399,7 +409,7 @@ body {
             border-radius: 5px;
             margin-left: 10px;
             cursor: pointer;
-            padding: 2px;
+            padding: 4px;
             font-size: 12px;
             top: 48px;
 
@@ -629,7 +639,7 @@ body {
         font-size: 26px;
         font-weight: 600;
         margin-top: 3px;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         cursor: pointer;
 
         &:hover {

@@ -84,6 +84,28 @@ body {
         }
       }
 
+      .history-viewer-panel {
+        .date-entry {
+          .separating-text {
+              color: $cape-cod;
+          }
+          .select-yesterday, .before-yesterday {
+              border-color: $cape-cod;
+              color: $silver-chalice;
+              &:hover {
+                  background-color: transparent;
+                  border-color: $star-dust;
+                  color: $gallery;
+              }
+          }
+          input {
+            &::placeholder {
+              color: $boulder;
+            }
+          }
+        }
+      }
+
       .habit-list {
 
         &.good-habits {

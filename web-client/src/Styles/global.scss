@@ -138,6 +138,27 @@ body {
             }
         }
 
+        &.bad-habits {
+            .habit-success {
+                border-color: $fire-bush;
+                .frequency-statistic {
+                    color: $tussock;
+                }
+                .current-progress {
+                    color: $tussock;
+                }
+            }
+            .habit-failure {
+                border-color: $guardsman-red;
+                .frequency-statistic {
+                  color: $stiletto;
+                }
+                .current-progress {
+                    color: $stiletto;
+                }
+            }
+        }
+
         .habit {
           border-width: 2px;
           background-color: inherit !important;

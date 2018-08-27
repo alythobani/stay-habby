@@ -23,10 +23,20 @@
 
 (defn add-habit
   "Add a habit to the database and returns that habit including the ID.
-  Will create an ID if the habit passed doesn't have an ID."
-  [{:keys [db habit] :or {db habby_db}}]
-  (let [final_habit (if (contains? habit :_id) habit (assoc habit :_id (ObjectId.)))]
-    (mc/insert-and-return db (:habits collection-names) final_habit)))
+  Will create an ID if the habit passed doesn't have an ID.
+  Converts the habit's `target_frequency` or `threshold_frequency` into an array of `frequency_change_record`s."
+  [{:keys [db habit creation-date-time] :or {db habby_db}}]
+  (as-> habit final_habit
+        (if (contains? final_habit :_id) final_habit (assoc final_habit :_id (ObjectId.)))
+        (if (contains? final_habit :initial_target_frequency)
+          (assoc (dissoc final_habit :initial_target_frequency)
+                 :threshold_frequencies [{:frequency_change_date creation-date-time,
+                                          :new_frequency (:initial_target_frequency final_habit)}]))
+        (if (contains? final_habit :initial_threshold_frequency)
+          (assoc (dissoc final_habit :initial_threshold_frequency)
+                 :threshold_frequencies [{:frequency_change_date creation-date-time,
+                                          :new_frequency (:initial_threshold_frequency final_habit)}]))
+        (mc/insert-and-return db (:habits collection-names) final_habit)))
 
 (defn delete-habit
   "Deletes a habit from the database, returns true if the habit was deleted."

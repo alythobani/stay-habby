@@ -75,8 +75,11 @@
 
 (defn resolve-mutation-add-habit
   "@refer `db/add-habit`."
-  [context {:keys [create_habit_data] :as all} value]
-  (tag-type (db/add-habit (assoc all :habit (unnest-tagged-unions-on-input-object create_habit_data)))))
+  [context {:keys [create_habit_data creation_date] :as all} value]
+  (as-> all $
+        (assoc (dissoc $ :create_habit_data) :habit (unnest-tagged-unions-on-input-object create_habit_data))
+        (assoc (dissoc $ :creation_date) :creation-date-time (date-from-y-m-d-map creation_date))
+        (tag-type (db/add-habit $))))
 
 (defn resolve-mutation-set-habit-data
   "@refer `db/set-habit-data`."
@@ -106,13 +109,14 @@
 (defn resolver-map
   []
   {:query/get-habits (create-async-resolver resolve-get-habits)
-   :query/tag-type-for-threshold-frequency (create-tag-type-resolver :threshold_frequency)
-   :query/tag-type-for-target-frequency (create-tag-type-resolver :target_frequency)
+   :query/tag-type-for-threshold-frequencies (create-tag-type-resolver :threshold_frequencies)
+   :query/tag-type-for-target-frequencies (create-tag-type-resolver :target_frequencies)
    :query/resolve-mutation-add-habit (create-async-resolver resolve-mutation-add-habit)
    :query/resolve-mutation-set-habit-data (create-async-resolver resolve-mutation-set-habit-data)
    :query/get-habit-data (create-async-resolver resolve-get-habit-data)
    :query/date-to-y-m-d-format (create-date-to-y-m-d-resolver :date)
    :query/toggle-date-to-y-m-d-format (create-date-to-y-m-d-resolver :toggle_date)
+   :query/frequency-change-date-to-y-m-d-format (create-date-to-y-m-d-resolver :frequency_change_date)
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
    :query/resolve-mutation-toggle-suspended-habit (create-async-resolver resolve-mutation-toggle-suspended-habit)
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)})

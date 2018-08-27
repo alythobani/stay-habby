@@ -37,6 +37,11 @@
                                     :fields {:times {:type (non-null Int)}
                                              :days {:type (non-null Int)}}}
 
+           :frequency_change_record {:description "A record of a habit's goal frequency being changed on a specific date."
+                                     :fields {:frequency_change_date {:type (non-null :date)
+                                                                      :resolve :query/frequency-change-date-to-y-m-d-format}
+                                              :new_frequency {:type (non-null :frequency)}}}
+
            :good_habit {:description "A good habit that we are trying to maintain."
                         :fields {:_id {:type (non-null ID)}
                                  :name {:type (non-null String)}
@@ -44,8 +49,8 @@
                                  :unit_name_singular {:type (non-null String)}
                                  :unit_name_plural {:type (non-null String)}
                                  :time_of_day {:type (non-null :habit_time)}
-                                 :target_frequency {:type (non-null :frequency)
-                                                    :resolve :query/tag-type-for-target-frequency}}}
+                                 :target_frequencies {:type (non-null (list (non-null :frequency_change_record)))
+                                                      :resolve :query/tag-type-for-target-frequencies}}}
 
            :bad_habit {:description "A bad habit we are trying to reduce."
                        :fields {:_id {:type (non-null ID)}
@@ -53,8 +58,8 @@
                                 :description {:type String}
                                 :unit_name_singular {:type (non-null String)}
                                 :unit_name_plural {:type (non-null String)}
-                                :threshold_frequency {:type (non-null :frequency)
-                                                      :resolve :query/tag-type-for-threshold-frequency}}}
+                                :threshold_frequencies {:type (non-null (list (non-null :frequency_change_record)))
+                                                        :resolve :query/tag-type-for-threshold-frequencies}}}
 
            :habit_day_record {:description "A record of how much a habit was performed on a specific day."
                               :fields {:_id {:type (non-null ID)}
@@ -130,14 +135,14 @@
                                                    :time_of_day {:type (non-null :habit_time)}
                                                    :unit_name_singular {:type (non-null String)}
                                                    :unit_name_plural {:type (non-null String)}
-                                                   :target_frequency {:type (non-null :create_frequency_data)}}}
+                                                   :initial_target_frequency {:type (non-null :create_frequency_data)}}}
 
                  :create_bad_habit_data {:description "The data required to create a new bad habit."
                                          :fields {:name {:type (non-null String)}
                                                   :description {:type String}
                                                   :unit_name_singular {:type (non-null String)}
                                                   :unit_name_plural {:type (non-null String)}
-                                                  :threshold_frequency {:type (non-null :create_frequency_data)}}}
+                                                  :initial_threshold_frequency {:type (non-null :create_frequency_data)}}}
 
                  :create_habit_data {:description "The data required to create a new habit."
                                      :fields {:type_name {:type (non-null String)}
@@ -146,7 +151,8 @@
 
  :mutations {:add_habit {:type (non-null :habit)
                          :description "Add a habit to your list of habits, returns the new habit."
-                         :args {:create_habit_data {:type (non-null :create_habit_data)}}
+                         :args {:create_habit_data {:type (non-null :create_habit_data)}
+                                :creation_date {:type (non-null :date_data)}}
                          :resolve :query/resolve-mutation-add-habit}
 
              :set_habit_data {:type (non-null :habit_day_record)

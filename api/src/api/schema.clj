@@ -109,8 +109,7 @@
 (defn resolver-map
   []
   {:query/get-habits (create-async-resolver resolve-get-habits)
-   :query/tag-type-for-threshold-frequencies (create-tag-type-resolver :threshold_frequencies)
-   :query/tag-type-for-target-frequencies (create-tag-type-resolver :target_frequencies)
+   :query/tag-type-for-new-frequency (create-tag-type-resolver :new_frequency)
    :query/resolve-mutation-add-habit (create-async-resolver resolve-mutation-add-habit)
    :query/resolve-mutation-set-habit-data (create-async-resolver resolve-mutation-set-habit-data)
    :query/get-habit-data (create-async-resolver resolve-get-habit-data)

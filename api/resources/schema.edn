@@ -40,7 +40,8 @@
            :frequency_change_record {:description "A record of a habit's goal frequency being changed on a specific date."
                                      :fields {:frequency_change_date {:type (non-null :date)
                                                                       :resolve :query/frequency-change-date-to-y-m-d-format}
-                                              :new_frequency {:type (non-null :frequency)}}}
+                                              :new_frequency {:type (non-null :frequency)
+                                                              :resolve :query/tag-type-for-new-frequency}}}
 
            :good_habit {:description "A good habit that we are trying to maintain."
                         :fields {:_id {:type (non-null ID)}
@@ -49,8 +50,7 @@
                                  :unit_name_singular {:type (non-null String)}
                                  :unit_name_plural {:type (non-null String)}
                                  :time_of_day {:type (non-null :habit_time)}
-                                 :target_frequencies {:type (non-null (list (non-null :frequency_change_record)))
-                                                      :resolve :query/tag-type-for-target-frequencies}}}
+                                 :target_frequencies {:type (non-null (list (non-null :frequency_change_record)))}}}
 
            :bad_habit {:description "A bad habit we are trying to reduce."
                        :fields {:_id {:type (non-null ID)}
@@ -58,8 +58,7 @@
                                 :description {:type String}
                                 :unit_name_singular {:type (non-null String)}
                                 :unit_name_plural {:type (non-null String)}
-                                :threshold_frequencies {:type (non-null (list (non-null :frequency_change_record)))
-                                                        :resolve :query/tag-type-for-threshold-frequencies}}}
+                                :threshold_frequencies {:type (non-null (list (non-null :frequency_change_record)))}}}
 
            :habit_day_record {:description "A record of how much a habit was performed on a specific day."
                               :fields {:_id {:type (non-null ID)}

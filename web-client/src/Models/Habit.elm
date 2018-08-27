@@ -4,6 +4,7 @@ import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Models.YmdDate exposing (YmdDate, decodeYmdDate)
 
 
 type Habit
@@ -22,7 +23,7 @@ type alias GoodHabitRecord =
     , description : Maybe String
     , unitNameSingular : String
     , unitNamePlural : String
-    , frequency : Frequency
+    , targetFrequencies : List FrequencyChangeRecord
     , timeOfDay : HabitTime
     }
 
@@ -33,7 +34,7 @@ type alias BadHabitRecord =
     , description : Maybe String
     , unitNameSingular : String
     , unitNamePlural : String
-    , frequency : Frequency
+    , thresholdFrequencies : List FrequencyChangeRecord
     }
 
 
@@ -70,7 +71,7 @@ type alias CreateGoodHabitRecord =
     , timeOfDay : HabitTime
     , unitNameSingular : String
     , unitNamePlural : String
-    , frequency : Frequency
+    , initialTargetFrequency : Frequency
     }
 
 
@@ -79,8 +80,12 @@ type alias CreateBadHabitRecord =
     , description : String
     , unitNameSingular : String
     , unitNamePlural : String
-    , frequency : Frequency
+    , initialThresholdFrequency : Frequency
     }
+
+
+type alias FrequencyChangeRecord =
+    { frequencyChangeDate : YmdDate, newFrequency : Frequency }
 
 
 type Frequency
@@ -179,26 +184,23 @@ getCommonFields :
         { id : String
         , name : String
         , description : Maybe String
-        , frequency : Frequency
         , unitNameSingular : String
         , unitNamePlural : String
         }
 getCommonFields habit =
     case habit of
-        GoodHabit { id, name, description, frequency, unitNameSingular, unitNamePlural } ->
+        GoodHabit { id, name, description, unitNameSingular, unitNamePlural } ->
             { id = id
             , name = name
             , description = description
-            , frequency = frequency
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
             }
 
-        BadHabit { id, name, description, frequency, unitNameSingular, unitNamePlural } ->
+        BadHabit { id, name, description, unitNameSingular, unitNamePlural } ->
             { id = id
             , name = name
             , description = description
-            , frequency = frequency
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
             }
@@ -211,24 +213,24 @@ getCommonCreateFields :
         , description : String
         , unitNameSingular : String
         , unitNamePlural : String
-        , frequency : Frequency
+        , initialFrequency : Frequency
         }
 getCommonCreateFields createHabit =
     case createHabit of
-        CreateGoodHabit { name, description, unitNameSingular, unitNamePlural, frequency } ->
+        CreateGoodHabit { name, description, unitNameSingular, unitNamePlural, initialTargetFrequency } ->
             { name = name
             , description = description
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
-            , frequency = frequency
+            , initialFrequency = initialTargetFrequency
             }
 
-        CreateBadHabit { name, description, unitNameSingular, unitNamePlural, frequency } ->
+        CreateBadHabit { name, description, unitNameSingular, unitNamePlural, initialThresholdFrequency } ->
             { name = name
             , description = description
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
-            , frequency = frequency
+            , initialFrequency = initialThresholdFrequency
             }
 
 
@@ -317,7 +319,7 @@ decodeHabit =
                 |> optional "description" (Decode.maybe Decode.string) Nothing
                 |> required "unit_name_singular" Decode.string
                 |> required "unit_name_plural" Decode.string
-                |> required "target_frequency" decodeFrequency
+                |> required "target_frequencies" (Decode.list decodeFrequencyChangeRecord)
                 |> required "time_of_day" decodeHabitTime
 
         decodeBadHabitRecord =
@@ -327,7 +329,7 @@ decodeHabit =
                 |> optional "description" (Decode.maybe Decode.string) Nothing
                 |> required "unit_name_singular" Decode.string
                 |> required "unit_name_plural" Decode.string
-                |> required "threshold_frequency" decodeFrequency
+                |> required "threshold_frequencies" (Decode.list decodeFrequencyChangeRecord)
     in
     Decode.at [ "__typename" ] Decode.string
         |> Decode.andThen
@@ -342,6 +344,13 @@ decodeHabit =
                     _ ->
                         Decode.fail <| "Unable to decode habit, invalid __typename: " ++ typeName
             )
+
+
+decodeFrequencyChangeRecord : Decode.Decoder FrequencyChangeRecord
+decodeFrequencyChangeRecord =
+    decode FrequencyChangeRecord
+        |> required "frequency_change_date" decodeYmdDate
+        |> required "new_frequency" decodeFrequency
 
 
 decodeFrequency : Decode.Decoder Frequency

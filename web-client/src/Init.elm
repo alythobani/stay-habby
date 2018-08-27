@@ -21,7 +21,8 @@ init { apiBaseUrl, currentTime } location =
         ymd =
             currentTime |> Date.fromTime |> YmdDate.fromDate
     in
-    ( { ymd = ymd
+    ( { currentYmd = ymd
+      , ymd = ymd
       , apiBaseUrl = apiBaseUrl
       , darkModeOn = True
       , editingTodayHabitAmount = Dict.empty

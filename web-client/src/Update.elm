@@ -165,7 +165,7 @@ update msg model =
 
         AddHabit createHabitData ->
             ( model
-            , Api.mutationAddHabit createHabitData model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+            , Api.mutationAddHabit createHabitData model.currentYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
             )
 
         OnAddHabitFailure apiError ->

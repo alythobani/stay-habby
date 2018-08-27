@@ -48,23 +48,30 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
       name
       unit_name_singular
       unit_name_plural
-      target_frequency {
-        __typename
-        ... on every_x_days_frequency {
-          days
-          times
+      target_frequencies {
+        frequency_change_date {
+          day
+          month
+          year
         }
-        ... on total_week_frequency {
-          week
-        }
-        ... on specific_day_of_week_frequency {
-          monday
-          tuesday
-          wednesday
-          thursday
-          friday
-          saturday
-          sunday
+        new_frequency {
+          __typename
+          ... on every_x_days_frequency {
+            days
+            times
+          }
+          ... on total_week_frequency {
+            week
+          }
+          ... on specific_day_of_week_frequency {
+            monday
+            tuesday
+            wednesday
+            thursday
+            friday
+            saturday
+            sunday
+          }
         }
       }
       time_of_day
@@ -75,23 +82,30 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
       name
       unit_name_singular
       unit_name_plural
-      threshold_frequency {
-        __typename
-        ... on every_x_days_frequency {
-          days
-          times
+      threshold_frequencies {
+        frequency_change_date {
+          day
+          month
+          year
         }
-        ... on total_week_frequency {
-          week
-        }
-        ... on specific_day_of_week_frequency {
-          monday
-          tuesday
-          wednesday
-          thursday
-          friday
-          saturday
-          sunday
+        new_frequency {
+          __typename
+          ... on every_x_days_frequency {
+            days
+            times
+          }
+          ... on total_week_frequency {
+            week
+          }
+          ... on specific_day_of_week_frequency {
+            monday
+            tuesday
+            wednesday
+            thursday
+            friday
+            saturday
+            sunday
+          }
         }
       }
     }
@@ -188,8 +202,8 @@ queryPastFrequencyStats ymd habitIds =
         )
 
 
-mutationAddHabit : Habit.CreateHabit -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
-mutationAddHabit createHabit =
+mutationAddHabit : Habit.CreateHabit -> YmdDate.YmdDate -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
+mutationAddHabit createHabit { day, month, year } =
     let
         commonFields =
             Habit.getCommonCreateFields createHabit
@@ -214,14 +228,14 @@ mutationAddHabit createHabit =
                   )
                 , ( "unit_name_singular", commonFields.unitNameSingular )
                 , ( "unit_name_plural", commonFields.unitNamePlural )
-                , ( "frequency_name"
+                , ( "initial_frequency_name"
                   , if isGoodHabit then
-                        "target_frequency"
+                        "initial_target_frequency"
                     else
-                        "threshold_frequency"
+                        "initial_threshold_frequency"
                   )
-                , ( "frequency_value"
-                  , case commonFields.frequency of
+                , ( "initial_frequency_value"
+                  , case commonFields.initialFrequency of
                         Habit.EveryXDayFrequency { days, times } ->
                             Util.templater
                                 (Dict.fromList [ ( "days", toString days ), ( "times", toString times ) ])
@@ -268,6 +282,9 @@ mutationAddHabit createHabit =
                                 }
                                 }"""
                   )
+                , ( "day", toString day )
+                , ( "month", toString month )
+                , ( "year", toString year )
                 ]
 
         isGoodHabit =
@@ -280,73 +297,91 @@ mutationAddHabit createHabit =
 
         queryString =
             """mutation {
-        \tadd_habit(create_habit_data: {
-        \t\ttype_name: "{{type_name}}",
-        \t\t{{type_name}}: {
-        \t\t\tname: "{{name}}",
-        \t\t\tdescription: "{{description}}",
-        \t\t\t{{time_of_day}}
-        \t\t\t{{frequency_name}}: {{frequency_value}}
-        \t\t\tunit_name_singular: "{{unit_name_singular}}",
-        \t\t\tunit_name_plural: "{{unit_name_plural}}"
-        \t\t}
-        \t}) {
-        \t\t__typename
-        \t\t...on good_habit {
-        \t\t\t_id,
-        \t\t\tdescription,
-        \t\t\tname,
-        \t\t\ttarget_frequency {
-        \t\t\t\t__typename,
-        \t\t\t\t... on every_x_days_frequency {
-        \t\t\t\t\tdays,
-        \t\t\t\t\ttimes
-        \t\t\t\t}
-        \t\t\t\t... on total_week_frequency {
-        \t\t\t\t\tweek
-        \t\t\t\t}
-        \t\t\t\t... on specific_day_of_week_frequency {
-        \t\t\t\t\tmonday,
-        \t\t\t\t\ttuesday,
-        \t\t\t\t\twednesday,
-        \t\t\t\t\tthursday,
-        \t\t\t\t\tfriday,
-        \t\t\t\t\tsaturday,
-        \t\t\t\t\tsunday
-        \t\t\t\t}
-        \t\t\t},
-        \t\t\ttime_of_day,
-        \t\t\tunit_name_plural,
-        \t\t\tunit_name_singular,
-        \t\t}
-        \t\t...on bad_habit {
-        \t\t\t\t_id,
-        \t\t\tdescription,
-        \t\t\tname,
-        \t\t\tthreshold_frequency {
-        \t\t\t\t__typename,
-        \t\t\t\t... on every_x_days_frequency {
-        \t\t\t\t\tdays,
-        \t\t\t\t\ttimes
-        \t\t\t\t}
-        \t\t\t\t... on total_week_frequency {
-        \t\t\t\t\tweek
-        \t\t\t\t}
-        \t\t\t\t... on specific_day_of_week_frequency {
-        \t\t\t\t\tmonday,
-        \t\t\t\t\ttuesday,
-        \t\t\t\t\twednesday,
-        \t\t\t\t\tthursday,
-        \t\t\t\t\tfriday,
-        \t\t\t\t\tsaturday,
-        \t\t\t\t\tsunday
-        \t\t\t\t}
-        \t\t\t},
-        \t\t\tunit_name_plural,
-        \t\t\tunit_name_singular,
-        \t\t}
-        \t}
-        }"""
+              add_habit(create_habit_data: {
+                type_name: "{{type_name}}",
+                {{type_name}}: {
+                  name: "{{name}}",
+                  description: "{{description}}",
+                  {{time_of_day}}
+                  {{initial_frequency_name}}: {{initial_frequency_value}},
+                  unit_name_singular: "{{unit_name_singular}}",
+                  unit_name_plural: "{{unit_name_plural}}"
+                }
+              }, creation_date: {
+                day: {{day}},
+                month: {{month}},
+                year: {{year}}
+              }) {
+                __typename
+                ... on good_habit {
+                  _id
+                  description
+                  name
+                  unit_name_singular
+                  unit_name_plural
+                  target_frequencies {
+                    frequency_change_date {
+                      day
+                      month
+                      year
+                    }
+                    new_frequency {
+                      __typename
+                      ... on every_x_days_frequency {
+                        days
+                        times
+                      }
+                      ... on total_week_frequency {
+                        week
+                      }
+                      ... on specific_day_of_week_frequency {
+                        monday
+                        tuesday
+                        wednesday
+                        thursday
+                        friday
+                        saturday
+                        sunday
+                      }
+                    }
+                  }
+                  time_of_day
+                }
+                ... on bad_habit {
+                  _id
+                  description
+                  name
+                  unit_name_singular
+                  unit_name_plural
+                  threshold_frequencies {
+                    frequency_change_date {
+                      day
+                      month
+                      year
+                    }
+                    new_frequency {
+                      __typename
+                      ... on every_x_days_frequency {
+                        days
+                        times
+                      }
+                      ... on total_week_frequency {
+                        week
+                      }
+                      ... on specific_day_of_week_frequency {
+                        monday
+                        tuesday
+                        wednesday
+                        thursday
+                        friday
+                        saturday
+                        sunday
+                      }
+                    }
+                  }
+                }
+              }
+            }"""
                 |> Util.templater templateDict
     in
     graphQLRequest queryString <| Decode.at [ "data", "add_habit" ] Habit.decodeHabit

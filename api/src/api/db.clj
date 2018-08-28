@@ -31,11 +31,13 @@
         (if (contains? final_habit :initial_target_frequency)
           (assoc (dissoc final_habit :initial_target_frequency)
                  :threshold_frequencies [{:frequency_change_date creation-date-time,
-                                          :new_frequency (:initial_target_frequency final_habit)}]))
+                                          :new_frequency (:initial_target_frequency final_habit)}])
+          final_habit)
         (if (contains? final_habit :initial_threshold_frequency)
           (assoc (dissoc final_habit :initial_threshold_frequency)
                  :threshold_frequencies [{:frequency_change_date creation-date-time,
-                                          :new_frequency (:initial_threshold_frequency final_habit)}]))
+                                          :new_frequency (:initial_threshold_frequency final_habit)}])
+          final_habit)
         (mc/insert-and-return db (:habits collection-names) final_habit)))
 
 (defn delete-habit

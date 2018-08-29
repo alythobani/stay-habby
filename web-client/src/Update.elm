@@ -56,7 +56,7 @@ update msg model =
                     time |> Date.fromTime |> YmdDate.fromDate
             in
             if model.ymd /= newYmd then
-                ( { model | ymd = newYmd }
+                ( { model | ymd = newYmd, currentYmd = newYmd }
                 , Api.queryHabitsAndHabitDataAndFrequencyStats
                     newYmd
                     model.apiBaseUrl

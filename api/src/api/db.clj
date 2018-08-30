@@ -30,8 +30,8 @@
         (if (contains? final_habit :_id) final_habit (assoc final_habit :_id (ObjectId.)))
         (if (contains? final_habit :initial_target_frequency)
           (assoc (dissoc final_habit :initial_target_frequency)
-                 :threshold_frequencies [{:frequency_change_date creation-date-time,
-                                          :new_frequency (:initial_target_frequency final_habit)}])
+                 :target_frequencies [{:frequency_change_date creation-date-time,
+                                       :new_frequency (:initial_target_frequency final_habit)}])
           final_habit)
         (if (contains? final_habit :initial_threshold_frequency)
           (assoc (dissoc final_habit :initial_threshold_frequency)

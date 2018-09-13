@@ -26,7 +26,15 @@ import RemoteData
 view : Model -> Html Msg
 view model =
     div
-        [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]
+        [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ]
+        , Util.onKeydown
+            (\key ->
+                if key == KK.Space then
+                    Just OnToggleShowSetHabitDataShortcut
+                else
+                    Nothing
+            )
+        ]
         [ renderTodayPanel
             model.ymd
             model.allHabits
@@ -47,6 +55,8 @@ view model =
             model.historyViewerFrequencyStats
             model.editingHistoryHabitAmount
             model.historyViewerHabitActionsDropdowns
+        , renderSetHabitDataShortcut
+            model.showSetHabitDataShortcut
         ]
 
 
@@ -653,3 +663,14 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                 [ text "check_box" ]
             ]
         ]
+
+
+renderSetHabitDataShortcut : Bool -> Html Msg
+renderSetHabitDataShortcut showSetHabitDataShortcut =
+    div
+        [ classList
+            [ ( "set-habit-data-shortcut", True )
+            , ( "display-none", not showSetHabitDataShortcut )
+            ]
+        ]
+        [ input [] [] ]

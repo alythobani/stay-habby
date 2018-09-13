@@ -5,6 +5,7 @@ import Date
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
+import Keyboard.Extra as KK
 import Material
 import Model exposing (Model)
 import Models.FrequencyStats as FrequencyStats
@@ -433,6 +434,36 @@ update msg model =
 
         Mdl msg_ ->
             Material.update Mdl msg_ model
+
+        OnToggleShowSetHabitDataShortcut ->
+            ( { model | showSetHabitDataShortcut = not model.showSetHabitDataShortcut }, Cmd.none )
+
+        KeyboardExtraMsg keyMsg ->
+            let
+                newKeysDown =
+                    KK.update keyMsg model.keysDown
+
+                newShowSetHabitDataShortcut =
+                    case keyMsg of
+                        KK.Down keyCode ->
+                            if KK.fromCode keyCode == KK.Space then
+                                True
+                            else if KK.fromCode keyCode == KK.Escape then
+                                False
+                            else
+                                model.showSetHabitDataShortcut
+
+                        _ ->
+                            model.showSetHabitDataShortcut
+            in
+            -- If you want to react to key-presses, call a function here instead
+            -- of just updating the model (you should still update the model).
+            ( { model
+                | keysDown = newKeysDown
+                , showSetHabitDataShortcut = newShowSetHabitDataShortcut
+              }
+            , Cmd.none
+            )
 
 
 extractInt : String -> Maybe Int -> Maybe Int

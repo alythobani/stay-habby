@@ -4,6 +4,7 @@ import Api
 import Date
 import Dict
 import Flags exposing (Flags)
+import Keyboard.Extra as KK
 import Material
 import Model exposing (Model)
 import Models.Habit as Habit
@@ -36,6 +37,8 @@ init { apiBaseUrl, currentTime } location =
       , todayViewerHabitActionsDropdowns = Dict.empty
       , historyViewerHabitActionsDropdowns = Dict.empty
       , mdl = Material.model
+      , showSetHabitDataShortcut = False
+      , keysDown = KK.init
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

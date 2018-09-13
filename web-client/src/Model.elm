@@ -2,6 +2,7 @@ module Model exposing (..)
 
 import Dict
 import Dropdown
+import Keyboard.Extra as KK
 import Material
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
@@ -48,4 +49,6 @@ type alias Model =
     , todayViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
     , historyViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
     , mdl : Material.Model
+    , showSetHabitDataShortcut : Bool
+    , keysDown : KK.Model
     }

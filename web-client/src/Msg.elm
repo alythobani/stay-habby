@@ -2,6 +2,7 @@ module Msg exposing (..)
 
 import Api
 import Dropdown
+import Keyboard.Extra as KK
 import Material
 import Models.ApiError exposing (ApiError)
 import Models.Habit as Habit
@@ -64,3 +65,5 @@ type Msg
     | ToggleHistoryViewerHabitActionsDropdown String Dropdown.State
     | OnToggleDarkMode
     | Mdl (Material.Msg Msg)
+    | OnToggleShowSetHabitDataShortcut
+    | KeyboardExtraMsg KK.Msg

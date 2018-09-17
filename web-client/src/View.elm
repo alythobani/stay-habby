@@ -6,7 +6,7 @@ import Dict
 import Dropdown
 import HabitUtil
 import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
-import Html.Attributes exposing (class, classList, placeholder, value)
+import Html.Attributes exposing (class, classList, id, placeholder, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Keyboard.Extra as KK
 import Material
@@ -141,16 +141,23 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             True
                             habit
                 in
-                div [ classList [ ( "display-none", not openView ) ] ]
+                div []
                     [ div
-                        [ class "habit-list good-habits" ]
-                        (List.map (renderHabit False) sortedGoodHabits)
-                    , div
-                        [ class "habit-list bad-habits" ]
-                        (List.map (renderHabit False) sortedBadHabits)
-                    , div
-                        [ class "habit-list suspended-habits" ]
-                        (List.map (renderHabit True) sortedSuspendedHabits)
+                        [ classList
+                            [ ( "display-none", not openView )
+                            , ( "all-habit-lists", True )
+                            ]
+                        ]
+                        [ div
+                            [ class "habit-list good-habits" ]
+                            (List.map (renderHabit False) sortedGoodHabits)
+                        , div
+                            [ class "habit-list bad-habits" ]
+                            (List.map (renderHabit False) sortedBadHabits)
+                        , div
+                            [ class "habit-list suspended-habits" ]
+                            (List.map (renderHabit True) sortedSuspendedHabits)
+                        ]
                     , button
                         [ class "add-habit"
                         , onClick <|
@@ -454,9 +461,12 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                 []
                                 [ span [ class "selected-date-title" ] [ text <| YmdDate.prettyPrint selectedDate ]
                                 , span [ class "change-date", onClick OnHistoryViewerChangeDate ] [ text "change date" ]
-                                , div [ class "habit-list good-habits" ] <| List.map (renderHabit False) sortedGoodHabits
-                                , div [ class "habit-list bad-habits" ] <| List.map (renderHabit False) sortedBadHabits
-                                , div [ class "habit-list suspended-habits" ] <| List.map (renderHabit True) sortedSuspendedHabits
+                                , div
+                                    [ class "all-habit-lists" ]
+                                    [ div [ class "habit-list good-habits" ] <| List.map (renderHabit False) sortedGoodHabits
+                                    , div [ class "habit-list bad-habits" ] <| List.map (renderHabit False) sortedBadHabits
+                                    , div [ class "habit-list suspended-habits" ] <| List.map (renderHabit True) sortedSuspendedHabits
+                                    ]
                                 ]
                 ]
 
@@ -673,4 +683,4 @@ renderSetHabitDataShortcut showSetHabitDataShortcut =
             , ( "display-none", not showSetHabitDataShortcut )
             ]
         ]
-        [ input [] [] ]
+        [ input [ id "set-habit-data-shortcut-input" ] [] ]

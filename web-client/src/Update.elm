@@ -5,6 +5,7 @@ import Date
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
+import Dom
 import Keyboard.Extra as KK
 import Material
 import Model exposing (Model)
@@ -13,6 +14,7 @@ import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
+import Task
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -443,27 +445,41 @@ update msg model =
                 newKeysDown =
                     KK.update keyMsg model.keysDown
 
-                newShowSetHabitDataShortcut =
+                ( newShowSetHabitDataShortcut, showSetHabitDataShortcutNeedsUpdate ) =
                     case keyMsg of
                         KK.Down keyCode ->
-                            if KK.fromCode keyCode == KK.Space then
-                                True
+                            if KK.fromCode keyCode == KK.CharA then
+                                ( True, model.showSetHabitDataShortcut /= True )
                             else if KK.fromCode keyCode == KK.Escape then
-                                False
+                                ( False, model.showSetHabitDataShortcut /= False )
                             else
-                                model.showSetHabitDataShortcut
+                                ( model.showSetHabitDataShortcut, False )
 
                         _ ->
-                            model.showSetHabitDataShortcut
+                            ( model.showSetHabitDataShortcut, False )
             in
             -- If you want to react to key-presses, call a function here instead
             -- of just updating the model (you should still update the model).
-            ( { model
-                | keysDown = newKeysDown
-                , showSetHabitDataShortcut = newShowSetHabitDataShortcut
-              }
-            , Cmd.none
-            )
+            if showSetHabitDataShortcutNeedsUpdate then
+                ( { model
+                    | keysDown = newKeysDown
+                    , showSetHabitDataShortcut = newShowSetHabitDataShortcut
+                  }
+                , if newShowSetHabitDataShortcut then
+                    Dom.focus "set-habit-data-shortcut-input" |> Task.attempt FocusResult
+                  else
+                    Cmd.none
+                )
+            else
+                ( { model | keysDown = newKeysDown }, Cmd.none )
+
+        FocusResult result ->
+            case result of
+                Result.Err (Dom.NotFound id) ->
+                    ( model, Cmd.none )
+
+                Result.Ok () ->
+                    ( model, Cmd.none )
 
 
 extractInt : String -> Maybe Int -> Maybe Int

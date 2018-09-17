@@ -1,6 +1,7 @@
 module Msg exposing (..)
 
 import Api
+import Dom
 import Dropdown
 import Keyboard.Extra as KK
 import Material
@@ -67,3 +68,4 @@ type Msg
     | Mdl (Material.Msg Msg)
     | OnToggleShowSetHabitDataShortcut
     | KeyboardExtraMsg KK.Msg
+    | FocusResult (Result Dom.Error ())

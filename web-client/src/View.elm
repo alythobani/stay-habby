@@ -57,6 +57,7 @@ view model =
             model.historyViewerHabitActionsDropdowns
         , renderSetHabitDataShortcut
             model.showSetHabitDataShortcut
+        , renderSetHabitDataShortcutBackground model.showSetHabitDataShortcut
         ]
 
 
@@ -684,3 +685,15 @@ renderSetHabitDataShortcut showSetHabitDataShortcut =
             ]
         ]
         [ input [ id "set-habit-data-shortcut-input" ] [] ]
+
+
+renderSetHabitDataShortcutBackground : Bool -> Html Msg
+renderSetHabitDataShortcutBackground showSetHabitDataShortcut =
+    div
+        [ classList
+            [ ( "set-habit-data-shortcut-background", True )
+            , ( "display-none", not showSetHabitDataShortcut )
+            ]
+        , onClick OnToggleShowSetHabitDataShortcut
+        ]
+        []

@@ -481,6 +481,9 @@ update msg model =
                 Result.Ok () ->
                     ( model, Cmd.none )
 
+        OnSetHabitDataShortcutInput habitName ->
+            ( { model | setHabitDataShortcutHabitName = habitName }, Cmd.none )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

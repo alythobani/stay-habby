@@ -69,3 +69,4 @@ type Msg
     | OnToggleShowSetHabitDataShortcut
     | KeyboardExtraMsg KK.Msg
     | FocusResult (Result Dom.Error ())
+    | OnSetHabitDataShortcutInput String

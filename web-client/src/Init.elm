@@ -39,6 +39,7 @@ init { apiBaseUrl, currentTime } location =
       , mdl = Material.model
       , showSetHabitDataShortcut = False
       , keysDown = KK.init
+      , setHabitDataShortcutHabitName = ""
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

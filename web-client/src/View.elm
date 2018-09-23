@@ -57,6 +57,7 @@ view model =
             model.historyViewerHabitActionsDropdowns
         , renderSetHabitDataShortcut
             model.showSetHabitDataShortcut
+            model.setHabitDataShortcutHabitName
         ]
 
 
@@ -675,8 +676,8 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
         ]
 
 
-renderSetHabitDataShortcut : Bool -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut =
+renderSetHabitDataShortcut : Bool -> String -> Html Msg
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitName =
     div
         [ classList
             [ ( "set-habit-data-shortcut", True )
@@ -695,6 +696,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut =
             [ id "set-habit-data-shortcut-input"
             , class "set-habit-data-shortcut-input"
             , placeholder "Enter a habit's name..."
+            , onInput <| OnSetHabitDataShortcutInput
+            , value setHabitDataShortcutHabitName
             ]
             []
         ]

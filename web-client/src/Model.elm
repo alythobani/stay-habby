@@ -51,4 +51,5 @@ type alias Model =
     , mdl : Material.Model
     , showSetHabitDataShortcut : Bool
     , keysDown : KK.Model
+    , setHabitDataShortcutHabitName : String
     }

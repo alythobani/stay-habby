@@ -463,10 +463,11 @@ body {
       }
       .set-habit-data-shortcut-input {
         position: absolute;
-        top: 50vh;
-        right: 50vw;
+        text-align: center;
+        top: 40vh;
+        right: 40vw;
         z-index: 3;
-        width: 200px;
+        width: 300px;
         height: 20px;
         font-size: 16px;
       }

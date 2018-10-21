@@ -1,4 +1,4 @@
-module View exposing (..)
+module View exposing (dropdownIcon, habitActionsDropdownDiv, renderHabitBox, renderHistoryViewerPanel, renderSetHabitDataShortcut, renderTodayPanel, view)
 
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -31,6 +31,7 @@ view model =
             (\key ->
                 if key == KK.Space then
                     Just OnToggleShowSetHabitDataShortcut
+
                 else
                     Nothing
             )
@@ -58,6 +59,7 @@ view model =
         , renderSetHabitDataShortcut
             model.showSetHabitDataShortcut
             model.setHabitDataShortcutHabitName
+            model.allHabits
         ]
 
 
@@ -93,6 +95,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 [ text <|
                     if darkModeOn then
                         "Dark Mode"
+
                     else
                         "Light Mode"
                 ]
@@ -164,12 +167,14 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                         , onClick <|
                             if addHabit.openView then
                                 OnCancelAddHabit
+
                             else
                                 OnOpenAddHabit
                         ]
                         [ text <|
                             if addHabit.openView then
                                 "Cancel"
+
                             else
                                 "Add Habit"
                         ]
@@ -387,6 +392,7 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                 , dropdownIcon openView NoOp
                 , if not openView then
                     Util.hiddenDiv
+
                   else
                     case selectedDate of
                         Nothing ->
@@ -405,6 +411,7 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                         (\key ->
                                             if key == KK.Enter then
                                                 Just OnHistoryViewerSelectDateInput
+
                                             else
                                                 Nothing
                                         )
@@ -490,6 +497,7 @@ dropdownIcon openView msg =
         [ text <|
             if openView then
                 "arrow_drop_down"
+
             else
                 "arrow_drop_up"
         ]
@@ -512,6 +520,7 @@ habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended onTodayVi
                 [ class <|
                     if dropdown then
                         "actions-dropdown-toggler-full"
+
                     else
                         "actions-dropdown-toggler-default"
                 ]
@@ -526,6 +535,7 @@ habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended onTodayVi
                     [ text <|
                         if currentlySuspended then
                             "Resume"
+
                         else
                             "Suspend"
                     ]
@@ -603,6 +613,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
         [ class
             (if isCurrentFragmentSuccessful then
                 "habit-success"
+
              else
                 "habit-failure"
             )
@@ -616,6 +627,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             Just stats ->
                 if not stats.habitHasStarted then
                     div [ class "current-progress" ] [ text "Start this habit!" ]
+
                 else
                     div [ class "frequency-stats-list" ]
                         [ div
@@ -653,6 +665,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                         ++ " "
                         ++ (if habitDatum == 1 then
                                 habitRecord.unitNameSingular
+
                             else
                                 habitRecord.unitNamePlural
                            )
@@ -661,6 +674,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                     (\key ->
                         if key == KK.Enter then
                             Just <| setHabitData ymd habitRecord.id editingHabitData
+
                         else
                             Nothing
                     )
@@ -676,8 +690,31 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
         ]
 
 
-renderSetHabitDataShortcut : Bool -> String -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitName =
+renderSetHabitDataShortcut :
+    Bool
+    -> String
+    -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
+    -> Html Msg
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitName rdHabits =
+    let
+        habitNames =
+            case rdHabits of
+                RemoteData.Success habits ->
+                    List.map (\habit -> .name <| Habit.getCommonFields habit) habits
+
+                _ ->
+                    []
+
+        setHabitDataShortcutHabitNameFilter =
+            String.contains setHabitDataShortcutHabitName
+
+        filteredHabitNames =
+            List.filter setHabitDataShortcutHabitNameFilter habitNames
+
+        renderHabitName habitName =
+            div [ class "set-habit-data-shortcut-habits-list-habit-name" ]
+                [ text habitName ]
+    in
     div
         [ classList
             [ ( "set-habit-data-shortcut", True )
@@ -700,4 +737,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
             , value setHabitDataShortcutHabitName
             ]
             []
+        , div
+            [ class "set-habit-data-shortcut-habits-list" ]
+            (List.map renderHabitName filteredHabitNames)
         ]

@@ -738,6 +738,10 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
             ]
             []
         , div
-            [ class "set-habit-data-shortcut-habits-list" ]
+            [ classList
+                [ ( "set-habit-data-shortcut-habits-list", True )
+                , ( "display-none", List.isEmpty filteredHabitNames )
+                ]
+            ]
             (List.map renderHabitName filteredHabitNames)
         ]

@@ -81,6 +81,7 @@ update msg model =
                 , allHabitData = RemoteData.Success habitData
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
                 , setHabitDataShortcutFilteredHabits = habits
+                , setHabitDataShortcutSelectedHabit = List.head habits
               }
             , Cmd.none
             )
@@ -505,6 +506,7 @@ update msg model =
             ( { model
                 | setHabitDataShortcutHabitNameFilterText = habitNameFilterText
                 , setHabitDataShortcutFilteredHabits = newFilteredHabits
+                , setHabitDataShortcutSelectedHabit = List.head newFilteredHabits
               }
             , Cmd.none
             )

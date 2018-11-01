@@ -53,4 +53,5 @@ type alias Model =
     , keysDown : KK.Model
     , setHabitDataShortcutHabitNameFilterText : String
     , setHabitDataShortcutFilteredHabits : List Habit.Habit
+    , setHabitDataShortcutSelectedHabit : Maybe Habit.Habit
     }

@@ -481,8 +481,17 @@ body {
         width: 300px;
         border: 1px solid white;
         .set-habit-data-shortcut-habits-list-habit-name {
-          border: 1px solid white;
-          background-color: $shark;
+          border: 0.5px solid white;
+          padding: 0.5px;
+          background-color: $shark-90;
+          &.set-habit-data-shortcut-habits-list-selected-habit {
+            font-weight: 600;
+            font-style: normal;
+            border-width: 2px;
+            font-size: 15px;
+            padding: 1px;
+            background-color: $black-90;
+          }
         }
       }
     }

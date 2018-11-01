@@ -60,6 +60,7 @@ view model =
             model.showSetHabitDataShortcut
             model.setHabitDataShortcutHabitNameFilterText
             model.setHabitDataShortcutFilteredHabits
+            model.setHabitDataShortcutSelectedHabit
         ]
 
 
@@ -694,15 +695,25 @@ renderSetHabitDataShortcut :
     Bool
     -> String
     -> List Habit.Habit
+    -> Maybe Habit.Habit
     -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits =
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabit =
     let
-        filteredHabitNames =
-            List.map (\habit -> .name <| Habit.getCommonFields habit) filteredHabits
+        renderHabitOption habit =
+            div
+                [ classList
+                    [ ( "set-habit-data-shortcut-habits-list-habit-name", True )
+                    , ( "set-habit-data-shortcut-habits-list-selected-habit"
+                      , case selectedHabit of
+                            Just h ->
+                                h == habit
 
-        renderHabitName habitName =
-            div [ class "set-habit-data-shortcut-habits-list-habit-name" ]
-                [ text habitName ]
+                            _ ->
+                                False
+                      )
+                    ]
+                ]
+                [ text <| .name <| Habit.getCommonFields habit ]
     in
     div
         [ classList
@@ -729,8 +740,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
         , div
             [ classList
                 [ ( "set-habit-data-shortcut-habits-list", True )
-                , ( "display-none", List.isEmpty filteredHabitNames )
+                , ( "display-none", List.isEmpty filteredHabits )
                 ]
             ]
-            (List.map renderHabitName filteredHabitNames)
+            (List.map renderHabitOption filteredHabits)
         ]

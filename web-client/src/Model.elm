@@ -1,4 +1,4 @@
-module Model exposing (..)
+module Model exposing (Model)
 
 import Dict
 import Dropdown
@@ -51,5 +51,6 @@ type alias Model =
     , mdl : Material.Model
     , showSetHabitDataShortcut : Bool
     , keysDown : KK.Model
-    , setHabitDataShortcutHabitName : String
+    , setHabitDataShortcutHabitNameFilterText : String
+    , setHabitDataShortcutFilteredHabits : List Habit.Habit
     }

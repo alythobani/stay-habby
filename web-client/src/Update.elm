@@ -1,4 +1,4 @@
-module Update exposing (..)
+module Update exposing (extractInt, update)
 
 import Api
 import Date
@@ -62,6 +62,7 @@ update msg model =
                     OnGetHabitsAndHabitDataAndFrequencyStatsFailure
                     OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
                 )
+
             else
                 ( model, Cmd.none )
 
@@ -79,6 +80,7 @@ update msg model =
                 | allHabits = RemoteData.Success habits
                 , allHabitData = RemoteData.Success habitData
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
+                , setHabitDataShortcutFilteredHabits = habits
               }
             , Cmd.none
             )
@@ -185,6 +187,7 @@ update msg model =
             in
             if String.isEmpty newVal then
                 ( { model | editingTodayHabitAmount = newEditingTodayHabitAmount Nothing }, Cmd.none )
+
             else
                 case String.toInt newVal of
                     Result.Err _ ->
@@ -253,6 +256,7 @@ update msg model =
                                     (always <| Just False)
                                     model.todayViewerHabitActionsDropdowns
                         }
+
                     else
                         { model
                             | historyViewerHabitActionsDropdowns =
@@ -450,8 +454,10 @@ update msg model =
                         KK.Down keyCode ->
                             if KK.fromCode keyCode == KK.CharA then
                                 ( True, model.showSetHabitDataShortcut /= True )
+
                             else if KK.fromCode keyCode == KK.Escape then
                                 ( False, model.showSetHabitDataShortcut /= False )
+
                             else
                                 ( model.showSetHabitDataShortcut, False )
 
@@ -467,9 +473,11 @@ update msg model =
                   }
                 , if newShowSetHabitDataShortcut then
                     Dom.focus "set-habit-data-shortcut-input" |> Task.attempt FocusResult
+
                   else
                     Cmd.none
                 )
+
             else
                 ( { model | keysDown = newKeysDown }, Cmd.none )
 
@@ -481,14 +489,32 @@ update msg model =
                 Result.Ok () ->
                     ( model, Cmd.none )
 
-        OnSetHabitDataShortcutInput habitName ->
-            ( { model | setHabitDataShortcutHabitName = habitName }, Cmd.none )
+        OnSetHabitDataShortcutInput habitNameFilterText ->
+            let
+                habitFilter habit =
+                    habit |> Habit.getCommonFields |> .name |> String.contains habitNameFilterText
+
+                newFilteredHabits =
+                    case model.allHabits of
+                        RemoteData.Success habits ->
+                            List.filter habitFilter habits
+
+                        _ ->
+                            []
+            in
+            ( { model
+                | setHabitDataShortcutHabitNameFilterText = habitNameFilterText
+                , setHabitDataShortcutFilteredHabits = newFilteredHabits
+              }
+            , Cmd.none
+            )
 
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =
     if String.isEmpty string then
         Nothing
+
     else
         String.toInt string
             |> Result.map Just

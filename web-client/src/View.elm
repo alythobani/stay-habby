@@ -58,8 +58,8 @@ view model =
             model.historyViewerHabitActionsDropdowns
         , renderSetHabitDataShortcut
             model.showSetHabitDataShortcut
-            model.setHabitDataShortcutHabitName
-            model.allHabits
+            model.setHabitDataShortcutHabitNameFilterText
+            model.setHabitDataShortcutFilteredHabits
         ]
 
 
@@ -693,23 +693,12 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
 renderSetHabitDataShortcut :
     Bool
     -> String
-    -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
+    -> List Habit.Habit
     -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitName rdHabits =
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits =
     let
-        habitNames =
-            case rdHabits of
-                RemoteData.Success habits ->
-                    List.map (\habit -> .name <| Habit.getCommonFields habit) habits
-
-                _ ->
-                    []
-
-        setHabitDataShortcutHabitNameFilter =
-            String.contains setHabitDataShortcutHabitName
-
         filteredHabitNames =
-            List.filter setHabitDataShortcutHabitNameFilter habitNames
+            List.map (\habit -> .name <| Habit.getCommonFields habit) filteredHabits
 
         renderHabitName habitName =
             div [ class "set-habit-data-shortcut-habits-list-habit-name" ]
@@ -734,7 +723,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
             , class "set-habit-data-shortcut-input"
             , placeholder "Enter a habit's name..."
             , onInput <| OnSetHabitDataShortcutInput
-            , value setHabitDataShortcutHabitName
+            , value setHabitDataShortcutHabitNameFilterText
             ]
             []
         , div

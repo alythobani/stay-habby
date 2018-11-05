@@ -739,6 +739,17 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
             , placeholder "Enter a habit's name..."
             , onInput <| OnSetHabitDataShortcutInput
             , value setHabitDataShortcutHabitNameFilterText
+            , Util.onKeydown
+                (\key ->
+                    if key == KK.ArrowDown then
+                        Just OnSetHabitDataShortcutSelectNextHabit
+
+                    else if key == KK.ArrowUp then
+                        Just OnSetHabitDataShortcutSelectPreviousHabit
+
+                    else
+                        Nothing
+                )
             ]
             []
         , div

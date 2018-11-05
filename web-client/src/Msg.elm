@@ -1,4 +1,4 @@
-module Msg exposing (..)
+module Msg exposing (Msg(..))
 
 import Api
 import Dom
@@ -70,3 +70,5 @@ type Msg
     | KeyboardExtraMsg KK.Msg
     | FocusResult (Result Dom.Error ())
     | OnSetHabitDataShortcutInput String
+    | OnSetHabitDataShortcutSelectNextHabit
+    | OnSetHabitDataShortcutSelectPreviousHabit

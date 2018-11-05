@@ -522,6 +522,30 @@ update msg model =
             , Cmd.none
             )
 
+        OnSetHabitDataShortcutSelectNextHabit ->
+            let
+                filteredHabitsLength =
+                    Array.length model.setHabitDataShortcutFilteredHabits
+
+                newSelectedHabitIndex =
+                    (model.setHabitDataShortcutSelectedHabitIndex + 1) % filteredHabitsLength
+            in
+            ( { model | setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex }
+            , Cmd.none
+            )
+
+        OnSetHabitDataShortcutSelectPreviousHabit ->
+            let
+                filteredHabitsLength =
+                    Array.length model.setHabitDataShortcutFilteredHabits
+
+                newSelectedHabitIndex =
+                    (model.setHabitDataShortcutSelectedHabitIndex - 1) % filteredHabitsLength
+            in
+            ( { model | setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex }
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

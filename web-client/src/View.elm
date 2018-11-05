@@ -63,6 +63,8 @@ view model =
             model.setHabitDataShortcutFilteredHabits
             model.setHabitDataShortcutSelectedHabitIndex
             model.showSetHabitDataShortcutAmountForm
+            model.allHabitData
+            model.ymd
         ]
 
 
@@ -699,8 +701,10 @@ renderSetHabitDataShortcut :
     -> Array.Array Habit.Habit
     -> Int
     -> Bool
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
+    -> YmdDate.YmdDate
     -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm =
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm rdHabitData ymd =
     let
         selectedHabit =
             Array.get selectedHabitIndex filteredHabits
@@ -780,14 +784,57 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                 , ( "display-none", not showAmountForm )
                 ]
             ]
-            [ span
-                [ class "set-habit-data-shortcut-amount-form-selected-habit-name" ]
-                [ selectedHabit ||> Habit.getCommonFields ||> .name ?> "Error: no habit selected" |> text ]
-            , input
-                [ id "set-habit-data-shortcut-amount-form-input"
-                , class "set-habit-data-shortcut-amount-form-input"
-                , placeholder "Enter today's amount..."
-                ]
-                []
-            ]
+            (case selectedHabit of
+                Just habit ->
+                    let
+                        habitRecord =
+                            Habit.getCommonFields habit
+
+                        habitDatum =
+                            case rdHabitData of
+                                RemoteData.Success habitData ->
+                                    List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) habitData
+                                        |> List.head
+                                        |> (\habitDatum ->
+                                                case habitDatum of
+                                                    Nothing ->
+                                                        0
+
+                                                    Just { amount } ->
+                                                        amount
+                                           )
+
+                                _ ->
+                                    0
+                    in
+                    [ span
+                        [ class "set-habit-data-shortcut-amount-form-selected-habit-name" ]
+                        [ text <| .name habitRecord ]
+                    , input
+                        [ id "set-habit-data-shortcut-amount-form-input"
+                        , class "set-habit-data-shortcut-amount-form-input"
+                        , placeholder <|
+                            toString habitDatum
+                                ++ " "
+                                ++ (if habitDatum == 1 then
+                                        habitRecord.unitNameSingular
+
+                                    else
+                                        habitRecord.unitNamePlural
+                                   )
+                        , Util.onKeydownPreventDefault
+                            (\key ->
+                                if key == KK.Escape then
+                                    Just OnToggleShowSetHabitDataShortcutAmountForm
+
+                                else
+                                    Nothing
+                            )
+                        ]
+                        []
+                    ]
+
+                Nothing ->
+                    []
+            )
         ]

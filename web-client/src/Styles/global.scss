@@ -461,37 +461,65 @@ body {
         z-index: 2;
         background-color: rgba(101, 101, 101, 0.59);
       }
-      .set-habit-data-shortcut-input {
-        position: absolute;
-        text-align: center;
-        top: 40vh;
-        right: 40vw;
-        z-index: 3;
-        width: 300px;
-        height: 20px;
-        font-size: 16px;
-      }
-      .set-habit-data-shortcut-habits-list {
-        position: absolute;
-        text-align: center;
-        top: 45vh;
-        right: 40vw;
-        color: white;
-        z-index: 3;
-        width: 300px;
-        border: 1px solid white;
-        .set-habit-data-shortcut-habits-list-habit-name {
-          border: 0.5px solid white;
-          padding: 0.5px;
-          background-color: $shark-90;
-          &.set-habit-data-shortcut-habits-list-selected-habit {
-            font-weight: 600;
-            font-style: normal;
-            border-width: 2px;
-            font-size: 15px;
-            padding: 1px;
-            background-color: $black-90;
+      .set-habit-data-shortcut-habit-selection {
+        .set-habit-data-shortcut-habit-selection-input {
+          position: absolute;
+          text-align: center;
+          top: 40vh;
+          right: 40vw;
+          z-index: 3;
+          width: 300px;
+          height: 20px;
+          font-size: 16px;
+        }
+        .set-habit-data-shortcut-habits-selection-habits-list {
+          position: absolute;
+          text-align: center;
+          top: 45vh;
+          right: 40vw;
+          color: white;
+          z-index: 3;
+          width: 300px;
+          border: 1px solid white;
+          .set-habit-data-shortcut-habits-selection-habits-list-habit-name {
+            border: 0.5px solid white;
+            padding: 0.5px;
+            background-color: $shark-90;
+            &.set-habit-data-shortcut-habits-selection-habits-list-selected-habit {
+              font-weight: 600;
+              font-style: normal;
+              border-width: 2px;
+              font-size: 15px;
+              padding: 1px;
+              background-color: $black-90;
+            }
           }
+        }
+      }
+      .set-habit-data-shortcut-amount-form {
+        .set-habit-data-shortcut-amount-form-selected-habit-name {
+          position: absolute;
+          text-align: center;
+          background-color: $shark-90;
+          border: 2px solid white;
+          top: 35vh;
+          right: 40vw;
+          z-index: 3;
+          width: 300px;
+          height: 25px;
+          font-size: 20px;
+          color: white;
+          padding-top: 3px;
+        }
+        .set-habit-data-shortcut-amount-form-input {
+          position: absolute;
+          text-align: center;
+          top: 40vh;
+          right: 40vw;
+          z-index: 3;
+          width: 300px;
+          height: 20px;
+          font-size: 16px;
         }
       }
     }

@@ -72,3 +72,4 @@ type Msg
     | OnSetHabitDataShortcutInput String
     | OnSetHabitDataShortcutSelectNextHabit
     | OnSetHabitDataShortcutSelectPreviousHabit
+    | OnToggleShowSetHabitDataShortcutAmountForm

@@ -55,4 +55,5 @@ type alias Model =
     , setHabitDataShortcutHabitNameFilterText : String
     , setHabitDataShortcutFilteredHabits : Array.Array Habit.Habit
     , setHabitDataShortcutSelectedHabitIndex : Int
+    , showSetHabitDataShortcutAmountForm : Bool
     }

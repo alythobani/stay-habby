@@ -43,6 +43,7 @@ init { apiBaseUrl, currentTime } location =
       , setHabitDataShortcutHabitNameFilterText = ""
       , setHabitDataShortcutFilteredHabits = Array.empty
       , setHabitDataShortcutSelectedHabitIndex = 0
+      , showSetHabitDataShortcutAmountForm = False
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

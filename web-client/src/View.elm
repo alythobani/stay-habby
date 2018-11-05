@@ -62,6 +62,7 @@ view model =
             model.setHabitDataShortcutHabitNameFilterText
             model.setHabitDataShortcutFilteredHabits
             model.setHabitDataShortcutSelectedHabitIndex
+            model.showSetHabitDataShortcutAmountForm
         ]
 
 
@@ -697,17 +698,21 @@ renderSetHabitDataShortcut :
     -> String
     -> Array.Array Habit.Habit
     -> Int
+    -> Bool
     -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex =
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm =
     let
         selectedHabit =
             Array.get selectedHabitIndex filteredHabits
 
+        readyToEnterHabit =
+            Maybe.isJust selectedHabit
+
         renderHabitOption habit =
             div
                 [ classList
-                    [ ( "set-habit-data-shortcut-habits-list-habit-name", True )
-                    , ( "set-habit-data-shortcut-habits-list-selected-habit"
+                    [ ( "set-habit-data-shortcut-habits-selection-habits-list-habit-name", True )
+                    , ( "set-habit-data-shortcut-habits-selection-habits-list-selected-habit"
                       , case selectedHabit of
                             Just h ->
                                 h == habit
@@ -733,30 +738,56 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
             , onClick OnToggleShowSetHabitDataShortcut
             ]
             []
-        , input
-            [ id "set-habit-data-shortcut-input"
-            , class "set-habit-data-shortcut-input"
-            , placeholder "Enter a habit's name..."
-            , onInput <| OnSetHabitDataShortcutInput
-            , value setHabitDataShortcutHabitNameFilterText
-            , Util.onKeydown
-                (\key ->
-                    if key == KK.ArrowDown then
-                        Just OnSetHabitDataShortcutSelectNextHabit
-
-                    else if key == KK.ArrowUp then
-                        Just OnSetHabitDataShortcutSelectPreviousHabit
-
-                    else
-                        Nothing
-                )
-            ]
-            []
         , div
             [ classList
-                [ ( "set-habit-data-shortcut-habits-list", True )
-                , ( "display-none", Array.isEmpty filteredHabits )
+                [ ( "set-habit-data-shortcut-habit-selection", True )
+                , ( "display-none", showAmountForm )
                 ]
             ]
-            (Array.map renderHabitOption filteredHabits |> Array.toList)
+            [ input
+                [ id "set-habit-data-shortcut-habit-selection-input"
+                , class "set-habit-data-shortcut-habit-selection-input"
+                , placeholder "Enter a habit's name..."
+                , onInput <| OnSetHabitDataShortcutInput
+                , value setHabitDataShortcutHabitNameFilterText
+                , Util.onKeydownPreventDefault
+                    (\key ->
+                        if key == KK.ArrowDown then
+                            Just OnSetHabitDataShortcutSelectNextHabit
+
+                        else if key == KK.ArrowUp then
+                            Just OnSetHabitDataShortcutSelectPreviousHabit
+
+                        else if key == KK.Enter && readyToEnterHabit then
+                            Just OnToggleShowSetHabitDataShortcutAmountForm
+
+                        else
+                            Nothing
+                    )
+                ]
+                []
+            , div
+                [ classList
+                    [ ( "set-habit-data-shortcut-habits-selection-habits-list", True )
+                    , ( "display-none", Array.isEmpty filteredHabits )
+                    ]
+                ]
+                (Array.map renderHabitOption filteredHabits |> Array.toList)
+            ]
+        , div
+            [ classList
+                [ ( "set-habit-data-shortcut-amount-form", True )
+                , ( "display-none", not showAmountForm )
+                ]
+            ]
+            [ span
+                [ class "set-habit-data-shortcut-amount-form-selected-habit-name" ]
+                [ selectedHabit ||> Habit.getCommonFields ||> .name ?> "Error: no habit selected" |> text ]
+            , input
+                [ id "set-habit-data-shortcut-amount-form-input"
+                , class "set-habit-data-shortcut-amount-form-input"
+                , placeholder "Enter today's amount..."
+                ]
+                []
+            ]
         ]

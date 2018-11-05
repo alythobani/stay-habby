@@ -473,7 +473,14 @@ update msg model =
                     , showSetHabitDataShortcut = newShowSetHabitDataShortcut
                   }
                 , if newShowSetHabitDataShortcut then
-                    Dom.focus "set-habit-data-shortcut-input" |> Task.attempt FocusResult
+                    Dom.focus
+                        (if model.showSetHabitDataShortcutAmountForm then
+                            "set-habit-data-shortcut-amount-form-input"
+
+                         else
+                            "set-habit-data-shortcut-habit-selection-input"
+                        )
+                        |> Task.attempt FocusResult
 
                   else
                     Cmd.none
@@ -544,6 +551,19 @@ update msg model =
             in
             ( { model | setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex }
             , Cmd.none
+            )
+
+        OnToggleShowSetHabitDataShortcutAmountForm ->
+            let
+                newShowSetHabitDataShortcutAmountForm =
+                    not model.showSetHabitDataShortcutAmountForm
+            in
+            ( { model | showSetHabitDataShortcutAmountForm = newShowSetHabitDataShortcutAmountForm }
+            , if newShowSetHabitDataShortcutAmountForm then
+                Dom.focus "set-habit-data-shortcut-amount-form-input" |> Task.attempt FocusResult
+
+              else
+                Cmd.none
             )
 
 

@@ -65,6 +65,7 @@ view model =
             model.showSetHabitDataShortcutAmountForm
             model.allHabitData
             model.ymd
+            model.setHabitDataShortcutInputtedAmount
         ]
 
 
@@ -703,8 +704,9 @@ renderSetHabitDataShortcut :
     -> Bool
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> YmdDate.YmdDate
+    -> Maybe Int
     -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm rdHabitData ymd =
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm rdHabitData ymd inputtedAmount =
     let
         selectedHabit =
             Array.get selectedHabitIndex filteredHabits
@@ -822,6 +824,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                     else
                                         habitRecord.unitNamePlural
                                    )
+                        , onInput OnSetHabitDataShortcutAmountFormInput
+                        , value (inputtedAmount ||> toString ?> "")
                         , Util.onKeydownPreventDefault
                             (\key ->
                                 if key == KK.Escape then

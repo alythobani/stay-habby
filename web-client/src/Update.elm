@@ -566,6 +566,15 @@ update msg model =
                 Cmd.none
             )
 
+        OnSetHabitDataShortcutAmountFormInput newInput ->
+            let
+                newSetHabitDataShortcutInputtedAmount =
+                    extractInt newInput model.setHabitDataShortcutInputtedAmount
+            in
+            ( { model | setHabitDataShortcutInputtedAmount = newSetHabitDataShortcutInputtedAmount }
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

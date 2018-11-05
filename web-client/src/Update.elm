@@ -82,7 +82,6 @@ update msg model =
                 , allHabitData = RemoteData.Success habitData
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
                 , setHabitDataShortcutFilteredHabits = Array.fromList habits
-                , setHabitDataShortcutSelectedHabit = List.head habits
               }
             , Cmd.none
             )
@@ -503,11 +502,22 @@ update msg model =
 
                         _ ->
                             []
+
+                oldSelectedHabit =
+                    Array.get model.setHabitDataShortcutSelectedHabitIndex model.setHabitDataShortcutFilteredHabits
+
+                newSelectedHabitIndex =
+                    case oldSelectedHabit of
+                        Just h ->
+                            Util.firstIndexInList newFilteredHabits h ?> 0
+
+                        Nothing ->
+                            0
             in
             ( { model
                 | setHabitDataShortcutHabitNameFilterText = habitNameFilterText
                 , setHabitDataShortcutFilteredHabits = Array.fromList newFilteredHabits
-                , setHabitDataShortcutSelectedHabit = List.head newFilteredHabits
+                , setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex
               }
             , Cmd.none
             )

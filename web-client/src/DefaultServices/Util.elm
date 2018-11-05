@@ -1,4 +1,4 @@
-module DefaultServices.Util exposing (..)
+module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, onKeydownWithOptions, replaceOrAdd, templater)
 
 import DefaultServices.Infix exposing (..)
 import Dict
@@ -23,6 +23,7 @@ notEmpty : String -> Maybe String
 notEmpty string =
     if String.isEmpty string then
         Nothing
+
     else
         Just string
 
@@ -61,12 +62,14 @@ replaceOrAdd list pred replaceWith =
             (\a ->
                 if pred a then
                     replaceWith
+
                 else
                     a
             )
         |> (\newList ->
                 if newList == list then
                     replaceWith :: list
+
                 else
                     newList
            )
@@ -107,3 +110,27 @@ onKeydownPreventDefault =
         { preventDefault = True
         , stopPropagation = False
         }
+
+
+{-| Helper function for `firstIndexInList`
+-}
+helper : List a -> a -> Int -> Maybe Int
+helper list elem offset =
+    case list of
+        [] ->
+            Nothing
+
+        x :: xs ->
+            if x == elem then
+                Just offset
+
+            else
+                helper xs elem (offset + 1)
+
+
+{-| Returns `Just` the index of the first occurrence of `element` in `list`.
+Returns `Nothing` if `element` is not found in `list`.
+-}
+firstIndexInList : List a -> a -> Maybe Int
+firstIndexInList list element =
+    helper list element 0

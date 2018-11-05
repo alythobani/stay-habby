@@ -61,7 +61,7 @@ view model =
             model.showSetHabitDataShortcut
             model.setHabitDataShortcutHabitNameFilterText
             model.setHabitDataShortcutFilteredHabits
-            model.setHabitDataShortcutSelectedHabit
+            model.setHabitDataShortcutSelectedHabitIndex
         ]
 
 
@@ -696,10 +696,13 @@ renderSetHabitDataShortcut :
     Bool
     -> String
     -> Array.Array Habit.Habit
-    -> Maybe Habit.Habit
+    -> Int
     -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabit =
+renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex =
     let
+        selectedHabit =
+            Array.get selectedHabitIndex filteredHabits
+
         renderHabitOption habit =
             div
                 [ classList

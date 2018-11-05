@@ -42,7 +42,7 @@ init { apiBaseUrl, currentTime } location =
       , keysDown = KK.init
       , setHabitDataShortcutHabitNameFilterText = ""
       , setHabitDataShortcutFilteredHabits = Array.empty
-      , setHabitDataShortcutSelectedHabit = Nothing
+      , setHabitDataShortcutSelectedHabitIndex = 0
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

@@ -1,6 +1,7 @@
 module Update exposing (extractInt, update)
 
 import Api
+import Array
 import Date
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -80,7 +81,7 @@ update msg model =
                 | allHabits = RemoteData.Success habits
                 , allHabitData = RemoteData.Success habitData
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
-                , setHabitDataShortcutFilteredHabits = habits
+                , setHabitDataShortcutFilteredHabits = Array.fromList habits
                 , setHabitDataShortcutSelectedHabit = List.head habits
               }
             , Cmd.none
@@ -505,7 +506,7 @@ update msg model =
             in
             ( { model
                 | setHabitDataShortcutHabitNameFilterText = habitNameFilterText
-                , setHabitDataShortcutFilteredHabits = newFilteredHabits
+                , setHabitDataShortcutFilteredHabits = Array.fromList newFilteredHabits
                 , setHabitDataShortcutSelectedHabit = List.head newFilteredHabits
               }
             , Cmd.none

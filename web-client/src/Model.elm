@@ -1,5 +1,6 @@
 module Model exposing (Model)
 
+import Array
 import Dict
 import Dropdown
 import Keyboard.Extra as KK
@@ -52,6 +53,6 @@ type alias Model =
     , showSetHabitDataShortcut : Bool
     , keysDown : KK.Model
     , setHabitDataShortcutHabitNameFilterText : String
-    , setHabitDataShortcutFilteredHabits : List Habit.Habit
+    , setHabitDataShortcutFilteredHabits : Array.Array Habit.Habit
     , setHabitDataShortcutSelectedHabit : Maybe Habit.Habit
     }

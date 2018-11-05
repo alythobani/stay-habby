@@ -1,6 +1,7 @@
 module Init exposing (init)
 
 import Api
+import Array
 import Date
 import Dict
 import Flags exposing (Flags)
@@ -40,7 +41,7 @@ init { apiBaseUrl, currentTime } location =
       , showSetHabitDataShortcut = False
       , keysDown = KK.init
       , setHabitDataShortcutHabitNameFilterText = ""
-      , setHabitDataShortcutFilteredHabits = []
+      , setHabitDataShortcutFilteredHabits = Array.empty
       , setHabitDataShortcutSelectedHabit = Nothing
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats

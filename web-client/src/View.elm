@@ -1,5 +1,6 @@
 module View exposing (dropdownIcon, habitActionsDropdownDiv, renderHabitBox, renderHistoryViewerPanel, renderSetHabitDataShortcut, renderTodayPanel, view)
 
+import Array
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
@@ -694,7 +695,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
 renderSetHabitDataShortcut :
     Bool
     -> String
-    -> List Habit.Habit
+    -> Array.Array Habit.Habit
     -> Maybe Habit.Habit
     -> Html Msg
 renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabit =
@@ -740,8 +741,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
         , div
             [ classList
                 [ ( "set-habit-data-shortcut-habits-list", True )
-                , ( "display-none", List.isEmpty filteredHabits )
+                , ( "display-none", Array.isEmpty filteredHabits )
                 ]
             ]
-            (List.map renderHabitOption filteredHabits)
+            (Array.map renderHabitOption filteredHabits |> Array.toList)
         ]

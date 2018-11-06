@@ -74,3 +74,4 @@ type Msg
     | OnSetHabitDataShortcutSelectPreviousHabit
     | OnToggleShowSetHabitDataShortcutAmountForm
     | OnSetHabitDataShortcutAmountFormInput String
+    | OnSetHabitDataShortcutAmountFormSubmit YmdDate.YmdDate String (Maybe Int)

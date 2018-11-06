@@ -575,6 +575,26 @@ update msg model =
             , Cmd.none
             )
 
+        OnSetHabitDataShortcutAmountFormSubmit ymd habitId newVal ->
+            case newVal of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just newVal ->
+                    ( { model
+                        | showSetHabitDataShortcut = False
+                        , showSetHabitDataShortcutAmountForm = False
+                        , setHabitDataShortcutInputtedAmount = Nothing
+                      }
+                    , Api.mutationSetHabitData
+                        ymd
+                        habitId
+                        newVal
+                        model.apiBaseUrl
+                        OnSetHabitDataFailure
+                        OnSetHabitDataSuccess
+                    )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

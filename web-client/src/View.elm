@@ -831,6 +831,9 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                 if key == KK.Escape then
                                     Just OnToggleShowSetHabitDataShortcutAmountForm
 
+                                else if key == KK.Enter then
+                                    Just <| OnSetHabitDataShortcutAmountFormSubmit ymd habitRecord.id inputtedAmount
+
                                 else
                                     Nothing
                             )

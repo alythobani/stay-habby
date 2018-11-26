@@ -15,23 +15,34 @@
 (def today (t/today-at 0 0))
 
 (defn add-habit-to-test-db
-  "Add a habit to the test database"
+  "Add a habit to the test database, today"
   [habit]
-  (add-habit {:db test_db :habit habit}))
+  (add-habit {:db test_db :habit habit :creation-date-time today}))
 
-(defn compare_clojure_habit_with_db_habit
-  "Returns true iff all fields of `clojure_habit` have the same value in `db_habit`.
-  Checks Keyword values in `clojure_habit` against the Keyword-ed version of the value in `db_habit`
-  since Keywords are converted to Strings by Monger.
-  Note that this function doesn't care if `db_habit` has a field that `clojure_habit` doesn't have."
-  [clojure_habit db_habit]
+(defn does-add-habit-inputted-habit-match-db-habit
+  "Compares a habit map inputted into `add-habit` with a habit map retrieved from the db.
+  Returns true iff all fields in `inputted-habit` must have the same value in `db-habit`, with the
+  exception of Keyword values in `inputted-habit` since they are converted by Monger into Strings
+  when the habit is added to the database, and the exception of `:initial_target_frequency` and
+  `:initial_threshold_frequency` fields that are used to generate the `:target_frequencies` and
+  `:threshold_frequencies` fields of `db-habit`.
+  Note that this function doesn't care if `db-habit` has a field that `inputted-habit` doesn't have.
+  Assumes the habit was added today."
+  [inputted-habit db-habit]
   (every? (fn [key]
-           (let [clj_val (key clojure_habit)
-                 db_val (key db_habit)]
-             (if (= (type clj_val) clojure.lang.Keyword)
-               (= clj_val (keyword db_val))
-               (= clj_val db_val))))
-          (keys clojure_habit)))
+           (let [clj_val (key inputted-habit)
+                 db_val (key db-habit)]
+             (condp = key
+                    :initial_target_frequency (= (:target_frequencies db-habit)
+                                                 [{:frequency_change_date today
+                                                   :new_frequency clj_val}])
+                    :initial_threshold_frequency (= (:threshold_frequencies db-habit)
+                                                    [{:frequency_change_date today
+                                                      :new_frequency clj_val}])
+                    (if (= (type clj_val) clojure.lang.Keyword)
+                      (= clj_val (keyword db_val))
+                      (= clj_val db_val)))))
+          (keys inputted-habit)))
 
 (defn supermap?
   "Returns true iff all fields of `map2` have the same value in `map1`.
@@ -44,13 +55,13 @@
     (is (= 0 (count (get-habits {:db test_db})))))
   (let [habit_1 (assoc default_habit
                        :type_name "good_habit"
-                       :target_frequency {:type_name "total_week_frequency"
-                                          :week 6})
+                       :initial_target_frequency {:type_name "total_week_frequency"
+                                                  :week 6})
         _ (add-habit-to-test-db habit_1)
         all_habits (get-habits {:db test_db})]
     (testing "One habit"
       (is (= 1 (count all_habits)) "There should be one habit in the db")
-      (is (some #(compare_clojure_habit_with_db_habit habit_1 %) all_habits) "Habit 1 not added properly")
+      (is (some #(does-add-habit-inputted-habit-match-db-habit habit_1 %) all_habits) "Habit 1 not added properly")
       (is (every? #(not (nil? (:_id %))) all_habits) ":_id field not set"))
     (let [habit_2 (assoc default_habit
                          :type_name "bad_habit"
@@ -61,8 +72,8 @@
           all_habits (get-habits {:db test_db})]
       (testing "Two habits"
         (is (= 2 (count all_habits)) "There should be two habits in the db")
-        (is (some #(compare_clojure_habit_with_db_habit habit_1 %) all_habits) "Habit 1 not added properly")
-        (is (some #(compare_clojure_habit_with_db_habit habit_2 %) all_habits) "Habit 2 not added properly")
+        (is (some #(does-add-habit-inputted-habit-match-db-habit habit_1 %) all_habits) "Habit 1 not added properly")
+        (is (some #(does-add-habit-inputted-habit-match-db-habit habit_2 %) all_habits) "Habit 2 not added properly")
         (is (every? #(not (nil? (:_id %))) all_habits) ":_id field not set")))))
 
 (deftest get-frequency-stats-test

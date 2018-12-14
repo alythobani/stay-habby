@@ -585,6 +585,15 @@ update msg model =
                         | showSetHabitDataShortcut = False
                         , showSetHabitDataShortcutAmountForm = False
                         , setHabitDataShortcutInputtedAmount = Nothing
+                        , setHabitDataShortcutHabitNameFilterText = ""
+                        , setHabitDataShortcutFilteredHabits =
+                            case model.allHabits of
+                                RemoteData.Success habits ->
+                                    Array.fromList habits
+
+                                _ ->
+                                    Array.empty
+                        , setHabitDataShortcutSelectedHabitIndex = 0
                       }
                     , Api.mutationSetHabitData
                         ymd

@@ -38,8 +38,10 @@
                                              :days {:type (non-null Int)}}}
 
            :frequency_change_record {:description "A record of a habit's goal frequency being changed on a specific date."
-                                     :fields {:frequency_change_date {:type (non-null :date)
-                                                                      :resolve :query/frequency-change-date-to-y-m-d-format}
+                                     :fields {:start_date {:type (non-null :date)
+                                                           :resolve :query/start-date-to-y-m-d-format}
+                                              :end_date {:type :date
+                                                         :resolve :query/end-date-to-y-m-d-format}
                                               :new_frequency {:type (non-null :frequency)
                                                               :resolve :query/tag-type-for-new-frequency}}}
 

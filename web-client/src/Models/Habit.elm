@@ -1,4 +1,4 @@
-module Models.Habit exposing (..)
+module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, extractCreateHabit, getCommonCreateFields, getCommonFields, initAddHabitData, splitHabits)
 
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -85,7 +85,10 @@ type alias CreateBadHabitRecord =
 
 
 type alias FrequencyChangeRecord =
-    { frequencyChangeDate : YmdDate, newFrequency : Frequency }
+    { startDate : YmdDate
+    , endDate : Maybe YmdDate
+    , newFrequency : Frequency
+    }
 
 
 type Frequency
@@ -349,7 +352,8 @@ decodeHabit =
 decodeFrequencyChangeRecord : Decode.Decoder FrequencyChangeRecord
 decodeFrequencyChangeRecord =
     decode FrequencyChangeRecord
-        |> required "frequency_change_date" decodeYmdDate
+        |> required "start_date" decodeYmdDate
+        |> optional "end_date" (Decode.maybe decodeYmdDate) Nothing
         |> required "new_frequency" decodeFrequency
 
 

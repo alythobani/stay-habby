@@ -68,6 +68,15 @@
   [field-name]
   (fn [context args value] (date-to-y-m-d-map (value field-name))))
 
+(defn create-nilable-date-to-y-m-d-resolver
+  "Creates a resolver that converts a possibly `nil` joda date-time to a y-m-d map."
+  [field-name]
+  (fn [context args value]
+    (let [datetime (value field-name)]
+      (if (nil? datetime)
+        nil
+        (date-to-y-m-d-map datetime)))))
+
 (defn resolve-get-habits
   "@refer `db/get-habits`."
   [context args value]
@@ -116,7 +125,7 @@
    :query/date-to-y-m-d-format (create-date-to-y-m-d-resolver :date)
    :query/toggle-date-to-y-m-d-format (create-date-to-y-m-d-resolver :toggle_date)
    :query/start-date-to-y-m-d-format (create-date-to-y-m-d-resolver :start_date)
-   :query/end-date-to-y-m-d-format (create-date-to-y-m-d-resolver :end_date)
+   :query/end-date-to-y-m-d-format (create-nilable-date-to-y-m-d-resolver :end_date)
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
    :query/resolve-mutation-toggle-suspended-habit (create-async-resolver resolve-mutation-toggle-suspended-habit)
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)})

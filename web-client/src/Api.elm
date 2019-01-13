@@ -1,4 +1,4 @@
-module Api exposing (..)
+module Api exposing (HabitsAndHabitDataAndFrequencyStats, QueriedFrequencyStats, graphQLRequest, mutationAddHabit, mutationSetHabitData, mutationToggleSuspendedHabit, queryHabitsAndHabitDataAndFrequencyStats, queryPastFrequencyStats)
 
 import DefaultServices.Http exposing (post)
 import DefaultServices.Util as Util
@@ -49,7 +49,12 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
       unit_name_singular
       unit_name_plural
       target_frequencies {
-        frequency_change_date {
+        start_date {
+          day
+          month
+          year
+        }
+        end_date {
           day
           month
           year
@@ -83,7 +88,12 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
       unit_name_singular
       unit_name_plural
       threshold_frequencies {
-        frequency_change_date {
+        start_date {
+          day
+          month
+          year
+        }
+        end_date {
           day
           month
           year
@@ -176,6 +186,7 @@ queryPastFrequencyStats ymd habitIds =
                 ++ "}"
                 ++ (if List.isEmpty habitIds then
                         ""
+
                     else
                         ", habit_ids: " ++ toString habitIds
                    )
@@ -213,6 +224,7 @@ mutationAddHabit createHabit { day, month, year } =
                 [ ( "type_name"
                   , if isGoodHabit then
                         "good_habit"
+
                     else
                         "bad_habit"
                   )
@@ -231,6 +243,7 @@ mutationAddHabit createHabit { day, month, year } =
                 , ( "initial_frequency_name"
                   , if isGoodHabit then
                         "initial_target_frequency"
+
                     else
                         "initial_threshold_frequency"
                   )

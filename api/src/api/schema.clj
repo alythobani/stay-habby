@@ -115,6 +115,22 @@
   [context {:keys [current_client_date] :as all} value]
   (map tag-type (db/get-frequency-stats (assoc all :current_client_date (date-from-y-m-d-map current_client_date)))))
 
+
+
+(defn resolve-mutation-edit-habit-goal-frequencies
+  "@refer `db/edit-habit-goal-frequencies`."
+  [context {:keys [new_frequencies] :as all} value]
+  (let [convert-frequency-y-m-d-maps-to-dates (fn [frequency-change-record]
+                                                (let [{start-date-ymd :start_date
+                                                       end-date-ymd :end_date} frequency-change-record]
+                                                  (assoc frequency-change-record
+                                                         :start_date (date-from-y-m-d-map start-date-ymd)
+                                                         :end_date (if (nil? end-date-ymd)
+                                                                     nil
+                                                                     (date-from-y-m-d-map end-date-ymd))))),
+        new_frequencies (map convert-frequency-y-m-d-maps-to-dates new_frequencies)]
+    (db/edit-habit-goal-frequencies (assoc all :new_frequencies new_frequencies))))
+
 (defn resolver-map
   []
   {:query/get-habits (create-async-resolver resolve-get-habits)
@@ -128,7 +144,8 @@
    :query/end-date-to-y-m-d-format (create-nilable-date-to-y-m-d-resolver :end_date)
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
    :query/resolve-mutation-toggle-suspended-habit (create-async-resolver resolve-mutation-toggle-suspended-habit)
-   :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)})
+   :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)
+   :query/resolve-mutation-edit-habit-goal-frequencies (create-async-resolver resolve-mutation-edit-habit-goal-frequencies)})
 
 (defn load-schema
   []

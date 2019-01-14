@@ -148,7 +148,12 @@
                  :create_habit_data {:description "The data required to create a new habit."
                                      :fields {:type_name {:type (non-null String)}
                                               :good_habit {:type :create_good_habit_data}
-                                              :bad_habit {:type :create_bad_habit_data}}}}
+                                              :bad_habit {:type :create_bad_habit_data}}}
+
+                 :create_frequency_change_record_data {:description "The data required to create a frequency change record."
+                                                       :fields {:start_date {:type (non-null :date_data)}
+                                                                :end_date {:type :date_data}
+                                                                :new_frequency {:type (non-null :create_frequency_data)}}}}
 
  :mutations {:add_habit {:type (non-null :habit)
                          :description "Add a habit to your list of habits, returns the new habit."
@@ -172,4 +177,11 @@
                                       :args {:habit_id {:type (non-null ID)}
                                              :suspended {:type (non-null Boolean)}
                                              :toggle_date {:type (non-null :date_data)}}
-                                      :resolve :query/resolve-mutation-toggle-suspended-habit}}}
+                                      :resolve :query/resolve-mutation-toggle-suspended-habit}
+
+             :edit_habit_goal_frequencies {:type (non-null :habit)
+                                           :description "Change a habit's `target_frequencies` or `threshold_frequencies`, returns the habit."
+                                           :args {:habit_id {:type (non-null ID)}
+                                                  :new_frequencies {:type (non-null (list (non-null :create_frequency_change_record_data)))}
+                                                  :habit_type {:type (non-null String)}}
+                                           :resolve :query/resolve-mutation-edit-habit-goal-frequencies}}}

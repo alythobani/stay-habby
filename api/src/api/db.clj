@@ -40,6 +40,18 @@
           final_habit)
         (mc/insert-and-return db (:habits collection-names) final_habit)))
 
+(defn edit-habit-goal-frequencies
+  "Changes a habit's `:target_frequencies` or `:threshold_frequencies` field."
+  [{:keys [db habit_id new_frequencies habit_type] :or {db habby_db}}]
+  (mc/find-and-modify db
+                      (:habits collection-names)
+                      {:_id (ObjectId. habit_id)}
+                      {$set {(if (= habit_type "good_habit")
+                               :target_frequencies
+                               :threshold_frequencies)
+                             new_frequencies}}
+                      {:return-new true}))
+
 (defn delete-habit
   "Deletes a habit from the database, returns true if the habit was deleted."
   [{:keys [db habit_id] :or {db habby_db}}]

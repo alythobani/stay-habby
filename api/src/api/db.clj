@@ -25,17 +25,19 @@
   "Add a habit to the database and returns that habit including the ID.
   Will create an ID if the habit passed doesn't have an ID.
   Converts the habit's `target_frequency` or `threshold_frequency` into an array of `frequency_change_record`s."
-  [{:keys [db habit creation-date-time] :or {db habby_db}}]
+  [{:keys [db habit frequency-start-datetime] :or {db habby_db}}]
   (as-> habit final_habit
         (if (contains? final_habit :_id) final_habit (assoc final_habit :_id (ObjectId.)))
         (if (contains? final_habit :initial_target_frequency)
           (assoc (dissoc final_habit :initial_target_frequency)
-                 :target_frequencies [{:frequency_change_date creation-date-time,
+                 :target_frequencies [{:start_date frequency-start-datetime,
+                                       :end_date nil,
                                        :new_frequency (:initial_target_frequency final_habit)}])
           final_habit)
         (if (contains? final_habit :initial_threshold_frequency)
           (assoc (dissoc final_habit :initial_threshold_frequency)
-                 :threshold_frequencies [{:frequency_change_date creation-date-time,
+                 :threshold_frequencies [{:start_date frequency-start-datetime,
+                                          :end_date nil,
                                           :new_frequency (:initial_threshold_frequency final_habit)}])
           final_habit)
         (mc/insert-and-return db (:habits collection-names) final_habit)))

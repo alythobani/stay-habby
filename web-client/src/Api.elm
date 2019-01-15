@@ -214,10 +214,18 @@ queryPastFrequencyStats ymd habitIds =
 
 
 mutationAddHabit : Habit.CreateHabit -> YmdDate.YmdDate -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
-mutationAddHabit createHabit { day, month, year } =
+mutationAddHabit createHabit ymd =
     let
         commonFields =
             Habit.getCommonCreateFields createHabit
+
+        startDate =
+            case commonFields.initialFrequency of
+                Habit.EveryXDayFrequency _ ->
+                    ymd
+
+                _ ->
+                    YmdDate.getFirstMondayAfterDate ymd
 
         templateDict =
             Dict.fromList
@@ -295,9 +303,9 @@ mutationAddHabit createHabit { day, month, year } =
                                 }
                                 }"""
                   )
-                , ( "day", toString day )
-                , ( "month", toString month )
-                , ( "year", toString year )
+                , ( "day", toString startDate.day )
+                , ( "month", toString startDate.month )
+                , ( "year", toString startDate.year )
                 ]
 
         isGoodHabit =
@@ -320,7 +328,7 @@ mutationAddHabit createHabit { day, month, year } =
                   unit_name_singular: "{{unit_name_singular}}",
                   unit_name_plural: "{{unit_name_plural}}"
                 }
-              }, creation_date: {
+              }, frequency_start_date: {
                 day: {{day}},
                 month: {{month}},
                 year: {{year}}
@@ -333,7 +341,12 @@ mutationAddHabit createHabit { day, month, year } =
                   unit_name_singular
                   unit_name_plural
                   target_frequencies {
-                    frequency_change_date {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
                       day
                       month
                       year
@@ -367,7 +380,12 @@ mutationAddHabit createHabit { day, month, year } =
                   unit_name_singular
                   unit_name_plural
                   threshold_frequencies {
-                    frequency_change_date {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
                       day
                       month
                       year

@@ -84,10 +84,10 @@
 
 (defn resolve-mutation-add-habit
   "@refer `db/add-habit`."
-  [context {:keys [create_habit_data creation_date] :as all} value]
+  [context {:keys [create_habit_data frequency_start_date] :as all} value]
   (as-> all $
         (assoc (dissoc $ :create_habit_data) :habit (unnest-tagged-unions-on-input-object create_habit_data))
-        (assoc (dissoc $ :creation_date) :creation-date-time (date-from-y-m-d-map creation_date))
+        (assoc (dissoc $ :frequency_start_date) :frequency-start-datetime (date-from-y-m-d-map frequency_start_date))
         (tag-type (db/add-habit $))))
 
 (defn resolve-mutation-set-habit-data

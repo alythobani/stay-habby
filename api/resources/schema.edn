@@ -158,7 +158,7 @@
  :mutations {:add_habit {:type (non-null :habit)
                          :description "Add a habit to your list of habits, returns the new habit."
                          :args {:create_habit_data {:type (non-null :create_habit_data)}
-                                :creation_date {:type (non-null :date_data)}}
+                                :frequency_start_date {:type (non-null :date_data)}}
                          :resolve :query/resolve-mutation-add-habit}
 
              :set_habit_data {:type (non-null :habit_day_record)

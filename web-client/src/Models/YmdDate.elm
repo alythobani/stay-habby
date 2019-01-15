@@ -1,4 +1,4 @@
-module Models.YmdDate exposing (..)
+module Models.YmdDate exposing (YmdDate, addDays, decodeYmdDate, fromDate, fromSimpleString, getFirstMondayAfterDate, prettyPrint, toDate, toSimpleString)
 
 import Date
 import Date.Extra as Date
@@ -59,10 +59,13 @@ prettyPrint ymd =
             toString day
                 ++ (if List.member day [ 1, 21, 31 ] then
                         "st"
+
                     else if List.member day [ 2, 22 ] then
                         "nd"
+
                     else if List.member day [ 3, 23 ] then
                         "rd"
+
                     else
                         "th"
                    )
@@ -74,14 +77,33 @@ prettyPrint ymd =
 -}
 addDays : Int -> YmdDate -> YmdDate
 addDays dayDelta ymd =
-    Date.fromCalendarDate ymd.year (monthFromMonthNumber ymd.month) ymd.day
+    toDate ymd
         |> Date.add Date.Day dayDelta
         |> fromDate
+
+
+toDate : YmdDate -> Date.Date
+toDate ymd =
+    Date.fromCalendarDate ymd.year (monthFromMonthNumber ymd.month) ymd.day
 
 
 fromDate : Date.Date -> YmdDate
 fromDate date =
     { year = Date.year date, month = Date.monthNumber date, day = Date.day date }
+
+
+getFirstMondayAfterDate : YmdDate -> YmdDate
+getFirstMondayAfterDate ymd =
+    let
+        -- Days are numbered 1 (Monday) to 7 (Sunday)
+        ymdDayOfWeekNumber =
+            toDate ymd |> Date.weekdayNumber
+
+        -- Monday: 0, Tuesday: 6, Wednesday: 5, ..., Sunday: 1
+        numDaysToAdd =
+            (8 - ymdDayOfWeekNumber) % 7
+    in
+    addDays numDaysToAdd ymd
 
 
 {-| From format "dd/mm/yy" where it's not required that dd or mm be 2 characters.

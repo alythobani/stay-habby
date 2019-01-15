@@ -2,7 +2,7 @@
   "A namespace for holding utilities related to calculation of performance statistics."
   (:require [api.dt-util :refer [date-geq?, date-leq?, first-monday-before-datetime, get-consecutive-datetimes,
                                  day-of-week-keyword, days-spanned-between-datetimes]]
-            [api.habit-util :refer [get-frequency]]
+            [api.habit-util :refer [get-first-frequency]]
             [clj-time.core :as t]))
 
 (def default-frequency-stats {:total_fragments 0, :successful_fragments 0, :total_done 0,
@@ -221,13 +221,13 @@
                                             (filter #(= (:habit_id %) (:_id habit)))
                                             (sort-by :toggle_date)),
         suspended-intervals (get-suspended-intervals sorted-suspended-toggle-events),
-        freq (get-frequency habit),
-        habit-goal-fragments (get-habit-goal-fragments sorted-habit-data current-date (:type_name habit) freq suspended-intervals)]
+        first-freq (get-first-frequency habit),
+        habit-goal-fragments (get-habit-goal-fragments sorted-habit-data current-date (:type_name habit) first-freq suspended-intervals)]
     (as-> (assoc default-frequency-stats :habit_id (:_id habit)) freq-stats
           (if (seq suspended-intervals)
             (assoc freq-stats :currently_suspended (nil? (:resume-date (last suspended-intervals))))
             freq-stats)
           (if (nil? habit-goal-fragments)
             freq-stats
-            (-> (update-freq-stats-with-habit-goal-fragments freq-stats habit-goal-fragments habit freq)
+            (-> (update-freq-stats-with-habit-goal-fragments freq-stats habit-goal-fragments habit first-freq)
                 (assoc :habit_has_started true))))))

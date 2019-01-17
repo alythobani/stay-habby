@@ -604,6 +604,20 @@ update msg model =
                         OnSetHabitDataSuccess
                     )
 
+        OpenEditGoalDialog ->
+            ( { model
+                | showEditGoalDialog = True
+              }
+            , Cmd.none
+            )
+
+        CloseEditGoalDialog ->
+            ( { model
+                | showEditGoalDialog = False
+              }
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

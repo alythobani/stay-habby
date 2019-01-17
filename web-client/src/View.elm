@@ -66,6 +66,8 @@ view model =
             model.allHabitData
             model.ymd
             model.setHabitDataShortcutInputtedAmount
+        , renderEditGoalDialog
+            model.showEditGoalDialog
         ]
 
 
@@ -546,8 +548,10 @@ habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended onTodayVi
                             "Suspend"
                     ]
                 , button
-                    [ class "action-button" ]
-                    [ text "Edit" ]
+                    [ class "action-button"
+                    , onClick <| OpenEditGoalDialog
+                    ]
+                    [ text "Edit Goal" ]
                 ]
             )
         ]
@@ -844,4 +848,23 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                 Nothing ->
                     []
             )
+        ]
+
+
+renderEditGoalDialog : Bool -> Html Msg
+renderEditGoalDialog showEditGoalDialog =
+    div
+        [ classList
+            [ ( "edit-goal-dialog", True )
+            , ( "display-none", not showEditGoalDialog )
+            ]
+        ]
+        [ div
+            [ class "edit-goal-dialog-background"
+            , onClick CloseEditGoalDialog
+            ]
+            []
+        , div
+            [ class "edit-goal-dialog-form" ]
+            [ text "Put the form here" ]
         ]

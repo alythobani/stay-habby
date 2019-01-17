@@ -46,6 +46,7 @@ init { apiBaseUrl, currentTime } location =
       , setHabitDataShortcutSelectedHabitIndex = 0
       , showSetHabitDataShortcutAmountForm = False
       , setHabitDataShortcutInputtedAmount = Nothing
+      , showEditGoalDialog = False
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

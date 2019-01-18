@@ -589,6 +589,12 @@ body {
               color: $gallery !important;
           }
         }
+
+        .edit-goal-dialog-form-current-goal-description {
+          position: relative;
+          top: 75px;
+          font-size: 14px;
+        }
       }
     }
     .all-habit-lists {

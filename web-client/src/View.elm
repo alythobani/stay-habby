@@ -854,59 +854,107 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
 
 renderEditGoalDialog : Bool -> Maybe Habit.Habit -> Html Msg
 renderEditGoalDialog showEditGoalDialog habit =
-    let
-        currentGoal : Maybe Habit.FrequencyChangeRecord
-        currentGoal =
-            case habit of
-                Just h ->
-                    case h of
-                        Habit.GoodHabit gh ->
-                            List.head <| List.reverse gh.targetFrequencies
-
-                        Habit.BadHabit bh ->
-                            List.head <| List.reverse bh.thresholdFrequencies
-
-                Nothing ->
-                    Nothing
-
-        currentGoalTag =
-            case currentGoal of
-                Just fcr ->
-                    case fcr.newFrequency of
-                        Habit.EveryXDayFrequency _ ->
-                            "Y Per X Days"
-
-                        Habit.TotalWeekFrequency _ ->
-                            "X Per Week"
-
-                        Habit.SpecificDayOfWeekFrequency _ ->
-                            "Specific Days of Week"
-
-                Nothing ->
-                    ""
-    in
     div
         [ classList
             [ ( "edit-goal-dialog", True )
             , ( "display-none", not showEditGoalDialog )
             ]
         ]
-        [ div
-            [ class "edit-goal-dialog-background"
-            , onClick CloseEditGoalDialog
-            ]
-            []
-        , div
-            [ class "edit-goal-dialog-form" ]
-            [ div
-                [ class "edit-goal-dialog-form-header" ]
-                [ text <| "Error: habit not found" <? .name <|| Habit.getCommonFields <|| habit ]
-            , div [ class "edit-goal-dialog-form-line-break" ] []
-            , div
-                [ class "edit-goal-dialog-form-current-goal-text" ]
-                [ text "Current Goal" ]
-            , div
-                [ class "edit-goal-dialog-form-current-goal-tag" ]
-                [ button [] [ text currentGoalTag ] ]
-            ]
-        ]
+        (case habit of
+            Just h ->
+                let
+                    habitRecord =
+                        Habit.getCommonFields h
+
+                    currentGoal : Maybe Habit.FrequencyChangeRecord
+                    currentGoal =
+                        case h of
+                            Habit.GoodHabit gh ->
+                                List.head <| List.reverse gh.targetFrequencies
+
+                            Habit.BadHabit bh ->
+                                List.head <| List.reverse bh.thresholdFrequencies
+
+                    ( currentGoalTag, currentGoalDesc ) =
+                        case currentGoal of
+                            Just fcr ->
+                                case fcr.newFrequency of
+                                    Habit.EveryXDayFrequency f ->
+                                        ( "Y Per X Days"
+                                        , toString f.times
+                                            ++ " "
+                                            ++ (if f.times == 1 then
+                                                    habitRecord.unitNameSingular
+
+                                                else
+                                                    habitRecord.unitNamePlural
+                                               )
+                                            ++ " per "
+                                            ++ (if f.days == 1 then
+                                                    "day"
+
+                                                else
+                                                    toString f.days ++ " days"
+                                               )
+                                        )
+
+                                    Habit.TotalWeekFrequency f ->
+                                        ( "X Per Week"
+                                        , toString f
+                                            ++ " "
+                                            ++ (if f == 1 then
+                                                    habitRecord.unitNameSingular
+
+                                                else
+                                                    habitRecord.unitNamePlural
+                                               )
+                                            ++ " per week"
+                                        )
+
+                                    Habit.SpecificDayOfWeekFrequency f ->
+                                        ( "Specific Days of Week"
+                                        , "Mo "
+                                            ++ toString f.monday
+                                            ++ " Tu "
+                                            ++ toString f.tuesday
+                                            ++ " We "
+                                            ++ toString f.wednesday
+                                            ++ " Th "
+                                            ++ toString f.thursday
+                                            ++ " Fr "
+                                            ++ toString f.friday
+                                            ++ " Sa "
+                                            ++ toString f.saturday
+                                            ++ " Su "
+                                            ++ toString f.sunday
+                                        )
+
+                            Nothing ->
+                                ( "N/A", "N/A" )
+                in
+                [ div
+                    [ class "edit-goal-dialog-background"
+                    , onClick CloseEditGoalDialog
+                    ]
+                    []
+                , div
+                    [ class "edit-goal-dialog-form" ]
+                    [ div
+                        [ class "edit-goal-dialog-form-header" ]
+                        [ text habitRecord.name ]
+                    , div [ class "edit-goal-dialog-form-line-break" ] []
+                    , div
+                        [ class "edit-goal-dialog-form-current-goal-text" ]
+                        [ text "Current Goal" ]
+                    , div
+                        [ class "edit-goal-dialog-form-current-goal-tag" ]
+                        [ button [] [ text currentGoalTag ] ]
+                    , div
+                        [ class "edit-goal-dialog-form-current-goal-description" ]
+                        [ text currentGoalDesc ]
+                    ]
+                ]
+
+            Nothing ->
+                []
+        )

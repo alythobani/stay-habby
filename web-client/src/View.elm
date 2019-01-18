@@ -866,5 +866,11 @@ renderEditGoalDialog showEditGoalDialog =
             []
         , div
             [ class "edit-goal-dialog-form" ]
-            [ text "Put the form here" ]
+            [ div
+                [ class "edit-goal-dialog-form-header" ]
+                [ text "Habit" ]
+            , div
+                [ class "edit-goal-dialog-form-current-goal" ]
+                []
+            ]
         ]

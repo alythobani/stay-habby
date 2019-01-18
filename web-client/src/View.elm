@@ -68,6 +68,7 @@ view model =
             model.setHabitDataShortcutInputtedAmount
         , renderEditGoalDialog
             model.showEditGoalDialog
+            model.editGoalDialogHabit
         ]
 
 
@@ -549,7 +550,7 @@ habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended onTodayVi
                     ]
                 , button
                     [ class "action-button"
-                    , onClick <| OpenEditGoalDialog
+                    , onClick <| OnEditGoalClick habitId
                     ]
                     [ text "Edit Goal" ]
                 ]
@@ -851,8 +852,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
         ]
 
 
-renderEditGoalDialog : Bool -> Html Msg
-renderEditGoalDialog showEditGoalDialog =
+renderEditGoalDialog : Bool -> Maybe Habit.Habit -> Html Msg
+renderEditGoalDialog showEditGoalDialog habit =
     div
         [ classList
             [ ( "edit-goal-dialog", True )
@@ -868,7 +869,7 @@ renderEditGoalDialog showEditGoalDialog =
             [ class "edit-goal-dialog-form" ]
             [ div
                 [ class "edit-goal-dialog-form-header" ]
-                [ text "Habit" ]
+                [ text <| "Habit" <? .name <|| Habit.getCommonFields <|| habit ]
             , div
                 [ class "edit-goal-dialog-form-current-goal" ]
                 []

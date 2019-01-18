@@ -604,9 +604,24 @@ update msg model =
                         OnSetHabitDataSuccess
                     )
 
-        OpenEditGoalDialog ->
+        OnEditGoalClick habitId ->
+            let
+                habitFilter : Habit.Habit -> Bool
+                habitFilter habit =
+                    habit |> Habit.getCommonFields |> .id |> (==) habitId
+
+                newEditGoalDialogHabit =
+                    case model.allHabits of
+                        RemoteData.Success habits ->
+                            List.filter habitFilter habits
+                                |> List.head
+
+                        _ ->
+                            Nothing
+            in
             ( { model
                 | showEditGoalDialog = True
+                , editGoalDialogHabit = newEditGoalDialogHabit
               }
             , Cmd.none
             )

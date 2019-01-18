@@ -75,5 +75,5 @@ type Msg
     | OnToggleShowSetHabitDataShortcutAmountForm
     | OnSetHabitDataShortcutAmountFormInput String
     | OnSetHabitDataShortcutAmountFormSubmit YmdDate.YmdDate String (Maybe Int)
-    | OpenEditGoalDialog
+    | OnEditGoalClick String
     | CloseEditGoalDialog

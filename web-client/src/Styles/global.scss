@@ -546,12 +546,48 @@ body {
         border: 2px solid white;
         background-color: black;
         box-shadow: 5px 5px $woodsmoke;
+        display: flex;
+        flex-direction: column;
 
         .edit-goal-dialog-form-header {
           position: relative;
           top: 30px;
           font-size: 24px;
           font-weight: 400;
+          padding: 10px;
+        }
+
+        .edit-goal-dialog-form-line-break {
+          display: block;
+          width: 450px;
+          border: 0.5px solid $cape-cod;
+          position: relative;
+          left: 25px;
+          top: 40px;
+        }
+
+        .edit-goal-dialog-form-current-goal-text {
+          position: relative;
+          top: 55px;
+        }
+
+        .edit-goal-dialog-form-current-goal-tag {
+          text-align: center;
+          position: relative;
+          top: 65px;
+          display: flex;
+          justify-content: center;
+
+          button {
+              @extend .button-style-1;
+
+              position: relative;
+              height: 30px;
+              width: 140px;
+              cursor: default;
+              border-color: $alto !important;
+              color: $gallery !important;
+          }
         }
       }
     }

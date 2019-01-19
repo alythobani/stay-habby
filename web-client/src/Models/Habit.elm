@@ -1,4 +1,4 @@
-module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, extractCreateHabit, getCommonCreateFields, getCommonFields, initAddHabitData, splitHabits)
+module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, extractCreateHabit, getCommonCreateFields, getCommonFields, initAddHabitData, splitHabits)
 
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -58,6 +58,10 @@ type alias AddHabitInputData =
     , times : Maybe Int
     , days : Maybe Int
     }
+
+
+type alias EditGoalInputData =
+    { frequencyKind : FrequencyKind }
 
 
 type CreateHabit

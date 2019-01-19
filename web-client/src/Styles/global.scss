@@ -568,13 +568,13 @@ body {
 
         .edit-goal-dialog-form-current-goal-text {
           position: relative;
-          top: 55px;
+          top: 65px;
         }
 
         .edit-goal-dialog-form-current-goal-tag {
           text-align: center;
           position: relative;
-          top: 65px;
+          top: 75px;
           display: flex;
           justify-content: center;
 
@@ -592,8 +592,35 @@ body {
 
         .edit-goal-dialog-form-current-goal-description {
           position: relative;
-          top: 75px;
+          top: 85px;
           font-size: 14px;
+        }
+
+        .edit-goal-dialog-form-new-goal-line-break {
+          @extend .edit-goal-dialog-form-line-break;
+          top: 110px;
+          width: 400px;
+          left: 50px;
+        }
+
+        .edit-goal-dialog-form-new-goal-header {
+          position: relative;
+          top: 130px;
+        }
+
+        .edit-goal-dialog-form-new-goal-frequency-tags {
+          position: relative;
+          top: 135px;
+          display: flex;
+          justify-content: center;
+          button {
+              @extend .button-style-1;
+
+              position: relative;
+              height: 30px;
+              width: 140px;
+              margin: 5px;
+          }
         }
       }
     }

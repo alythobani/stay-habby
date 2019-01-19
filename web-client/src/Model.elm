@@ -60,4 +60,7 @@ type alias Model =
     , setHabitDataShortcutInputtedAmount : Maybe Int
     , showEditGoalDialog : Bool
     , editGoalDialogHabit : Maybe Habit.Habit
+    , editGoal :
+        { frequencyKind : Habit.FrequencyKind
+        }
     }

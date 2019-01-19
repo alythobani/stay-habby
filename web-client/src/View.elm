@@ -69,6 +69,7 @@ view model =
         , renderEditGoalDialog
             model.showEditGoalDialog
             model.editGoalDialogHabit
+            model.editGoal
         ]
 
 
@@ -852,8 +853,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
         ]
 
 
-renderEditGoalDialog : Bool -> Maybe Habit.Habit -> Html Msg
-renderEditGoalDialog showEditGoalDialog habit =
+renderEditGoalDialog : Bool -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Html Msg
+renderEditGoalDialog showEditGoalDialog habit editGoal =
     div
         [ classList
             [ ( "edit-goal-dialog", True )
@@ -952,6 +953,30 @@ renderEditGoalDialog showEditGoalDialog habit =
                     , div
                         [ class "edit-goal-dialog-form-current-goal-description" ]
                         [ text currentGoalDesc ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-line-break" ]
+                        []
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-header" ]
+                        [ text "New Goal" ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-frequency-tags" ]
+                        [ button
+                            [ classList [ ( "selected", editGoal.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
+                            , onClick <| OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind
+                            ]
+                            [ text "X Per Week" ]
+                        , button
+                            [ classList [ ( "selected", editGoal.frequencyKind == Habit.SpecificDayOfWeekFrequencyKind ) ]
+                            , onClick <| OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind
+                            ]
+                            [ text "Specific Days of Week" ]
+                        , button
+                            [ classList [ ( "selected", editGoal.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
+                            , onClick <| OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind
+                            ]
+                            [ text "Y Per X Days" ]
+                        ]
                     ]
                 ]
 

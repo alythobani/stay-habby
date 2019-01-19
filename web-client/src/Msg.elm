@@ -77,3 +77,4 @@ type Msg
     | OnSetHabitDataShortcutAmountFormSubmit YmdDate.YmdDate String (Maybe Int)
     | OnEditGoalClick String
     | CloseEditGoalDialog
+    | OnEditGoalSelectFrequencyKind Habit.FrequencyKind

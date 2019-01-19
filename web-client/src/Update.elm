@@ -24,6 +24,9 @@ update msg model =
         updateAddHabit updater =
             { model | addHabit = updater model.addHabit }
 
+        updateEditGoal updater =
+            { model | editGoal = updater model.editGoal }
+
         getTodayViewerFrequencyStats : List String -> Cmd Msg
         getTodayViewerFrequencyStats habitIds =
             Api.queryPastFrequencyStats
@@ -618,8 +621,47 @@ update msg model =
 
                         _ ->
                             Nothing
+
+                currentGoal : Maybe Habit.FrequencyChangeRecord
+                currentGoal =
+                    case newEditGoalDialogHabit of
+                        Just h ->
+                            case h of
+                                Habit.GoodHabit gh ->
+                                    List.head <| List.reverse gh.targetFrequencies
+
+                                Habit.BadHabit bh ->
+                                    List.head <| List.reverse bh.thresholdFrequencies
+
+                        Nothing ->
+                            Nothing
+
+                newEditGoalFrequencyKind : Maybe Habit.FrequencyKind
+                newEditGoalFrequencyKind =
+                    case currentGoal of
+                        Just fcr ->
+                            case fcr.newFrequency of
+                                Habit.TotalWeekFrequency f ->
+                                    Just Habit.TotalWeekFrequencyKind
+
+                                Habit.SpecificDayOfWeekFrequency f ->
+                                    Just Habit.SpecificDayOfWeekFrequencyKind
+
+                                Habit.EveryXDayFrequency f ->
+                                    Just Habit.EveryXDayFrequencyKind
+
+                        Nothing ->
+                            Nothing
+
+                newModel =
+                    case newEditGoalFrequencyKind of
+                        Just fk ->
+                            updateEditGoal (\editGoal -> { editGoal | frequencyKind = fk })
+
+                        Nothing ->
+                            model
             in
-            ( { model
+            ( { newModel
                 | showEditGoalDialog = True
                 , editGoalDialogHabit = newEditGoalDialogHabit
               }
@@ -632,6 +674,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        OnEditGoalSelectFrequencyKind frequencyKind ->
+            ( updateEditGoal (\editGoal -> { editGoal | frequencyKind = frequencyKind }), Cmd.none )
 
 
 extractInt : String -> Maybe Int -> Maybe Int

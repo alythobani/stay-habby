@@ -932,6 +932,53 @@ renderEditGoalDialog showEditGoalDialog habit editGoal =
 
                             Nothing ->
                                 ( "N/A", "N/A" )
+
+                    newGoalDesc : String
+                    newGoalDesc =
+                        case editGoal.frequencyKind of
+                            Habit.TotalWeekFrequencyKind ->
+                                (editGoal.timesPerWeek ||> toString ?> "_")
+                                    ++ " "
+                                    ++ (if (editGoal.timesPerWeek ?> 0) == 1 then
+                                            habitRecord.unitNameSingular
+
+                                        else
+                                            habitRecord.unitNamePlural
+                                       )
+                                    ++ " per week"
+
+                            Habit.SpecificDayOfWeekFrequencyKind ->
+                                "Mo "
+                                    ++ (editGoal.mondayTimes ||> toString ?> "_")
+                                    ++ " Tu "
+                                    ++ (editGoal.tuesdayTimes ||> toString ?> "_")
+                                    ++ " We "
+                                    ++ (editGoal.wednesdayTimes ||> toString ?> "_")
+                                    ++ " Th "
+                                    ++ (editGoal.thursdayTimes ||> toString ?> "_")
+                                    ++ " Fr "
+                                    ++ (editGoal.fridayTimes ||> toString ?> "_")
+                                    ++ " Sa "
+                                    ++ (editGoal.saturdayTimes ||> toString ?> "_")
+                                    ++ " Su "
+                                    ++ (editGoal.sundayTimes ||> toString ?> "_")
+
+                            Habit.EveryXDayFrequencyKind ->
+                                (editGoal.times ||> toString ?> "_")
+                                    ++ " "
+                                    ++ (if (editGoal.times ?> 0) == 1 then
+                                            habitRecord.unitNameSingular
+
+                                        else
+                                            habitRecord.unitNamePlural
+                                       )
+                                    ++ " per "
+                                    ++ (if (editGoal.days ?> 0) == 1 then
+                                            "day"
+
+                                        else
+                                            (editGoal.days ||> toString ?> "_") ++ " days"
+                                       )
                 in
                 [ div
                     [ class "edit-goal-dialog-background"
@@ -977,6 +1024,9 @@ renderEditGoalDialog showEditGoalDialog habit editGoal =
                             ]
                             [ text "Y Per X Days" ]
                         ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-description" ]
+                        [ text newGoalDesc ]
                     , div
                         [ class "edit-goal-dialog-form-new-goal-forms" ]
                         [ div

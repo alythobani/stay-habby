@@ -536,11 +536,11 @@ body {
       .edit-goal-dialog-form {
         position: absolute;
         text-align: center;
-        top: 16vh;
+        top: 10vh;
         right: 32.5vw;
         z-index: 3;
         width: 500px;
-        height: 500px;
+        height: 600px;
         font-size: 16px;
         color: white;
         border: 2px solid white;
@@ -623,9 +623,15 @@ body {
           }
         }
 
+        .edit-goal-dialog-form-new-goal-description {
+          position: relative;
+          top: 145px;
+          font-size: 14px;
+        }
+
         .edit-goal-dialog-form-new-goal-forms {
           position: relative;
-          top: 150px;
+          top: 160px;
           display: flex;
           justify-content: center;
           .edit-goal-dialog-form-new-goal-total-week-frequency-form {
@@ -641,7 +647,7 @@ body {
           .edit-goal-dialog-form-new-goal-specific-day-of-week-frequency-form {
               display: block;
               float: left;
-              width: 330px;
+              width: 440px;
 
               input {
                   @extend .input-style-1;

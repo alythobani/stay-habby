@@ -1,4 +1,30 @@
-module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, extractCreateHabit, getCommonCreateFields, getCommonFields, initAddHabitData, splitHabits)
+module Models.Habit exposing
+    ( AddHabitInputData
+    , BadHabitRecord
+    , CreateBadHabitRecord
+    , CreateGoodHabitRecord
+    , CreateHabit(..)
+    , EditGoalInputData
+    , EveryXDayFrequencyRecord
+    , Frequency(..)
+    , FrequencyChangeRecord
+    , FrequencyKind(..)
+    , GoodHabitRecord
+    , Habit(..)
+    , HabitKind(..)
+    , HabitTime(..)
+    , SpecificDayOfWeekFrequencyRecord
+    , decodeFrequency
+    , decodeFrequencyChangeRecord
+    , decodeHabit
+    , decodeHabitTime
+    , extractCreateHabit
+    , getCommonCreateFields
+    , getCommonFields
+    , initAddHabitData
+    , initEditGoalData
+    , splitHabits
+    )
 
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -61,7 +87,34 @@ type alias AddHabitInputData =
 
 
 type alias EditGoalInputData =
-    { frequencyKind : FrequencyKind }
+    { frequencyKind : FrequencyKind
+    , timesPerWeek : Maybe Int
+    , mondayTimes : Maybe Int
+    , tuesdayTimes : Maybe Int
+    , wednesdayTimes : Maybe Int
+    , thursdayTimes : Maybe Int
+    , fridayTimes : Maybe Int
+    , saturdayTimes : Maybe Int
+    , sundayTimes : Maybe Int
+    , times : Maybe Int
+    , days : Maybe Int
+    }
+
+
+initEditGoalData : EditGoalInputData
+initEditGoalData =
+    { frequencyKind = TotalWeekFrequencyKind
+    , timesPerWeek = Nothing
+    , mondayTimes = Nothing
+    , tuesdayTimes = Nothing
+    , wednesdayTimes = Nothing
+    , thursdayTimes = Nothing
+    , fridayTimes = Nothing
+    , saturdayTimes = Nothing
+    , sundayTimes = Nothing
+    , times = Nothing
+    , days = Nothing
+    }
 
 
 type CreateHabit

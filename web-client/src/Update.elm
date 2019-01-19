@@ -678,6 +678,56 @@ update msg model =
         OnEditGoalSelectFrequencyKind frequencyKind ->
             ( updateEditGoal (\editGoal -> { editGoal | frequencyKind = frequencyKind }), Cmd.none )
 
+        OnEditGoalTimesPerWeekInput timesPerWeek ->
+            ( updateEditGoal (\editGoal -> { editGoal | timesPerWeek = extractInt timesPerWeek editGoal.timesPerWeek })
+            , Cmd.none
+            )
+
+        OnEditGoalSpecificDayMondayInput mondayTimes ->
+            ( updateEditGoal (\editGoal -> { editGoal | mondayTimes = extractInt mondayTimes editGoal.mondayTimes })
+            , Cmd.none
+            )
+
+        OnEditGoalSpecificDayTuesdayInput tuesdayTimes ->
+            ( updateEditGoal (\editGoal -> { editGoal | tuesdayTimes = extractInt tuesdayTimes editGoal.tuesdayTimes })
+            , Cmd.none
+            )
+
+        OnEditGoalSpecificDayWednesdayInput wednesdayTimes ->
+            ( updateEditGoal (\editGoal -> { editGoal | wednesdayTimes = extractInt wednesdayTimes editGoal.wednesdayTimes })
+            , Cmd.none
+            )
+
+        OnEditGoalSpecificDayThursdayInput thursdayTimes ->
+            ( updateEditGoal (\editGoal -> { editGoal | thursdayTimes = extractInt thursdayTimes editGoal.thursdayTimes })
+            , Cmd.none
+            )
+
+        OnEditGoalSpecificDayFridayInput fridayTimes ->
+            ( updateEditGoal (\editGoal -> { editGoal | fridayTimes = extractInt fridayTimes editGoal.fridayTimes })
+            , Cmd.none
+            )
+
+        OnEditGoalSpecificDaySaturdayInput saturdayTimes ->
+            ( updateEditGoal (\editGoal -> { editGoal | saturdayTimes = extractInt saturdayTimes editGoal.saturdayTimes })
+            , Cmd.none
+            )
+
+        OnEditGoalSpecificDaySundayInput sundayTimes ->
+            ( updateEditGoal (\editGoal -> { editGoal | sundayTimes = extractInt sundayTimes editGoal.sundayTimes })
+            , Cmd.none
+            )
+
+        OnEditGoalTimesInput times ->
+            ( updateEditGoal (\editGoal -> { editGoal | times = extractInt times editGoal.times })
+            , Cmd.none
+            )
+
+        OnEditGoalDaysInput days ->
+            ( updateEditGoal (\editGoal -> { editGoal | days = extractInt days editGoal.days })
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

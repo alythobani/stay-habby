@@ -48,7 +48,7 @@ init { apiBaseUrl, currentTime } location =
       , setHabitDataShortcutInputtedAmount = Nothing
       , showEditGoalDialog = False
       , editGoalDialogHabit = Nothing
-      , editGoal = { frequencyKind = Habit.TotalWeekFrequencyKind }
+      , editGoal = Habit.initEditGoalData
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

@@ -977,6 +977,90 @@ renderEditGoalDialog showEditGoalDialog habit editGoal =
                             ]
                             [ text "Y Per X Days" ]
                         ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-forms" ]
+                        [ div
+                            [ classList
+                                [ ( "edit-goal-dialog-form-new-goal-total-week-frequency-form", True )
+                                , ( "display-none", editGoal.frequencyKind /= Habit.TotalWeekFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder "X"
+                                , onInput OnEditGoalTimesPerWeekInput
+                                , value (editGoal.timesPerWeek ||> toString ?> "")
+                                ]
+                                []
+                            ]
+                        , div
+                            [ classList
+                                [ ( "edit-goal-dialog-form-new-goal-specific-day-of-week-frequency-form", True )
+                                , ( "display-none", editGoal.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder "Monday"
+                                , onInput OnEditGoalSpecificDayMondayInput
+                                , value (editGoal.mondayTimes ||> toString ?> "")
+                                ]
+                                []
+                            , input
+                                [ placeholder "Tuesday"
+                                , onInput OnEditGoalSpecificDayTuesdayInput
+                                , value (editGoal.tuesdayTimes ||> toString ?> "")
+                                ]
+                                []
+                            , input
+                                [ placeholder "Wednesday"
+                                , onInput OnEditGoalSpecificDayWednesdayInput
+                                , value (editGoal.wednesdayTimes ||> toString ?> "")
+                                ]
+                                []
+                            , input
+                                [ placeholder "Thursday"
+                                , onInput OnEditGoalSpecificDayThursdayInput
+                                , value (editGoal.thursdayTimes ||> toString ?> "")
+                                ]
+                                []
+                            , input
+                                [ placeholder "Friday"
+                                , onInput OnEditGoalSpecificDayFridayInput
+                                , value (editGoal.fridayTimes ||> toString ?> "")
+                                ]
+                                []
+                            , input
+                                [ placeholder "Saturday"
+                                , onInput OnEditGoalSpecificDaySaturdayInput
+                                , value (editGoal.saturdayTimes ||> toString ?> "")
+                                ]
+                                []
+                            , input
+                                [ placeholder "Sunday"
+                                , onInput OnEditGoalSpecificDaySundayInput
+                                , value (editGoal.sundayTimes ||> toString ?> "")
+                                ]
+                                []
+                            ]
+                        , div
+                            [ classList
+                                [ ( "edit-goal-dialog-form-new-goal-every-x-days-frequency-form", True )
+                                , ( "display-none", editGoal.frequencyKind /= Habit.EveryXDayFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder "Times"
+                                , onInput OnEditGoalTimesInput
+                                , value (editGoal.times ||> toString ?> "")
+                                ]
+                                []
+                            , input
+                                [ placeholder "Days"
+                                , onInput OnEditGoalDaysInput
+                                , value (editGoal.days ||> toString ?> "")
+                                ]
+                                []
+                            ]
+                        ]
                     ]
                 ]
 

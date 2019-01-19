@@ -622,6 +622,56 @@ body {
               margin: 5px;
           }
         }
+
+        .edit-goal-dialog-form-new-goal-forms {
+          position: relative;
+          top: 150px;
+          display: flex;
+          justify-content: center;
+          .edit-goal-dialog-form-new-goal-total-week-frequency-form {
+              input {
+                  @extend .input-style-1;
+
+                  text-align: center;
+                  width: 100px;
+                  height: 40px;
+              }
+          }
+
+          .edit-goal-dialog-form-new-goal-specific-day-of-week-frequency-form {
+              display: block;
+              float: left;
+              width: 330px;
+
+              input {
+                  @extend .input-style-1;
+
+                  text-align: center;
+                  height: 40px;
+                  width: 100px;
+                  display: inline-block;
+                  margin: 0 10px 10px 0;
+                  float: left;
+              }
+          }
+
+          .edit-goal-dialog-form-new-goal-every-x-days-frequency-form {
+              display: block;
+              float: left;
+              width: 220px;
+
+              input {
+                  @extend .input-style-1;
+
+                  text-align: center;
+                  height: 40px;
+                  width: 100px;
+                  display: inline-block;
+                  margin: 0 10px 10px 0;
+                  float: left;
+              }
+          }
+        }
       }
     }
     .all-habit-lists {

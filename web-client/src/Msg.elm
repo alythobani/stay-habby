@@ -78,3 +78,13 @@ type Msg
     | OnEditGoalClick String
     | CloseEditGoalDialog
     | OnEditGoalSelectFrequencyKind Habit.FrequencyKind
+    | OnEditGoalTimesPerWeekInput String
+    | OnEditGoalSpecificDayMondayInput String
+    | OnEditGoalSpecificDayTuesdayInput String
+    | OnEditGoalSpecificDayWednesdayInput String
+    | OnEditGoalSpecificDayThursdayInput String
+    | OnEditGoalSpecificDayFridayInput String
+    | OnEditGoalSpecificDaySaturdayInput String
+    | OnEditGoalSpecificDaySundayInput String
+    | OnEditGoalTimesInput String
+    | OnEditGoalDaysInput String

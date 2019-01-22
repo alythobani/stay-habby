@@ -728,6 +728,34 @@ update msg model =
             , Cmd.none
             )
 
+        OnEditGoalFailure apiError ->
+            -- TODO
+            ( model, Cmd.none )
+
+        OnEditGoalSuccess habit ->
+            ( { model
+                | allHabits =
+                    RemoteData.map
+                        (\allHabits ->
+                            Util.replaceOrAdd
+                                allHabits
+                                (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
+                                habit
+                        )
+                        model.allHabits
+                , editGoal = Habit.initEditGoalData
+                , showEditGoalDialog = False
+              }
+            , Cmd.none
+            )
+
+        OnEditGoalSubmitClick habitId newFrequencies habitType ->
+            ( { model
+                | showEditGoalDialog = False
+              }
+            , Api.mutationEditHabitGoalFrequencies habitId newFrequencies habitType model.apiBaseUrl OnEditGoalFailure OnEditGoalSuccess
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

@@ -868,6 +868,14 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                     habitRecord =
                         Habit.getCommonFields h
 
+                    isGoodHabit =
+                        case h of
+                            Habit.GoodHabit _ ->
+                                True
+
+                            _ ->
+                                False
+
                     currentGoal : Maybe Habit.FrequencyChangeRecord
                     currentGoal =
                         case h of
@@ -1196,7 +1204,23 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                             ]
                         ]
                         [ button
-                            [ class "edit-goal-dialog-form-buttons-submit" ]
+                            [ class "edit-goal-dialog-form-buttons-submit"
+                            , onClick <|
+                                case newFrequencies of
+                                    Just fcrs ->
+                                        OnEditGoalSubmitClick
+                                            habitRecord.id
+                                            fcrs
+                                            (if isGoodHabit then
+                                                "good_habit"
+
+                                             else
+                                                "bad_habit"
+                                            )
+
+                                    Nothing ->
+                                        NoOp
+                            ]
                             [ text "Submit" ]
                         , button
                             [ class "edit-goal-dialog-form-buttons-cancel"

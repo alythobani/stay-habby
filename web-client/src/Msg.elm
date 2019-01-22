@@ -88,3 +88,6 @@ type Msg
     | OnEditGoalSpecificDaySundayInput String
     | OnEditGoalTimesInput String
     | OnEditGoalDaysInput String
+    | OnEditGoalFailure ApiError
+    | OnEditGoalSuccess Habit.Habit
+    | OnEditGoalSubmitClick String (List Habit.FrequencyChangeRecord) String

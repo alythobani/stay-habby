@@ -1199,7 +1199,9 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                             [ class "edit-goal-dialog-form-buttons-submit" ]
                             [ text "Submit" ]
                         , button
-                            [ class "edit-goal-dialog-form-buttons-cancel" ]
+                            [ class "edit-goal-dialog-form-buttons-cancel"
+                            , onClick CloseEditGoalDialog
+                            ]
                             [ text "Cancel" ]
                         ]
                     ]

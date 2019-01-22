@@ -256,52 +256,7 @@ mutationAddHabit createHabit ymd =
                         "initial_threshold_frequency"
                   )
                 , ( "initial_frequency_value"
-                  , case commonFields.initialFrequency of
-                        Habit.EveryXDayFrequency { days, times } ->
-                            Util.templater
-                                (Dict.fromList [ ( "days", toString days ), ( "times", toString times ) ])
-                                """{
-                                type_name: "every_x_days_frequency",
-                                every_x_days_frequency: {
-                                    days: {{days}},
-                                    times: {{times}}
-                                }
-                                }"""
-
-                        Habit.TotalWeekFrequency times ->
-                            Util.templater
-                                (Dict.fromList [ ( "times", toString times ) ])
-                                """{
-                                type_name: "total_week_frequency",
-                                total_week_frequency: {
-                                    week: {{times}}
-                                }
-                                }"""
-
-                        Habit.SpecificDayOfWeekFrequency { monday, tuesday, wednesday, thursday, friday, saturday, sunday } ->
-                            Util.templater
-                                (Dict.fromList
-                                    [ ( "monday", toString monday )
-                                    , ( "tuesday", toString tuesday )
-                                    , ( "wednesday", toString wednesday )
-                                    , ( "thursday", toString thursday )
-                                    , ( "friday", toString friday )
-                                    , ( "saturday", toString saturday )
-                                    , ( "sunday", toString sunday )
-                                    ]
-                                )
-                                """{
-                                type_name: "specific_day_of_week_frequency",
-                                specific_day_of_week_frequency: {
-                                monday: {{monday}},
-                                tuesday: {{tuesday}},
-                                wednesday: {{wednesday}},
-                                thursday: {{thursday}},
-                                friday: {{friday}},
-                                saturday: {{saturday}},
-                                sunday: {{sunday}}
-                                }
-                                }"""
+                  , frequencyToGraphQLString commonFields.initialFrequency
                   )
                 , ( "day", toString startDate.day )
                 , ( "month", toString startDate.month )
@@ -416,6 +371,219 @@ mutationAddHabit createHabit ymd =
                 |> Util.templater templateDict
     in
     graphQLRequest queryString <| Decode.at [ "data", "add_habit" ] Habit.decodeHabit
+
+
+frequencyToGraphQLString : Habit.Frequency -> String
+frequencyToGraphQLString frequency =
+    case frequency of
+        Habit.EveryXDayFrequency { days, times } ->
+            Util.templater
+                (Dict.fromList [ ( "days", toString days ), ( "times", toString times ) ])
+                """{
+                  type_name: "every_x_days_frequency",
+                  every_x_days_frequency: {
+                      days: {{days}},
+                      times: {{times}}
+                  }
+                  }"""
+
+        Habit.TotalWeekFrequency times ->
+            Util.templater
+                (Dict.fromList [ ( "times", toString times ) ])
+                """{
+                  type_name: "total_week_frequency",
+                  total_week_frequency: {
+                      week: {{times}}
+                  }
+                  }"""
+
+        Habit.SpecificDayOfWeekFrequency { monday, tuesday, wednesday, thursday, friday, saturday, sunday } ->
+            Util.templater
+                (Dict.fromList
+                    [ ( "monday", toString monday )
+                    , ( "tuesday", toString tuesday )
+                    , ( "wednesday", toString wednesday )
+                    , ( "thursday", toString thursday )
+                    , ( "friday", toString friday )
+                    , ( "saturday", toString saturday )
+                    , ( "sunday", toString sunday )
+                    ]
+                )
+                """{
+                  type_name: "specific_day_of_week_frequency",
+                  specific_day_of_week_frequency: {
+                  monday: {{monday}},
+                  tuesday: {{tuesday}},
+                  wednesday: {{wednesday}},
+                  thursday: {{thursday}},
+                  friday: {{friday}},
+                  saturday: {{saturday}},
+                  sunday: {{sunday}}
+                  }
+                  }"""
+
+
+mutationEditHabitGoalFrequencies : String -> List Habit.FrequencyChangeRecord -> String -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
+mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
+    let
+        frequencyChangeRecordToGraphQLString : Habit.FrequencyChangeRecord -> String
+        frequencyChangeRecordToGraphQLString fcr =
+            let
+                fcrTemplateDict =
+                    Dict.fromList
+                        [ ( "start_date_day", toString fcr.startDate.day )
+                        , ( "start_date_month", toString fcr.startDate.month )
+                        , ( "start_date_year", toString fcr.startDate.year )
+                        , ( "end_date"
+                          , case fcr.endDate of
+                                Just { day, month, year } ->
+                                    Util.templater
+                                        (Dict.fromList
+                                            [ ( "day", toString day )
+                                            , ( "month", toString month )
+                                            , ( "year", toString year )
+                                            ]
+                                        )
+                                        """{
+                          day: {{day}},
+                          month: {{month}},
+                          year: {{year}}
+                          }"""
+
+                                Nothing ->
+                                    "null"
+                          )
+                        , ( "new_frequency"
+                          , frequencyToGraphQLString fcr.newFrequency
+                          )
+                        ]
+            in
+            """{
+          start_date: {
+            day: {{start_date_day}},
+            month: {{start_date_month}},
+            year: {{start_date_year}}
+          },
+          end_date: {{end_date}},
+          new_frequency: {{new_frequency}}
+          }"""
+                |> Util.templater fcrTemplateDict
+
+        templateDict =
+            Dict.fromList
+                [ ( "habit_type"
+                  , if isGoodHabit then
+                        "good_habit"
+
+                    else
+                        "bad_habit"
+                  )
+                , ( "habit_id", habitId )
+                , ( "new_frequencies"
+                  , newFrequencies
+                        |> List.map frequencyChangeRecordToGraphQLString
+                        |> String.join ", "
+                  )
+                ]
+
+        isGoodHabit =
+            case habitType of
+                "good_habit" ->
+                    True
+
+                _ ->
+                    False
+
+        queryString =
+            """mutation {
+            edit_habit_goal_frequencies(
+              habit_id: "{{habit_id}}",
+              habit_type: "{{habit_type}}",
+              new_frequencies: [{{new_frequencies}}]
+            ) {
+                __typename
+                ... on good_habit {
+                  _id
+                  description
+                  name
+                  unit_name_singular
+                  unit_name_plural
+                  target_frequencies {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
+                      day
+                      month
+                      year
+                    }
+                    new_frequency {
+                      __typename
+                      ... on every_x_days_frequency {
+                        days
+                        times
+                      }
+                      ... on total_week_frequency {
+                        week
+                      }
+                      ... on specific_day_of_week_frequency {
+                        monday
+                        tuesday
+                        wednesday
+                        thursday
+                        friday
+                        saturday
+                        sunday
+                      }
+                    }
+                  }
+                  time_of_day
+                }
+                ... on bad_habit {
+                  _id
+                  description
+                  name
+                  unit_name_singular
+                  unit_name_plural
+                  threshold_frequencies {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
+                      day
+                      month
+                      year
+                    }
+                    new_frequency {
+                      __typename
+                      ... on every_x_days_frequency {
+                        days
+                        times
+                      }
+                      ... on total_week_frequency {
+                        week
+                      }
+                      ... on specific_day_of_week_frequency {
+                        monday
+                        tuesday
+                        wednesday
+                        thursday
+                        friday
+                        saturday
+                        sunday
+                      }
+                    }
+                  }
+                }
+              }
+            }"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest queryString <| Decode.at [ "data", "edit_habit_goal_frequencies" ] Habit.decodeHabit
 
 
 mutationSetHabitData : YmdDate.YmdDate -> String -> Int -> String -> (ApiError -> b) -> (HabitData.HabitData -> b) -> Cmd b

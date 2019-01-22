@@ -70,6 +70,7 @@ view model =
             model.showEditGoalDialog
             model.editGoalDialogHabit
             model.editGoal
+            model.ymd
         ]
 
 
@@ -853,8 +854,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
         ]
 
 
-renderEditGoalDialog : Bool -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Html Msg
-renderEditGoalDialog showEditGoalDialog habit editGoal =
+renderEditGoalDialog : Bool -> Maybe Habit.Habit -> Habit.EditGoalInputData -> YmdDate.YmdDate -> Html Msg
+renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
     div
         [ classList
             [ ( "edit-goal-dialog", True )
@@ -879,56 +880,17 @@ renderEditGoalDialog showEditGoalDialog habit editGoal =
                     ( currentGoalTag, currentGoalDesc ) =
                         case currentGoal of
                             Just fcr ->
-                                case fcr.newFrequency of
+                                ( case fcr.newFrequency of
                                     Habit.EveryXDayFrequency f ->
-                                        ( "Y Per X Days"
-                                        , toString f.times
-                                            ++ " "
-                                            ++ (if f.times == 1 then
-                                                    habitRecord.unitNameSingular
-
-                                                else
-                                                    habitRecord.unitNamePlural
-                                               )
-                                            ++ " per "
-                                            ++ (if f.days == 1 then
-                                                    "day"
-
-                                                else
-                                                    toString f.days ++ " days"
-                                               )
-                                        )
+                                        "Y Per X Days"
 
                                     Habit.TotalWeekFrequency f ->
-                                        ( "X Per Week"
-                                        , toString f
-                                            ++ " "
-                                            ++ (if f == 1 then
-                                                    habitRecord.unitNameSingular
-
-                                                else
-                                                    habitRecord.unitNamePlural
-                                               )
-                                            ++ " per week"
-                                        )
+                                        "X Per Week"
 
                                     Habit.SpecificDayOfWeekFrequency f ->
-                                        ( "Specific Days of Week"
-                                        , "Mo "
-                                            ++ toString f.monday
-                                            ++ " Tu "
-                                            ++ toString f.tuesday
-                                            ++ " We "
-                                            ++ toString f.wednesday
-                                            ++ " Th "
-                                            ++ toString f.thursday
-                                            ++ " Fr "
-                                            ++ toString f.friday
-                                            ++ " Sa "
-                                            ++ toString f.saturday
-                                            ++ " Su "
-                                            ++ toString f.sunday
-                                        )
+                                        "Specific Days of Week"
+                                , Habit.prettyPrintFrequency fcr.newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
+                                )
 
                             Nothing ->
                                 ( "N/A", "N/A" )
@@ -979,6 +941,101 @@ renderEditGoalDialog showEditGoalDialog habit editGoal =
                                         else
                                             (editGoal.days ||> toString ?> "_") ++ " days"
                                        )
+
+                    oldFrequencies : List Habit.FrequencyChangeRecord
+                    oldFrequencies =
+                        case h of
+                            Habit.GoodHabit gh ->
+                                gh.targetFrequencies
+
+                            Habit.BadHabit bh ->
+                                bh.thresholdFrequencies
+
+                    newGoal =
+                        Habit.extractNewGoal editGoal
+
+                    ( newFrequencies, newStartDate ) =
+                        case newGoal of
+                            Just newFrequency ->
+                                case List.reverse oldFrequencies of
+                                    currFcr :: rest ->
+                                        if List.member (YmdDate.compareYmds currFcr.startDate todayYmd) [ EQ, GT ] then
+                                            -- the current goal started today or later, we should overwrite it
+                                            ( Just <|
+                                                List.reverse <|
+                                                    { startDate = currFcr.startDate, endDate = Nothing, newFrequency = newFrequency }
+                                                        :: rest
+                                            , Just currFcr.startDate
+                                            )
+
+                                        else
+                                            -- current goal started yesterday or earlier, we keep it but end it asap
+                                            case editGoal.frequencyKind of
+                                                Habit.EveryXDayFrequencyKind ->
+                                                    -- new goal starts today
+                                                    ( Just <|
+                                                        List.reverse <|
+                                                            { startDate = todayYmd, endDate = Nothing, newFrequency = newFrequency }
+                                                                :: { currFcr | endDate = Just <| YmdDate.addDays -1 todayYmd }
+                                                                :: rest
+                                                    , Just todayYmd
+                                                    )
+
+                                                _ ->
+                                                    -- new goal is weekly and starts on the next available Monday
+                                                    let
+                                                        startDate =
+                                                            YmdDate.getFirstMondayAfterDate todayYmd
+                                                    in
+                                                    ( Just <|
+                                                        List.reverse <|
+                                                            { startDate = startDate, endDate = Nothing, newFrequency = newFrequency }
+                                                                :: { currFcr | endDate = Just <| YmdDate.addDays -1 startDate }
+                                                                :: rest
+                                                    , Just startDate
+                                                    )
+
+                                    [] ->
+                                        let
+                                            startDate =
+                                                YmdDate.getFirstMondayAfterDate todayYmd
+                                        in
+                                        ( Just <| [ { startDate = startDate, endDate = Nothing, newFrequency = newFrequency } ]
+                                        , Just startDate
+                                        )
+
+                            Nothing ->
+                                ( Nothing, Nothing )
+
+                    confirmationMessage : String
+                    confirmationMessage =
+                        case newGoal of
+                            Just newFrequency ->
+                                case currentGoal of
+                                    Just fcr ->
+                                        "The previous goal for "
+                                            ++ habitRecord.name
+                                            ++ " was "
+                                            ++ Habit.prettyPrintFrequency fcr.newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
+                                            ++ ". The new goal "
+                                            ++ Habit.prettyPrintFrequency newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
+                                            ++ " will officially start "
+                                            ++ (if newStartDate == Just todayYmd then
+                                                    "today (" ++ (newStartDate ||> YmdDate.prettyPrintWithWeekday ?> "N/A") ++ ")."
+
+                                                else
+                                                    "on " ++ (newStartDate ||> YmdDate.prettyPrintWithWeekday ?> "N/A") ++ "."
+                                               )
+
+                                    Nothing ->
+                                        "The new goal "
+                                            ++ newGoalDesc
+                                            ++ " will officially start on "
+                                            ++ (newStartDate ||> YmdDate.prettyPrintWithWeekday ?> "N/A")
+                                            ++ "."
+
+                            Nothing ->
+                                ""
                 in
                 [ div
                     [ class "edit-goal-dialog-background"
@@ -1111,6 +1168,13 @@ renderEditGoalDialog showEditGoalDialog habit editGoal =
                                 []
                             ]
                         ]
+                    , div
+                        [ classList
+                            [ ( "edit-goal-dialog-form-confirmation-message", True )
+                            , ( "display-none", not <| Maybe.isJust newGoal )
+                            ]
+                        ]
+                        [ text confirmationMessage ]
                     ]
                 ]
 

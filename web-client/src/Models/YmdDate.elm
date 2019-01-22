@@ -1,4 +1,4 @@
-module Models.YmdDate exposing (YmdDate, addDays, decodeYmdDate, fromDate, fromSimpleString, getFirstMondayAfterDate, prettyPrint, toDate, toSimpleString)
+module Models.YmdDate exposing (YmdDate, addDays, compareYmds, decodeYmdDate, fromDate, fromSimpleString, getFirstMondayAfterDate, prettyPrint, prettyPrintWithWeekday, toDate, toSimpleString)
 
 import Date
 import Date.Extra as Date
@@ -9,6 +9,31 @@ import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
 
 type alias YmdDate =
     { day : Int, month : Int, year : Int }
+
+
+compareYmds : YmdDate -> YmdDate -> Order
+compareYmds ymdOne ymdTwo =
+    let
+        yearOrder =
+            compare ymdOne.year ymdTwo.year
+
+        monthOrder =
+            compare ymdOne.month ymdTwo.month
+
+        dayOrder =
+            compare ymdOne.day ymdTwo.day
+    in
+    if List.member yearOrder [ LT, GT ] then
+        yearOrder
+
+    else if List.member monthOrder [ LT, GT ] then
+        monthOrder
+
+    else if List.member dayOrder [ LT, GT ] then
+        dayOrder
+
+    else
+        EQ
 
 
 prettyPrint : YmdDate -> String
@@ -71,6 +96,11 @@ prettyPrint ymd =
                    )
     in
     prettyMonth ymd ++ " " ++ prettyDay ymd ++ ", " ++ toString ymd.year
+
+
+prettyPrintWithWeekday : YmdDate -> String
+prettyPrintWithWeekday ymd =
+    ymd |> toDate |> Date.toFormattedString "EEEE, MMMM ddd, y"
 
 
 {-| Add days to a date to get a new date that many days away, you can add negative days to go back in time.

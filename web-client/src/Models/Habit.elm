@@ -1,30 +1,4 @@
-module Models.Habit exposing
-    ( AddHabitInputData
-    , BadHabitRecord
-    , CreateBadHabitRecord
-    , CreateGoodHabitRecord
-    , CreateHabit(..)
-    , EditGoalInputData
-    , EveryXDayFrequencyRecord
-    , Frequency(..)
-    , FrequencyChangeRecord
-    , FrequencyKind(..)
-    , GoodHabitRecord
-    , Habit(..)
-    , HabitKind(..)
-    , HabitTime(..)
-    , SpecificDayOfWeekFrequencyRecord
-    , decodeFrequency
-    , decodeFrequencyChangeRecord
-    , decodeHabit
-    , decodeHabitTime
-    , extractCreateHabit
-    , getCommonCreateFields
-    , getCommonFields
-    , initAddHabitData
-    , initEditGoalData
-    , splitHabits
-    )
+module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, extractCreateHabit, extractNewGoal, getCommonCreateFields, getCommonFields, initAddHabitData, initEditGoalData, prettyPrintEveryXDayFrequency, prettyPrintFrequency, prettyPrintSpecificDayOfWeekFrequency, prettyPrintTotalWeekFrequency, splitHabits)
 
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -367,6 +341,115 @@ extractCreateHabit addHabitInputData =
 
                 _ ->
                     Nothing
+
+
+extractNewGoal : EditGoalInputData -> Maybe Frequency
+extractNewGoal editGoal =
+    case editGoal.frequencyKind of
+        EveryXDayFrequencyKind ->
+            case ( editGoal.days, editGoal.times ) of
+                ( Just days, Just times ) ->
+                    Just <| EveryXDayFrequency { days = days, times = times }
+
+                _ ->
+                    Nothing
+
+        SpecificDayOfWeekFrequencyKind ->
+            case
+                ( editGoal.mondayTimes
+                , editGoal.tuesdayTimes
+                , editGoal.wednesdayTimes
+                , editGoal.thursdayTimes
+                , editGoal.fridayTimes
+                , editGoal.saturdayTimes
+                , editGoal.sundayTimes
+                )
+            of
+                ( Just mo, Just tu, Just we, Just th, Just fr, Just sa, Just su ) ->
+                    Just <|
+                        SpecificDayOfWeekFrequency
+                            { monday = mo
+                            , tuesday = tu
+                            , wednesday = we
+                            , thursday = th
+                            , friday = fr
+                            , saturday = sa
+                            , sunday = su
+                            }
+
+                _ ->
+                    Nothing
+
+        TotalWeekFrequencyKind ->
+            case editGoal.timesPerWeek of
+                Just timesPerWeek ->
+                    Just <| TotalWeekFrequency timesPerWeek
+
+                _ ->
+                    Nothing
+
+
+prettyPrintEveryXDayFrequency : EveryXDayFrequencyRecord -> String -> String -> String
+prettyPrintEveryXDayFrequency { days, times } unitNameSingular unitNamePlural =
+    toString times
+        ++ " "
+        ++ (if times == 1 then
+                unitNameSingular
+
+            else
+                unitNamePlural
+           )
+        ++ " per "
+        ++ (if days == 1 then
+                "day"
+
+            else
+                toString days ++ " days"
+           )
+
+
+prettyPrintTotalWeekFrequency : Int -> String -> String -> String
+prettyPrintTotalWeekFrequency timesPerWeek unitNameSingular unitNamePlural =
+    toString timesPerWeek
+        ++ " "
+        ++ (if timesPerWeek == 1 then
+                unitNameSingular
+
+            else
+                unitNamePlural
+           )
+        ++ " per week"
+
+
+prettyPrintSpecificDayOfWeekFrequency : SpecificDayOfWeekFrequencyRecord -> String
+prettyPrintSpecificDayOfWeekFrequency { monday, tuesday, wednesday, thursday, friday, saturday, sunday } =
+    "Mo "
+        ++ toString monday
+        ++ " Tu "
+        ++ toString tuesday
+        ++ " We "
+        ++ toString wednesday
+        ++ " Th "
+        ++ toString thursday
+        ++ " Fr "
+        ++ toString friday
+        ++ " Sa "
+        ++ toString saturday
+        ++ " Su "
+        ++ toString sunday
+
+
+prettyPrintFrequency : Frequency -> String -> String -> String
+prettyPrintFrequency frequency unitNameSingular unitNamePlural =
+    case frequency of
+        EveryXDayFrequency everyXDayFrequencyRecord ->
+            prettyPrintEveryXDayFrequency everyXDayFrequencyRecord unitNameSingular unitNamePlural
+
+        TotalWeekFrequency int ->
+            prettyPrintTotalWeekFrequency int unitNameSingular unitNamePlural
+
+        SpecificDayOfWeekFrequency specificDayOfWeekFrequencyRecord ->
+            prettyPrintSpecificDayOfWeekFrequency specificDayOfWeekFrequencyRecord
 
 
 decodeHabit : Decode.Decoder Habit

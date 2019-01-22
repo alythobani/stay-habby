@@ -536,11 +536,11 @@ body {
       .edit-goal-dialog-form {
         position: absolute;
         text-align: center;
-        top: 10vh;
+        top: 5vh;
         right: 32.5vw;
         z-index: 3;
         width: 500px;
-        height: 600px;
+        height: 650px;
         font-size: 16px;
         color: white;
         border: 2px solid white;
@@ -679,10 +679,24 @@ body {
           }
         }
 
+        .edit-goal-dialog-form-confirmation-message-line-break {
+          @extend .edit-goal-dialog-form-line-break;
+          top: 180px;
+          width: 400px;
+          left: 50px;
+        }
+
         .edit-goal-dialog-form-confirmation-message {
           position: relative;
-          top: 180px;
+          top: 200px;
           font-size: 14px;
+        }
+
+        .edit-goal-dialog-form-submit-button-line-break {
+          @extend .edit-goal-dialog-form-line-break;
+          top: 220px;
+          width: 400px;
+          left: 50px;
         }
       }
     }

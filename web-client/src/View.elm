@@ -1170,11 +1170,25 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                         ]
                     , div
                         [ classList
+                            [ ( "edit-goal-dialog-form-confirmation-message-line-break", True )
+                            , ( "display-none", not <| Maybe.isJust newGoal )
+                            ]
+                        ]
+                        []
+                    , div
+                        [ classList
                             [ ( "edit-goal-dialog-form-confirmation-message", True )
                             , ( "display-none", not <| Maybe.isJust newGoal )
                             ]
                         ]
                         [ text confirmationMessage ]
+                    , div
+                        [ classList
+                            [ ( "edit-goal-dialog-form-submit-button-line-break", True )
+                            , ( "display-none", not <| Maybe.isJust newGoal )
+                            ]
+                        ]
+                        []
                     ]
                 ]
 

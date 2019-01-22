@@ -697,6 +697,25 @@ body {
           top: 220px;
           width: 400px;
           left: 50px;
+          display: none;
+        }
+
+        .edit-goal-dialog-form-buttons {
+          position: relative;
+          top: 220px;
+          width: 250px;
+          left: 125px;
+          .edit-goal-dialog-form-buttons-cancel {
+            @extend .button-style-1;
+            height: 30px;
+            width: 100px;
+          }
+          .edit-goal-dialog-form-buttons-submit {
+            @extend .button-style-2;
+            float: right;
+            height: 30px;
+            width: 100px;
+          }
         }
       }
     }

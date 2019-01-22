@@ -1189,6 +1189,19 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                             ]
                         ]
                         []
+                    , div
+                        [ classList
+                            [ ( "edit-goal-dialog-form-buttons", True )
+                            , ( "display-none", not <| Maybe.isJust newGoal )
+                            ]
+                        ]
+                        [ button
+                            [ class "edit-goal-dialog-form-buttons-submit" ]
+                            [ text "Submit" ]
+                        , button
+                            [ class "edit-goal-dialog-form-buttons-cancel" ]
+                            [ text "Cancel" ]
+                        ]
                     ]
                 ]
 

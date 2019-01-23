@@ -962,58 +962,60 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                     newGoal =
                         Habit.extractNewGoal editGoal
 
-                    ( newFrequencies, newStartDate ) =
+                    isWeeklyNewGoal =
+                        case editGoal.frequencyKind of
+                            Habit.EveryXDayFrequencyKind ->
+                                False
+
+                            _ ->
+                                True
+
+                    newStartDate : YmdDate.YmdDate
+                    newStartDate =
+                        if isWeeklyNewGoal then
+                            YmdDate.getFirstMondayAfterDate todayYmd
+
+                        else
+                            todayYmd
+
+                    newFrequencies =
                         case newGoal of
                             Just newFrequency ->
                                 case List.reverse oldFrequencies of
                                     currFcr :: rest ->
                                         if List.member (YmdDate.compareYmds currFcr.startDate todayYmd) [ EQ, GT ] then
-                                            -- the current goal started today or later, we should overwrite it
-                                            ( Just <|
-                                                List.reverse <|
-                                                    { startDate = currFcr.startDate, endDate = Nothing, newFrequency = newFrequency }
-                                                        :: rest
-                                            , Just currFcr.startDate
-                                            )
+                                            -- The current goal started today or later, we should overwrite it.
+                                            -- (At this point there should only possibly be one goal, the current one,
+                                            -- that started today or later.)
+                                            case rest of
+                                                secondLastFcr :: restTwo ->
+                                                    Just <|
+                                                        List.reverse <|
+                                                            { startDate = newStartDate
+                                                            , endDate = Nothing
+                                                            , newFrequency = newFrequency
+                                                            }
+                                                                :: { secondLastFcr | endDate = Just <| YmdDate.addDays -1 newStartDate }
+                                                                :: restTwo
+
+                                                [] ->
+                                                    -- `currFcr` was the only goal and we are replacing it
+                                                    Just [ { startDate = newStartDate, endDate = Nothing, newFrequency = newFrequency } ]
 
                                         else
-                                            -- current goal started yesterday or earlier, we keep it but end it asap
-                                            case editGoal.frequencyKind of
-                                                Habit.EveryXDayFrequencyKind ->
-                                                    -- new goal starts today
-                                                    ( Just <|
-                                                        List.reverse <|
-                                                            { startDate = todayYmd, endDate = Nothing, newFrequency = newFrequency }
-                                                                :: { currFcr | endDate = Just <| YmdDate.addDays -1 todayYmd }
-                                                                :: rest
-                                                    , Just todayYmd
-                                                    )
-
-                                                _ ->
-                                                    -- new goal is weekly and starts on the next available Monday
-                                                    let
-                                                        startDate =
-                                                            YmdDate.getFirstMondayAfterDate todayYmd
-                                                    in
-                                                    ( Just <|
-                                                        List.reverse <|
-                                                            { startDate = startDate, endDate = Nothing, newFrequency = newFrequency }
-                                                                :: { currFcr | endDate = Just <| YmdDate.addDays -1 startDate }
-                                                                :: rest
-                                                    , Just startDate
-                                                    )
+                                            Just <|
+                                                List.reverse <|
+                                                    { startDate = newStartDate, endDate = Nothing, newFrequency = newFrequency }
+                                                        :: { currFcr | endDate = Just <| YmdDate.addDays -1 newStartDate }
+                                                        :: rest
 
                                     [] ->
-                                        let
-                                            startDate =
-                                                YmdDate.getFirstMondayAfterDate todayYmd
-                                        in
-                                        ( Just <| [ { startDate = startDate, endDate = Nothing, newFrequency = newFrequency } ]
-                                        , Just startDate
-                                        )
+                                        -- there are no existing goals (this shouldn't happen though)
+                                        Just [ { startDate = newStartDate, endDate = Nothing, newFrequency = newFrequency } ]
 
                             Nothing ->
-                                ( Nothing, Nothing )
+                                -- User has not fully filled out form, we don't need to compute `newFrequencies` yet
+                                Nothing
 
                     confirmationMessage : String
                     confirmationMessage =
@@ -1028,18 +1030,18 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                                             ++ ". The new goal "
                                             ++ Habit.prettyPrintFrequency newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
                                             ++ " will officially start "
-                                            ++ (if newStartDate == Just todayYmd then
-                                                    "today (" ++ (newStartDate ||> YmdDate.prettyPrintWithWeekday ?> "N/A") ++ ")."
+                                            ++ (if newStartDate == todayYmd then
+                                                    "today (" ++ YmdDate.prettyPrintWithWeekday newStartDate ++ ")."
 
                                                 else
-                                                    "on " ++ (newStartDate ||> YmdDate.prettyPrintWithWeekday ?> "N/A") ++ "."
+                                                    "on " ++ YmdDate.prettyPrintWithWeekday newStartDate ++ "."
                                                )
 
                                     Nothing ->
                                         "The new goal "
                                             ++ newGoalDesc
                                             ++ " will officially start on "
-                                            ++ (newStartDate ||> YmdDate.prettyPrintWithWeekday ?> "N/A")
+                                            ++ YmdDate.prettyPrintWithWeekday newStartDate
                                             ++ "."
 
                             Nothing ->

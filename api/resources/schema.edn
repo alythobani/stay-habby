@@ -106,17 +106,14 @@
                                        :day {:type (non-null Int)}}}
 
                  :create_every_x_days_frequency_data {:description "The data required to create a every_x_days_frequency."
-                                                      :fields {:type_name {:type (non-null String)}
-                                                               :times {:type (non-null Int)}
+                                                      :fields {:times {:type (non-null Int)}
                                                                :days {:type (non-null Int)}}}
 
                  :create_total_week_frequency_data {:description "The data required to create a total_week_frequency."
-                                                    :fields {:type_name {:type (non-null String)}
-                                                             :week {:type (non-null Int)}}}
+                                                    :fields {:week {:type (non-null Int)}}}
 
                  :create_specific_day_of_week_frequency_data {:description "The data required to create a specific_day_of_week_frequency."
-                                                              :fields {:type_name {:type (non-null String)}
-                                                                       :monday {:type Int}
+                                                              :fields {:monday {:type Int}
                                                                        :tuesday {:type Int}
                                                                        :wednesday {:type Int}
                                                                        :thursday {:type Int}

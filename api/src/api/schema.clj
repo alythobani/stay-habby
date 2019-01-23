@@ -131,7 +131,7 @@
                                                                      nil
                                                                      (date-from-y-m-d-map end-date-ymd))))),
         new_frequencies (map convert-frequency-y-m-d-maps-to-dates new_frequencies)]
-    (db/edit-habit-goal-frequencies (assoc all :new_frequencies new_frequencies))))
+    (tag-type (db/edit-habit-goal-frequencies (assoc all :new_frequencies new_frequencies)))))
 
 (defn resolver-map
   []

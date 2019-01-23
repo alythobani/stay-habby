@@ -120,7 +120,9 @@
 (defn resolve-mutation-edit-habit-goal-frequencies
   "@refer `db/edit-habit-goal-frequencies`."
   [context {:keys [new_frequencies] :as all} value]
-  (let [convert-frequency-y-m-d-maps-to-dates (fn [frequency-change-record]
+  (let [new_frequencies (map #(update % :new_frequency unnest-tagged-unions-on-input-object)
+                             new_frequencies),
+        convert-frequency-y-m-d-maps-to-dates (fn [frequency-change-record]
                                                 (let [{start-date-ymd :start_date
                                                        end-date-ymd :end_date} frequency-change-record]
                                                   (assoc frequency-change-record

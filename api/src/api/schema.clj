@@ -142,6 +142,8 @@
    :query/get-habit-data (create-async-resolver resolve-get-habit-data)
    :query/date-to-y-m-d-format (create-date-to-y-m-d-resolver :date)
    :query/toggle-date-to-y-m-d-format (create-date-to-y-m-d-resolver :toggle_date)
+   :query/suspended-start-date-to-y-m-d-format (create-date-to-y-m-d-resolver :start_date)
+   :query/suspended-end-date-to-y-m-d-format (create-nilable-date-to-y-m-d-resolver :end_date)
    :query/start-date-to-y-m-d-format (create-date-to-y-m-d-resolver :start_date)
    :query/end-date-to-y-m-d-format (create-nilable-date-to-y-m-d-resolver :end_date)
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)

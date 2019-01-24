@@ -45,6 +45,12 @@
                                               :new_frequency {:type (non-null :frequency)
                                                               :resolve :query/tag-type-for-new-frequency}}}
 
+           :suspended_interval {:description "A record of a habit being suspended for a certain period of time."}
+                               :fields {:start_date {:type (non-null :date)
+                                                     :resolve :query/suspended-start-date-to-y-m-d-format}
+                                        :end_date {:type :date
+                                                   :resolve :query/suspended-end-date-to-y-m-d-format}}
+
            :good_habit {:description "A good habit that we are trying to maintain."
                         :fields {:_id {:type (non-null ID)}
                                  :name {:type (non-null String)}
@@ -52,7 +58,8 @@
                                  :unit_name_singular {:type (non-null String)}
                                  :unit_name_plural {:type (non-null String)}
                                  :time_of_day {:type (non-null :habit_time)}
-                                 :target_frequencies {:type (non-null (list (non-null :frequency_change_record)))}}}
+                                 :target_frequencies {:type (non-null (list (non-null :frequency_change_record)))}
+                                 :suspensions {:type (non-null (list (non-null :suspended_interval)))}}}
 
            :bad_habit {:description "A bad habit we are trying to reduce."
                        :fields {:_id {:type (non-null ID)}
@@ -60,7 +67,8 @@
                                 :description {:type String}
                                 :unit_name_singular {:type (non-null String)}
                                 :unit_name_plural {:type (non-null String)}
-                                :threshold_frequencies {:type (non-null (list (non-null :frequency_change_record)))}}}
+                                :threshold_frequencies {:type (non-null (list (non-null :frequency_change_record)))}
+                                :suspensions {:type (non-null (list (non-null :suspended_interval)))}}}
 
            :habit_day_record {:description "A record of how much a habit was performed on a specific day."
                               :fields {:_id {:type (non-null ID)}

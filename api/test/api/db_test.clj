@@ -15,9 +15,9 @@
 (def today (t/today-at 0 0))
 
 (defn add-habit-to-test-db
-  "Add a habit to the test database, today"
+  "Add a habit to the test database, set the first goal to start today"
   [habit]
-  (add-habit {:db test_db :habit habit :creation-date-time today}))
+  (add-habit {:db test_db :habit habit :frequency-start-datetime today}))
 
 (defn does-add-habit-inputted-habit-match-db-habit
   "Compares a habit map inputted into `add-habit` with a habit map retrieved from the db.
@@ -34,10 +34,12 @@
                  db_val (key db-habit)]
              (condp = key
                     :initial_target_frequency (= (:target_frequencies db-habit)
-                                                 [{:frequency_change_date today
+                                                 [{:start_date today
+                                                   :end_date nil
                                                    :new_frequency clj_val}])
                     :initial_threshold_frequency (= (:threshold_frequencies db-habit)
-                                                    [{:frequency_change_date today
+                                                    [{:start_date today
+                                                      :end_date nil
                                                       :new_frequency clj_val}])
                     (if (= (type clj_val) clojure.lang.Keyword)
                       (= clj_val (keyword db_val))
@@ -65,9 +67,9 @@
       (is (every? #(not (nil? (:_id %))) all_habits) ":_id field not set"))
     (let [habit_2 (assoc default_habit
                          :type_name "bad_habit"
-                         :threshold_frequency {:type_name "every_x_days_frequency"
-                                               :days 4
-                                               :times 3})
+                         :initial_threshold_frequency {:type_name "every_x_days_frequency"
+                                                       :days 4
+                                                       :times 3})
           _ (add-habit-to-test-db habit_2)
           all_habits (get-habits {:db test_db})]
       (testing "Two habits"

@@ -221,11 +221,11 @@ mutationAddHabit createHabit ymd =
 
         startDate =
             case commonFields.initialFrequency of
-                Habit.EveryXDayFrequency _ ->
-                    ymd
+                Habit.TotalWeekFrequency _ ->
+                    YmdDate.getFirstMondayAfterDate ymd
 
                 _ ->
-                    YmdDate.getFirstMondayAfterDate ymd
+                    ymd
 
         templateDict =
             Dict.fromList

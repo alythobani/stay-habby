@@ -963,12 +963,7 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                         Habit.extractNewGoal editGoal
 
                     isWeeklyNewGoal =
-                        case editGoal.frequencyKind of
-                            Habit.EveryXDayFrequencyKind ->
-                                False
-
-                            _ ->
-                                True
+                        editGoal.frequencyKind == Habit.TotalWeekFrequencyKind
 
                     newStartDate : YmdDate.YmdDate
                     newStartDate =

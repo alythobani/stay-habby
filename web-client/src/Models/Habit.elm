@@ -1,4 +1,4 @@
-module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, extractCreateHabit, extractNewGoal, getCommonCreateFields, getCommonFields, initAddHabitData, initEditGoalData, prettyPrintEveryXDayFrequency, prettyPrintFrequency, prettyPrintSpecificDayOfWeekFrequency, prettyPrintTotalWeekFrequency, splitHabits)
+module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, SuspendedInterval, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, decodeSuspendedInterval, extractCreateHabit, extractNewGoal, getCommonCreateFields, getCommonFields, initAddHabitData, initEditGoalData, prettyPrintEveryXDayFrequency, prettyPrintFrequency, prettyPrintSpecificDayOfWeekFrequency, prettyPrintTotalWeekFrequency, splitHabits)
 
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -25,6 +25,7 @@ type alias GoodHabitRecord =
     , unitNamePlural : String
     , targetFrequencies : List FrequencyChangeRecord
     , timeOfDay : HabitTime
+    , suspensions : List SuspendedInterval
     }
 
 
@@ -35,6 +36,7 @@ type alias BadHabitRecord =
     , unitNameSingular : String
     , unitNamePlural : String
     , thresholdFrequencies : List FrequencyChangeRecord
+    , suspensions : List SuspendedInterval
     }
 
 
@@ -112,6 +114,12 @@ type alias CreateBadHabitRecord =
     , unitNameSingular : String
     , unitNamePlural : String
     , initialThresholdFrequency : Frequency
+    }
+
+
+type alias SuspendedInterval =
+    { startDate : YmdDate
+    , endDate : Maybe YmdDate
     }
 
 
@@ -220,23 +228,26 @@ getCommonFields :
         , description : Maybe String
         , unitNameSingular : String
         , unitNamePlural : String
+        , suspensions : List SuspendedInterval
         }
 getCommonFields habit =
     case habit of
-        GoodHabit { id, name, description, unitNameSingular, unitNamePlural } ->
+        GoodHabit { id, name, description, unitNameSingular, unitNamePlural, suspensions } ->
             { id = id
             , name = name
             , description = description
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
+            , suspensions = suspensions
             }
 
-        BadHabit { id, name, description, unitNameSingular, unitNamePlural } ->
+        BadHabit { id, name, description, unitNameSingular, unitNamePlural, suspensions } ->
             { id = id
             , name = name
             , description = description
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
+            , suspensions = suspensions
             }
 
 
@@ -464,6 +475,7 @@ decodeHabit =
                 |> required "unit_name_plural" Decode.string
                 |> required "target_frequencies" (Decode.list decodeFrequencyChangeRecord)
                 |> required "time_of_day" decodeHabitTime
+                |> required "suspensions" (Decode.list decodeSuspendedInterval)
 
         decodeBadHabitRecord =
             decode BadHabitRecord
@@ -473,6 +485,7 @@ decodeHabit =
                 |> required "unit_name_singular" Decode.string
                 |> required "unit_name_plural" Decode.string
                 |> required "threshold_frequencies" (Decode.list decodeFrequencyChangeRecord)
+                |> required "suspensions" (Decode.list decodeSuspendedInterval)
     in
     Decode.at [ "__typename" ] Decode.string
         |> Decode.andThen
@@ -487,6 +500,13 @@ decodeHabit =
                     _ ->
                         Decode.fail <| "Unable to decode habit, invalid __typename: " ++ typeName
             )
+
+
+decodeSuspendedInterval : Decode.Decoder SuspendedInterval
+decodeSuspendedInterval =
+    decode SuspendedInterval
+        |> required "start_date" decodeYmdDate
+        |> optional "end_date" (Decode.maybe decodeYmdDate) Nothing
 
 
 decodeFrequencyChangeRecord : Decode.Decoder FrequencyChangeRecord

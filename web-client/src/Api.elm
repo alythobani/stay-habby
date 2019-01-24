@@ -80,6 +80,18 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
         }
       }
       time_of_day
+      suspensions {
+        start_date {
+          day
+          month
+          year
+        }
+        end_date {
+          day
+          month
+          year
+        }
+      }
     }
     ... on bad_habit {
       _id
@@ -116,6 +128,18 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
             saturday
             sunday
           }
+        }
+      }
+      suspensions {
+        start_date {
+          day
+          month
+          year
+        }
+        end_date {
+          day
+          month
+          year
         }
       }
     }
@@ -327,6 +351,18 @@ mutationAddHabit createHabit ymd =
                     }
                   }
                   time_of_day
+                  suspensions {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
+                      day
+                      month
+                      year
+                    }
+                  }
                 }
                 ... on bad_habit {
                   _id
@@ -363,6 +399,18 @@ mutationAddHabit createHabit ymd =
                         saturday
                         sunday
                       }
+                    }
+                  }
+                  suspensions {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
+                      day
+                      month
+                      year
                     }
                   }
                 }
@@ -540,6 +588,18 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
                     }
                   }
                   time_of_day
+                  suspensions {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
+                      day
+                      month
+                      year
+                    }
+                  }
                 }
                 ... on bad_habit {
                   _id
@@ -576,6 +636,18 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
                         saturday
                         sunday
                       }
+                    }
+                  }
+                  suspensions {
+                    start_date {
+                      day
+                      month
+                      year
+                    }
+                    end_date {
+                      day
+                      month
+                      year
                     }
                   }
                 }

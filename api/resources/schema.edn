@@ -155,6 +155,10 @@
                                               :good_habit {:type :create_good_habit_data}
                                               :bad_habit {:type :create_bad_habit_data}}}
 
+                 :create_suspended_interval_data {:description "The data needed to create a suspended interval."
+                                                  :fields {:start_date {:type (non-null :date_data)}
+                                                           :end_date {:type :date_data}}}
+
                  :create_frequency_change_record_data {:description "The data required to create a frequency change record."
                                                        :fields {:start_date {:type (non-null :date_data)}
                                                                 :end_date {:type :date_data}
@@ -183,6 +187,12 @@
                                              :suspended {:type (non-null Boolean)}
                                              :toggle_date {:type (non-null :date_data)}}
                                       :resolve :query/resolve-mutation-toggle-suspended-habit}
+
+             :edit_habit_suspensions {:type (non-null :habit)
+                                      :description "Change a habit's `suspensions` field, returns the habit."
+                                      :args {:habit_id {:type (non-null ID)}
+                                             :new_suspensions {:type (non-null (list (non-null :create_suspended_interval_data)))}}
+                                      :resolve :query/resolve-mutation-edit-habit-suspensions}
 
              :edit_habit_goal_frequencies {:type (non-null :habit)
                                            :description "Change a habit's `target_frequencies` or `threshold_frequencies`, returns the habit."

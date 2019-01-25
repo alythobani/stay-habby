@@ -44,6 +44,16 @@
         (assoc final_habit :suspensions [])
         (mc/insert-and-return db (:habits collection-names) final_habit)))
 
+(defn edit-habit-suspensions
+  "Changes a habit's `:suspensions` field."
+  [{:keys [db habit_id new_suspensions] :or {db habby_db}}]
+  (mc/find-and-modify db
+                      (:habits collection-names)
+                      {:_id (ObjectId. habit_id)}
+                      {$set {:suspensions new_suspensions}}
+                      {:return-new true}))
+
+
 (defn edit-habit-goal-frequencies
   "Changes a habit's `:target_frequencies` or `:threshold_frequencies` field."
   [{:keys [db habit_id new_frequencies habit_type] :or {db habby_db}}]

@@ -115,7 +115,19 @@
   [context {:keys [current_client_date] :as all} value]
   (map tag-type (db/get-frequency-stats (assoc all :current_client_date (date-from-y-m-d-map current_client_date)))))
 
-
+(defn resolve-mutation-edit-habit-suspensions
+  "@refer `db/edit-habit-suspensions`."
+  [context {:keys [new_suspensions] :as all} value]
+  (let [convert-suspended-interval-y-m-d-maps-to-dates (fn [suspended-interval]
+                                                         (let [{start-date-ymd :start_date
+                                                                end-date-ymd :end_date} suspended-interval]
+                                                           (assoc suspended-interval
+                                                                  :start_date (date-from-y-m-d-map start-date-ymd)
+                                                                  :end_date (if (nil? end-date-ymd)
+                                                                              nil
+                                                                              (date-from-y-m-d-map end-date-ymd)))))
+        new_suspensions (map convert-suspended-interval-y-m-d-maps-to-dates new_suspensions)]
+    (tag-type (db/edit-habit-suspensions (assoc all :new_suspensions new_suspensions)))))
 
 (defn resolve-mutation-edit-habit-goal-frequencies
   "@refer `db/edit-habit-goal-frequencies`."
@@ -149,6 +161,7 @@
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
    :query/resolve-mutation-toggle-suspended-habit (create-async-resolver resolve-mutation-toggle-suspended-habit)
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)
+   :query/resolve-mutation-edit-habit-suspensions (create-async-resolver resolve-mutation-edit-habit-suspensions)
    :query/resolve-mutation-edit-habit-goal-frequencies (create-async-resolver resolve-mutation-edit-habit-goal-frequencies)})
 
 (defn load-schema

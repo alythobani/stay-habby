@@ -723,3 +723,51 @@ mutationToggleSuspendedHabit { day, month, year } habitId suspended =
                 |> Util.templater templateDict
     in
     graphQLRequest query (Decode.at [ "data", "toggle_suspended_habit" ] SuspendedToggleEvent.decodeSuspendedToggleEvent)
+
+
+mutationEditHabitSuspensions : String -> List Habit.SuspendedInterval -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
+mutationEditHabitSuspensions habitId newSuspensions =
+    let
+        suspendedIntervalToGraphQLString : Habit.SuspendedInterval -> String
+        suspendedIntervalToGraphQLString suspendedInterval =
+            let
+                suspendedIntervalTemplateDict =
+                    Dict.fromList
+                        [ ( "start_date", YmdDate.toGraphQLInputString suspendedInterval.startDate )
+                        , ( "end_date"
+                          , case suspendedInterval.endDate of
+                                Just ymd ->
+                                    YmdDate.toGraphQLInputString ymd
+
+                                Nothing ->
+                                    "null"
+                          )
+                        ]
+            in
+            """{
+              start_date: {{start_date}},
+              end_date: {{end_date}}
+            }"""
+                |> Util.templater suspendedIntervalTemplateDict
+
+        templateDict =
+            Dict.fromList
+                [ ( "habit_id", habitId )
+                , ( "new_suspensions"
+                  , newSuspensions
+                        |> List.map suspendedIntervalToGraphQLString
+                        |> String.join ", "
+                  )
+                , ( "habit_output", Habit.graphQLOutputString )
+                ]
+
+        queryString =
+            """mutation {
+            edit_habit_suspensions(
+              habit_id: "{{habit_id}}",
+              new_suspensions: [{{new_suspensions}}]
+            ) {{habit_output}}
+            }"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest queryString <| Decode.at [ "data", "edit_habit_goal_frequencies" ] Habit.decodeHabit

@@ -1,4 +1,4 @@
-module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, SuspendedInterval, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, decodeSuspendedInterval, extractCreateHabit, extractNewGoal, getCommonCreateFields, getCommonFields, initAddHabitData, initEditGoalData, prettyPrintEveryXDayFrequency, prettyPrintFrequency, prettyPrintSpecificDayOfWeekFrequency, prettyPrintTotalWeekFrequency, splitHabits)
+module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, SuspendedInterval, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, decodeSuspendedInterval, extractCreateHabit, extractNewGoal, getCommonCreateFields, getCommonFields, graphQLOutputString, initAddHabitData, initEditGoalData, prettyPrintEveryXDayFrequency, prettyPrintFrequency, prettyPrintSpecificDayOfWeekFrequency, prettyPrintTotalWeekFrequency, splitHabits)
 
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
@@ -461,6 +461,114 @@ prettyPrintFrequency frequency unitNameSingular unitNamePlural =
 
         SpecificDayOfWeekFrequency specificDayOfWeekFrequencyRecord ->
             prettyPrintSpecificDayOfWeekFrequency specificDayOfWeekFrequencyRecord
+
+
+graphQLOutputString : String
+graphQLOutputString =
+    """{
+      __typename
+      ... on good_habit {
+        _id
+        description
+        name
+        unit_name_singular
+        unit_name_plural
+        target_frequencies {
+          start_date {
+            day
+            month
+            year
+          }
+          end_date {
+            day
+            month
+            year
+          }
+          new_frequency {
+            __typename
+            ... on every_x_days_frequency {
+              days
+              times
+            }
+            ... on total_week_frequency {
+              week
+            }
+            ... on specific_day_of_week_frequency {
+              monday
+              tuesday
+              wednesday
+              thursday
+              friday
+              saturday
+              sunday
+            }
+          }
+        }
+        time_of_day
+        suspensions {
+          start_date {
+            day
+            month
+            year
+          }
+          end_date {
+            day
+            month
+            year
+          }
+        }
+      }
+      ... on bad_habit {
+        _id
+        description
+        name
+        unit_name_singular
+        unit_name_plural
+        threshold_frequencies {
+          start_date {
+            day
+            month
+            year
+          }
+          end_date {
+            day
+            month
+            year
+          }
+          new_frequency {
+            __typename
+            ... on every_x_days_frequency {
+              days
+              times
+            }
+            ... on total_week_frequency {
+              week
+            }
+            ... on specific_day_of_week_frequency {
+              monday
+              tuesday
+              wednesday
+              thursday
+              friday
+              saturday
+              sunday
+            }
+          }
+        }
+        suspensions {
+          start_date {
+            day
+            month
+            year
+          }
+          end_date {
+            day
+            month
+            year
+          }
+        }
+      }
+    }"""
 
 
 decodeHabit : Decode.Decoder Habit

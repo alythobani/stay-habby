@@ -282,9 +282,8 @@ mutationAddHabit createHabit ymd =
                 , ( "initial_frequency_value"
                   , frequencyToGraphQLString commonFields.initialFrequency
                   )
-                , ( "day", toString startDate.day )
-                , ( "month", toString startDate.month )
-                , ( "year", toString startDate.year )
+                , ( "frequency_start_date", YmdDate.toGraphQLInputString startDate )
+                , ( "habit_output", Habit.graphQLOutputString )
                 ]
 
         isGoodHabit =
@@ -307,114 +306,7 @@ mutationAddHabit createHabit ymd =
                   unit_name_singular: "{{unit_name_singular}}",
                   unit_name_plural: "{{unit_name_plural}}"
                 }
-              }, frequency_start_date: {
-                day: {{day}},
-                month: {{month}},
-                year: {{year}}
-              }) {
-                __typename
-                ... on good_habit {
-                  _id
-                  description
-                  name
-                  unit_name_singular
-                  unit_name_plural
-                  target_frequencies {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                    new_frequency {
-                      __typename
-                      ... on every_x_days_frequency {
-                        days
-                        times
-                      }
-                      ... on total_week_frequency {
-                        week
-                      }
-                      ... on specific_day_of_week_frequency {
-                        monday
-                        tuesday
-                        wednesday
-                        thursday
-                        friday
-                        saturday
-                        sunday
-                      }
-                    }
-                  }
-                  time_of_day
-                  suspensions {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                  }
-                }
-                ... on bad_habit {
-                  _id
-                  description
-                  name
-                  unit_name_singular
-                  unit_name_plural
-                  threshold_frequencies {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                    new_frequency {
-                      __typename
-                      ... on every_x_days_frequency {
-                        days
-                        times
-                      }
-                      ... on total_week_frequency {
-                        week
-                      }
-                      ... on specific_day_of_week_frequency {
-                        monday
-                        tuesday
-                        wednesday
-                        thursday
-                        friday
-                        saturday
-                        sunday
-                      }
-                    }
-                  }
-                  suspensions {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                  }
-                }
-              }
+              }, frequency_start_date: {{frequency_start_date}}) {{habit_output}}
             }"""
                 |> Util.templater templateDict
     in
@@ -532,6 +424,7 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
                         |> List.map frequencyChangeRecordToGraphQLString
                         |> String.join ", "
                   )
+                , ( "habit_output", Habit.graphQLOutputString )
                 ]
 
         isGoodHabit =
@@ -548,110 +441,7 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
               habit_id: "{{habit_id}}",
               habit_type: "{{habit_type}}",
               new_frequencies: [{{new_frequencies}}]
-            ) {
-                __typename
-                ... on good_habit {
-                  _id
-                  description
-                  name
-                  unit_name_singular
-                  unit_name_plural
-                  target_frequencies {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                    new_frequency {
-                      __typename
-                      ... on every_x_days_frequency {
-                        days
-                        times
-                      }
-                      ... on total_week_frequency {
-                        week
-                      }
-                      ... on specific_day_of_week_frequency {
-                        monday
-                        tuesday
-                        wednesday
-                        thursday
-                        friday
-                        saturday
-                        sunday
-                      }
-                    }
-                  }
-                  time_of_day
-                  suspensions {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                  }
-                }
-                ... on bad_habit {
-                  _id
-                  description
-                  name
-                  unit_name_singular
-                  unit_name_plural
-                  threshold_frequencies {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                    new_frequency {
-                      __typename
-                      ... on every_x_days_frequency {
-                        days
-                        times
-                      }
-                      ... on total_week_frequency {
-                        week
-                      }
-                      ... on specific_day_of_week_frequency {
-                        monday
-                        tuesday
-                        wednesday
-                        thursday
-                        friday
-                        saturday
-                        sunday
-                      }
-                    }
-                  }
-                  suspensions {
-                    start_date {
-                      day
-                      month
-                      year
-                    }
-                    end_date {
-                      day
-                      month
-                      year
-                    }
-                  }
-                }
-              }
+            ) {{habit_output}}
             }"""
                 |> Util.templater templateDict
     in

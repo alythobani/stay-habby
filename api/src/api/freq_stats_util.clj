@@ -66,18 +66,13 @@
 
 (defn count-fragment-as-suspended?
   "Returns true iff we should count `habit-goal-fragment` as suspended based on `suspended-interval`.
-  Condition 1: the fragment is suspended only if the habit was suspended before (or day of) the fragment started. We shouldn't let the
-  user suspend a habit post-start-of-fragment in order to avoid poor performance stats.
-  Condition 2: the fragment is suspended only if the habit was resumed after the end of the fragment. If the user wants to
-  resume a habit in the middle of a fragment, we should let them count the fragment towards their statistics."
+  Treat it as suspended if there is any overlap."
   [habit-goal-fragment suspended-interval]
-  (if (nil? (:resume-date suspended-interval))
-    ; Never-ending suspended interval
-    (date-leq? (:suspend-date suspended-interval) (:start-date habit-goal-fragment))
-    (and (date-leq? (:suspend-date suspended-interval)
-                    (:start-date habit-goal-fragment))
-         (date-geq? (:resume-date suspended-interval)
-                    (t/plus (:end-date habit-goal-fragment) (t/days 1))))))
+  (and (date-leq? (:start_date suspended-interval)
+                  (:end-date habit-goal-fragment))
+       (or (nil? (:end_date suspended-interval))
+           (date-geq? (:end_date suspended-interval)
+                      (:start-date habit-goal-fragment)))))
 
 (defn during-habit-goal-fragment?
   "Returns true iff `datetime` occurs during `habit-goal-fragment`."
@@ -179,53 +174,30 @@
         updated-with-past-fragments-freq-stats (reduce update-freq-stats-with-past-fragment freq-stats past-fragments)]
     (update-freq-stats-with-current-fragment updated-with-past-fragments-freq-stats current-fragment freq (:type_name habit))))
 
-(defn get-suspended-intervals
-  "Takes in a list of `suspended_toggle_event`s and returns a list of maps representing intervals during which the habit was suspended."
-  [sorted-suspended-toggle-events]
-  (let [acc (reduce (fn [acc suspended-toggle-event]
-                      (if (:suspended suspended-toggle-event)
-                        ; Suspend
-                        (if (:unresumed-suspend-date acc)
-                          ; Habit was already suspended earlier. Use the existing unresumed-suspend-date, ignore this one.
-                          acc
-                          ; Habit was not already suspended. Now it is and we can wait for a Resume.
-                          (assoc acc :unresumed-suspend-date (:toggle_date suspended-toggle-event)))
-                        ; Resume
-                        (if (:unresumed-suspend-date acc)
-                          ; We can add a new suspend interval, and then clear :unresumed-suspend-date because it's done its work
-                          (assoc acc
-                                 :suspended-intervals (conj (:suspended-intervals acc)
-                                                            {:suspend-date (:unresumed-suspend-date acc),
-                                                             :resume-date (:toggle_date suspended-toggle-event)})
-                                 :unresumed-suspend-date nil)
-                          ; This Resume shouldn't affect any performance statistics.
-                          acc)))
-                    {:suspended-intervals [], :unresumed-suspend-date nil}
-                    sorted-suspended-toggle-events)]
-    (if (:unresumed-suspend-date acc)
-      ; The last Suspend was never dealt with, we still need to add a never-ending suspended interval
-      (conj (:suspended-intervals acc)
-            {:suspend-date (:unresumed-suspend-date acc),
-             :resume-date nil})
-      (:suspended-intervals acc))))
+(defn datetime-falls-within-suspended-interval?
+  "Returns true iff `datetime` occurs during `suspended-interval`."
+  [datetime suspended-interval]
+  (and (date-geq? datetime (:start_date suspended-interval))
+       (or (nil? (:end_date suspended-interval))
+           (date-leq? datetime (:end_date suspended-interval)))))
 
 (defn get-freq-stats-for-habit
   "Computes a `habit_frequency_stats` for `habit` based on habit data from `current-date` or earlier.
   `all-habit-data-until-current-date` may include data from other habits.
-  Uses `all-suspended-toggle-events-until-current-date` to determine when to exclude dates from performance calculation."
-  [habit all-habit-data-until-current-date all-suspended-toggle-events-until-current-date current-date]
+  Uses the habit's `:suspensions` array to determine when to exclude dates from performance calculation."
+  [habit all-habit-data-until-current-date current-date]
   (let [sorted-habit-data (->> all-habit-data-until-current-date
                                (filter #(= (:habit_id %) (:_id habit)))
                                (sort-by :date)),
-        sorted-suspended-toggle-events (->> all-suspended-toggle-events-until-current-date
-                                            (filter #(= (:habit_id %) (:_id habit)))
-                                            (sort-by :toggle_date)),
-        suspended-intervals (get-suspended-intervals sorted-suspended-toggle-events),
+        suspensions (:suspensions habit),
         first-freq (get-first-frequency habit),
-        habit-goal-fragments (get-habit-goal-fragments sorted-habit-data current-date (:type_name habit) first-freq suspended-intervals)]
+        habit-goal-fragments (get-habit-goal-fragments sorted-habit-data current-date (:type_name habit) first-freq suspensions)]
     (as-> (assoc default-frequency-stats :habit_id (:_id habit)) freq-stats
-          (if (seq suspended-intervals)
-            (assoc freq-stats :currently_suspended (nil? (:resume-date (last suspended-intervals))))
+          (if (seq suspensions)
+            ; The habit has been suspended before, check if it's currently suspended
+            (assoc freq-stats
+                   :currently_suspended (some #(datetime-falls-within-suspended-interval? current-date %) suspensions))
+            ; The habit has never been suspended before, so it's not currently suspended
             freq-stats)
           (if (nil? habit-goal-fragments)
             freq-stats

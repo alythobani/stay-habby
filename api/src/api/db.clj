@@ -136,12 +136,8 @@
                                 :habit_ids habit_ids}),
         all-habit-data-until-current-date (get-habit-data {:db db,
                                                            :before_date (date-to-y-m-d-map current_client_date),
-                                                           :habit_ids habit_ids}),
-        all-suspended-toggle-events-until-current-date (get-suspended-toggle-events {:db db,
-                                                                                     :before_date (date-to-y-m-d-map current_client_date),
-                                                                                     :habit_ids habit_ids})]
+                                                           :habit_ids habit_ids})]
     (map #(get-freq-stats-for-habit %
                                     all-habit-data-until-current-date
-                                    all-suspended-toggle-events-until-current-date
                                     current_client_date)
          all-habits)))

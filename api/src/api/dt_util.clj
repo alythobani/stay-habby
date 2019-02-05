@@ -18,6 +18,13 @@
   (or (same-date? dt1 dt2)
       (t/before? dt1 dt2)))
 
+(defn earliest-datetime
+  "Returns `dt1` if it falls on or before `dt2`, else returns `dt2`."
+  [dt1 dt2]
+  (if (date-leq? dt1 dt2)
+    dt1
+    dt2))
+
 (defn first-monday-before-datetime
   "Returns the date of the first Monday before `dt`.
   Subtracting (<day of week of `dt`> - 1) days from `dt` yields the most recent Monday.

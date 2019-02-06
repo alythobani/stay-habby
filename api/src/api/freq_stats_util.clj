@@ -63,7 +63,8 @@
      :end-date fragment-end-dt,
      :total-done 0,
      :successful false,
-     :suspended (some #(count-fragment-as-suspended? fragment-start-dt fragment-end-dt %) suspended-intervals),
+     ; `some` returns `nil` if the pred is not satisfied by any array element. `some?` converts to a boolean.
+     :suspended (some? (some #(count-fragment-as-suspended? fragment-start-dt fragment-end-dt %) suspended-intervals)),
      :valid (= expected-fragment-length actual-fragment-length),
      :goal-amount (get-habit-goal-amount-for-datetime fragment-start-dt freq),
      :expected-fragment-length expected-fragment-length,
@@ -214,7 +215,7 @@
           (if (seq suspensions)
             ; The habit has been suspended before, check if it's currently suspended
             (assoc freq-stats
-                   :currently_suspended (some #(datetime-falls-within-suspended-interval? current-date %) suspensions))
+                   :currently_suspended (some? (some #(datetime-falls-within-suspended-interval? current-date %) suspensions)))
             ; The habit has never been suspended before, so it's not currently suspended
             freq-stats)
           (if (nil? habit-goal-fragments)

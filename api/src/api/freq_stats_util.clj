@@ -89,7 +89,7 @@
 
 (defn evaluate-habit-goal-fragment-successful
   "Evaluates the `:successful` field of `habit-goal-fragment` based on its `:total-done` field, the type of habit, and the habit's goal."
-  [habit-goal-fragment habit-type freq]
+  [habit-goal-fragment habit-type]
   (assoc habit-goal-fragment
          :successful ((if (= habit-type "good_habit") >= <=)
                       (:total-done habit-goal-fragment)
@@ -97,11 +97,11 @@
 
 (defn evaluate-habit-goal-fragment
   "Evaluates `:total-done` and `:successful` fields of a habit goal fragment."
-  [habit-goal-fragment habit-data habit-type freq]
+  [habit-goal-fragment habit-data habit-type]
   (let [habit-data-during-fragment (get-habit-data-during-fragment habit-data habit-goal-fragment)]
     (-> habit-goal-fragment
         (evaluate-habit-goal-fragment-total-done habit-data-during-fragment)
-        (evaluate-habit-goal-fragment-successful habit-type freq))))
+        (evaluate-habit-goal-fragment-successful habit-type))))
 
 (defn create-habit-goal-fragments-for-an-fcr
   "Initializes habit goal fragments for a habit based on a `frequency_change_record` (`fcr`).
@@ -134,7 +134,7 @@
     (let [habit-goal-fragments (create-habit-goal-fragments current-date
                                                             freq-change-records
                                                             suspended-intervals)]
-      (map #(evaluate-habit-goal-fragment % sorted-habit-data habit-type freq) habit-goal-fragments))))
+      (map #(evaluate-habit-goal-fragment % sorted-habit-data habit-type) habit-goal-fragments))))
 
 (defn update-freq-stats-with-past-fragment
   "Updates fields of a `habit_frequency_stats` based on a past habit goal fragment."

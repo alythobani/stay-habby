@@ -687,7 +687,7 @@ update msg model =
             ( model, Cmd.none )
 
         OnEditGoalSuccess habit ->
-            ( { model
+            { model
                 | allHabits =
                     RemoteData.map
                         (\allHabits ->
@@ -699,9 +699,15 @@ update msg model =
                         model.allHabits
                 , editGoal = Habit.initEditGoalData
                 , showEditGoalDialog = False
-              }
-            , Cmd.none
-            )
+            }
+                ! [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
+                  , case model.historyViewerSelectedDate of
+                        Just ymd ->
+                            getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
+
+                        Nothing ->
+                            Cmd.none
+                  ]
 
         OnEditGoalSubmitClick habitId newFrequencies habitType ->
             ( { model

@@ -249,52 +249,6 @@ update msg model =
                             Cmd.none
                   ]
 
-        ToggleSuspendedHabit ymd habitId suspended onTodayViewer ->
-            let
-                updateHabitActionsDropdownModel model =
-                    if onTodayViewer then
-                        { model
-                            | todayViewerHabitActionsDropdowns =
-                                Dict.update
-                                    habitId
-                                    (always <| Just False)
-                                    model.todayViewerHabitActionsDropdowns
-                        }
-
-                    else
-                        { model
-                            | historyViewerHabitActionsDropdowns =
-                                Dict.update
-                                    habitId
-                                    (always <| Just False)
-                                    model.historyViewerHabitActionsDropdowns
-                        }
-            in
-            ( updateHabitActionsDropdownModel model
-            , Api.mutationToggleSuspendedHabit
-                ymd
-                habitId
-                suspended
-                model.apiBaseUrl
-                OnToggleSuspendedHabitFailure
-                OnToggleSuspendedHabitSuccess
-            )
-
-        OnToggleSuspendedHabitFailure apiError ->
-            -- TODO
-            ( model, Cmd.none )
-
-        OnToggleSuspendedHabitSuccess updatedSuspendedToggleEvent ->
-            model
-                ! [ getTodayViewerFrequencyStats [ updatedSuspendedToggleEvent.habitId ]
-                  , case model.historyViewerSelectedDate of
-                        Just ymd ->
-                            getHistoryViewerFrequencyStats ymd [ updatedSuspendedToggleEvent.habitId ]
-
-                        Nothing ->
-                            Cmd.none
-                  ]
-
         OnToggleHistoryViewer ->
             ( { model | openHistoryViewer = not model.openHistoryViewer }
             , Cmd.none

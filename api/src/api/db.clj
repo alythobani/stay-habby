@@ -14,8 +14,7 @@
 (def collection-names
   "The names of all the collections in the database."
   {:habits "habits"
-   :habit_data "habit_data"
-   :suspended_toggle_events "suspended_toggle_events"})
+   :habit_data "habit_data"})
 
 (defonce connection (mg/connect))
 
@@ -71,18 +70,6 @@
   [{:keys [db habit_id] :or {db habby_db}}]
   (= 1 (.getN (mc/remove-by-id db (:habits collection-names) (ObjectId. habit_id)))))
 
-(defn toggle-suspended-habit
-  "Add a record of a habit being suspended/resumed on a specific date.
-  If a `suspended_toggle_event` already exists for the given date, overwrites it.
-  Returns the created/modified `suspended_toggle_event`."
-  [{:keys [db habit_id suspended toggle-date-time] :or {db habby_db}}]
-  (mc/find-and-modify db
-                      (:suspended_toggle_events collection-names)
-                      {:toggle_date toggle-date-time, :habit_id (ObjectId. habit_id)}
-                      {$set {:suspended suspended}
-                       $setOnInsert {:toggle_date toggle-date-time, :habit_id (ObjectId. habit_id), :_id (ObjectId.)}}
-                      {:upsert true, :return-new true}))
-
 (defn get-habits
   "Retrieves all habits sync from the database as clojure maps."
   [{:keys [db habit_ids] :or {db habby_db}}]
@@ -102,19 +89,6 @@
                  ; Require dates be earlier than midnight the day after `before_date`, so that times don't interfere
                  :date {$lt (t/plus (date-from-y-m-d-map before_date) (t/days 1))}))
         (mc/find-maps db (:habit_data collection-names) find-query-filter)))
-
-(defn get-suspended-toggle-events
-  "Gets `suspended_toggle_event`s from the db, optionally after/before a specific date or for specific habits."
-  [{:keys [db after_date before_date habit_ids] :or {db habby_db}}]
-  (as-> {} find-query-filter
-        (if (nil? habit_ids) find-query-filter (assoc find-query-filter :habit_id {$in (map #(ObjectId. %) habit_ids)}))
-        (if (nil? after_date) find-query-filter (assoc find-query-filter :toggle_date {$gte (date-from-y-m-d-map after_date)}))
-        (if (nil? before_date)
-          find-query-filter
-          (assoc find-query-filter
-                 ; Require dates be earlier than midnight the day after `before_date`, so that times don't interfere
-                 :toggle_date {$lt (t/plus (date-from-y-m-d-map before_date) (t/days 1))}))
-        (mc/find-maps db (:suspended_toggle_events collection-names) find-query-filter)))
 
 (defn set-habit-data
   "Set the `amount` for a habit on a specfic day."

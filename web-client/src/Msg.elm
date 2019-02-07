@@ -91,3 +91,7 @@ type Msg
     | OnEditGoalFailure ApiError
     | OnEditGoalSuccess Habit.Habit
     | OnEditGoalSubmitClick String (List Habit.FrequencyChangeRecord) String
+      -- Suspending Habits
+    | OnResumeOrSuspendHabitClick String Bool Bool (List Habit.SuspendedInterval)
+    | OnResumeOrSuspendHabitFailure ApiError
+    | OnResumeOrSuspendHabitSuccess Habit.Habit

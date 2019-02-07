@@ -756,6 +756,128 @@ update msg model =
             , Api.mutationEditHabitGoalFrequencies habitId newFrequencies habitType model.apiBaseUrl OnEditGoalFailure OnEditGoalSuccess
             )
 
+        -- Suspending Habits
+        OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer oldSuspensions ->
+            let
+                newDropdownsModel =
+                    -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
+                    if onTodayViewer then
+                        { model
+                            | todayViewerHabitActionsDropdowns =
+                                Dict.update
+                                    habitId
+                                    (always <| Just False)
+                                    model.todayViewerHabitActionsDropdowns
+                        }
+
+                    else
+                        { model
+                            | historyViewerHabitActionsDropdowns =
+                                Dict.update
+                                    habitId
+                                    (always <| Just False)
+                                    model.historyViewerHabitActionsDropdowns
+                        }
+
+                newSuspensions : List Habit.SuspendedInterval
+                newSuspensions =
+                    if currentlySuspended then
+                        -- User is trying to Resume the Habit
+                        case List.reverse oldSuspensions of
+                            currSuspendedInterval :: rest ->
+                                -- Check if the last SuspendedInterval has been resumed yet
+                                case currSuspendedInterval.endDate of
+                                    Just endDateYmd ->
+                                        -- It's already been closed, nothing to do
+                                        oldSuspensions
+
+                                    Nothing ->
+                                        -- We should close the suspended interval to resume the habit
+                                        if YmdDate.compareYmds currSuspendedInterval.startDate model.ymd == LT then
+                                            -- The suspended interval started earlier than today.
+                                            -- To resume today, we set its endDate to yesterday.
+                                            let
+                                                yesterday =
+                                                    YmdDate.addDays -1 model.ymd
+
+                                                newCurrSuspendedInterval =
+                                                    { currSuspendedInterval | endDate = Just yesterday }
+                                            in
+                                            List.reverse <| newCurrSuspendedInterval :: rest
+
+                                        else
+                                            -- it was suspended today (or later, but that shouldn't be possible), we can just get rid of it
+                                            List.take (List.length oldSuspensions - 1) oldSuspensions
+
+                            [] ->
+                                -- Habit has never been suspended before, so it's already active. Nothing to do
+                                []
+
+                    else
+                        -- User is trying to Suspend the Habit
+                        case List.reverse oldSuspensions of
+                            currSuspendedInterval :: rest ->
+                                -- Check if the last SuspendedInterval has still in effect
+                                case currSuspendedInterval.endDate of
+                                    Just endDateYmd ->
+                                        -- The habit has been resumed.
+                                        if YmdDate.compareYmds endDateYmd model.ymd == LT then
+                                            -- The SuspendedInterval's last day was yesterday or earlier.
+                                            -- To suspend the habit, we should add a new SuspendedInterval that starts today.
+                                            let
+                                                newSuspendedInterval =
+                                                    { startDate = model.ymd, endDate = Nothing }
+                                            in
+                                            List.reverse <| newSuspendedInterval :: currSuspendedInterval :: rest
+
+                                        else
+                                            -- The SuspendedInterval's last day is today (or later, but that shouldn't be possible).
+                                            -- This means the habit is already currently suspended, so there's nothing to do.
+                                            -- (For that reason this branch should never even execute)
+                                            oldSuspensions
+
+                                    Nothing ->
+                                        -- The last suspension is still in effect (so the habit is still suspended), nothing to do.
+                                        oldSuspensions
+
+                            [] ->
+                                -- Let's give the Habit its first suspension
+                                [ { startDate = model.ymd, endDate = Nothing } ]
+            in
+            ( newDropdownsModel
+            , Api.mutationEditHabitSuspensions
+                habitId
+                newSuspensions
+                model.apiBaseUrl
+                OnResumeOrSuspendHabitFailure
+                OnResumeOrSuspendHabitSuccess
+            )
+
+        OnResumeOrSuspendHabitFailure apiError ->
+            -- TODO
+            ( model, Cmd.none )
+
+        OnResumeOrSuspendHabitSuccess habit ->
+            { model
+                | allHabits =
+                    RemoteData.map
+                        (\allHabits ->
+                            Util.replaceOrAdd
+                                allHabits
+                                (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
+                                habit
+                        )
+                        model.allHabits
+            }
+                ! [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
+                  , case model.historyViewerSelectedDate of
+                        Just ymd ->
+                            getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
+
+                        Nothing ->
+                            Cmd.none
+                  ]
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

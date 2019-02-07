@@ -1,4 +1,4 @@
-module Api exposing (HabitsAndHabitDataAndFrequencyStats, QueriedFrequencyStats, frequencyToGraphQLString, graphQLRequest, mutationAddHabit, mutationEditHabitGoalFrequencies, mutationSetHabitData, mutationToggleSuspendedHabit, queryHabitsAndHabitDataAndFrequencyStats, queryPastFrequencyStats)
+module Api exposing (HabitsAndHabitDataAndFrequencyStats, QueriedFrequencyStats, frequencyToGraphQLString, graphQLRequest, mutationAddHabit, mutationEditHabitGoalFrequencies, mutationEditHabitSuspensions, mutationSetHabitData, mutationToggleSuspendedHabit, queryHabitsAndHabitDataAndFrequencyStats, queryPastFrequencyStats)
 
 import DefaultServices.Http exposing (post)
 import DefaultServices.Util as Util
@@ -40,110 +40,9 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
     let
         queryString =
             """{
-  habits: get_habits {
-    __typename
-    ... on good_habit {
-      _id
-      description
-      name
-      unit_name_singular
-      unit_name_plural
-      target_frequencies {
-        start_date {
-          day
-          month
-          year
-        }
-        end_date {
-          day
-          month
-          year
-        }
-        new_frequency {
-          __typename
-          ... on every_x_days_frequency {
-            days
-            times
-          }
-          ... on total_week_frequency {
-            week
-          }
-          ... on specific_day_of_week_frequency {
-            monday
-            tuesday
-            wednesday
-            thursday
-            friday
-            saturday
-            sunday
-          }
-        }
-      }
-      time_of_day
-      suspensions {
-        start_date {
-          day
-          month
-          year
-        }
-        end_date {
-          day
-          month
-          year
-        }
-      }
-    }
-    ... on bad_habit {
-      _id
-      description
-      name
-      unit_name_singular
-      unit_name_plural
-      threshold_frequencies {
-        start_date {
-          day
-          month
-          year
-        }
-        end_date {
-          day
-          month
-          year
-        }
-        new_frequency {
-          __typename
-          ... on every_x_days_frequency {
-            days
-            times
-          }
-          ... on total_week_frequency {
-            week
-          }
-          ... on specific_day_of_week_frequency {
-            monday
-            tuesday
-            wednesday
-            thursday
-            friday
-            saturday
-            sunday
-          }
-        }
-      }
-      suspensions {
-        start_date {
-          day
-          month
-          year
-        }
-        end_date {
-          day
-          month
-          year
-        }
-      }
-    }
-  }
+  habits: get_habits """
+                ++ Habit.graphQLOutputString
+                ++ """
   habitData: get_habit_data {
     _id
     amount
@@ -560,4 +459,4 @@ mutationEditHabitSuspensions habitId newSuspensions =
             }"""
                 |> Util.templater templateDict
     in
-    graphQLRequest queryString <| Decode.at [ "data", "edit_habit_goal_frequencies" ] Habit.decodeHabit
+    graphQLRequest queryString <| Decode.at [ "data", "edit_habit_suspensions" ] Habit.decodeHabit

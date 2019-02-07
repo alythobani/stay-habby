@@ -57,6 +57,7 @@ view model =
             model.historyViewerFrequencyStats
             model.editingHistoryHabitAmount
             model.historyViewerHabitActionsDropdowns
+            model.ymd
         , renderSetHabitDataShortcut
             model.showSetHabitDataShortcut
             model.setHabitDataShortcutHabitNameFilterText
@@ -134,7 +135,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             _ ->
                                 ( goodHabits, badHabits, [] )
 
-                    renderHabit currentlySuspended habit =
+                    renderHabit habit =
                         renderHabitBox
                             (case rdFrequencyStatsList of
                                 RemoteData.Success frequencyStatsList ->
@@ -150,11 +151,13 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             editingHabitDataDict
                             OnHabitDataInput
                             SetHabitData
-                            currentlySuspended
                             habitActionsDropdowns
                             ToggleTodayViewerHabitActionsDropdown
                             True
                             habit
+                            ymd
+
+                    -- TODO: Redundant, but should be removed during the UI change of only one panel (no History Viewer)
                 in
                 div []
                     [ div
@@ -165,13 +168,13 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                         ]
                         [ div
                             [ class "habit-list good-habits" ]
-                            (List.map (renderHabit False) sortedGoodHabits)
+                            (List.map renderHabit sortedGoodHabits)
                         , div
                             [ class "habit-list bad-habits" ]
-                            (List.map (renderHabit False) sortedBadHabits)
+                            (List.map renderHabit sortedBadHabits)
                         , div
                             [ class "habit-list suspended-habits" ]
-                            (List.map (renderHabit True) sortedSuspendedHabits)
+                            (List.map renderHabit sortedSuspendedHabits)
                         ]
                     , button
                         [ class "add-habit"
@@ -393,8 +396,9 @@ renderHistoryViewerPanel :
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Dict.Dict String (Dict.Dict String Int)
     -> Dict.Dict String Dropdown.State
+    -> YmdDate.YmdDate
     -> Html Msg
-renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns =
+renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns todayYmd =
     case ( rdHabits, rdHabitData ) of
         ( RemoteData.Success habits, RemoteData.Success habitData ) ->
             div
@@ -454,7 +458,7 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                     Dict.get (YmdDate.toSimpleString selectedDate) editingHabitDataDictDict
                                         ?> Dict.empty
 
-                                renderHabit currentlySuspended habit =
+                                renderHabit habit =
                                     renderHabitBox
                                         (case rdFrequencyStatsList of
                                             RemoteData.Success frequencyStatsList ->
@@ -470,11 +474,11 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                         editingHabitDataDict
                                         (OnHistoryViewerHabitDataInput selectedDate)
                                         SetHabitData
-                                        currentlySuspended
                                         habitActionsDropdowns
                                         ToggleHistoryViewerHabitActionsDropdown
                                         False
                                         habit
+                                        todayYmd
                             in
                             div
                                 []
@@ -482,9 +486,9 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                 , span [ class "change-date", onClick OnHistoryViewerChangeDate ] [ text "change date" ]
                                 , div
                                     [ class "all-habit-lists" ]
-                                    [ div [ class "habit-list good-habits" ] <| List.map (renderHabit False) sortedGoodHabits
-                                    , div [ class "habit-list bad-habits" ] <| List.map (renderHabit False) sortedBadHabits
-                                    , div [ class "habit-list suspended-habits" ] <| List.map (renderHabit True) sortedSuspendedHabits
+                                    [ div [ class "habit-list good-habits" ] <| List.map renderHabit sortedGoodHabits
+                                    , div [ class "habit-list bad-habits" ] <| List.map renderHabit sortedBadHabits
+                                    , div [ class "habit-list suspended-habits" ] <| List.map renderHabit sortedSuspendedHabits
                                     ]
                                 ]
                 ]
@@ -520,9 +524,36 @@ habitActionsDropdownDiv :
     -> YmdDate.YmdDate
     -> String
     -> Bool
-    -> Bool
+    -> List Habit.SuspendedInterval
+    -> YmdDate.YmdDate
     -> Html Msg
-habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended onTodayViewer =
+habitActionsDropdownDiv dropdown config ymd habitId onTodayViewer suspensions todayYmd =
+    let
+        currentlySuspended : Bool
+        currentlySuspended =
+            case List.reverse suspensions of
+                currSuspendedInterval :: rest ->
+                    case currSuspendedInterval.endDate of
+                        Just endDateYmd ->
+                            -- The latest `SuspendedInterval` has been closed already.
+                            -- Assumption: no `SuspendedInterval`s were started or ended after today.
+                            if YmdDate.compareYmds endDateYmd todayYmd == LT then
+                                -- The end date was yesterday or earlier, so the habit is now active.
+                                False
+
+                            else
+                                -- The end date is today (or later, but that shouldn't be possible).
+                                -- Dates are inclusive, so the habit is currently suspended.
+                                True
+
+                        Nothing ->
+                            -- Suspended interval is endless, habit is currently suspended
+                            True
+
+                [] ->
+                    -- Habit has never been suspended before, so it's active
+                    False
+    in
     div [ class "actions-dropdown" ]
         [ Dropdown.dropdown
             dropdown
@@ -541,7 +572,7 @@ habitActionsDropdownDiv dropdown config ymd habitId currentlySuspended onTodayVi
                 [ class "action-buttons" ]
                 [ button
                     [ class "action-button"
-                    , onClick <| ToggleSuspendedHabit ymd habitId (not currentlySuspended) onTodayViewer
+                    , onClick <| OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer suspensions
                     ]
                     [ text <|
                         if currentlySuspended then
@@ -573,13 +604,13 @@ renderHabitBox :
     -> Dict.Dict String Int
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
-    -> Bool
     -> Dict.Dict String Dropdown.State
     -> (String -> Dropdown.State -> Msg)
     -> Bool
     -> Habit.Habit
+    -> YmdDate.YmdDate
     -> Html Msg
-renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData currentlySuspended habitActionsDropdowns toggleHabitActionsDropdown onTodayViewer habit =
+renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput setHabitData habitActionsDropdowns toggleHabitActionsDropdown onTodayViewer habit todayYmd =
     let
         habitRecord =
             Habit.getCommonFields habit
@@ -632,7 +663,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             )
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
-        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig ymd habitRecord.id currentlySuspended onTodayViewer
+        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig ymd habitRecord.id onTodayViewer habitRecord.suspensions todayYmd
         , case habitStats of
             Nothing ->
                 frequencyStatisticDiv "Error retriving performance stats"

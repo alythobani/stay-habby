@@ -91,3 +91,5 @@ type Msg
     | OnResumeOrSuspendHabitClick String Bool Bool (List Habit.SuspendedInterval)
     | OnResumeOrSuspendHabitFailure ApiError
     | OnResumeOrSuspendHabitSuccess Habit.Habit
+      -- Error messages
+    | OnToggleShowErrorMessage

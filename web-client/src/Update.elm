@@ -838,6 +838,12 @@ update msg model =
                             Cmd.none
                   ]
 
+        -- Error Messages
+        OnToggleShowErrorMessage ->
+            ( { model | showErrorMessage = not model.showErrorMessage }
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

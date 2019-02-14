@@ -61,4 +61,8 @@ type alias Model =
     , showEditGoalDialog : Bool
     , editGoalDialogHabit : Maybe Habit.Habit
     , editGoal : Habit.EditGoalInputData
+
+    -- Error messages
+    , errorMessage : Maybe String
+    , showErrorMessage : Bool
     }

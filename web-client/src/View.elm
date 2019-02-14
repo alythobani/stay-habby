@@ -48,6 +48,7 @@ view model =
             model.todayViewerHabitActionsDropdowns
             model.darkModeOn
             model.mdl
+            model.errorMessage
         , renderHistoryViewerPanel
             model.openHistoryViewer
             model.historyViewerDateInput
@@ -72,6 +73,9 @@ view model =
             model.editGoalDialogHabit
             model.editGoal
             model.ymd
+        , renderErrorMessage
+            model.errorMessage
+            model.showErrorMessage
         ]
 
 
@@ -86,8 +90,9 @@ renderTodayPanel :
     -> Dict.Dict String Dropdown.State
     -> Bool
     -> Material.Model
+    -> Maybe String
     -> Html Msg
-renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns darkModeOn mdl =
+renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns darkModeOn mdl errorMessage =
     let
         createHabitData =
             Habit.extractCreateHabit addHabit
@@ -95,6 +100,14 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
     div
         [ class "today-panel" ]
         [ div [ class "today-panel-title", onClick OnToggleTodayViewer ] [ text "Today's Progress" ]
+        , div
+            [ classList
+                [ ( "error-message-icon", True )
+                , ( "display-none", not <| Maybe.isJust errorMessage )
+                ]
+            , onClick OnToggleShowErrorMessage
+            ]
+            [ i [ class "material-icons" ] [] ]
         , div [ class "dark-mode-switch" ]
             [ Toggles.switch
                 Mdl
@@ -1262,3 +1275,22 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
             Nothing ->
                 []
         )
+
+
+renderErrorMessage : Maybe String -> Bool -> Html Msg
+renderErrorMessage errorMessage showErrorMessage =
+    div
+        [ classList
+            [ ( "error-message", True )
+            , ( "display-none", not showErrorMessage )
+            ]
+        ]
+        [ div
+            [ class "error-message-background"
+            , onClick OnToggleShowErrorMessage
+            ]
+            []
+        , div
+            [ class "error-message-text" ]
+            [ text <| "Error: " ++ (errorMessage ?> "") ]
+        ]

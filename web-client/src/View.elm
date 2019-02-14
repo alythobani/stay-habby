@@ -1289,8 +1289,13 @@ renderErrorMessage errorMessage showErrorMessage =
             [ class "error-message-background"
             , onClick OnToggleShowErrorMessage
             ]
-            []
-        , div
-            [ class "error-message-text" ]
-            [ text <| ("" <? errorMessage) ]
+            [ div
+                [ class "error-message-text" ]
+                [ text <|
+                    (errorMessage
+                        ||> (\em -> em ++ ". You may want to refresh the page.")
+                        ?> "No errors"
+                    )
+                ]
+            ]
         ]

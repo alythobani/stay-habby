@@ -747,21 +747,24 @@ body {
         width: 100vw;
         z-index: 2;
         background-color: rgba(101, 101, 101, 0.59);
-      }
-      .error-message-text {
-        position: absolute;
         display: flex;
-        flex-direction: column;
         justify-content: center;
-        text-align: center;
-        top: 40vh;
-        right: 40vw;
-        z-index: 3;
-        min-width: 400px;
-        height: 40px;
-        font-size: 20px;
-        color: red;
-        background-color: black;
+        align-items: center;
+
+        .error-message-text {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+          top: 40vh;
+          right: 40vw;
+          z-index: 3;
+          min-width: 400px;
+          height: 40px;
+          font-size: 20px;
+          color: red;
+          background-color: black;
+        }
       }
     }
     .all-habit-lists {

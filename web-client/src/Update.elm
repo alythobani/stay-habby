@@ -76,6 +76,7 @@ update msg model =
                 | allHabits = RemoteData.Failure apiError
                 , allHabitData = RemoteData.Failure apiError
                 , allFrequencyStats = RemoteData.Failure apiError
+                , errorMessage = Just <| "Error retrieving habits / data / stats: " ++ ApiError.toString apiError
               }
             , Cmd.none
             )
@@ -302,7 +303,9 @@ update msg model =
             { model | historyViewerSelectedDate = Just ymd } ! [ getHistoryViewerFrequencyStats ymd [] ]
 
         OnGetTodayFrequencyStatsFailure apiError ->
-            ( model, Cmd.none )
+            ( { model | errorMessage = Just <| "Error retrieving performance stats: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
 
         OnGetTodayFrequencyStatsSuccess { frequencyStatsList } ->
             let
@@ -330,7 +333,12 @@ update msg model =
             )
 
         OnGetPastFrequencyStatsFailure apiError ->
-            ( { model | historyViewerFrequencyStats = RemoteData.Failure apiError }, Cmd.none )
+            ( { model
+                | historyViewerFrequencyStats = RemoteData.Failure apiError
+                , errorMessage = Just <| "Error retrieving past performance stats: " ++ ApiError.toString apiError
+              }
+            , Cmd.none
+            )
 
         OnGetPastFrequencyStatsSuccess { frequencyStatsList } ->
             let

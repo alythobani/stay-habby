@@ -14,7 +14,8 @@
 (def collection-names
   "The names of all the collections in the database."
   {:habits "habits"
-   :habit_data "habit_data"})
+   :habit_data "habit_data"
+   :habit_day_notes "habit_day_notes"})
 
 (defonce connection (mg/connect))
 
@@ -89,6 +90,19 @@
                  ; Require dates be earlier than midnight the day after `before_date`, so that times don't interfere
                  :date {$lt (t/plus (date-from-y-m-d-map before_date) (t/days 1))}))
         (mc/find-maps db (:habit_data collection-names) find-query-filter)))
+
+(defn get-habit-day-notes
+  "Gets habit day notes from the db, optionally after/before a specific date or for specific habits."
+  [{:keys [db after_date before_date habit_ids] :or {db habby_db}}]
+  (as-> {} find-query-filter
+        (if (nil? habit_ids) find-query-filter (assoc find-query-filter :habit_id {$in (map #(ObjectId. %) habit_ids)}))
+        (if (nil? after_date) find-query-filter (assoc find-query-filter :date {$gte (date-from-y-m-d-map after_date)}))
+        (if (nil? before_date)
+          find-query-filter
+          (assoc find-query-filter
+                 ; Require dates be earlier than midnight the day after `before_date`, so that times don't interfere
+                 :date {$lt (t/plus (date-from-y-m-d-map before_date) (t/days 1))}))
+        (mc/find-maps db (:habit_day_notes collection-names) find-query-filter)))
 
 (defn set-habit-data
   "Set the `amount` for a habit on a specfic day."

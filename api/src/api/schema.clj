@@ -100,6 +100,11 @@
   [context args value]
   (db/get-habit-data args))
 
+(defn resolve-get-habit-day-notes
+  "@refer `db/get-habit-day-notes`."
+  [context args value]
+  (db/get-habit-day-notes args))
+
 (defn resolve-mutation-delete-habit
   "@refer `db/delete-habit`."
   [context args value]
@@ -155,7 +160,8 @@
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)
    :query/resolve-mutation-edit-habit-suspensions (create-async-resolver resolve-mutation-edit-habit-suspensions)
-   :query/resolve-mutation-edit-habit-goal-frequencies (create-async-resolver resolve-mutation-edit-habit-goal-frequencies)})
+   :query/resolve-mutation-edit-habit-goal-frequencies (create-async-resolver resolve-mutation-edit-habit-goal-frequencies)
+   :query/get-habit-day-notes (create-async-resolver resolve-get-habit-day-notes)})
 
 (defn load-schema
   []

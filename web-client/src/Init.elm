@@ -49,8 +49,8 @@ init { apiBaseUrl, currentTime } location =
       , showEditGoalDialog = False
       , editGoalDialogHabit = Nothing
       , editGoal = Habit.initEditGoalData
-      , errorMessage = Just "Test error"
-      , showErrorMessage = True -- TODO: temporary, this should be default False
+      , errorMessage = Nothing
+      , showErrorMessage = False
       }
     , Api.queryHabitsAndHabitDataAndFrequencyStats
         ymd

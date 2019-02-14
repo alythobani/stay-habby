@@ -1,4 +1,4 @@
-module Models.ApiError exposing (..)
+module Models.ApiError exposing (ApiError(..), GraphqlErrorInfo, GraphqlErrorLocation, decodeGraphqlErrorInfo, decodeGraphqlErrorLocation, decoder, toString)
 
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
@@ -32,6 +32,25 @@ type alias GraphqlErrorInfo =
 -}
 type alias GraphqlErrorLocation =
     { line : Int, column : Int }
+
+
+toString : ApiError -> String
+toString apiError =
+    case apiError of
+        UnexpectedPayload ->
+            "Unexpected Payload"
+
+        RawTimeout ->
+            "Raw Timeout"
+
+        RawNetworkError ->
+            "Raw Network Error"
+
+        GraphqlError graphqlErrorInfoList ->
+            graphqlErrorInfoList |> List.map .message |> String.join ", "
+
+        InternalError ->
+            "Internal Error"
 
 
 decoder : Decode.Decoder ApiError

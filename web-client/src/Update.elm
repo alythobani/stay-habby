@@ -10,6 +10,7 @@ import Dom
 import Keyboard.Extra as KK
 import Material
 import Model exposing (Model)
+import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
@@ -172,8 +173,9 @@ update msg model =
             )
 
         OnAddHabitFailure apiError ->
-            -- TODO
-            ( model, Cmd.none )
+            ( { model | errorMessage = Just <| "Error adding habit: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
 
         OnAddHabitSuccess habit ->
             ( { model
@@ -217,8 +219,9 @@ update msg model =
                     )
 
         OnSetHabitDataFailure apiError ->
-            -- TODO
-            ( model, Cmd.none )
+            ( { model | errorMessage = Just <| "Error setting habit data: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
 
         OnSetHabitDataSuccess updatedHabitDatum ->
             let
@@ -291,8 +294,9 @@ update msg model =
                     update (SetHistoryViewerSelectedDate ymd) model
 
                 Nothing ->
-                    -- TODO: show error message because of invalid date input
-                    ( model, Cmd.none )
+                    ( { model | errorMessage = Just "Error selecting date: invalid input" }
+                    , Cmd.none
+                    )
 
         SetHistoryViewerSelectedDate ymd ->
             { model | historyViewerSelectedDate = Just ymd } ! [ getHistoryViewerFrequencyStats ymd [] ]
@@ -683,8 +687,9 @@ update msg model =
             )
 
         OnEditGoalFailure apiError ->
-            -- TODO
-            ( model, Cmd.none )
+            ( { model | errorMessage = Just <| "Error editing habit goal: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
 
         OnEditGoalSuccess habit ->
             { model
@@ -814,8 +819,9 @@ update msg model =
             )
 
         OnResumeOrSuspendHabitFailure apiError ->
-            -- TODO
-            ( model, Cmd.none )
+            ( { model | errorMessage = Just <| "Error suspending/resuming habit: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
 
         OnResumeOrSuspendHabitSuccess habit ->
             { model

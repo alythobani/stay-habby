@@ -1292,5 +1292,5 @@ renderErrorMessage errorMessage showErrorMessage =
             []
         , div
             [ class "error-message-text" ]
-            [ text <| "Error: " ++ (errorMessage ?> "") ]
+            [ text <| ("" <? errorMessage) ]
         ]

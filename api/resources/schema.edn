@@ -83,7 +83,7 @@
                                             :habit_has_started {:type (non-null Boolean)}
                                             :currently_suspended {:type (non-null Boolean)}}}
 
-           :habit_day_note {:description "A note related to a habit on a given day"
+           :habit_day_note {:description "A note related to a habit on a given day."
                             :fields {:_id {:type (non-null ID)}
                                      :habit_id {:type (non-null ID)}
                                      :date {:type (non-null :date)
@@ -183,6 +183,14 @@
                                      :amount {:type (non-null Int)}
                                      :date {:type (non-null :date_data)}}
                               :resolve :query/resolve-mutation-set-habit-data}
+
+             :set_habit_day_note {:type (non-null :habit_day_note)
+                                  :description "Add a note for a habit on a given day."
+                                  :args {:habit_id {:type (non-null ID)}
+                                         :note {:type (non-null String)}
+                                         :date {:type (non-null :date_data)}}
+                                  :resolve :query/resolve-mutation-set-habit-day-note}
+
              :delete_habit {:type (non-null Boolean)
                             :description "Delete a habit by ID, returns true if the habit was deleted."
                             :args {:habit_id {:type (non-null ID)}}

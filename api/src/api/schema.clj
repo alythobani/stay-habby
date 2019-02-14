@@ -95,6 +95,11 @@
   [context {:keys [date] :as all} value]
   (db/set-habit-data (assoc (dissoc all :date) :date-time (date-from-y-m-d-map date))))
 
+(defn resolve-mutation-set-habit-day-note
+  "@refer `db/set-habit-day-note`."
+  [context {:keys [date] :as all} value]
+  (db/set-habit-day-note (assoc (dissoc all :date) :date-time (date-from-y-m-d-map date))))
+
 (defn resolve-get-habit-data
   "@refer `db/get-habit-data`."
   [context args value]
@@ -151,8 +156,10 @@
    :query/tag-type-for-new-frequency (create-tag-type-resolver :new_frequency)
    :query/resolve-mutation-add-habit (create-async-resolver resolve-mutation-add-habit)
    :query/resolve-mutation-set-habit-data (create-async-resolver resolve-mutation-set-habit-data)
+   :query/resolve-mutation-set-habit-day-note (create-async-resolver resolve-mutation-set-habit-day-note)
    :query/get-habit-data (create-async-resolver resolve-get-habit-data)
    :query/date-to-y-m-d-format (create-date-to-y-m-d-resolver :date)
+   :query/habit-day-note-date-to-y-m-d-format (create-date-to-y-m-d-resolver :date)
    :query/suspended-start-date-to-y-m-d-format (create-date-to-y-m-d-resolver :start_date)
    :query/suspended-end-date-to-y-m-d-format (create-nilable-date-to-y-m-d-resolver :end_date)
    :query/start-date-to-y-m-d-format (create-date-to-y-m-d-resolver :start_date)

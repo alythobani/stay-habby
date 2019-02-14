@@ -114,6 +114,16 @@
                        $setOnInsert {:date date-time, :habit_id (ObjectId. habit_id), :_id (ObjectId.)}}
                       {:upsert true, :return-new true}))
 
+(defn set-habit-day-note
+  "Add a `note` for a habit on a given day."
+  [{:keys [db habit_id note date-time] :or {db habby_db}}]
+  (mc/find-and-modify db
+                      (:habit_day_notes collection-names)
+                      {:date date-time, :habit_id (ObjectId. habit_id)}
+                      {$set {:note note}
+                       $setOnInsert {:date date-time, :habit_id (ObjectId. habit_id), :_id (ObjectId.)}}
+                      {:upsert true, :return-new true}))
+
 (defn get-frequency-stats
   "Returns performance statistics for the requested habits.
   Retrieves habits and habit data from database `db`.

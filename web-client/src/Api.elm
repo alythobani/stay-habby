@@ -10,6 +10,7 @@ import Models.ApiError exposing (ApiError)
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.HabitData as HabitData
+import Models.HabitDayNote as HabitDayNote
 import Models.YmdDate as YmdDate
 
 
@@ -374,6 +375,30 @@ mutationSetHabitData { day, month, year } habitId amount =
                 |> Util.templater templateDict
     in
     graphQLRequest query (Decode.at [ "data", "set_habit_data" ] HabitData.decodeHabitData)
+
+
+mutationSetHabitDayNote : YmdDate.YmdDate -> String -> String -> String -> (ApiError -> b) -> (HabitDayNote.HabitDayNote -> b) -> Cmd b
+mutationSetHabitDayNote ymd habitId note =
+    let
+        templateDict =
+            Dict.fromList <|
+                [ ( "date", YmdDate.toGraphQLInputString ymd )
+                , ( "note", note )
+                , ( "habit_id", habitId )
+                , ( "habit_day_note_output", HabitDayNote.graphQLOutputString )
+                ]
+
+        query =
+            """mutation {
+              set_habit_day_note(
+                date: {{date}},
+                note: "{{note}}",
+                habit_id: "{{habit_id}}"
+              ) {{habit_day_note_output}}
+            }"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest query (Decode.at [ "data", "set_habit_day_note" ] HabitDayNote.decodeHabitDayNote)
 
 
 mutationEditHabitSuspensions : String -> List Habit.SuspendedInterval -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b

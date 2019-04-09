@@ -1,8 +1,5 @@
 module Models.YmdDate exposing (YmdDate, addDays, compareYmds, decodeYmdDate, fromDate, fromSimpleString, getFirstMondayAfterDate, prettyPrint, prettyPrintWithWeekday, toDate, toGraphQLInputString, toSimpleString)
 
-import Date
-import Date.Extra as Date
-import Date.Extra.Facts exposing (monthFromMonthNumber)
 import DefaultServices.Util as Util
 import Dict
 import Json.Decode as Decode

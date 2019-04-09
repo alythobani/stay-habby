@@ -2,9 +2,6 @@ module Model exposing (Model)
 
 import Array
 import Dict
-import Dropdown
-import Keyboard.Extra as KK
-import Material
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit

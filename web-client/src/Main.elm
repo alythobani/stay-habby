@@ -4,7 +4,6 @@ import Flags exposing (Flags)
 import Init exposing (init)
 import Model exposing (Model)
 import Msg exposing (Msg(..))
-import Navigation
 import Subscriptions exposing (subscriptions)
 import Update exposing (update)
 import View exposing (view)

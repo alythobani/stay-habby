@@ -1,6 +1,5 @@
 module Subscriptions exposing (subscriptions)
 
-import Keyboard.Extra as KK
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import Time

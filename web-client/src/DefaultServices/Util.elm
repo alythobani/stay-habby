@@ -6,7 +6,6 @@ import Html exposing (Attribute, Html, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (Options, defaultOptions, keyCode, onWithOptions)
 import Json.Decode as Decode
-import Keyboard.Extra as KK
 import String.Extra
 
 

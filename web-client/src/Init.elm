@@ -2,16 +2,12 @@ module Init exposing (init)
 
 import Api
 import Array
-import Date
 import Dict
 import Flags exposing (Flags)
-import Keyboard.Extra as KK
-import Material
 import Model exposing (Model)
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
-import Navigation
 import RemoteData
 
 

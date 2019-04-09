@@ -4,15 +4,10 @@ import Array
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
-import Dropdown
 import HabitUtil
 import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
 import Html.Attributes exposing (class, classList, id, placeholder, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
-import Keyboard.Extra as KK
-import Material
-import Material.Options as Options
-import Material.Toggles as Toggles
 import Maybe.Extra as Maybe
 import Model exposing (Model)
 import Models.ApiError as ApiError

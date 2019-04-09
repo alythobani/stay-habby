@@ -2,13 +2,9 @@ module Update exposing (extractInt, update)
 
 import Api
 import Array
-import Date
 import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
-import Dom
-import Keyboard.Extra as KK
-import Material
 import Model exposing (Model)
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats

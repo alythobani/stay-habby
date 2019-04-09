@@ -1,4 +1,4 @@
-module HabitUtil exposing (..)
+module HabitUtil exposing (Comparator, HabitStatsPair, compareByAll, compareHabitsByCompletion, compareHabitsByCurrentGoalProgress, compareHabitsByCurrentGoalRemaining, compareHabitsByDaysLeft, compareHabitsByHabitHasStarted, findFrequencyStatsForHabit, isHabitCurrentFragmentSuccessful, isHabitCurrentlySuspended, sortHabitsByCurrentFragment, splitHabitsByCurrentlySuspended)
 
 {-| Module for useful Habit operations
 -}
@@ -11,6 +11,7 @@ isHabitCurrentFragmentSuccessful : Habit.Habit -> FrequencyStats.FrequencyStats 
 isHabitCurrentFragmentSuccessful habit frequencyStats =
     if not frequencyStats.habitHasStarted then
         False
+
     else
         case habit of
             Habit.GoodHabit _ ->
@@ -63,8 +64,10 @@ compareHabitsByHabitHasStarted : Comparator HabitStatsPair
 compareHabitsByHabitHasStarted ( _, statsOne ) ( _, statsTwo ) =
     if statsOne.habitHasStarted == statsTwo.habitHasStarted then
         EQ
+
     else if statsOne.habitHasStarted then
         GT
+
     else
         LT
 
@@ -82,9 +85,11 @@ compareHabitsByCompletion ( habitOne, statsOne ) ( habitTwo, statsTwo ) =
     in
     if isHabitOneGoalCompleted == isHabitTwoGoalCompleted then
         EQ
+
     else if isHabitOneGoalCompleted then
         -- habit one is already complete, habit two is not
         GT
+
     else
         -- habit two is already complete, habit one is not
         LT

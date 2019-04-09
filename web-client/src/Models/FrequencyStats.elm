@@ -1,4 +1,4 @@
-module Models.FrequencyStats exposing (..)
+module Models.FrequencyStats exposing (FrequencyStats, decodeFrequencyStats)
 
 import Json.Decode as Decode exposing (null)
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)

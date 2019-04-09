@@ -243,15 +243,17 @@ update msg model =
                                 model.editingHistoryHabitAmount
                     }
             in
-            newModel
-                ! [ getTodayViewerFrequencyStats [ updatedHabitDatum.habitId ]
-                  , case newModel.historyViewerSelectedDate of
-                        Just ymd ->
-                            getHistoryViewerFrequencyStats ymd [ updatedHabitDatum.habitId ]
+            ( newModel
+            , Cmd.batch
+                [ getTodayViewerFrequencyStats [ updatedHabitDatum.habitId ]
+                , case newModel.historyViewerSelectedDate of
+                    Just ymd ->
+                        getHistoryViewerFrequencyStats ymd [ updatedHabitDatum.habitId ]
 
-                        Nothing ->
-                            Cmd.none
-                  ]
+                    Nothing ->
+                        Cmd.none
+                ]
+            )
 
         OnToggleHistoryViewer ->
             ( { model | openHistoryViewer = not model.openHistoryViewer }
@@ -300,7 +302,9 @@ update msg model =
                     )
 
         SetHistoryViewerSelectedDate ymd ->
-            { model | historyViewerSelectedDate = Just ymd } ! [ getHistoryViewerFrequencyStats ymd [] ]
+            ( { model | historyViewerSelectedDate = Just ymd }
+            , getHistoryViewerFrequencyStats ymd []
+            )
 
         OnGetTodayFrequencyStatsFailure apiError ->
             ( { model | errorMessage = Just <| "Error retrieving performance stats: " ++ ApiError.toString apiError }
@@ -504,7 +508,7 @@ update msg model =
                     Array.length model.setHabitDataShortcutFilteredHabits
 
                 newSelectedHabitIndex =
-                    (model.setHabitDataShortcutSelectedHabitIndex + 1) % filteredHabitsLength
+                    modBy filteredHabitsLength (model.setHabitDataShortcutSelectedHabitIndex + 1)
             in
             ( { model | setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex }
             , Cmd.none
@@ -516,7 +520,7 @@ update msg model =
                     Array.length model.setHabitDataShortcutFilteredHabits
 
                 newSelectedHabitIndex =
-                    (model.setHabitDataShortcutSelectedHabitIndex - 1) % filteredHabitsLength
+                    modBy filteredHabitsLength (model.setHabitDataShortcutSelectedHabitIndex - 1)
             in
             ( { model | setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex }
             , Cmd.none
@@ -700,7 +704,7 @@ update msg model =
             )
 
         OnEditGoalSuccess habit ->
-            { model
+            ( { model
                 | allHabits =
                     RemoteData.map
                         (\allHabits ->
@@ -712,15 +716,17 @@ update msg model =
                         model.allHabits
                 , editGoal = Habit.initEditGoalData
                 , showEditGoalDialog = False
-            }
-                ! [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
-                  , case model.historyViewerSelectedDate of
-                        Just ymd ->
-                            getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
+              }
+            , Cmd.batch
+                [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
+                , case model.historyViewerSelectedDate of
+                    Just ymd ->
+                        getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
 
-                        Nothing ->
-                            Cmd.none
-                  ]
+                    Nothing ->
+                        Cmd.none
+                ]
+            )
 
         OnEditGoalSubmitClick habitId newFrequencies habitType ->
             ( { model
@@ -832,7 +838,7 @@ update msg model =
             )
 
         OnResumeOrSuspendHabitSuccess habit ->
-            { model
+            ( { model
                 | allHabits =
                     RemoteData.map
                         (\allHabits ->
@@ -842,15 +848,17 @@ update msg model =
                                 habit
                         )
                         model.allHabits
-            }
-                ! [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
-                  , case model.historyViewerSelectedDate of
-                        Just ymd ->
-                            getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
+              }
+            , Cmd.batch
+                [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
+                , case model.historyViewerSelectedDate of
+                    Just ymd ->
+                        getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
 
-                        Nothing ->
-                            Cmd.none
-                  ]
+                    Nothing ->
+                        Cmd.none
+                ]
+            )
 
         -- Error Messages
         OnToggleShowErrorMessage ->

@@ -1,9 +1,9 @@
-port module Main exposing (..)
+port module Main exposing (main)
 
 import Flags exposing (Flags)
 import Init exposing (init)
 import Model exposing (Model)
-import Msg exposing (Msg(OnLocationChange))
+import Msg exposing (Msg(..))
 import Navigation
 import Subscriptions exposing (subscriptions)
 import Update exposing (update)

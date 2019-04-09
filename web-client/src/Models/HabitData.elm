@@ -1,4 +1,4 @@
-module Models.HabitData exposing (..)
+module Models.HabitData exposing (HabitData, decodeHabitData)
 
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)

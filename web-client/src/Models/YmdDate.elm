@@ -133,7 +133,7 @@ getFirstMondayAfterDate ymd =
 
         -- Monday: 0, Tuesday: 6, Wednesday: 5, ..., Sunday: 1
         numDaysToAdd =
-            (8 - ymdDayOfWeekNumber) % 7
+            modBy 7 (8 - ymdDayOfWeekNumber)
     in
     addDays numDaysToAdd ymd
 

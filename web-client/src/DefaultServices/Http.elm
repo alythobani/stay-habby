@@ -1,4 +1,4 @@
-module DefaultServices.Http exposing (..)
+module DefaultServices.Http exposing (get, handleHttpResult, post)
 
 {- This module is designed to be used with a backend which serves errors back, refer to Models.ApiError to see the
    format of expected errors.

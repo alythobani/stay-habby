@@ -3,7 +3,7 @@ module Models.YmdDate exposing (YmdDate, addDays, compareYmds, decodeYmdDate, fr
 import DefaultServices.Util as Util
 import Dict
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 
 
 type alias YmdDate =
@@ -192,7 +192,7 @@ toGraphQLInputString ymd =
 
 decodeYmdDate : Decode.Decoder YmdDate
 decodeYmdDate =
-    decode YmdDate
+    Decode.succeed YmdDate
         |> required "day" Decode.int
         |> required "month" Decode.int
         |> required "year" Decode.int

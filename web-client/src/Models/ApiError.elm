@@ -1,7 +1,7 @@
 module Models.ApiError exposing (ApiError(..), GraphqlErrorInfo, GraphqlErrorLocation, decodeGraphqlErrorInfo, decodeGraphqlErrorLocation, decoder, toString)
 
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 
 
 {-| An error from the api represented as a union of possible errors.
@@ -64,7 +64,7 @@ decoder =
 
 decodeGraphqlErrorInfo : Decode.Decoder GraphqlErrorInfo
 decodeGraphqlErrorInfo =
-    decode GraphqlErrorInfo
+    Decode.succeed GraphqlErrorInfo
         |> required "message" Decode.string
         |> required "locations" (Decode.list decodeGraphqlErrorLocation)
         |> required "query-path" (Decode.list Decode.string)
@@ -72,6 +72,6 @@ decodeGraphqlErrorInfo =
 
 decodeGraphqlErrorLocation : Decode.Decoder GraphqlErrorLocation
 decodeGraphqlErrorLocation =
-    decode GraphqlErrorLocation
+    Decode.succeed GraphqlErrorLocation
         |> required "line" Decode.int
         |> required "column" Decode.int

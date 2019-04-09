@@ -1,7 +1,7 @@
 module Models.FrequencyStats exposing (FrequencyStats, decodeFrequencyStats)
 
 import Json.Decode as Decode exposing (null)
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 
 
 type alias FrequencyStats =
@@ -21,7 +21,7 @@ type alias FrequencyStats =
 
 decodeFrequencyStats : Decode.Decoder FrequencyStats
 decodeFrequencyStats =
-    decode FrequencyStats
+    Decode.succeed FrequencyStats
         |> required "habit_id" Decode.string
         |> required "total_fragments" Decode.int
         |> required "successful_fragments" Decode.int

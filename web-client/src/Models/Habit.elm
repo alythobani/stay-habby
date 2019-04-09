@@ -2,7 +2,7 @@ module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitR
 
 import DefaultServices.Util as Util
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Models.YmdDate exposing (YmdDate, decodeYmdDate)
 
 
@@ -574,7 +574,7 @@ decodeHabit : Decode.Decoder Habit
 decodeHabit =
     let
         decodeGoodHabitRecord =
-            decode GoodHabitRecord
+            Decode.succeed GoodHabitRecord
                 |> required "_id" Decode.string
                 |> required "name" Decode.string
                 |> optional "description" (Decode.maybe Decode.string) Nothing
@@ -585,7 +585,7 @@ decodeHabit =
                 |> required "suspensions" (Decode.list decodeSuspendedInterval)
 
         decodeBadHabitRecord =
-            decode BadHabitRecord
+            Decode.succeed BadHabitRecord
                 |> required "_id" Decode.string
                 |> required "name" Decode.string
                 |> optional "description" (Decode.maybe Decode.string) Nothing
@@ -611,14 +611,14 @@ decodeHabit =
 
 decodeSuspendedInterval : Decode.Decoder SuspendedInterval
 decodeSuspendedInterval =
-    decode SuspendedInterval
+    Decode.succeed SuspendedInterval
         |> required "start_date" decodeYmdDate
         |> optional "end_date" (Decode.maybe decodeYmdDate) Nothing
 
 
 decodeFrequencyChangeRecord : Decode.Decoder FrequencyChangeRecord
 decodeFrequencyChangeRecord =
-    decode FrequencyChangeRecord
+    Decode.succeed FrequencyChangeRecord
         |> required "start_date" decodeYmdDate
         |> optional "end_date" (Decode.maybe decodeYmdDate) Nothing
         |> required "new_frequency" decodeFrequency
@@ -628,7 +628,7 @@ decodeFrequency : Decode.Decoder Frequency
 decodeFrequency =
     let
         decodeEveryXDayFrequencyRecord =
-            decode EveryXDayFrequencyRecord
+            Decode.succeed EveryXDayFrequencyRecord
                 |> required "days" Decode.int
                 |> required "times" Decode.int
 
@@ -636,7 +636,7 @@ decodeFrequency =
             Decode.at [ "week" ] Decode.int
 
         decodeSpecificDayOfWeekFrequencyRecord =
-            decode SpecificDayOfWeekFrequencyRecord
+            Decode.succeed SpecificDayOfWeekFrequencyRecord
                 |> optional "monday" Decode.int 0
                 |> optional "tuesday" Decode.int 0
                 |> optional "wednesday" Decode.int 0

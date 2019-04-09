@@ -1,7 +1,6 @@
 module View exposing (dropdownIcon, habitActionsDropdownDiv, renderHabitBox, renderHistoryViewerPanel, renderSetHabitDataShortcut, renderTodayPanel, view)
 
 import Array
-import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
 import HabitUtil

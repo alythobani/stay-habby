@@ -1,6 +1,5 @@
 module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, SuspendedInterval, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, decodeSuspendedInterval, extractCreateHabit, extractNewGoal, getCommonCreateFields, getCommonFields, graphQLOutputString, initAddHabitData, initEditGoalData, prettyPrintEveryXDayFrequency, prettyPrintFrequency, prettyPrintSpecificDayOfWeekFrequency, prettyPrintTotalWeekFrequency, splitHabits)
 
-import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)

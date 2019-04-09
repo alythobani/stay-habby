@@ -1,6 +1,5 @@
 module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, onKeydownWithOptions, replaceOrAdd, templater)
 
-import DefaultServices.Infix exposing (..)
 import Dict
 import Html exposing (Attribute, Html, div)
 import Html.Attributes exposing (class)

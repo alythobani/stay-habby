@@ -2,7 +2,6 @@ module Update exposing (extractInt, update)
 
 import Api
 import Array
-import DefaultServices.Infix exposing (..)
 import DefaultServices.Util as Util
 import Dict
 import Model exposing (Model)

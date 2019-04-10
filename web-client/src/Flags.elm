@@ -6,4 +6,4 @@ import Time
 {-| The flags passed to the program from javascript upon init.
 -}
 type alias Flags =
-    { apiBaseUrl : String, currentTime : Time.Time }
+    { apiBaseUrl : String, currentTime : Time.Posix }

@@ -54,20 +54,20 @@ get : String -> Decode.Decoder a -> (ApiError.ApiError -> b) -> (a -> b) -> Cmd 
 get url decoder onApiError onApiSuccess =
     let
         -- Get with credentials.
-        get : String -> Decode.Decoder a -> Http.Request a
-        get url decoder =
+        get_ : String -> Decode.Decoder a -> Http.Request a
+        get_ url_ decoder_ =
             Http.request
                 { method = "GET"
                 , headers = []
-                , url = url
+                , url = url_
                 , body = Http.emptyBody
-                , expect = Http.expectJson decoder
+                , expect = Http.expectJson decoder_
                 , timeout = Nothing
                 , withCredentials = True
                 }
 
         httpRequest =
-            get url decoder
+            get_ url decoder
     in
     Http.send (handleHttpResult onApiError onApiSuccess) httpRequest
 
@@ -82,19 +82,19 @@ post : String -> Decode.Decoder a -> Encode.Value -> (ApiError.ApiError -> b) ->
 post url decoder body onApiError onApiSuccess =
     let
         -- Post with credentials.
-        post : String -> Http.Body -> Decode.Decoder a -> Http.Request a
-        post url body decoder =
+        post_ : String -> Http.Body -> Decode.Decoder a -> Http.Request a
+        post_ url_ body_ decoder_ =
             Http.request
                 { method = "POST"
                 , headers = []
-                , url = url
-                , body = body
-                , expect = Http.expectJson decoder
+                , url = url_
+                , body = body_
+                , expect = Http.expectJson decoder_
                 , timeout = Nothing
                 , withCredentials = True
                 }
 
         httpRequest =
-            post url (Http.jsonBody body) decoder
+            post_ url (Http.jsonBody body) decoder
     in
     Http.send (handleHttpResult onApiError onApiSuccess) httpRequest

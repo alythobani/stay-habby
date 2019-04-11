@@ -1,4 +1,4 @@
-module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, onKeydownWithOptions, replaceOrAdd, templater)
+module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, replaceOrAdd, templater)
 
 import DefaultServices.Keyboard as Keyboard
 import Dict
@@ -6,7 +6,6 @@ import Html exposing (Attribute, Html, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (keyCode, on, preventDefaultOn)
 import Json.Decode as Decode
-import String.Extra
 
 
 {-| Creates an empty div with class `display-none`.
@@ -33,7 +32,7 @@ templater : Dict.Dict String String -> String -> String
 templater dict templateString =
     Dict.foldr
         (\key value template ->
-            String.Extra.replace ("{{" ++ key ++ "}}") value template
+            String.replace ("{{" ++ key ++ "}}") value template
         )
         templateString
         dict

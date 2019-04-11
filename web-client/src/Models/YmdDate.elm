@@ -1,5 +1,6 @@
 module Models.YmdDate exposing (YmdDate, addDays, compareYmds, decodeYmdDate, fromDate, fromSimpleString, getFirstMondayAfterDate, prettyPrint, prettyPrintWithWeekday, toDate, toGraphQLInputString, toSimpleString)
 
+import Date
 import DefaultServices.Util as Util
 import Dict
 import Json.Decode as Decode
@@ -80,7 +81,7 @@ prettyPrint ymd =
                     "Invalid Month Number"
 
         prettyDay { day } =
-            toString day
+            String.fromInt day
                 ++ (if List.member day [ 1, 21, 31 ] then
                         "st"
 
@@ -94,12 +95,12 @@ prettyPrint ymd =
                         "th"
                    )
     in
-    prettyMonth ymd ++ " " ++ prettyDay ymd ++ ", " ++ toString ymd.year
+    prettyMonth ymd ++ " " ++ prettyDay ymd ++ ", " ++ String.fromInt ymd.year
 
 
 prettyPrintWithWeekday : YmdDate -> String
 prettyPrintWithWeekday ymd =
-    ymd |> toDate |> Date.toFormattedString "EEEE, MMMM ddd, y"
+    ymd |> toDate |> Date.format "EEEE, MMMM ddd, y"
 
 
 {-| Add days to a date to get a new date that many days away, you can add negative days to go back in time.
@@ -107,13 +108,13 @@ prettyPrintWithWeekday ymd =
 addDays : Int -> YmdDate -> YmdDate
 addDays dayDelta ymd =
     toDate ymd
-        |> Date.add Date.Day dayDelta
+        |> Date.add Date.Days dayDelta
         |> fromDate
 
 
 toDate : YmdDate -> Date.Date
 toDate ymd =
-    Date.fromCalendarDate ymd.year (monthFromMonthNumber ymd.month) ymd.day
+    Date.fromCalendarDate ymd.year (Date.numberToMonth ymd.month) ymd.day
 
 
 fromDate : Date.Date -> YmdDate
@@ -145,10 +146,10 @@ fromSimpleString date =
     String.split "/" date
         |> (\dateComponents ->
                 case dateComponents of
-                    [ day, monthNumber, shortenedYear ] ->
-                        case ( String.toInt day, String.toInt monthNumber, String.toInt <| "20" ++ shortenedYear ) of
-                            ( Ok day, Ok monthNumber, Ok year ) ->
-                                Date.fromCalendarDate year (monthFromMonthNumber monthNumber) day
+                    [ dayStr, monthNumberStr, shortenedYearStr ] ->
+                        case ( String.toInt dayStr, String.toInt monthNumberStr, String.toInt <| "20" ++ shortenedYearStr ) of
+                            ( Just day, Just monthNumber, Just year ) ->
+                                Date.fromCalendarDate year (Date.numberToMonth monthNumber) day
                                     |> fromDate
                                     |> Just
 
@@ -167,7 +168,7 @@ fromSimpleString date =
 -}
 toSimpleString : YmdDate -> String
 toSimpleString { year, month, day } =
-    Basics.toString day ++ "/" ++ Basics.toString month ++ "/" ++ (String.dropLeft 2 <| Basics.toString year)
+    String.fromInt day ++ "/" ++ String.fromInt month ++ "/" ++ (String.dropLeft 2 <| String.fromInt year)
 
 
 toGraphQLInputString : YmdDate -> String
@@ -175,9 +176,9 @@ toGraphQLInputString ymd =
     let
         templateDict =
             Dict.fromList
-                [ ( "day", toString ymd.day )
-                , ( "month", toString ymd.month )
-                , ( "year", toString ymd.year )
+                [ ( "day", String.fromInt ymd.day )
+                , ( "month", String.fromInt ymd.month )
+                , ( "year", String.fromInt ymd.year )
                 ]
 
         graphQLString =

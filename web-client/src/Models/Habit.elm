@@ -281,22 +281,22 @@ getCommonCreateFields createHabit =
 extractCreateHabit : AddHabitInputData -> Maybe CreateHabit
 extractCreateHabit addHabitInputData =
     let
-        name =
+        extractedName =
             Util.notEmpty addHabitInputData.name
 
-        description =
+        extractedDesc =
             Util.notEmpty addHabitInputData.description
 
         goodHabitTime =
             addHabitInputData.goodHabitTime
 
-        unitNameSingular =
+        extractedUnitNameSingular =
             Util.notEmpty addHabitInputData.unitNameSingular
 
-        unitNamePlural =
+        extractedUnitNamePlural =
             Util.notEmpty addHabitInputData.unitNamePlural
 
-        frequency =
+        extractedFrequency =
             case addHabitInputData.frequencyKind of
                 EveryXDayFrequencyKind ->
                     case ( addHabitInputData.days, addHabitInputData.times ) of
@@ -307,20 +307,20 @@ extractCreateHabit addHabitInputData =
                             Nothing
 
                 TotalWeekFrequencyKind ->
-                    addHabitInputData.timesPerWeek ||> TotalWeekFrequency
+                    Maybe.map TotalWeekFrequency addHabitInputData.timesPerWeek
 
                 SpecificDayOfWeekFrequencyKind ->
                     case
-                        ( addHabitInputData.mondayTimes
+                        [ addHabitInputData.mondayTimes
                         , addHabitInputData.tuesdayTimes
                         , addHabitInputData.wednesdayTimes
                         , addHabitInputData.thursdayTimes
                         , addHabitInputData.fridayTimes
                         , addHabitInputData.saturdayTimes
                         , addHabitInputData.sundayTimes
-                        )
+                        ]
                     of
-                        ( Just monday, Just tuesday, Just wednesday, Just thursday, Just friday, Just saturday, Just sunday ) ->
+                        [ Just monday, Just tuesday, Just wednesday, Just thursday, Just friday, Just saturday, Just sunday ] ->
                             Just <|
                                 SpecificDayOfWeekFrequency
                                     { monday = monday
@@ -337,16 +337,26 @@ extractCreateHabit addHabitInputData =
     in
     case addHabitInputData.kind of
         GoodHabitKind ->
-            case ( name, description, unitNameSingular, unitNamePlural, frequency ) of
-                ( Just name, Just description, Just unitNameSingular, Just unitNamePlural, Just frequency ) ->
+            case
+                ( ( extractedName, extractedDesc )
+                , ( extractedUnitNameSingular, extractedUnitNamePlural )
+                , extractedFrequency
+                )
+            of
+                ( ( Just name, Just description ), ( Just unitNameSingular, Just unitNamePlural ), Just frequency ) ->
                     Just <| CreateGoodHabit <| CreateGoodHabitRecord name description goodHabitTime unitNameSingular unitNamePlural frequency
 
                 _ ->
                     Nothing
 
         BadHabitKind ->
-            case ( name, description, unitNameSingular, unitNamePlural, frequency ) of
-                ( Just name, Just description, Just unitNameSingular, Just unitNamePlural, Just frequency ) ->
+            case
+                ( ( extractedName, extractedDesc )
+                , ( extractedUnitNameSingular, extractedUnitNamePlural )
+                , extractedFrequency
+                )
+            of
+                ( ( Just name, Just description ), ( Just unitNameSingular, Just unitNamePlural ), Just frequency ) ->
                     Just <| CreateBadHabit <| CreateBadHabitRecord name description unitNameSingular unitNamePlural frequency
 
                 _ ->
@@ -366,16 +376,16 @@ extractNewGoal editGoal =
 
         SpecificDayOfWeekFrequencyKind ->
             case
-                ( editGoal.mondayTimes
+                [ editGoal.mondayTimes
                 , editGoal.tuesdayTimes
                 , editGoal.wednesdayTimes
                 , editGoal.thursdayTimes
                 , editGoal.fridayTimes
                 , editGoal.saturdayTimes
                 , editGoal.sundayTimes
-                )
+                ]
             of
-                ( Just mo, Just tu, Just we, Just th, Just fr, Just sa, Just su ) ->
+                [ Just mo, Just tu, Just we, Just th, Just fr, Just sa, Just su ] ->
                     Just <|
                         SpecificDayOfWeekFrequency
                             { monday = mo
@@ -401,7 +411,7 @@ extractNewGoal editGoal =
 
 prettyPrintEveryXDayFrequency : EveryXDayFrequencyRecord -> String -> String -> String
 prettyPrintEveryXDayFrequency { days, times } unitNameSingular unitNamePlural =
-    toString times
+    String.fromInt times
         ++ " "
         ++ (if times == 1 then
                 unitNameSingular
@@ -414,13 +424,13 @@ prettyPrintEveryXDayFrequency { days, times } unitNameSingular unitNamePlural =
                 "day"
 
             else
-                toString days ++ " days"
+                String.fromInt days ++ " days"
            )
 
 
 prettyPrintTotalWeekFrequency : Int -> String -> String -> String
 prettyPrintTotalWeekFrequency timesPerWeek unitNameSingular unitNamePlural =
-    toString timesPerWeek
+    String.fromInt timesPerWeek
         ++ " "
         ++ (if timesPerWeek == 1 then
                 unitNameSingular
@@ -434,19 +444,19 @@ prettyPrintTotalWeekFrequency timesPerWeek unitNameSingular unitNamePlural =
 prettyPrintSpecificDayOfWeekFrequency : SpecificDayOfWeekFrequencyRecord -> String
 prettyPrintSpecificDayOfWeekFrequency { monday, tuesday, wednesday, thursday, friday, saturday, sunday } =
     "Mo "
-        ++ toString monday
+        ++ String.fromInt monday
         ++ " Tu "
-        ++ toString tuesday
+        ++ String.fromInt tuesday
         ++ " We "
-        ++ toString wednesday
+        ++ String.fromInt wednesday
         ++ " Th "
-        ++ toString thursday
+        ++ String.fromInt thursday
         ++ " Fr "
-        ++ toString friday
+        ++ String.fromInt friday
         ++ " Sa "
-        ++ toString saturday
+        ++ String.fromInt saturday
         ++ " Su "
-        ++ toString sunday
+        ++ String.fromInt sunday
 
 
 prettyPrintFrequency : Frequency -> String -> String -> String

@@ -80,7 +80,7 @@ onKeydown keyToMsg =
     let
         decodeMsgFromCode : Keyboard.Key -> Decode.Decoder msg
         decodeMsgFromCode code =
-            Keyboard.fromCode code
+            code
                 |> keyToMsg
                 |> Maybe.map Decode.succeed
                 |> Maybe.withDefault (Decode.fail "")
@@ -98,13 +98,13 @@ WARNING: It'll only prevent default if your function returns a message not `Noth
 onKeydownPreventDefault : (Keyboard.Key -> Maybe msg) -> Attribute msg
 onKeydownPreventDefault keyToMsg =
     let
-        decodeMsgBoolFromCode : Keyboard.Key -> Decode.Decoder msg
+        decodeMsgBoolFromCode : Keyboard.Key -> Decode.Decoder ( msg, Bool )
         decodeMsgBoolFromCode code =
-            Keyboard.fromCode code
+            code
                 |> keyToMsg
                 |> Maybe.map (\msg -> ( msg, True ))
                 |> Maybe.map Decode.succeed
-                |> Maybe.withDefault (Decode.fail ( "", False ))
+                |> Maybe.withDefault (Decode.fail "")
     in
     preventDefaultOn
         "keydown"

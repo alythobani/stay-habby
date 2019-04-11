@@ -1,9 +1,10 @@
 module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, onKeydownWithOptions, replaceOrAdd, templater)
 
+import DefaultServices.Keyboard as Keyboard
 import Dict
 import Html exposing (Attribute, Html, div)
 import Html.Attributes exposing (class)
-import Html.Events exposing (Options, defaultOptions, keyCode, onWithOptions)
+import Html.Events exposing (keyCode, on, preventDefaultOn)
 import Json.Decode as Decode
 import String.Extra
 
@@ -75,26 +76,19 @@ replaceOrAdd list pred replaceWith =
 
 {-| Event handler for handling `keyDown` events.
 -}
-onKeydownWithOptions : Options -> (KK.Key -> Maybe msg) -> Attribute msg
-onKeydownWithOptions options keyToMsg =
+onKeydown : (Keyboard.Key -> Maybe msg) -> Attribute msg
+onKeydown keyToMsg =
     let
-        decodeMsgFromKeyCode code =
-            KK.fromCode code
+        decodeMsgFromCode : Keyboard.Key -> Decode.Decoder msg
+        decodeMsgFromCode code =
+            Keyboard.fromCode code
                 |> keyToMsg
-                ||> Decode.succeed
-                ?> Decode.fail ""
+                |> Maybe.map Decode.succeed
+                |> Maybe.withDefault (Decode.fail "")
     in
-    onWithOptions
+    on
         "keydown"
-        options
-        (Decode.andThen decodeMsgFromKeyCode keyCode)
-
-
-{-| Default event handler for `keyDown` events.
--}
-onKeydown : (KK.Key -> Maybe msg) -> Attribute msg
-onKeydown =
-    onKeydownWithOptions defaultOptions
+        (Decode.andThen decodeMsgFromCode Keyboard.decodeKey)
 
 
 {-| Event handler for `keyDown` events that also `preventDefault`.
@@ -102,12 +96,20 @@ onKeydown =
 WARNING: It'll only prevent default if your function returns a message not `Nothing`.
 
 -}
-onKeydownPreventDefault : (KK.Key -> Maybe msg) -> Attribute msg
-onKeydownPreventDefault =
-    onKeydownWithOptions
-        { preventDefault = True
-        , stopPropagation = False
-        }
+onKeydownPreventDefault : (Keyboard.Key -> Maybe msg) -> Attribute msg
+onKeydownPreventDefault keyToMsg =
+    let
+        decodeMsgBoolFromCode : Keyboard.Key -> Decode.Decoder msg
+        decodeMsgBoolFromCode code =
+            Keyboard.fromCode code
+                |> keyToMsg
+                |> Maybe.map (\msg -> ( msg, True ))
+                |> Maybe.map Decode.succeed
+                |> Maybe.withDefault (Decode.fail ( "", False ))
+    in
+    preventDefaultOn
+        "keydown"
+        (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
 
 
 {-| Helper function for `firstIndexInList`

@@ -1,6 +1,7 @@
 module Model exposing (Model)
 
 import Array
+import DefaultServices.Keyboard as Keyboard
 import Dict
 import Models.ApiError as ApiError
 import Models.FrequencyStats as FrequencyStats
@@ -45,11 +46,10 @@ type alias Model =
     , historyViewerDateInput : String
     , historyViewerSelectedDate : Maybe YmdDate.YmdDate
     , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
-    , todayViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
-    , historyViewerHabitActionsDropdowns : Dict.Dict String Dropdown.State
-    , mdl : Material.Model
+    , todayViewerHabitActionsDropdowns : Dict.Dict String Bool
+    , historyViewerHabitActionsDropdowns : Dict.Dict String Bool
     , showSetHabitDataShortcut : Bool
-    , keysDown : KK.Model
+    , keysDown : Keyboard.Model
     , setHabitDataShortcutHabitNameFilterText : String
     , setHabitDataShortcutFilteredHabits : Array.Array Habit.Habit
     , setHabitDataShortcutSelectedHabitIndex : Int

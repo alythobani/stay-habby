@@ -34,7 +34,6 @@ init { apiBaseUrl, currentTime } location =
       , historyViewerFrequencyStats = RemoteData.NotAsked
       , todayViewerHabitActionsDropdowns = Dict.empty
       , historyViewerHabitActionsDropdowns = Dict.empty
-      , mdl = Material.model
       , showSetHabitDataShortcut = False
       , keysDown = KK.init
       , setHabitDataShortcutHabitNameFilterText = ""

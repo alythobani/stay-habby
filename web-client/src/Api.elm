@@ -4,7 +4,7 @@ import DefaultServices.Http exposing (post)
 import DefaultServices.Util as Util
 import Dict
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode
 import Models.ApiError exposing (ApiError)
 import Models.FrequencyStats as FrequencyStats
@@ -53,11 +53,11 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
     habit_id
   }
   frequencyStatsList: get_frequency_stats(current_client_date: {year: """
-                ++ toString ymd.year
+                ++ String.fromInt ymd.year
                 ++ ", month: "
-                ++ toString ymd.month
+                ++ String.fromInt ymd.month
                 ++ ", day: "
-                ++ toString ymd.day
+                ++ String.fromInt ymd.day
                 ++ """}) {
     habit_id
     total_fragments
@@ -75,7 +75,7 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
     in
     graphQLRequest
         queryString
-        (decode HabitsAndHabitDataAndFrequencyStats
+        (Decode.succeed HabitsAndHabitDataAndFrequencyStats
             |> required "habits" (Decode.list Habit.decodeHabit)
             |> required "habitData" (Decode.list HabitData.decodeHabitData)
             |> required "frequencyStatsList" (Decode.list FrequencyStats.decodeFrequencyStats)
@@ -100,17 +100,17 @@ queryPastFrequencyStats ymd habitIds =
     let
         queryString =
             "{frequencyStatsList: get_frequency_stats(current_client_date: {year: "
-                ++ toString ymd.year
+                ++ String.fromInt ymd.year
                 ++ ", month: "
-                ++ toString ymd.month
+                ++ String.fromInt ymd.month
                 ++ ", day: "
-                ++ toString ymd.day
+                ++ String.fromInt ymd.day
                 ++ "}"
                 ++ (if List.isEmpty habitIds then
                         ""
 
                     else
-                        ", habit_ids: " ++ toString habitIds
+                        ", habit_ids: " ++ Debug.toString habitIds
                    )
                 ++ """) {
     habit_id
@@ -129,7 +129,7 @@ queryPastFrequencyStats ymd habitIds =
     in
     graphQLRequest
         queryString
-        (decode QueriedFrequencyStats
+        (Decode.succeed QueriedFrequencyStats
             |> required "frequencyStatsList" (Decode.list FrequencyStats.decodeFrequencyStats)
             |> Decode.at [ "data" ]
         )
@@ -163,7 +163,7 @@ mutationAddHabit createHabit ymd =
                 , ( "time_of_day"
                   , case createHabit of
                         Habit.CreateGoodHabit { timeOfDay } ->
-                            "time_of_day: " ++ (toString timeOfDay |> String.toUpper) ++ ","
+                            "time_of_day: " ++ (Debug.toString timeOfDay |> String.toUpper) ++ ","
 
                         _ ->
                             ""
@@ -216,7 +216,7 @@ frequencyToGraphQLString frequency =
     case frequency of
         Habit.EveryXDayFrequency { days, times } ->
             Util.templater
-                (Dict.fromList [ ( "days", toString days ), ( "times", toString times ) ])
+                (Dict.fromList [ ( "days", String.fromInt days ), ( "times", String.fromInt times ) ])
                 """{
                   type_name: "every_x_days_frequency",
                   every_x_days_frequency: {
@@ -227,7 +227,7 @@ frequencyToGraphQLString frequency =
 
         Habit.TotalWeekFrequency times ->
             Util.templater
-                (Dict.fromList [ ( "times", toString times ) ])
+                (Dict.fromList [ ( "times", String.fromInt times ) ])
                 """{
                   type_name: "total_week_frequency",
                   total_week_frequency: {
@@ -238,13 +238,13 @@ frequencyToGraphQLString frequency =
         Habit.SpecificDayOfWeekFrequency { monday, tuesday, wednesday, thursday, friday, saturday, sunday } ->
             Util.templater
                 (Dict.fromList
-                    [ ( "monday", toString monday )
-                    , ( "tuesday", toString tuesday )
-                    , ( "wednesday", toString wednesday )
-                    , ( "thursday", toString thursday )
-                    , ( "friday", toString friday )
-                    , ( "saturday", toString saturday )
-                    , ( "sunday", toString sunday )
+                    [ ( "monday", String.fromInt monday )
+                    , ( "tuesday", String.fromInt tuesday )
+                    , ( "wednesday", String.fromInt wednesday )
+                    , ( "thursday", String.fromInt thursday )
+                    , ( "friday", String.fromInt friday )
+                    , ( "saturday", String.fromInt saturday )
+                    , ( "sunday", String.fromInt sunday )
                     ]
                 )
                 """{
@@ -269,17 +269,17 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
             let
                 fcrTemplateDict =
                     Dict.fromList
-                        [ ( "start_date_day", toString fcr.startDate.day )
-                        , ( "start_date_month", toString fcr.startDate.month )
-                        , ( "start_date_year", toString fcr.startDate.year )
+                        [ ( "start_date_day", String.fromInt fcr.startDate.day )
+                        , ( "start_date_month", String.fromInt fcr.startDate.month )
+                        , ( "start_date_year", String.fromInt fcr.startDate.year )
                         , ( "end_date"
                           , case fcr.endDate of
                                 Just { day, month, year } ->
                                     Util.templater
                                         (Dict.fromList
-                                            [ ( "day", toString day )
-                                            , ( "month", toString month )
-                                            , ( "year", toString year )
+                                            [ ( "day", String.fromInt day )
+                                            , ( "month", String.fromInt month )
+                                            , ( "year", String.fromInt year )
                                             ]
                                         )
                                         """{
@@ -351,10 +351,10 @@ mutationSetHabitData { day, month, year } habitId amount =
     let
         templateDict =
             Dict.fromList <|
-                [ ( "day", toString day )
-                , ( "month", toString month )
-                , ( "year", toString year )
-                , ( "amount", toString amount )
+                [ ( "day", String.fromInt day )
+                , ( "month", String.fromInt month )
+                , ( "year", String.fromInt year )
+                , ( "amount", String.fromInt amount )
                 , ( "habit_id", habitId )
                 ]
 

@@ -1,5 +1,6 @@
 port module Main exposing (main)
 
+import Browser
 import Flags exposing (Flags)
 import Init exposing (init)
 import Model exposing (Model)
@@ -14,10 +15,11 @@ essentially subscribe to url changes.
 -}
 main : Program Flags Model Msg
 main =
-    Navigation.programWithFlags
-        OnLocationChange
+    Browser.application
         { init = init
         , update = update
         , subscriptions = subscriptions
         , view = view
+        , onUrlRequest = OnUrlRequest
+        , onUrlChange = OnUrlChange
         }

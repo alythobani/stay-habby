@@ -8,6 +8,6 @@ import Time
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Time.every Time.minute TickMinute
+        [ Time.every (30 * 1000) TickMinute
         , Sub.map KeyboardExtraMsg KK.subscriptions
         ]

@@ -1,17 +1,22 @@
 module Msg exposing (Msg(..))
 
 import Api
+import Browser
+import Browser.Dom as Dom
+import DefaultServices.Keyboard as Keyboard
 import Models.ApiError exposing (ApiError)
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.YmdDate as YmdDate
 import Time
+import Url
 
 
 type Msg
     = NoOp
-    | OnLocationChange Navigation.Location
-    | TickMinute Time.Time
+    | OnUrlChange Url.Url
+    | OnUrlRequest Browser.UrlRequest
+    | TickMinute Time.Posix
     | OnGetHabitsAndHabitDataAndFrequencyStatsFailure ApiError
     | OnGetHabitsAndHabitDataAndFrequencyStatsSuccess Api.HabitsAndHabitDataAndFrequencyStats
     | OnOpenAddHabit
@@ -53,12 +58,11 @@ type Msg
     | OnGetPastFrequencyStatsSuccess Api.QueriedFrequencyStats
     | OnHistoryViewerChangeDate
     | OnHistoryViewerHabitDataInput YmdDate.YmdDate String String
-    | ToggleTodayViewerHabitActionsDropdown String Dropdown.State
-    | ToggleHistoryViewerHabitActionsDropdown String Dropdown.State
+    | ToggleTodayViewerHabitActionsDropdown String Bool
+    | ToggleHistoryViewerHabitActionsDropdown String Bool
     | OnToggleDarkMode
-    | Mdl (Material.Msg Msg)
     | OnToggleShowSetHabitDataShortcut
-    | KeyboardExtraMsg KK.Msg
+    | KeyboardExtraMsg Keyboard.Msg
     | FocusResult (Result Dom.Error ())
     | OnSetHabitDataShortcutInput String
     | OnSetHabitDataShortcutSelectNextHabit

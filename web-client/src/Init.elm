@@ -9,10 +9,11 @@ import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
+import Url
 
 
-init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
-init { apiBaseUrl, currentTime } location =
+init : Flags -> Url.Url -> ( Model, Cmd Msg )
+init { apiBaseUrl, currentTime } url =
     let
         ymd =
             currentTime |> Date.fromTime |> YmdDate.fromDate

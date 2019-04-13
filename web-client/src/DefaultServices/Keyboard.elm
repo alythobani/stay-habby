@@ -1,4 +1,4 @@
-module DefaultServices.Keyboard exposing (Key(..), Model, codeBook, codeDict, decodeKey, fromCode)
+module DefaultServices.Keyboard exposing (Key(..), Model, Msg(..), codeBook, codeDict, decodeKey, fromCode)
 
 {- This module got lots of inspiration (and copied code) from ohanhi's Keyboard.Extra module,
    which is, as of the moment I'm writing this, deprecated for Elm 0.19.
@@ -12,6 +12,13 @@ import Set
 
 type alias Model =
     Set.Set Key
+
+
+{-| The message type `DefaultServices.Keyboard` uses.
+-}
+type Msg
+    = Down Key
+    | Up Key
 
 
 {-| Keys on the keyboard. Direct association with the "code" of a KeyboardEvent.

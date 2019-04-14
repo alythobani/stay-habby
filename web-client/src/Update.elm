@@ -55,7 +55,7 @@ update msg model =
                     time |> Date.fromTime |> YmdDate.fromDate
             in
             if model.ymd /= newYmd then
-                ( { model | ymd = newYmd, currentYmd = newYmd }
+                ( { model | ymd = newYmd }
                 , Api.queryHabitsAndHabitDataAndFrequencyStats
                     newYmd
                     model.apiBaseUrl
@@ -165,7 +165,7 @@ update msg model =
 
         AddHabit createHabitData ->
             ( model
-            , Api.mutationAddHabit createHabitData model.currentYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+            , Api.mutationAddHabit createHabitData model.ymd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
             )
 
         OnAddHabitFailure apiError ->

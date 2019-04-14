@@ -12,8 +12,7 @@ import RemoteData
 
 
 type alias Model =
-    { currentYmd : YmdDate.YmdDate
-    , ymd : YmdDate.YmdDate
+    { ymd : YmdDate.YmdDate
     , apiBaseUrl : String
     , darkModeOn : Bool
     , editingTodayHabitAmount : Dict.Dict String Int

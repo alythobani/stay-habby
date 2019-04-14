@@ -2,6 +2,7 @@ module Update exposing (extractInt, update)
 
 import Api
 import Array
+import Date
 import DefaultServices.Util as Util
 import Dict
 import Model exposing (Model)
@@ -44,6 +45,32 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        OnTimeZoneRetrieval result ->
+            case result of
+                Result.Err error ->
+                    ( { model | errorMessage = Just <| "Time Zone error: " ++ Debug.toString error }, Cmd.none )
+
+                Ok ( timeZoneName, timeZone ) ->
+                    let
+                        currentDate : Date.Date
+                        currentDate =
+                            Date.fromPosix timeZone model.currentPosix
+
+                        currentYmd : YmdDate.YmdDate
+                        currentYmd =
+                            YmdDate.fromDate currentDate
+                    in
+                    ( { model
+                        | currentTimeZone = timeZone
+                        , ymd = Just currentYmd
+                      }
+                    , Api.queryHabitsAndHabitDataAndFrequencyStats
+                        currentYmd
+                        model.apiBaseUrl
+                        OnGetHabitsAndHabitDataAndFrequencyStatsFailure
+                        OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
+                    )
 
         OnLocationChange location ->
             -- TODO

@@ -9,11 +9,13 @@ import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.YmdDate as YmdDate
 import Time
+import TimeZone
 import Url
 
 
 type Msg
     = NoOp
+    | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
     | OnUrlChange Url.Url
     | OnUrlRequest Browser.UrlRequest
     | TickMinute Time.Posix

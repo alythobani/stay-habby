@@ -9,10 +9,13 @@ import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.YmdDate as YmdDate
 import RemoteData
+import Time
 
 
 type alias Model =
-    { ymd : YmdDate.YmdDate
+    { currentPosix : Time.Posix
+    , currentTimeZone : Time.Zone
+    , ymd : Maybe YmdDate.YmdDate
     , apiBaseUrl : String
     , darkModeOn : Bool
     , editingTodayHabitAmount : Dict.Dict String Int

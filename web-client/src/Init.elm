@@ -9,16 +9,21 @@ import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
+import Task
+import Time
+import TimeZone
 import Url
 
 
 init : Flags -> Url.Url -> ( Model, Cmd Msg )
 init { apiBaseUrl, currentTime } url =
     let
-        ymd =
-            currentTime |> Date.fromTime |> YmdDate.fromDate
+        currentPosix =
+            currentTime |> Time.millisToPosix
     in
-    ( { ymd = ymd
+    ( { currentPosix = currentPosix
+      , currentTimeZone = Nothing
+      , ymd = Nothing
       , apiBaseUrl = apiBaseUrl
       , darkModeOn = True
       , editingTodayHabitAmount = Dict.empty
@@ -47,9 +52,5 @@ init { apiBaseUrl, currentTime } url =
       , errorMessage = Nothing
       , showErrorMessage = False
       }
-    , Api.queryHabitsAndHabitDataAndFrequencyStats
-        ymd
-        apiBaseUrl
-        OnGetHabitsAndHabitDataAndFrequencyStatsFailure
-        OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
+    , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
     )

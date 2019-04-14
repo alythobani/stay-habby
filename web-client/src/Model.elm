@@ -14,7 +14,7 @@ import Time
 
 type alias Model =
     { currentPosix : Time.Posix
-    , currentTimeZone : Time.Zone
+    , currentTimeZone : Maybe Time.Zone
     , ymd : Maybe YmdDate.YmdDate
     , apiBaseUrl : String
     , darkModeOn : Bool

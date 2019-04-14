@@ -64,7 +64,7 @@ type Msg
     | ToggleHistoryViewerHabitActionsDropdown String Bool
     | OnToggleDarkMode
     | OnToggleShowSetHabitDataShortcut
-    | KeyboardExtraMsg Keyboard.Msg
+    | KeyboardMsg Keyboard.Msg
     | FocusResult (Result Dom.Error ())
     | OnSetHabitDataShortcutInput String
     | OnSetHabitDataShortcutSelectNextHabit

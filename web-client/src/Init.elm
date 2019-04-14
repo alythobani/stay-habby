@@ -2,6 +2,7 @@ module Init exposing (init)
 
 import Api
 import Array
+import DefaultServices.Keyboard as Keyboard
 import Dict
 import Flags exposing (Flags)
 import Model exposing (Model)
@@ -18,6 +19,7 @@ import Url
 init : Flags -> Url.Url -> ( Model, Cmd Msg )
 init { apiBaseUrl, currentTime } url =
     let
+        currentPosix : Time.Posix
         currentPosix =
             currentTime |> Time.millisToPosix
     in
@@ -40,7 +42,7 @@ init { apiBaseUrl, currentTime } url =
       , todayViewerHabitActionsDropdowns = Dict.empty
       , historyViewerHabitActionsDropdowns = Dict.empty
       , showSetHabitDataShortcut = False
-      , keysDown = KK.init
+      , keysDown = Keyboard.init
       , setHabitDataShortcutHabitNameFilterText = ""
       , setHabitDataShortcutFilteredHabits = Array.empty
       , setHabitDataShortcutSelectedHabitIndex = 0

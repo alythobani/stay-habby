@@ -1,24 +1,58 @@
-module DefaultServices.Keyboard exposing (Key(..), Model, Msg(..), codeBook, codeDict, decodeKey, fromCode)
+module DefaultServices.Keyboard exposing (Key(..), KeyCode, Model, Msg(..), codeBook, codeDict, decodeKey, decodeKeyCode, fromCode, init, subscriptions, update)
 
 {- This module got lots of inspiration (and copied code) from ohanhi's Keyboard.Extra module,
    which is, as of the moment I'm writing this, deprecated for Elm 0.19.
    Their code is here https://github.com/ohanhi/keyboard-extra/blob/3.0.4/src/Keyboard/Extra.elm
 -}
 
+import Browser.Events as Events
 import Dict
 import Json.Decode as Decode
 import Set
 
 
+type alias KeyCode =
+    String
+
+
 type alias Model =
-    Set.Set Key
+    Set.Set KeyCode
+
+
+{-| Use this to initialize the component.
+-}
+init : Model
+init =
+    Set.empty
+
+
+{-| You need to call this to have the component update.
+-}
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        Down code ->
+            Set.insert code model
+
+        Up code ->
+            Set.remove code model
 
 
 {-| The message type `DefaultServices.Keyboard` uses.
 -}
 type Msg
-    = Down Key
-    | Up Key
+    = Down KeyCode
+    | Up KeyCode
+
+
+{-| You will need to add this to your program's subscriptions.
+-}
+subscriptions : Sub Msg
+subscriptions =
+    Sub.batch
+        [ Events.onKeyDown (Decode.map Down decodeKeyCode)
+        , Events.onKeyUp (Decode.map Up decodeKeyCode)
+        ]
 
 
 {-| Keys on the keyboard. Direct association with the "code" of a KeyboardEvent.
@@ -97,7 +131,7 @@ type Key
 {-| Convert a key code into a `Key`.
 fromCode "ArrowLeft" == ArrowLeft
 -}
-fromCode : String -> Key
+fromCode : KeyCode -> Key
 fromCode code =
     codeDict
         |> Dict.get code
@@ -112,15 +146,26 @@ on "keydown" (Json.map tagger decodeKey)
 -}
 decodeKey : Decode.Decoder Key
 decodeKey =
-    Decode.map fromCode (Decode.field "code" Decode.string)
+    Decode.map fromCode decodeKeyCode
 
 
-codeDict : Dict.Dict String Key
+{-| A `Json.Decoder` for grabbing `event.code` and turning it into a `KeyCode`
+import Json.Decode as Json
+onKey : (KeyCode -> msg) -> Attribute msg
+onKey tagger =
+on "keydown" (Json.map tagger decodeKeyCode)
+-}
+decodeKeyCode : Decode.Decoder KeyCode
+decodeKeyCode =
+    Decode.field "code" Decode.string
+
+
+codeDict : Dict.Dict KeyCode Key
 codeDict =
     Dict.fromList codeBook
 
 
-codeBook : List ( String, Key )
+codeBook : List ( KeyCode, Key )
 codeBook =
     [ ( "Escape", Escape )
     , ( "Backquote", Backquote )

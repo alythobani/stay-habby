@@ -2,7 +2,9 @@ module Update exposing (extractInt, update)
 
 import Api
 import Array
+import Browser.Dom as Dom
 import Date
+import DefaultServices.Keyboard as Keyboard
 import DefaultServices.Util as Util
 import Dict
 import Model exposing (Model)
@@ -13,6 +15,7 @@ import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
 import Task
+import TimeZone
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -26,12 +29,17 @@ update msg model =
 
         getTodayViewerFrequencyStats : List String -> Cmd Msg
         getTodayViewerFrequencyStats habitIds =
-            Api.queryPastFrequencyStats
-                model.ymd
-                habitIds
-                model.apiBaseUrl
-                OnGetTodayFrequencyStatsFailure
-                OnGetTodayFrequencyStatsSuccess
+            case model.ymd of
+                Just ymd ->
+                    Api.queryPastFrequencyStats
+                        ymd
+                        habitIds
+                        model.apiBaseUrl
+                        OnGetTodayFrequencyStatsFailure
+                        OnGetTodayFrequencyStatsSuccess
+
+                Nothing ->
+                    Cmd.none
 
         getHistoryViewerFrequencyStats : YmdDate.YmdDate -> List String -> Cmd Msg
         getHistoryViewerFrequencyStats ymd habitIds =
@@ -61,37 +69,34 @@ update msg model =
                         currentYmd =
                             YmdDate.fromDate currentDate
                     in
-                    ( { model
-                        | currentTimeZone = timeZone
-                        , ymd = Just currentYmd
-                      }
-                    , Api.queryHabitsAndHabitDataAndFrequencyStats
-                        currentYmd
-                        model.apiBaseUrl
-                        OnGetHabitsAndHabitDataAndFrequencyStatsFailure
-                        OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
-                    )
+                    if model.ymd == Just currentYmd then
+                        -- Date hasn't changed. No need to re-query things.
+                        ( { model | currentTimeZone = Just timeZone }, Cmd.none )
 
-        OnLocationChange location ->
+                    else
+                        ( { model
+                            | currentTimeZone = Just timeZone
+                            , ymd = Just currentYmd
+                          }
+                        , Api.queryHabitsAndHabitDataAndFrequencyStats
+                            currentYmd
+                            model.apiBaseUrl
+                            OnGetHabitsAndHabitDataAndFrequencyStatsFailure
+                            OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
+                        )
+
+        OnUrlChange url ->
             -- TODO
             ( model, Cmd.none )
 
-        TickMinute time ->
-            let
-                newYmd =
-                    time |> Date.fromTime |> YmdDate.fromDate
-            in
-            if model.ymd /= newYmd then
-                ( { model | ymd = newYmd }
-                , Api.queryHabitsAndHabitDataAndFrequencyStats
-                    newYmd
-                    model.apiBaseUrl
-                    OnGetHabitsAndHabitDataAndFrequencyStatsFailure
-                    OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
-                )
+        OnUrlRequest urlRequest ->
+            -- TODO
+            ( model, Cmd.none )
 
-            else
-                ( model, Cmd.none )
+        TickMinute posix ->
+            ( { model | currentPosix = posix }
+            , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
+            )
 
         OnGetHabitsAndHabitDataAndFrequencyStatsFailure apiError ->
             ( { model
@@ -191,9 +196,16 @@ update msg model =
             )
 
         AddHabit createHabitData ->
-            ( model
-            , Api.mutationAddHabit createHabitData model.ymd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
-            )
+            case model.ymd of
+                Just ymd ->
+                    ( model
+                    , Api.mutationAddHabit createHabitData ymd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+                    )
+
+                Nothing ->
+                    ( { model | errorMessage = Just "Error adding habit: current date not available" }
+                    , Cmd.none
+                    )
 
         OnAddHabitFailure apiError ->
             ( { model | errorMessage = Just <| "Error adding habit: " ++ ApiError.toString apiError }
@@ -219,14 +231,14 @@ update msg model =
 
             else
                 case String.toInt newVal of
-                    Result.Err _ ->
+                    Nothing ->
                         ( model, Cmd.none )
 
-                    Result.Ok newInt ->
+                    Just newInt ->
                         ( { model | editingTodayHabitAmount = newEditingTodayHabitAmount <| Just newInt }, Cmd.none )
 
-        SetHabitData ymd habitId newVal ->
-            case newVal of
+        SetHabitData ymd habitId maybeNewVal ->
+            case maybeNewVal of
                 Nothing ->
                     ( model, Cmd.none )
 
@@ -296,25 +308,41 @@ update msg model =
             )
 
         OnHistoryViewerSelectYesterday ->
-            let
-                yesterday =
-                    YmdDate.addDays -1 model.ymd
-            in
-            update (SetHistoryViewerSelectedDate yesterday) model
+            case model.ymd of
+                Just ymd ->
+                    let
+                        yesterday : YmdDate.YmdDate
+                        yesterday =
+                            YmdDate.addDays -1 ymd
+                    in
+                    update (SetHistoryViewerSelectedDate yesterday) model
+
+                Nothing ->
+                    ( { model | errorMessage = Just "Error selecting yesterday: current date not available" }
+                    , Cmd.none
+                    )
 
         OnHistoryViewerSelectBeforeYesterday ->
-            let
-                beforeYesterday =
-                    YmdDate.addDays -2 model.ymd
-            in
-            update (SetHistoryViewerSelectedDate beforeYesterday) model
+            case model.ymd of
+                Just ymd ->
+                    let
+                        beforeYesterday : YmdDate.YmdDate
+                        beforeYesterday =
+                            YmdDate.addDays -2 ymd
+                    in
+                    update (SetHistoryViewerSelectedDate beforeYesterday) model
+
+                Nothing ->
+                    ( { model | errorMessage = Just "Error selecting before yesterday: current date not available" }
+                    , Cmd.none
+                    )
 
         OnHistoryViewerSelectDateInput ->
             let
-                ymd =
+                maybeYmd =
                     YmdDate.fromSimpleString model.historyViewerDateInput
             in
-            case ymd of
+            case maybeYmd of
                 Just ymd ->
                     update (SetHistoryViewerSelectedDate ymd) model
 
@@ -338,8 +366,8 @@ update msg model =
                 updateAllFrequencyStats : List FrequencyStats.FrequencyStats -> List FrequencyStats.FrequencyStats
                 updateAllFrequencyStats allFrequencyStats =
                     List.foldl
-                        (\newStats allFrequencyStats ->
-                            Util.replaceOrAdd allFrequencyStats (\stats -> stats.habitId == newStats.habitId) newStats
+                        (\newStats statsList ->
+                            Util.replaceOrAdd statsList (\stats -> stats.habitId == newStats.habitId) newStats
                         )
                         allFrequencyStats
                         frequencyStatsList
@@ -371,8 +399,8 @@ update msg model =
                 updateHistoryViewerFrequencyStats : List FrequencyStats.FrequencyStats -> List FrequencyStats.FrequencyStats
                 updateHistoryViewerFrequencyStats historyViewerFrequencyStats =
                     List.foldl
-                        (\newStats historyViewerFrequencyStats ->
-                            Util.replaceOrAdd historyViewerFrequencyStats (\stats -> stats.habitId == newStats.habitId) newStats
+                        (\newStats statsList ->
+                            Util.replaceOrAdd statsList (\stats -> stats.habitId == newStats.habitId) newStats
                         )
                         historyViewerFrequencyStats
                         frequencyStatsList
@@ -399,7 +427,7 @@ update msg model =
                 editingHabitDataDict =
                     model.editingHistoryHabitAmount
                         |> Dict.get (YmdDate.toSimpleString forDate)
-                        ?> Dict.empty
+                        |> Maybe.withDefault Dict.empty
 
                 newAmount =
                     extractInt newInput (Dict.get habitId editingHabitDataDict)
@@ -434,24 +462,21 @@ update msg model =
         OnToggleDarkMode ->
             ( { model | darkModeOn = not model.darkModeOn }, Cmd.none )
 
-        Mdl msg_ ->
-            Material.update Mdl msg_ model
-
         OnToggleShowSetHabitDataShortcut ->
             ( { model | showSetHabitDataShortcut = not model.showSetHabitDataShortcut }, Cmd.none )
 
-        KeyboardExtraMsg keyMsg ->
+        KeyboardMsg keyMsg ->
             let
                 newKeysDown =
-                    KK.update keyMsg model.keysDown
+                    Keyboard.update keyMsg model.keysDown
 
                 ( newShowSetHabitDataShortcut, showSetHabitDataShortcutNeedsUpdate ) =
                     case keyMsg of
-                        KK.Down keyCode ->
-                            if KK.fromCode keyCode == KK.CharA then
+                        Keyboard.Down keyCode ->
+                            if Keyboard.fromCode keyCode == Keyboard.KeyA then
                                 ( True, model.showSetHabitDataShortcut /= True )
 
-                            else if KK.fromCode keyCode == KK.Escape then
+                            else if Keyboard.fromCode keyCode == Keyboard.Escape then
                                 ( False, model.showSetHabitDataShortcut /= False )
 
                             else
@@ -511,7 +536,7 @@ update msg model =
                 newSelectedHabitIndex =
                     case oldSelectedHabit of
                         Just h ->
-                            Util.firstIndexInList newFilteredHabits h ?> 0
+                            Maybe.withDefault 0 (Util.firstIndexInList newFilteredHabits h)
 
                         Nothing ->
                             0
@@ -570,8 +595,8 @@ update msg model =
             , Cmd.none
             )
 
-        OnSetHabitDataShortcutAmountFormSubmit ymd habitId newVal ->
-            case newVal of
+        OnSetHabitDataShortcutAmountFormSubmit ymd habitId maybeNewVal ->
+            case maybeNewVal of
                 Nothing ->
                     ( model, Cmd.none )
 
@@ -759,100 +784,107 @@ update msg model =
 
         -- Suspending Habits
         OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer oldSuspensions ->
-            let
-                newDropdownsModel =
-                    -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
-                    if onTodayViewer then
-                        { model
-                            | todayViewerHabitActionsDropdowns =
-                                Dict.update
-                                    habitId
-                                    (always <| Just False)
-                                    model.todayViewerHabitActionsDropdowns
-                        }
+            case model.ymd of
+                Just ymd ->
+                    let
+                        newDropdownsModel =
+                            -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
+                            if onTodayViewer then
+                                { model
+                                    | todayViewerHabitActionsDropdowns =
+                                        Dict.update
+                                            habitId
+                                            (always <| Just False)
+                                            model.todayViewerHabitActionsDropdowns
+                                }
 
-                    else
-                        { model
-                            | historyViewerHabitActionsDropdowns =
-                                Dict.update
-                                    habitId
-                                    (always <| Just False)
-                                    model.historyViewerHabitActionsDropdowns
-                        }
+                            else
+                                { model
+                                    | historyViewerHabitActionsDropdowns =
+                                        Dict.update
+                                            habitId
+                                            (always <| Just False)
+                                            model.historyViewerHabitActionsDropdowns
+                                }
 
-                newSuspensions : List Habit.SuspendedInterval
-                newSuspensions =
-                    if currentlySuspended then
-                        -- User is trying to Resume the Habit
-                        case List.reverse oldSuspensions of
-                            currSuspendedInterval :: rest ->
-                                -- Check if the last SuspendedInterval has been resumed yet
-                                case currSuspendedInterval.endDate of
-                                    Just endDateYmd ->
-                                        -- It's already been closed, nothing to do
-                                        oldSuspensions
+                        newSuspensions : List Habit.SuspendedInterval
+                        newSuspensions =
+                            if currentlySuspended then
+                                -- User is trying to Resume the Habit
+                                case List.reverse oldSuspensions of
+                                    currSuspendedInterval :: rest ->
+                                        -- Check if the last SuspendedInterval has been resumed yet
+                                        case currSuspendedInterval.endDate of
+                                            Just endDateYmd ->
+                                                -- It's already been closed, nothing to do
+                                                oldSuspensions
 
-                                    Nothing ->
-                                        -- We should close the suspended interval to resume the habit
-                                        if YmdDate.compareYmds currSuspendedInterval.startDate model.ymd == LT then
-                                            -- The suspended interval started earlier than today.
-                                            -- To resume today, we set its endDate to yesterday.
-                                            let
-                                                yesterday =
-                                                    YmdDate.addDays -1 model.ymd
+                                            Nothing ->
+                                                -- We should close the suspended interval to resume the habit
+                                                if YmdDate.compareYmds currSuspendedInterval.startDate ymd == LT then
+                                                    -- The suspended interval started earlier than today.
+                                                    -- To resume today, we set its endDate to yesterday.
+                                                    let
+                                                        yesterday =
+                                                            YmdDate.addDays -1 ymd
 
-                                                newCurrSuspendedInterval =
-                                                    { currSuspendedInterval | endDate = Just yesterday }
-                                            in
-                                            List.reverse <| newCurrSuspendedInterval :: rest
+                                                        newCurrSuspendedInterval =
+                                                            { currSuspendedInterval | endDate = Just yesterday }
+                                                    in
+                                                    List.reverse <| newCurrSuspendedInterval :: rest
 
-                                        else
-                                            -- it was suspended today (or later, but that shouldn't be possible), we can just get rid of it
-                                            List.take (List.length oldSuspensions - 1) oldSuspensions
+                                                else
+                                                    -- it was suspended today (or later, but that shouldn't be possible), we can just get rid of it
+                                                    List.take (List.length oldSuspensions - 1) oldSuspensions
 
-                            [] ->
-                                -- Habit has never been suspended before, so it's already active. Nothing to do
-                                []
+                                    [] ->
+                                        -- Habit has never been suspended before, so it's already active. Nothing to do
+                                        []
 
-                    else
-                        -- User is trying to Suspend the Habit
-                        case List.reverse oldSuspensions of
-                            currSuspendedInterval :: rest ->
-                                -- Check if the last SuspendedInterval has still in effect
-                                case currSuspendedInterval.endDate of
-                                    Just endDateYmd ->
-                                        -- The habit has been resumed.
-                                        if YmdDate.compareYmds endDateYmd model.ymd == LT then
-                                            -- The SuspendedInterval's last day was yesterday or earlier.
-                                            -- To suspend the habit, we should add a new SuspendedInterval that starts today.
-                                            let
-                                                newSuspendedInterval =
-                                                    { startDate = model.ymd, endDate = Nothing }
-                                            in
-                                            List.reverse <| newSuspendedInterval :: currSuspendedInterval :: rest
+                            else
+                                -- User is trying to Suspend the Habit
+                                case List.reverse oldSuspensions of
+                                    currSuspendedInterval :: rest ->
+                                        -- Check if the last SuspendedInterval has still in effect
+                                        case currSuspendedInterval.endDate of
+                                            Just endDateYmd ->
+                                                -- The habit has been resumed.
+                                                if YmdDate.compareYmds endDateYmd ymd == LT then
+                                                    -- The SuspendedInterval's last day was yesterday or earlier.
+                                                    -- To suspend the habit, we should add a new SuspendedInterval that starts today.
+                                                    let
+                                                        newSuspendedInterval =
+                                                            { startDate = ymd, endDate = Nothing }
+                                                    in
+                                                    List.reverse <| newSuspendedInterval :: currSuspendedInterval :: rest
 
-                                        else
-                                            -- The SuspendedInterval's last day is today (or later, but that shouldn't be possible).
-                                            -- This means the habit is already currently suspended, so there's nothing to do.
-                                            -- (For that reason this branch should never even execute)
-                                            oldSuspensions
+                                                else
+                                                    -- The SuspendedInterval's last day is today (or later, but that shouldn't be possible).
+                                                    -- This means the habit is already currently suspended, so there's nothing to do.
+                                                    -- (For that reason this branch should never even execute)
+                                                    oldSuspensions
 
-                                    Nothing ->
-                                        -- The last suspension is still in effect (so the habit is still suspended), nothing to do.
-                                        oldSuspensions
+                                            Nothing ->
+                                                -- The last suspension is still in effect (so the habit is still suspended), nothing to do.
+                                                oldSuspensions
 
-                            [] ->
-                                -- Let's give the Habit its first suspension
-                                [ { startDate = model.ymd, endDate = Nothing } ]
-            in
-            ( newDropdownsModel
-            , Api.mutationEditHabitSuspensions
-                habitId
-                newSuspensions
-                model.apiBaseUrl
-                OnResumeOrSuspendHabitFailure
-                OnResumeOrSuspendHabitSuccess
-            )
+                                    [] ->
+                                        -- Let's give the Habit its first suspension
+                                        [ { startDate = ymd, endDate = Nothing } ]
+                    in
+                    ( newDropdownsModel
+                    , Api.mutationEditHabitSuspensions
+                        habitId
+                        newSuspensions
+                        model.apiBaseUrl
+                        OnResumeOrSuspendHabitFailure
+                        OnResumeOrSuspendHabitSuccess
+                    )
+
+                Nothing ->
+                    ( { model | errorMessage = Just "Error suspending/resuming habit: current date not available" }
+                    , Cmd.none
+                    )
 
         OnResumeOrSuspendHabitFailure apiError ->
             ( { model | errorMessage = Just <| "Error suspending/resuming habit: " ++ ApiError.toString apiError }
@@ -891,10 +923,14 @@ update msg model =
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =
-    if String.isEmpty string then
-        Nothing
+    let
+        maybeInt : Maybe Int
+        maybeInt =
+            String.toInt string
+    in
+    case maybeInt of
+        Just i ->
+            maybeInt
 
-    else
-        String.toInt string
-            |> Result.map Just
-            |> Result.withDefault default
+        Nothing ->
+            default

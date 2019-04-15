@@ -783,13 +783,13 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                 , value setHabitDataShortcutHabitNameFilterText
                 , Util.onKeydownPreventDefault
                     (\key ->
-                        if key == KK.ArrowDown then
+                        if key == Keyboard.ArrowDown then
                             Just OnSetHabitDataShortcutSelectNextHabit
 
-                        else if key == KK.ArrowUp then
+                        else if key == Keyboard.ArrowUp then
                             Just OnSetHabitDataShortcutSelectPreviousHabit
 
-                        else if key == KK.Enter && readyToEnterHabit then
+                        else if key == Keyboard.Enter && readyToEnterHabit then
                             Just OnToggleShowSetHabitDataShortcutAmountForm
 
                         else
@@ -822,8 +822,8 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                 RemoteData.Success habitData ->
                                     List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) habitData
                                         |> List.head
-                                        |> (\habitDatum ->
-                                                case habitDatum of
+                                        |> (\maybeHabitDatum ->
+                                                case maybeHabitDatum of
                                                     Nothing ->
                                                         0
 
@@ -841,7 +841,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                         [ id "set-habit-data-shortcut-amount-form-input"
                         , class "set-habit-data-shortcut-amount-form-input"
                         , placeholder <|
-                            toString habitDatum
+                            String.fromInt habitDatum
                                 ++ " "
                                 ++ (if habitDatum == 1 then
                                         habitRecord.unitNameSingular
@@ -850,13 +850,13 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                         habitRecord.unitNamePlural
                                    )
                         , onInput OnSetHabitDataShortcutAmountFormInput
-                        , value (inputtedAmount ||> toString ?> "")
+                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt inputtedAmount)
                         , Util.onKeydownPreventDefault
                             (\key ->
-                                if key == KK.Escape then
+                                if key == Keyboard.Escape then
                                     Just OnToggleShowSetHabitDataShortcutAmountForm
 
-                                else if key == KK.Enter then
+                                else if key == Keyboard.Enter then
                                     Just <| OnSetHabitDataShortcutAmountFormSubmit ymd habitRecord.id inputtedAmount
 
                                 else
@@ -925,9 +925,9 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                     newGoalDesc =
                         case editGoal.frequencyKind of
                             Habit.TotalWeekFrequencyKind ->
-                                (editGoal.timesPerWeek ||> toString ?> "_")
+                                Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.timesPerWeek)
                                     ++ " "
-                                    ++ (if (editGoal.timesPerWeek ?> 0) == 1 then
+                                    ++ (if Maybe.withDefault 0 editGoal.timesPerWeek == 1 then
                                             habitRecord.unitNameSingular
 
                                         else
@@ -937,35 +937,35 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
 
                             Habit.SpecificDayOfWeekFrequencyKind ->
                                 "Mo "
-                                    ++ (editGoal.mondayTimes ||> toString ?> "_")
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.mondayTimes)
                                     ++ " Tu "
-                                    ++ (editGoal.tuesdayTimes ||> toString ?> "_")
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.tuesdayTimes)
                                     ++ " We "
-                                    ++ (editGoal.wednesdayTimes ||> toString ?> "_")
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.wednesdayTimes)
                                     ++ " Th "
-                                    ++ (editGoal.thursdayTimes ||> toString ?> "_")
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.thursdayTimes)
                                     ++ " Fr "
-                                    ++ (editGoal.fridayTimes ||> toString ?> "_")
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.fridayTimes)
                                     ++ " Sa "
-                                    ++ (editGoal.saturdayTimes ||> toString ?> "_")
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.saturdayTimes)
                                     ++ " Su "
-                                    ++ (editGoal.sundayTimes ||> toString ?> "_")
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.sundayTimes)
 
                             Habit.EveryXDayFrequencyKind ->
-                                (editGoal.times ||> toString ?> "_")
+                                Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.times)
                                     ++ " "
-                                    ++ (if (editGoal.times ?> 0) == 1 then
+                                    ++ (if Maybe.withDefault 0 editGoal.times == 1 then
                                             habitRecord.unitNameSingular
 
                                         else
                                             habitRecord.unitNamePlural
                                        )
                                     ++ " per "
-                                    ++ (if (editGoal.days ?> 0) == 1 then
+                                    ++ (if Maybe.withDefault 0 editGoal.days == 1 then
                                             "day"
 
                                         else
-                                            (editGoal.days ||> toString ?> "_") ++ " days"
+                                            Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.days) ++ " days"
                                        )
 
                     oldFrequencies : List Habit.FrequencyChangeRecord
@@ -1118,7 +1118,7 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                             [ input
                                 [ placeholder "X"
                                 , onInput OnEditGoalTimesPerWeekInput
-                                , value (editGoal.timesPerWeek ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.timesPerWeek)
                                 ]
                                 []
                             ]
@@ -1131,43 +1131,43 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                             [ input
                                 [ placeholder "Monday"
                                 , onInput OnEditGoalSpecificDayMondayInput
-                                , value (editGoal.mondayTimes ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.mondayTimes)
                                 ]
                                 []
                             , input
                                 [ placeholder "Tuesday"
                                 , onInput OnEditGoalSpecificDayTuesdayInput
-                                , value (editGoal.tuesdayTimes ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.tuesdayTimes)
                                 ]
                                 []
                             , input
                                 [ placeholder "Wednesday"
                                 , onInput OnEditGoalSpecificDayWednesdayInput
-                                , value (editGoal.wednesdayTimes ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.wednesdayTimes)
                                 ]
                                 []
                             , input
                                 [ placeholder "Thursday"
                                 , onInput OnEditGoalSpecificDayThursdayInput
-                                , value (editGoal.thursdayTimes ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.thursdayTimes)
                                 ]
                                 []
                             , input
                                 [ placeholder "Friday"
                                 , onInput OnEditGoalSpecificDayFridayInput
-                                , value (editGoal.fridayTimes ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.fridayTimes)
                                 ]
                                 []
                             , input
                                 [ placeholder "Saturday"
                                 , onInput OnEditGoalSpecificDaySaturdayInput
-                                , value (editGoal.saturdayTimes ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.saturdayTimes)
                                 ]
                                 []
                             , input
                                 [ placeholder "Sunday"
                                 , onInput OnEditGoalSpecificDaySundayInput
-                                , value (editGoal.sundayTimes ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.sundayTimes)
                                 ]
                                 []
                             ]
@@ -1180,13 +1180,13 @@ renderEditGoalDialog showEditGoalDialog habit editGoal todayYmd =
                             [ input
                                 [ placeholder "Times"
                                 , onInput OnEditGoalTimesInput
-                                , value (editGoal.times ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.times)
                                 ]
                                 []
                             , input
                                 [ placeholder "Days"
                                 , onInput OnEditGoalDaysInput
-                                , value (editGoal.days ||> toString ?> "")
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.days)
                                 ]
                                 []
                             ]
@@ -1266,10 +1266,9 @@ renderErrorMessage errorMessage showErrorMessage =
             [ div
                 [ class "error-message-text" ]
                 [ text <|
-                    (errorMessage
-                        ||> (\em -> em ++ ". You may want to refresh the page.")
-                        ?> "No errors"
-                    )
+                    Maybe.withDefault
+                        "No errors"
+                        (Maybe.map (\em -> em ++ ". You may want to refresh the page.") errorMessage)
                 ]
             ]
         ]

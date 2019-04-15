@@ -2,6 +2,7 @@ module Init exposing (init)
 
 import Api
 import Array
+import Browser.Navigation as Navigation
 import DefaultServices.Keyboard as Keyboard
 import Dict
 import Flags exposing (Flags)
@@ -16,14 +17,16 @@ import TimeZone
 import Url
 
 
-init : Flags -> Url.Url -> ( Model, Cmd Msg )
-init { apiBaseUrl, currentTime } url =
+init : Flags -> Url.Url -> Navigation.Key -> ( Model, Cmd Msg )
+init { apiBaseUrl, currentTime } url key =
     let
         currentPosix : Time.Posix
         currentPosix =
             currentTime |> Time.millisToPosix
     in
-    ( { currentPosix = currentPosix
+    ( { key = key
+      , url = url
+      , currentPosix = currentPosix
       , currentTimeZone = Nothing
       , ymd = Nothing
       , apiBaseUrl = apiBaseUrl

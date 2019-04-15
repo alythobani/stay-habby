@@ -1,6 +1,7 @@
 module View exposing (dropdownIcon, habitActionsDropdownDiv, renderHabitBox, renderHistoryViewerPanel, renderSetHabitDataShortcut, renderTodayPanel, view)
 
 import Array
+import Browser
 import DefaultServices.Keyboard as Keyboard
 import DefaultServices.Util as Util
 import Dict
@@ -19,58 +20,62 @@ import Msg exposing (Msg(..))
 import RemoteData
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
-    div
-        [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ]
-        , Util.onKeydown
-            (\key ->
-                if key == Keyboard.Space then
-                    Just OnToggleShowSetHabitDataShortcut
+    { title = "Be Habby"
+    , body =
+        [ div
+            [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ]
+            , Util.onKeydown
+                (\key ->
+                    if key == Keyboard.Space then
+                        Just OnToggleShowSetHabitDataShortcut
 
-                else
-                    Nothing
-            )
+                    else
+                        Nothing
+                )
+            ]
+            [ renderTodayPanel
+                model.ymd
+                model.allHabits
+                model.allHabitData
+                model.allFrequencyStats
+                model.addHabit
+                model.editingTodayHabitAmount
+                model.openTodayViewer
+                model.todayViewerHabitActionsDropdowns
+                model.darkModeOn
+                model.errorMessage
+            , renderHistoryViewerPanel
+                model.openHistoryViewer
+                model.historyViewerDateInput
+                model.historyViewerSelectedDate
+                model.allHabits
+                model.allHabitData
+                model.historyViewerFrequencyStats
+                model.editingHistoryHabitAmount
+                model.historyViewerHabitActionsDropdowns
+                model.ymd
+            , renderSetHabitDataShortcut
+                model.showSetHabitDataShortcut
+                model.setHabitDataShortcutHabitNameFilterText
+                model.setHabitDataShortcutFilteredHabits
+                model.setHabitDataShortcutSelectedHabitIndex
+                model.showSetHabitDataShortcutAmountForm
+                model.allHabitData
+                model.ymd
+                model.setHabitDataShortcutInputtedAmount
+            , renderEditGoalDialog
+                model.showEditGoalDialog
+                model.editGoalDialogHabit
+                model.editGoal
+                model.ymd
+            , renderErrorMessage
+                model.errorMessage
+                model.showErrorMessage
+            ]
         ]
-        [ renderTodayPanel
-            model.ymd
-            model.allHabits
-            model.allHabitData
-            model.allFrequencyStats
-            model.addHabit
-            model.editingTodayHabitAmount
-            model.openTodayViewer
-            model.todayViewerHabitActionsDropdowns
-            model.darkModeOn
-            model.errorMessage
-        , renderHistoryViewerPanel
-            model.openHistoryViewer
-            model.historyViewerDateInput
-            model.historyViewerSelectedDate
-            model.allHabits
-            model.allHabitData
-            model.historyViewerFrequencyStats
-            model.editingHistoryHabitAmount
-            model.historyViewerHabitActionsDropdowns
-            model.ymd
-        , renderSetHabitDataShortcut
-            model.showSetHabitDataShortcut
-            model.setHabitDataShortcutHabitNameFilterText
-            model.setHabitDataShortcutFilteredHabits
-            model.setHabitDataShortcutSelectedHabitIndex
-            model.showSetHabitDataShortcutAmountForm
-            model.allHabitData
-            model.ymd
-            model.setHabitDataShortcutInputtedAmount
-        , renderEditGoalDialog
-            model.showEditGoalDialog
-            model.editGoalDialogHabit
-            model.editGoal
-            model.ymd
-        , renderErrorMessage
-            model.errorMessage
-            model.showErrorMessage
-        ]
+    }
 
 
 renderTodayPanel :

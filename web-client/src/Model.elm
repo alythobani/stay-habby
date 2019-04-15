@@ -1,6 +1,7 @@
 module Model exposing (Model)
 
 import Array
+import Browser.Navigation as Navigation
 import DefaultServices.Keyboard as Keyboard
 import Dict
 import Models.ApiError as ApiError
@@ -10,10 +11,13 @@ import Models.HabitData as HabitData
 import Models.YmdDate as YmdDate
 import RemoteData
 import Time
+import Url
 
 
 type alias Model =
-    { currentPosix : Time.Posix
+    { key : Navigation.Key
+    , url : Url.Url
+    , currentPosix : Time.Posix
     , currentTimeZone : Maybe Time.Zone
     , ymd : Maybe YmdDate.YmdDate
     , apiBaseUrl : String

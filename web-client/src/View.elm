@@ -6,7 +6,7 @@ import DefaultServices.Util as Util
 import Dict
 import HabitUtil
 import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
-import Html.Attributes exposing (class, classList, id, placeholder, value)
+import Html.Attributes exposing (class, classList, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Maybe.Extra as Maybe
 import Model exposing (Model)
@@ -102,14 +102,8 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
             ]
             [ i [ class "material-icons" ] [] ]
         , div [ class "dark-mode-switch" ]
-            [ Toggles.switch
-                Mdl
-                [ 0 ]
-                mdl
-                [ Options.onToggle OnToggleDarkMode
-                , Toggles.ripple
-                , Toggles.value darkModeOn
-                ]
+            [ input
+                [ type_ "checkbox" ]
                 [ text <|
                     if darkModeOn then
                         "Dark Mode"
@@ -401,10 +395,10 @@ renderHistoryViewerPanel :
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Dict.Dict String (Dict.Dict String Int)
-    -> Dict.Dict String Dropdown.State
+    -> Dict.Dict String Bool
     -> YmdDate.YmdDate
     -> Html Msg
-renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns todayYmd =
+renderHistoryViewerPanel openView dateInput maybeSelectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns todayYmd =
     case ( rdHabits, rdHabitData ) of
         ( RemoteData.Success habits, RemoteData.Success habitData ) ->
             div
@@ -415,7 +409,7 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                     Util.hiddenDiv
 
                   else
-                    case selectedDate of
+                    case maybeSelectedDate of
                         Nothing ->
                             div
                                 [ classList [ ( "date-entry", True ), ( "display-none", not openView ) ] ]
@@ -430,7 +424,7 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
                                     , value dateInput
                                     , Util.onKeydown
                                         (\key ->
-                                            if key == KK.Enter then
+                                            if key == Keyboard.Enter then
                                                 Just OnHistoryViewerSelectDateInput
 
                                             else
@@ -462,7 +456,7 @@ renderHistoryViewerPanel openView dateInput selectedDate rdHabits rdHabitData rd
 
                                 editingHabitDataDict =
                                     Dict.get (YmdDate.toSimpleString selectedDate) editingHabitDataDictDict
-                                        ?> Dict.empty
+                                        |> Maybe.withDefault Dict.empty
 
                                 renderHabit habit =
                                     renderHabitBox

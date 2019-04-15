@@ -519,15 +519,14 @@ dropdownIcon openView msg =
 
 
 habitActionsDropdownDiv :
-    Dropdown.State
-    -> Dropdown.Config Msg
+    Bool
     -> YmdDate.YmdDate
     -> String
     -> Bool
     -> List Habit.SuspendedInterval
     -> YmdDate.YmdDate
     -> Html Msg
-habitActionsDropdownDiv dropdown config ymd habitId onTodayViewer suspensions todayYmd =
+habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions todayYmd =
     let
         currentlySuspended : Bool
         currentlySuspended =
@@ -555,39 +554,34 @@ habitActionsDropdownDiv dropdown config ymd habitId onTodayViewer suspensions to
                     False
     in
     div [ class "actions-dropdown" ]
-        [ Dropdown.dropdown
-            dropdown
-            config
-            (Dropdown.toggle div
-                [ class <|
-                    if dropdown then
-                        "actions-dropdown-toggler-full"
+        [ div
+            [ class <|
+                if dropdown then
+                    "actions-dropdown-toggler-full"
+
+                else
+                    "actions-dropdown-toggler-default"
+            ]
+            [ text "" ]
+        , div
+            [ class "action-buttons" ]
+            [ button
+                [ class "action-button"
+                , onClick <| OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer suspensions
+                ]
+                [ text <|
+                    if currentlySuspended then
+                        "Resume"
 
                     else
-                        "actions-dropdown-toggler-default"
+                        "Suspend"
                 ]
-                [ text "" ]
-            )
-            (Dropdown.drawer div
-                [ class "action-buttons" ]
-                [ button
-                    [ class "action-button"
-                    , onClick <| OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer suspensions
-                    ]
-                    [ text <|
-                        if currentlySuspended then
-                            "Resume"
-
-                        else
-                            "Suspend"
-                    ]
-                , button
-                    [ class "action-button"
-                    , onClick <| OnEditGoalClick habitId
-                    ]
-                    [ text "Edit Goal" ]
+            , button
+                [ class "action-button"
+                , onClick <| OnEditGoalClick habitId
                 ]
-            )
+                [ text "Edit Goal" ]
+            ]
         ]
 
 
@@ -604,8 +598,8 @@ renderHabitBox :
     -> Dict.Dict String Int
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
-    -> Dict.Dict String Dropdown.State
-    -> (String -> Dropdown.State -> Msg)
+    -> Dict.Dict String Bool
+    -> (String -> Bool -> Msg)
     -> Bool
     -> Habit.Habit
     -> YmdDate.YmdDate
@@ -618,8 +612,8 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
         habitDatum =
             List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) habitData
                 |> List.head
-                |> (\habitDatum ->
-                        case habitDatum of
+                |> (\maybeHabitDatum ->
+                        case maybeHabitDatum of
                             Nothing ->
                                 0
 
@@ -631,7 +625,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             Dict.get habitRecord.id editingHabitDataDict
 
         actionsDropdown =
-            Dict.get habitRecord.id habitActionsDropdowns ?> False
+            Dict.get habitRecord.id habitActionsDropdowns |> Maybe.withDefault False
 
         isCurrentFragmentSuccessful =
             case habitStats of
@@ -645,13 +639,6 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             div
                 [ class "frequency-statistic" ]
                 [ text str ]
-
-        actionsDropdownConfig =
-            Dropdown.Config
-                ("history viewer actions dropdown for habit " ++ habitRecord.id)
-                Dropdown.OnClick
-                (class "visible")
-                (toggleHabitActionsDropdown habitRecord.id)
     in
     div
         [ class
@@ -663,7 +650,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             )
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
-        , habitActionsDropdownDiv actionsDropdown actionsDropdownConfig ymd habitRecord.id onTodayViewer habitRecord.suspensions todayYmd
+        , habitActionsDropdownDiv actionsDropdown ymd habitRecord.id onTodayViewer habitRecord.suspensions todayYmd
         , case habitStats of
             Nothing ->
                 frequencyStatisticDiv "Error retriving performance stats"
@@ -677,15 +664,15 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                         [ div
                             [ class "current-progress" ]
                             [ text <|
-                                toString stats.currentFragmentTotal
+                                String.fromInt stats.currentFragmentTotal
                                     ++ " out of "
-                                    ++ toString stats.currentFragmentGoal
+                                    ++ String.fromInt stats.currentFragmentGoal
                                     ++ " "
                                     ++ habitRecord.unitNamePlural
                             ]
-                        , frequencyStatisticDiv ("Days left: " ++ toString stats.currentFragmentDaysLeft)
+                        , frequencyStatisticDiv ("Days left: " ++ String.fromInt stats.currentFragmentDaysLeft)
                         , frequencyStatisticDiv
-                            ((toString <|
+                            ((String.fromInt <|
                                 round <|
                                     toFloat stats.successfulFragments
                                         * 100
@@ -693,9 +680,9 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                              )
                                 ++ "%"
                             )
-                        , frequencyStatisticDiv ("Streak: " ++ toString stats.currentFragmentStreak)
-                        , frequencyStatisticDiv ("Best streak: " ++ toString stats.bestFragmentStreak)
-                        , frequencyStatisticDiv ("Total done: " ++ toString stats.totalDone)
+                        , frequencyStatisticDiv ("Streak: " ++ String.fromInt stats.currentFragmentStreak)
+                        , frequencyStatisticDiv ("Best streak: " ++ String.fromInt stats.bestFragmentStreak)
+                        , frequencyStatisticDiv ("Total done: " ++ String.fromInt stats.totalDone)
                         ]
         , div
             [ classList
@@ -705,7 +692,7 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
             ]
             [ input
                 [ placeholder <|
-                    toString habitDatum
+                    String.fromInt habitDatum
                         ++ " "
                         ++ (if habitDatum == 1 then
                                 habitRecord.unitNameSingular
@@ -716,13 +703,13 @@ renderHabitBox habitStats ymd habitData editingHabitDataDict onHabitDataInput se
                 , onInput <| onHabitDataInput habitRecord.id
                 , Util.onKeydown
                     (\key ->
-                        if key == KK.Enter then
+                        if key == Keyboard.Enter then
                             Just <| setHabitData ymd habitRecord.id editingHabitData
 
                         else
                             Nothing
                     )
-                , value (editingHabitData ||> toString ?> "")
+                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editingHabitData)
                 ]
                 []
             , i

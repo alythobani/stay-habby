@@ -307,7 +307,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 [ input
                     [ placeholder "X"
                     , onInput OnAddHabitTimesPerWeekInput
-                    , value (addHabit.timesPerWeek ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.timesPerWeek)
                     ]
                     []
                 ]
@@ -320,43 +320,43 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 [ input
                     [ placeholder "Monday"
                     , onInput OnAddHabitSpecificDayMondayInput
-                    , value (addHabit.mondayTimes ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.mondayTimes)
                     ]
                     []
                 , input
                     [ placeholder "Tuesday"
                     , onInput OnAddHabitSpecificDayTuesdayInput
-                    , value (addHabit.tuesdayTimes ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.tuesdayTimes)
                     ]
                     []
                 , input
                     [ placeholder "Wednesday"
                     , onInput OnAddHabitSpecificDayWednesdayInput
-                    , value (addHabit.wednesdayTimes ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.wednesdayTimes)
                     ]
                     []
                 , input
                     [ placeholder "Thursday"
                     , onInput OnAddHabitSpecificDayThursdayInput
-                    , value (addHabit.thursdayTimes ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.thursdayTimes)
                     ]
                     []
                 , input
                     [ placeholder "Friday"
                     , onInput OnAddHabitSpecificDayFridayInput
-                    , value (addHabit.fridayTimes ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.fridayTimes)
                     ]
                     []
                 , input
                     [ placeholder "Saturday"
                     , onInput OnAddHabitSpecificDaySaturdayInput
-                    , value (addHabit.saturdayTimes ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.saturdayTimes)
                     ]
                     []
                 , input
                     [ placeholder "Sunday"
                     , onInput OnAddHabitSpecificDaySundayInput
-                    , value (addHabit.sundayTimes ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.sundayTimes)
                     ]
                     []
                 ]
@@ -369,13 +369,13 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 [ input
                     [ placeholder "Times"
                     , onInput OnAddHabitTimesInput
-                    , value (addHabit.times ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.times)
                     ]
                     []
                 , input
                     [ placeholder "Days"
                     , onInput OnAddHabitDaysInput
-                    , value (addHabit.days ||> toString ?> "")
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.days)
                     ]
                     []
                 ]

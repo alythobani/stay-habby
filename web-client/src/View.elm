@@ -1,6 +1,7 @@
 module View exposing (dropdownIcon, habitActionsDropdownDiv, renderHabitBox, renderHistoryViewerPanel, renderSetHabitDataShortcut, renderTodayPanel, view)
 
 import Array
+import DefaultServices.Keyboard as Keyboard
 import DefaultServices.Util as Util
 import Dict
 import HabitUtil
@@ -24,7 +25,7 @@ view model =
         [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ]
         , Util.onKeydown
             (\key ->
-                if key == KK.Space then
+                if key == Keyboard.Space then
                     Just OnToggleShowSetHabitDataShortcut
 
                 else
@@ -41,7 +42,6 @@ view model =
             model.openTodayViewer
             model.todayViewerHabitActionsDropdowns
             model.darkModeOn
-            model.mdl
             model.errorMessage
         , renderHistoryViewerPanel
             model.openHistoryViewer
@@ -81,14 +81,13 @@ renderTodayPanel :
     -> Habit.AddHabitInputData
     -> Dict.Dict String Int
     -> Bool
-    -> Dict.Dict String Dropdown.State
+    -> Dict.Dict String Bool
     -> Bool
-    -> Material.Model
     -> Maybe String
     -> Html Msg
-renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns darkModeOn mdl errorMessage =
+renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns darkModeOn errorMessage =
     let
-        createHabitData =
+        maybeCreateHabitData =
             Habit.extractCreateHabit addHabit
     in
     div
@@ -380,7 +379,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     ]
                     []
                 ]
-            , case createHabitData of
+            , case maybeCreateHabitData of
                 Nothing ->
                     Util.hiddenDiv
 

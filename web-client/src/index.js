@@ -9,4 +9,4 @@ var flags = { apiBaseUrl: __WEBPACK_CONSTANT_API_BASE_URL__, currentTime: Date.n
 
 var Elm = require('./Main.elm');
 var mountNode = document.getElementById('main');
-var app = Elm.Main.embed(mountNode, flags);
+var app = Elm.Elm.Main.init({node: mountNode, flags: flags});

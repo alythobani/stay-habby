@@ -1,7 +1,9 @@
-# Habby
+# Stay Habby
 
-A basic habit tracker app, created mostly to test out using
-[Lacinia](http://lacinia.readthedocs.io/en/latest/).
+A habit tracker app, originally started by [Arie Milner](https://github.com/amilner42/habby) and later turned into my baby.
+
+![Screenshot on April 15, 2019](screenshots/2019-04-15.png)
+
 
 ### Stack
 

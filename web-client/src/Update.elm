@@ -447,25 +447,25 @@ update msg model =
 
         ToggleTodayViewerHabitActionsDropdown habitId ->
             let
-                updatedTodayViewerHabitActionsDropdowns =
-                    if Dict.member habitId model.todayViewerHabitActionsDropdowns then
-                        Dict.empty
+                updatedTodayViewerHabitActionsDropdown =
+                    if model.todayViewerHabitActionsDropdown == Just habitId then
+                        Nothing
 
                     else
-                        Dict.singleton habitId True
+                        Just habitId
             in
-            ( { model | todayViewerHabitActionsDropdowns = updatedTodayViewerHabitActionsDropdowns }, Cmd.none )
+            ( { model | todayViewerHabitActionsDropdown = updatedTodayViewerHabitActionsDropdown }, Cmd.none )
 
         ToggleHistoryViewerHabitActionsDropdown habitId ->
             let
-                updatedHistoryViewerHabitActionsDropdowns =
-                    if Dict.member habitId model.historyViewerHabitActionsDropdowns then
-                        Dict.empty
+                updatedHistoryViewerHabitActionsDropdown =
+                    if model.historyViewerHabitActionsDropdown == Just habitId then
+                        Nothing
 
                     else
-                        Dict.singleton habitId True
+                        Just habitId
             in
-            ( { model | historyViewerHabitActionsDropdowns = updatedHistoryViewerHabitActionsDropdowns }, Cmd.none )
+            ( { model | historyViewerHabitActionsDropdown = updatedHistoryViewerHabitActionsDropdown }, Cmd.none )
 
         OnToggleDarkMode ->
             ( { model | darkModeOn = not model.darkModeOn }, Cmd.none )
@@ -798,22 +798,10 @@ update msg model =
                         newDropdownsModel =
                             -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
                             if onTodayViewer then
-                                { model
-                                    | todayViewerHabitActionsDropdowns =
-                                        Dict.update
-                                            habitId
-                                            (always <| Just False)
-                                            model.todayViewerHabitActionsDropdowns
-                                }
+                                { model | todayViewerHabitActionsDropdown = Nothing }
 
                             else
-                                { model
-                                    | historyViewerHabitActionsDropdowns =
-                                        Dict.update
-                                            habitId
-                                            (always <| Just False)
-                                            model.historyViewerHabitActionsDropdowns
-                                }
+                                { model | historyViewerHabitActionsDropdown = Nothing }
 
                         newSuspensions : List Habit.SuspendedInterval
                         newSuspensions =

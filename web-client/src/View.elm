@@ -43,7 +43,7 @@ view model =
                 model.addHabit
                 model.editingTodayHabitAmount
                 model.openTodayViewer
-                model.todayViewerHabitActionsDropdowns
+                model.todayViewerHabitActionsDropdown
                 model.darkModeOn
                 model.errorMessage
             , renderHistoryViewerPanel
@@ -54,7 +54,7 @@ view model =
                 model.allHabitData
                 model.historyViewerFrequencyStats
                 model.editingHistoryHabitAmount
-                model.historyViewerHabitActionsDropdowns
+                model.historyViewerHabitActionsDropdown
                 model.ymd
             , renderSetHabitDataShortcut
                 model.showSetHabitDataShortcut
@@ -86,11 +86,11 @@ renderTodayPanel :
     -> Habit.AddHabitInputData
     -> Dict.Dict String Int
     -> Bool
-    -> Dict.Dict String Bool
+    -> Maybe String
     -> Bool
     -> Maybe String
     -> Html Msg
-renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdowns darkModeOn errorMessage =
+renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdown darkModeOn errorMessage =
     let
         maybeCreateHabitData =
             Habit.extractCreateHabit addHabit
@@ -162,7 +162,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                             editingHabitDataDict
                             OnHabitDataInput
                             SetHabitData
-                            habitActionsDropdowns
+                            habitActionsDropdown
                             ToggleTodayViewerHabitActionsDropdown
                             True
                             habit
@@ -406,10 +406,10 @@ renderHistoryViewerPanel :
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Dict.Dict String (Dict.Dict String Int)
-    -> Dict.Dict String Bool
+    -> Maybe String
     -> Maybe YmdDate.YmdDate
     -> Html Msg
-renderHistoryViewerPanel openView dateInput maybeSelectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdowns maybeTodayYmd =
+renderHistoryViewerPanel openView dateInput maybeSelectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdown maybeTodayYmd =
     case ( rdHabits, rdHabitData ) of
         ( RemoteData.Success habits, RemoteData.Success habitData ) ->
             div
@@ -485,7 +485,7 @@ renderHistoryViewerPanel openView dateInput maybeSelectedDate rdHabits rdHabitDa
                                         editingHabitDataDict
                                         (OnHistoryViewerHabitDataInput selectedDate)
                                         SetHabitData
-                                        habitActionsDropdowns
+                                        habitActionsDropdown
                                         ToggleHistoryViewerHabitActionsDropdown
                                         False
                                         habit
@@ -628,13 +628,13 @@ renderHabitBox :
     -> Dict.Dict String Int
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
-    -> Dict.Dict String Bool
+    -> Maybe String
     -> (String -> Msg)
     -> Bool
     -> Habit.Habit
     -> Maybe YmdDate.YmdDate
     -> Html Msg
-renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInput setHabitData habitActionsDropdowns toggleHabitActionsDropdown onTodayViewer habit maybeTodayYmd =
+renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInput setHabitData habitActionsDropdown toggleHabitActionsDropdown onTodayViewer habit maybeTodayYmd =
     case maybeYmd of
         Just ymd ->
             let
@@ -657,7 +657,7 @@ renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInp
                     Dict.get habitRecord.id editingHabitDataDict
 
                 actionsDropdown =
-                    Dict.get habitRecord.id habitActionsDropdowns |> Maybe.withDefault False
+                    habitActionsDropdown == Just habitRecord.id
 
                 isCurrentFragmentSuccessful =
                     case habitStats of

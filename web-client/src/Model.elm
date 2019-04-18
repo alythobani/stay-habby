@@ -52,8 +52,8 @@ type alias Model =
     , historyViewerDateInput : String
     , historyViewerSelectedDate : Maybe YmdDate.YmdDate
     , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
-    , todayViewerHabitActionsDropdowns : Dict.Dict String Bool
-    , historyViewerHabitActionsDropdowns : Dict.Dict String Bool
+    , todayViewerHabitActionsDropdown : Maybe String
+    , historyViewerHabitActionsDropdown : Maybe String
     , showSetHabitDataShortcut : Bool
     , keysDown : Keyboard.Model
     , setHabitDataShortcutHabitNameFilterText : String

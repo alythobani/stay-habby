@@ -574,12 +574,23 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
 
                         else
                             "actions-dropdown-toggler-default"
+                    , onClick <|
+                        (if onTodayViewer then
+                            ToggleTodayViewerHabitActionsDropdown
+
+                         else
+                            ToggleHistoryViewerHabitActionsDropdown
+                        )
+                            habitId
                     ]
                     [ text "" ]
                 , div
                     [ class "action-buttons" ]
                     [ button
-                        [ class "action-button"
+                        [ classList
+                            [ ( "action-button", True )
+                            , ( "display-none", not dropdown )
+                            ]
                         , onClick <| OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer suspensions
                         ]
                         [ text <|
@@ -590,7 +601,10 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
                                 "Suspend"
                         ]
                     , button
-                        [ class "action-button"
+                        [ classList
+                            [ ( "action-button", True )
+                            , ( "display-none", not dropdown )
+                            ]
                         , onClick <| OnEditGoalClick habitId
                         ]
                         [ text "Edit Goal" ]
@@ -615,7 +629,7 @@ renderHabitBox :
     -> (String -> String -> Msg)
     -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
     -> Dict.Dict String Bool
-    -> (String -> Bool -> Msg)
+    -> (String -> Msg)
     -> Bool
     -> Habit.Habit
     -> Maybe YmdDate.YmdDate

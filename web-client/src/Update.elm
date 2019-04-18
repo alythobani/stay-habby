@@ -445,17 +445,25 @@ update msg model =
             , Cmd.none
             )
 
-        ToggleTodayViewerHabitActionsDropdown habitId newState ->
+        ToggleTodayViewerHabitActionsDropdown habitId ->
             let
                 updatedTodayViewerHabitActionsDropdowns =
-                    Dict.update habitId (always <| Just newState) model.todayViewerHabitActionsDropdowns
+                    if Dict.member habitId model.todayViewerHabitActionsDropdowns then
+                        Dict.empty
+
+                    else
+                        Dict.singleton habitId True
             in
             ( { model | todayViewerHabitActionsDropdowns = updatedTodayViewerHabitActionsDropdowns }, Cmd.none )
 
-        ToggleHistoryViewerHabitActionsDropdown habitId newState ->
+        ToggleHistoryViewerHabitActionsDropdown habitId ->
             let
                 updatedHistoryViewerHabitActionsDropdowns =
-                    Dict.update habitId (always <| Just newState) model.historyViewerHabitActionsDropdowns
+                    if Dict.member habitId model.historyViewerHabitActionsDropdowns then
+                        Dict.empty
+
+                    else
+                        Dict.singleton habitId True
             in
             ( { model | historyViewerHabitActionsDropdowns = updatedHistoryViewerHabitActionsDropdowns }, Cmd.none )
 

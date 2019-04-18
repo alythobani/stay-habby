@@ -874,6 +874,7 @@ body {
                 float: left;
                 margin-left: 11px;
                 margin-top: -4px;
+                position: relative;
                 &:hover {
                   .actions-dropdown-toggler-default:after {
                     content: "▾";
@@ -899,8 +900,7 @@ body {
                 }
                 .action-buttons {
                   z-index: 1;
-                  position: relative;
-                  top: 21px;
+                  position: absolute;
                   .action-button {
                     @extend .button-style-3;
                     height: 23px;

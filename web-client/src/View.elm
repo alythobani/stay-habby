@@ -116,7 +116,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     , ( "dark-mode-switch-toggler-checked", darkModeOn )
                     ]
                 ]
-                []
+                [ span [ class "dark-mode-switch-toggler-slider" ] [] ]
             , div
                 [ class "dark-mode-switch-text" ]
                 [ text <|

@@ -229,23 +229,42 @@ body {
         }
 
         .dark-mode-switch {
-          .dark-mode-switch-toggler {
-            position: relative;
-            width: 20px;
-            height: 20px;
-            float: left;
-            background-color: gray;
-            &.dark-mode-switch-toggler-checked {
-              background-color: blue;
-            }
-          }
           position: absolute;
           top: 25px;
           right: 80px;
+          .dark-mode-switch-toggler {
+            position: relative;
+            border-radius: 20px;
+            width: 45px;
+            height: 20px;
+            float: left;
+            background-color: $dandelion;
+            -webkit-transition: 0.5s;
+            -ms-transition: 0.5s;
+            transition: 0.5s;
+            .dark-mode-switch-toggler-slider {
+              -webkit-transition: 0.5s;
+              -ms-transition: 0.5s;
+              transition: 0.5s;
+              position: absolute;
+              bottom: 3px;
+              left: 3px;
+              background-color: white;
+              border-radius: 50%;
+              width: 15px;
+              height: 15px;
+            }
+            &.dark-mode-switch-toggler-checked {
+              background-color: $azure;
+              .dark-mode-switch-toggler-slider {
+                left: 26px;
+              }
+            }
+          }
           .dark-mode-switch-text {
             float: right;
             margin-left: 10px;
-            font-size: 14px;
+            font-size: 15px;
           }
           color: $chicago;
           &:hover {

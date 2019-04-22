@@ -106,9 +106,19 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
             , onClick OnToggleShowErrorMessage
             ]
             [ i [ class "material-icons" ] [] ]
-        , div [ class "dark-mode-switch" ]
-            [ input
-                [ type_ "checkbox" ]
+        , div
+            [ class "dark-mode-switch"
+            , onClick OnToggleDarkMode
+            ]
+            [ div
+                [ classList
+                    [ ( "dark-mode-switch-toggler", True )
+                    , ( "dark-mode-switch-toggler-checked", darkModeOn )
+                    ]
+                ]
+                []
+            , div
+                [ class "dark-mode-switch-text" ]
                 [ text <|
                     if darkModeOn then
                         "Dark Mode"

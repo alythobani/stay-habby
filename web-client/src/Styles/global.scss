@@ -87,7 +87,6 @@ body {
           color: $alto;
           &:hover {
               color: $cloud;
-              cursor: pointer;
           }
         }
         .today-panel-date {
@@ -230,9 +229,24 @@ body {
         }
 
         .dark-mode-switch {
+          .dark-mode-switch-toggler {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            float: left;
+            background-color: gray;
+            &.dark-mode-switch-toggler-checked {
+              background-color: blue;
+            }
+          }
           position: absolute;
           top: 25px;
           right: 80px;
+          .dark-mode-switch-text {
+            float: right;
+            margin-left: 10px;
+            font-size: 14px;
+          }
           color: $chicago;
           &:hover {
             color: black;

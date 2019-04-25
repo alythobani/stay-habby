@@ -25,16 +25,7 @@ view model =
     { title = "Be Habby"
     , body =
         [ div
-            [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ]
-            , Util.onKeydown
-                (\key ->
-                    if key == Keyboard.Space then
-                        Just OnToggleShowSetHabitDataShortcut
-
-                    else
-                        Nothing
-                )
-            ]
+            [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]
             [ renderTodayPanel
                 model.ymd
                 model.allHabits
@@ -76,6 +67,22 @@ view model =
             ]
         ]
     }
+
+
+{-| An `Html.input` element that stops propagation of any `keydown` events within it.
+
+Useful for creating `input` elements for the user to type into without triggering any
+global keyboard shortcuts.
+
+-}
+inputStopKeydownPropagation : List (Html.Attribute Msg) -> List (Html Msg) -> Html Msg
+inputStopKeydownPropagation attrs htmls =
+    let
+        stopPropagationAttrs : List (Html.Attribute Msg)
+        stopPropagationAttrs =
+            Util.onKeydownStopPropagation (\keyKeyboard -> Just NoOp) :: attrs
+    in
+    input stopPropagationAttrs htmls
 
 
 renderTodayPanel :
@@ -241,7 +248,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 ]
             , div
                 [ class "add-habit-input-form-name-and-description" ]
-                [ input
+                [ inputStopKeydownPropagation
                     [ class "add-habit-input-form-name"
                     , placeholder "Name..."
                     , onInput OnAddHabitNameInput
@@ -280,14 +287,14 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 ]
             , div
                 [ class "add-habit-input-form-unit-name" ]
-                [ input
+                [ inputStopKeydownPropagation
                     [ class "habit-unit-name-singular"
                     , placeholder "Unit name singular..."
                     , onInput OnAddHabitUnitNameSingularInput
                     , value addHabit.unitNameSingular
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ class "habit-unit-name-plural"
                     , placeholder "Unit name plural..."
                     , onInput OnAddHabitUnitNamePluralInput
@@ -319,7 +326,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     , ( "display-none", addHabit.frequencyKind /= Habit.TotalWeekFrequencyKind )
                     ]
                 ]
-                [ input
+                [ inputStopKeydownPropagation
                     [ placeholder "X"
                     , onInput OnAddHabitTimesPerWeekInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.timesPerWeek)
@@ -332,43 +339,43 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     , ( "display-none", addHabit.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
                     ]
                 ]
-                [ input
+                [ inputStopKeydownPropagation
                     [ placeholder "Monday"
                     , onInput OnAddHabitSpecificDayMondayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.mondayTimes)
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ placeholder "Tuesday"
                     , onInput OnAddHabitSpecificDayTuesdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.tuesdayTimes)
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ placeholder "Wednesday"
                     , onInput OnAddHabitSpecificDayWednesdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.wednesdayTimes)
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ placeholder "Thursday"
                     , onInput OnAddHabitSpecificDayThursdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.thursdayTimes)
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ placeholder "Friday"
                     , onInput OnAddHabitSpecificDayFridayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.fridayTimes)
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ placeholder "Saturday"
                     , onInput OnAddHabitSpecificDaySaturdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.saturdayTimes)
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ placeholder "Sunday"
                     , onInput OnAddHabitSpecificDaySundayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.sundayTimes)
@@ -381,13 +388,13 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     , ( "display-none", addHabit.frequencyKind /= Habit.EveryXDayFrequencyKind )
                     ]
                 ]
-                [ input
+                [ inputStopKeydownPropagation
                     [ placeholder "Times"
                     , onInput OnAddHabitTimesInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.times)
                     ]
                     []
-                , input
+                , inputStopKeydownPropagation
                     [ placeholder "Days"
                     , onInput OnAddHabitDaysInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.days)
@@ -443,13 +450,13 @@ renderHistoryViewerPanel openView dateInput maybeSelectedDate rdHabits rdHabitDa
                                     [ placeholder "dd/mm/yy"
                                     , onInput OnHistoryViewerDateInput
                                     , value dateInput
-                                    , Util.onKeydown
+                                    , Util.onKeydownStopPropagation
                                         (\key ->
                                             if key == Keyboard.Enter then
                                                 Just OnHistoryViewerSelectDateInput
 
                                             else
-                                                Nothing
+                                                Just NoOp
                                         )
                                     ]
                                     []
@@ -743,13 +750,13 @@ renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInp
                                         habitRecord.unitNamePlural
                                    )
                         , onInput <| onHabitDataInput habitRecord.id
-                        , Util.onKeydown
+                        , Util.onKeydownStopPropagation
                             (\key ->
                                 if key == Keyboard.Enter then
                                     Just <| setHabitData ymd habitRecord.id editingHabitData
 
                                 else
-                                    Nothing
+                                    Just NoOp
                             )
                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editingHabitData)
                         ]
@@ -828,7 +835,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                         , placeholder "Enter a habit's name..."
                         , onInput <| OnSetHabitDataShortcutInput
                         , value setHabitDataShortcutHabitNameFilterText
-                        , Util.onKeydownPreventDefault
+                        , Util.onKeydownStopPropagation
                             (\key ->
                                 if key == Keyboard.ArrowDown then
                                     Just OnSetHabitDataShortcutSelectNextHabit
@@ -839,8 +846,11 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                 else if key == Keyboard.Enter && readyToEnterHabit then
                                     Just OnToggleShowSetHabitDataShortcutAmountForm
 
+                                else if key == Keyboard.Escape then
+                                    Just OnToggleShowSetHabitDataShortcut
+
                                 else
-                                    Nothing
+                                    Just NoOp
                             )
                         ]
                         []
@@ -898,7 +908,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                            )
                                 , onInput OnSetHabitDataShortcutAmountFormInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt inputtedAmount)
-                                , Util.onKeydownPreventDefault
+                                , Util.onKeydownStopPropagation
                                     (\key ->
                                         if key == Keyboard.Escape then
                                             Just OnToggleShowSetHabitDataShortcutAmountForm
@@ -907,7 +917,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                             Just <| OnSetHabitDataShortcutAmountFormSubmit ymd habitRecord.id inputtedAmount
 
                                         else
-                                            Nothing
+                                            Just NoOp
                                     )
                                 ]
                                 []
@@ -1167,7 +1177,7 @@ renderEditGoalDialog showEditGoalDialog habit editGoal maybeTodayYmd =
                                         , ( "display-none", editGoal.frequencyKind /= Habit.TotalWeekFrequencyKind )
                                         ]
                                     ]
-                                    [ input
+                                    [ inputStopKeydownPropagation
                                         [ placeholder "X"
                                         , onInput OnEditGoalTimesPerWeekInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.timesPerWeek)
@@ -1180,43 +1190,43 @@ renderEditGoalDialog showEditGoalDialog habit editGoal maybeTodayYmd =
                                         , ( "display-none", editGoal.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
                                         ]
                                     ]
-                                    [ input
+                                    [ inputStopKeydownPropagation
                                         [ placeholder "Monday"
                                         , onInput OnEditGoalSpecificDayMondayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.mondayTimes)
                                         ]
                                         []
-                                    , input
+                                    , inputStopKeydownPropagation
                                         [ placeholder "Tuesday"
                                         , onInput OnEditGoalSpecificDayTuesdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.tuesdayTimes)
                                         ]
                                         []
-                                    , input
+                                    , inputStopKeydownPropagation
                                         [ placeholder "Wednesday"
                                         , onInput OnEditGoalSpecificDayWednesdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.wednesdayTimes)
                                         ]
                                         []
-                                    , input
+                                    , inputStopKeydownPropagation
                                         [ placeholder "Thursday"
                                         , onInput OnEditGoalSpecificDayThursdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.thursdayTimes)
                                         ]
                                         []
-                                    , input
+                                    , inputStopKeydownPropagation
                                         [ placeholder "Friday"
                                         , onInput OnEditGoalSpecificDayFridayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.fridayTimes)
                                         ]
                                         []
-                                    , input
+                                    , inputStopKeydownPropagation
                                         [ placeholder "Saturday"
                                         , onInput OnEditGoalSpecificDaySaturdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.saturdayTimes)
                                         ]
                                         []
-                                    , input
+                                    , inputStopKeydownPropagation
                                         [ placeholder "Sunday"
                                         , onInput OnEditGoalSpecificDaySundayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.sundayTimes)
@@ -1229,13 +1239,13 @@ renderEditGoalDialog showEditGoalDialog habit editGoal maybeTodayYmd =
                                         , ( "display-none", editGoal.frequencyKind /= Habit.EveryXDayFrequencyKind )
                                         ]
                                     ]
-                                    [ input
+                                    [ inputStopKeydownPropagation
                                         [ placeholder "Times"
                                         , onInput OnEditGoalTimesInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.times)
                                         ]
                                         []
-                                    , input
+                                    , inputStopKeydownPropagation
                                         [ placeholder "Days"
                                         , onInput OnEditGoalDaysInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.days)

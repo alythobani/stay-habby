@@ -1,10 +1,10 @@
-module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, replaceOrAdd, templater)
+module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, onKeydownStopPropagation, replaceOrAdd, templater)
 
 import DefaultServices.Keyboard as Keyboard
 import Dict
 import Html exposing (Attribute, Html, div)
 import Html.Attributes exposing (class)
-import Html.Events exposing (keyCode, on, preventDefaultOn)
+import Html.Events exposing (keyCode, on, preventDefaultOn, stopPropagationOn)
 import Json.Decode as Decode
 
 
@@ -107,6 +107,27 @@ onKeydownPreventDefault keyToMsg =
                 |> Maybe.withDefault (Decode.fail "")
     in
     preventDefaultOn
+        "keydown"
+        (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
+
+
+{-| Event handler for `keyDown` events that also `stopPropagation`.
+
+WARNING: It'll only stop propagation if your function returns a message not `Nothing`.
+
+-}
+onKeydownStopPropagation : (Keyboard.Key -> Maybe msg) -> Attribute msg
+onKeydownStopPropagation keyToMsg =
+    let
+        decodeMsgBoolFromCode : Keyboard.Key -> Decode.Decoder ( msg, Bool )
+        decodeMsgBoolFromCode code =
+            code
+                |> keyToMsg
+                |> Maybe.map (\msg -> ( msg, True ))
+                |> Maybe.map Decode.succeed
+                |> Maybe.withDefault (Decode.fail "")
+    in
+    stopPropagationOn
         "keydown"
         (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
 

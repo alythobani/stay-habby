@@ -5,6 +5,7 @@ import Browser.Navigation as Navigation
 import DefaultServices.Keyboard as Keyboard
 import Dict
 import Models.ApiError as ApiError
+import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.HabitData as HabitData
@@ -54,7 +55,6 @@ type alias Model =
     , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     , todayViewerHabitActionsDropdown : Maybe String
     , historyViewerHabitActionsDropdown : Maybe String
-    , showSetHabitDataShortcut : Bool
     , keysDown : Keyboard.Model
     , setHabitDataShortcutHabitNameFilterText : String
     , setHabitDataShortcutFilteredHabits : Array.Array Habit.Habit
@@ -68,4 +68,7 @@ type alias Model =
     -- Error messages
     , errorMessage : Maybe String
     , showErrorMessage : Bool
+
+    -- Full screen dialogs
+    , activeDialogScreen : Maybe DialogScreen.DialogScreen
     }

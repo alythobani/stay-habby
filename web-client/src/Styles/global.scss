@@ -137,7 +137,7 @@ body {
         }
       }
 
-      .set-habit-data-shortcut-background {
+      .dialog-background-screen {
         background-color: rgba(133, 133, 133, 0.44);
       }
 
@@ -503,16 +503,16 @@ body {
             }
         }
     }
+    .dialog-background-screen {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      height: 100vh;
+      width: 100vw;
+      z-index: 2;
+      background-color: rgba(101, 101, 101, 0.59);
+    }
     .set-habit-data-shortcut {
-      .set-habit-data-shortcut-background {
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        height: 100vh;
-        width: 100vw;
-        z-index: 2;
-        background-color: rgba(101, 101, 101, 0.59);
-      }
       .set-habit-data-shortcut-habit-selection {
         .set-habit-data-shortcut-habit-selection-input {
           position: absolute;

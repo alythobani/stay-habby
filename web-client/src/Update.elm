@@ -7,8 +7,10 @@ import Date
 import DefaultServices.Keyboard as Keyboard
 import DefaultServices.Util as Util
 import Dict
+import Maybe.Extra as Maybe
 import Model exposing (Model)
 import Models.ApiError as ApiError
+import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
@@ -470,52 +472,34 @@ update msg model =
         OnToggleDarkMode ->
             ( { model | darkModeOn = not model.darkModeOn }, Cmd.none )
 
-        OnToggleShowSetHabitDataShortcut ->
-            ( { model | showSetHabitDataShortcut = not model.showSetHabitDataShortcut }, Cmd.none )
-
         KeyboardMsg keyMsg ->
             let
                 newKeysDown =
                     Keyboard.update keyMsg model.keysDown
 
-                ( newShowSetHabitDataShortcut, showSetHabitDataShortcutNeedsUpdate ) =
-                    case keyMsg of
-                        Keyboard.Down keyCode ->
-                            if Keyboard.fromCode keyCode == Keyboard.KeyA then
-                                ( True, model.showSetHabitDataShortcut /= True )
-
-                            else if Keyboard.fromCode keyCode == Keyboard.Escape then
-                                ( False, model.showSetHabitDataShortcut /= False )
-
-                            else
-                                ( model.showSetHabitDataShortcut, False )
-
-                        _ ->
-                            ( model.showSetHabitDataShortcut, False )
+                newModel =
+                    { model | keysDown = newKeysDown }
             in
             -- If you want to react to key-presses, call a function here instead
             -- of just updating the model (you should still update the model).
-            if showSetHabitDataShortcutNeedsUpdate then
-                ( { model
-                    | keysDown = newKeysDown
-                    , showSetHabitDataShortcut = newShowSetHabitDataShortcut
-                  }
-                , if newShowSetHabitDataShortcut then
-                    Dom.focus
-                        (if model.showSetHabitDataShortcutAmountForm then
-                            "set-habit-data-shortcut-amount-form-input"
+            case keyMsg of
+                Keyboard.Down keyCode ->
+                    if Keyboard.fromCode keyCode == Keyboard.KeyA then
+                        if Maybe.isJust model.activeDialogScreen then
+                            -- A dialog screen is already open, don't open the set habit data one
+                            ( newModel, Cmd.none )
 
-                         else
-                            "set-habit-data-shortcut-habit-selection-input"
-                        )
-                        |> Task.attempt FocusResult
+                        else
+                            update OpenSetHabitDataShortcutDialogScreen newModel
 
-                  else
-                    Cmd.none
-                )
+                    else if Keyboard.fromCode keyCode == Keyboard.Escape then
+                        update OnExitDialogScreen newModel
 
-            else
-                ( { model | keysDown = newKeysDown }, Cmd.none )
+                    else
+                        ( newModel, Cmd.none )
+
+                _ ->
+                    ( newModel, Cmd.none )
 
         FocusResult result ->
             case result of
@@ -610,7 +594,7 @@ update msg model =
 
                 Just newVal ->
                     ( { model
-                        | showSetHabitDataShortcut = False
+                        | activeDialogScreen = Nothing
                         , showSetHabitDataShortcutAmountForm = False
                         , setHabitDataShortcutInputtedAmount = Nothing
                         , setHabitDataShortcutHabitNameFilterText = ""
@@ -914,6 +898,30 @@ update msg model =
         OnToggleShowErrorMessage ->
             ( { model | showErrorMessage = not model.showErrorMessage }
             , Cmd.none
+            )
+
+        OnExitDialogScreen ->
+            ( { model | activeDialogScreen = Nothing }, Cmd.none )
+
+        OpenSetHabitDataShortcutDialogScreen ->
+            ( { model | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutScreen }
+            , Dom.focus
+                (if model.showSetHabitDataShortcutAmountForm then
+                    "set-habit-data-shortcut-amount-form-input"
+
+                 else
+                    "set-habit-data-shortcut-habit-selection-input"
+                )
+                |> Task.attempt FocusResult
+            )
+
+        OnExitSetHabitDataShortcutAmountFormInput ->
+            ( { model
+                | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutScreen
+                , showSetHabitDataShortcutAmountForm = False
+              }
+            , Dom.focus "set-habit-data-shortcut-habit-selection-input"
+                |> Task.attempt FocusResult
             )
 
 

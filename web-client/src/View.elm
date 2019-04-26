@@ -12,6 +12,7 @@ import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Maybe.Extra as Maybe
 import Model exposing (Model)
 import Models.ApiError as ApiError
+import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.HabitData as HabitData
@@ -47,8 +48,9 @@ view model =
                 model.editingHistoryHabitAmount
                 model.historyViewerHabitActionsDropdown
                 model.ymd
+            , renderDialogBackgroundScreen model.activeDialogScreen
             , renderSetHabitDataShortcut
-                model.showSetHabitDataShortcut
+                model.activeDialogScreen
                 model.setHabitDataShortcutHabitNameFilterText
                 model.setHabitDataShortcutFilteredHabits
                 model.setHabitDataShortcutSelectedHabitIndex
@@ -773,8 +775,25 @@ renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInp
             div [] []
 
 
+renderDialogBackgroundScreen : Maybe DialogScreen.DialogScreen -> Html Msg
+renderDialogBackgroundScreen activeDialogScreen =
+    let
+        showBackgroundScreen : Bool
+        showBackgroundScreen =
+            Maybe.isJust activeDialogScreen
+    in
+    div
+        [ classList
+            [ ( "dialog-background-screen", True )
+            , ( "display-none", not showBackgroundScreen )
+            ]
+        , onClick OnExitDialogScreen
+        ]
+        []
+
+
 renderSetHabitDataShortcut :
-    Bool
+    Maybe DialogScreen.DialogScreen
     -> String
     -> Array.Array Habit.Habit
     -> Int
@@ -783,10 +802,14 @@ renderSetHabitDataShortcut :
     -> Maybe YmdDate.YmdDate
     -> Maybe Int
     -> Html Msg
-renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm rdHabitData maybeYmd inputtedAmount =
+renderSetHabitDataShortcut activeDialogScreen setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm rdHabitData maybeYmd inputtedAmount =
     case maybeYmd of
         Just ymd ->
             let
+                showSetHabitDataShortcut : Bool
+                showSetHabitDataShortcut =
+                    activeDialogScreen == Just DialogScreen.SetHabitDataShortcutScreen
+
                 selectedHabit =
                     Array.get selectedHabitIndex filteredHabits
 
@@ -817,14 +840,6 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                 ]
                 [ div
                     [ classList
-                        [ ( "set-habit-data-shortcut-background", True )
-                        , ( "display-none", not showSetHabitDataShortcut )
-                        ]
-                    , onClick OnToggleShowSetHabitDataShortcut
-                    ]
-                    []
-                , div
-                    [ classList
                         [ ( "set-habit-data-shortcut-habit-selection", True )
                         , ( "display-none", showAmountForm )
                         ]
@@ -847,7 +862,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                     Just OnToggleShowSetHabitDataShortcutAmountForm
 
                                 else if key == Keyboard.Escape then
-                                    Just OnToggleShowSetHabitDataShortcut
+                                    Just OnExitDialogScreen
 
                                 else
                                     Just NoOp
@@ -911,7 +926,7 @@ renderSetHabitDataShortcut showSetHabitDataShortcut setHabitDataShortcutHabitNam
                                 , Util.onKeydownStopPropagation
                                     (\key ->
                                         if key == Keyboard.Escape then
-                                            Just OnToggleShowSetHabitDataShortcutAmountForm
+                                            Just OnExitSetHabitDataShortcutAmountFormInput
 
                                         else if key == Keyboard.Enter then
                                             Just <| OnSetHabitDataShortcutAmountFormSubmit ymd habitRecord.id inputtedAmount

@@ -64,7 +64,6 @@ type Msg
     | ToggleTodayViewerHabitActionsDropdown String
     | ToggleHistoryViewerHabitActionsDropdown String
     | OnToggleDarkMode
-    | OnToggleShowSetHabitDataShortcut
     | KeyboardMsg Keyboard.Msg
     | FocusResult (Result Dom.Error ())
     | OnSetHabitDataShortcutInput String
@@ -95,3 +94,7 @@ type Msg
     | OnResumeOrSuspendHabitSuccess Habit.Habit
       -- Error messages
     | OnToggleShowErrorMessage
+      -- Full screen dialogs
+    | OnExitDialogScreen
+    | OpenSetHabitDataShortcutDialogScreen
+    | OnExitSetHabitDataShortcutAmountFormInput

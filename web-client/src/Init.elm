@@ -44,7 +44,6 @@ init { apiBaseUrl, currentTime } url key =
       , historyViewerFrequencyStats = RemoteData.NotAsked
       , todayViewerHabitActionsDropdown = Nothing
       , historyViewerHabitActionsDropdown = Nothing
-      , showSetHabitDataShortcut = False
       , keysDown = Keyboard.init
       , setHabitDataShortcutHabitNameFilterText = ""
       , setHabitDataShortcutFilteredHabits = Array.empty
@@ -54,8 +53,13 @@ init { apiBaseUrl, currentTime } url key =
       , showEditGoalDialog = False
       , editGoalDialogHabit = Nothing
       , editGoal = Habit.initEditGoalData
+
+      -- Error messages
       , errorMessage = Nothing
       , showErrorMessage = False
+
+      -- Full screen dialogs
+      , activeDialogScreen = Nothing
       }
     , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
     )

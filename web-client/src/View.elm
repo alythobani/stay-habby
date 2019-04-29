@@ -65,7 +65,7 @@ view model =
                 model.ymd
             , renderErrorMessage
                 model.errorMessage
-                model.showErrorMessage
+                model.activeDialogScreen
             ]
         ]
     }
@@ -112,7 +112,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                 [ ( "error-message-icon", True )
                 , ( "display-none", not <| Maybe.isJust errorMessage )
                 ]
-            , onClick OnToggleShowErrorMessage
+            , onClick OpenErrorMessageDialogScreen
             ]
             [ i [ class "material-icons" ] [] ]
         , div
@@ -1326,24 +1326,19 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeTodayYmd =
             div [] []
 
 
-renderErrorMessage : Maybe String -> Bool -> Html Msg
-renderErrorMessage errorMessage showErrorMessage =
+renderErrorMessage : Maybe String -> Maybe DialogScreen.DialogScreen -> Html Msg
+renderErrorMessage errorMessage activeDialogScreen =
     div
         [ classList
             [ ( "error-message", True )
-            , ( "display-none", not showErrorMessage )
+            , ( "display-none", activeDialogScreen /= Just DialogScreen.ErrorMessageScreen )
             ]
         ]
         [ div
-            [ class "error-message-background"
-            , onClick OnToggleShowErrorMessage
-            ]
-            [ div
-                [ class "error-message-text" ]
-                [ text <|
-                    Maybe.withDefault
-                        "No errors"
-                        (Maybe.map (\em -> em ++ ". You may want to refresh the page.") errorMessage)
-                ]
+            [ class "error-message-text" ]
+            [ text <|
+                Maybe.withDefault
+                    "No errors"
+                    (Maybe.map (\em -> em ++ ". You may want to refresh the page.") errorMessage)
             ]
         ]

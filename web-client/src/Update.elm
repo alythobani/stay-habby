@@ -897,8 +897,8 @@ update msg model =
             )
 
         -- Error Messages
-        OnToggleShowErrorMessage ->
-            ( { model | showErrorMessage = not model.showErrorMessage }
+        OpenErrorMessageDialogScreen ->
+            ( { model | activeDialogScreen = Just DialogScreen.ErrorMessageScreen }
             , Cmd.none
             )
 

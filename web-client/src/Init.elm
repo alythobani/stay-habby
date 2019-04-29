@@ -55,7 +55,6 @@ init { apiBaseUrl, currentTime } url key =
 
       -- Error messages
       , errorMessage = Nothing
-      , showErrorMessage = False
 
       -- Full screen dialogs
       , activeDialogScreen = Nothing

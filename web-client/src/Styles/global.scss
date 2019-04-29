@@ -65,12 +65,8 @@ body {
 
       .today-panel {
         .error-message-icon {
-          position: relative;
-          right: 180px;
-          bottom: 42px;
           color: red;
           &:hover {
-            cursor: pointer;
             i:after {
               content: "error";
             }
@@ -80,7 +76,6 @@ body {
               content: "error_outline";
             }
             color: red;
-            font-size: 36px;
           }
         }
         .dark-mode-switch {
@@ -226,6 +221,26 @@ body {
 
         .today-panel-title {
             @extend .panel-title;
+        }
+
+        .error-message-icon {
+          position: relative;
+          right: 200px;
+          bottom: 45px;
+          color: red;
+          &:hover {
+            cursor: pointer;
+            i:after {
+              content: "error";
+            }
+          }
+          i {
+            &:after {
+              content: "error_outline";
+            }
+            color: red;
+            font-size: 36px;
+          }
         }
 
         .dark-mode-switch {
@@ -763,32 +778,25 @@ body {
       }
     }
     .error-message {
-      .error-message-background {
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        height: 100vh;
-        width: 100vw;
-        z-index: 2;
-        background-color: rgba(101, 101, 101, 0.59);
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      .error-message-text {
         display: flex;
+        flex-direction: column;
         justify-content: center;
-        align-items: center;
-
-        .error-message-text {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          text-align: center;
-          top: 40vh;
-          right: 40vw;
-          z-index: 3;
-          min-width: 400px;
-          height: 40px;
-          font-size: 20px;
-          color: red;
-          background-color: black;
-        }
+        text-align: center;
+        z-index: 3;
+        min-width: 400px;
+        min-height: 40px;
+        font-size: 20px;
+        color: red;
+        background-color: black;
       }
     }
     .all-habit-lists {

@@ -93,7 +93,7 @@ type Msg
     | OnResumeOrSuspendHabitFailure ApiError
     | OnResumeOrSuspendHabitSuccess Habit.Habit
       -- Error messages
-    | OnToggleShowErrorMessage
+    | OpenErrorMessageDialogScreen
       -- Full screen dialogs
     | OnExitDialogScreen
     | OpenSetHabitDataShortcutDialogScreen

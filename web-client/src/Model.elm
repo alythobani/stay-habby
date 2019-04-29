@@ -66,7 +66,6 @@ type alias Model =
 
     -- Error messages
     , errorMessage : Maybe String
-    , showErrorMessage : Bool
 
     -- Full screen dialogs
     , activeDialogScreen : Maybe DialogScreen.DialogScreen

@@ -59,7 +59,7 @@ view model =
                 model.ymd
                 model.setHabitDataShortcutInputtedAmount
             , renderEditGoalDialog
-                model.showEditGoalDialog
+                model.activeDialogScreen
                 model.editGoalDialogHabit
                 model.editGoal
                 model.ymd
@@ -947,14 +947,14 @@ renderSetHabitDataShortcut activeDialogScreen setHabitDataShortcutHabitNameFilte
             div [] []
 
 
-renderEditGoalDialog : Bool -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Maybe YmdDate.YmdDate -> Html Msg
-renderEditGoalDialog showEditGoalDialog habit editGoal maybeTodayYmd =
+renderEditGoalDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Maybe YmdDate.YmdDate -> Html Msg
+renderEditGoalDialog activeDialogScreen habit editGoal maybeTodayYmd =
     case maybeTodayYmd of
         Just todayYmd ->
             div
                 [ classList
                     [ ( "edit-goal-dialog", True )
-                    , ( "display-none", not showEditGoalDialog )
+                    , ( "display-none", activeDialogScreen /= Just DialogScreen.EditGoalScreen )
                     ]
                 ]
                 (case habit of

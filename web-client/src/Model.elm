@@ -61,7 +61,6 @@ type alias Model =
     , setHabitDataShortcutSelectedHabitIndex : Int
     , showSetHabitDataShortcutAmountForm : Bool
     , setHabitDataShortcutInputtedAmount : Maybe Int
-    , showEditGoalDialog : Bool
     , editGoalDialogHabit : Maybe Habit.Habit
     , editGoal : Habit.EditGoalInputData
 

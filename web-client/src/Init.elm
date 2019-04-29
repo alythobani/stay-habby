@@ -50,7 +50,6 @@ init { apiBaseUrl, currentTime } url key =
       , setHabitDataShortcutSelectedHabitIndex = 0
       , showSetHabitDataShortcutAmountForm = False
       , setHabitDataShortcutInputtedAmount = Nothing
-      , showEditGoalDialog = False
       , editGoalDialogHabit = Nothing
       , editGoal = Habit.initEditGoalData
 

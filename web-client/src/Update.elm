@@ -671,7 +671,7 @@ update msg model =
                             model
             in
             ( { newModel
-                | showEditGoalDialog = True
+                | activeDialogScreen = Just DialogScreen.EditGoalScreen
                 , editGoalDialogHabit = newEditGoalDialogHabit
                 , todayViewerHabitActionsDropdown = Nothing
                 , historyViewerHabitActionsDropdown = Nothing
@@ -681,7 +681,7 @@ update msg model =
 
         CloseEditGoalDialog ->
             ( { model
-                | showEditGoalDialog = False
+                | activeDialogScreen = Nothing
               }
             , Cmd.none
             )
@@ -756,7 +756,7 @@ update msg model =
                         )
                         model.allHabits
                 , editGoal = Habit.initEditGoalData
-                , showEditGoalDialog = False
+                , activeDialogScreen = Nothing
               }
             , Cmd.batch
                 [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
@@ -771,7 +771,7 @@ update msg model =
 
         OnEditGoalSubmitClick habitId newFrequencies habitType ->
             ( { model
-                | showEditGoalDialog = False
+                | activeDialogScreen = Nothing
               }
             , Api.mutationEditHabitGoalFrequencies habitId newFrequencies habitType model.apiBaseUrl OnEditGoalFailure OnEditGoalSuccess
             )

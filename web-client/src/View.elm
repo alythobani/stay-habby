@@ -1138,11 +1138,6 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeTodayYmd =
                                         ""
                         in
                         [ div
-                            [ class "edit-goal-dialog-background"
-                            , onClick CloseEditGoalDialog
-                            ]
-                            []
-                        , div
                             [ class "edit-goal-dialog-form" ]
                             [ div
                                 [ class "edit-goal-dialog-form-header" ]

@@ -23,7 +23,7 @@ import RemoteData
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Be Habby"
+    { title = "Stay Habby"
     , body =
         [ div
             [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]

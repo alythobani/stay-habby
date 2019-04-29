@@ -673,6 +673,8 @@ update msg model =
             ( { newModel
                 | showEditGoalDialog = True
                 , editGoalDialogHabit = newEditGoalDialogHabit
+                , todayViewerHabitActionsDropdown = Nothing
+                , historyViewerHabitActionsDropdown = Nothing
               }
             , Cmd.none
             )

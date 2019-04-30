@@ -62,6 +62,10 @@ init { apiBaseUrl, currentTime } url key =
 
       -- Full screen dialogs
       , activeDialogScreen = Nothing
+
+      -- Add note
+      , addNoteDialogHabit = Nothing
+      , addNoteDialogInput = ""
       }
     , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
     )

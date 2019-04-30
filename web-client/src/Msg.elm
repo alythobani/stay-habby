@@ -104,3 +104,5 @@ type Msg
     | OnExitDialogScreen
     | OpenSetHabitDataShortcutDialogScreen
     | OnExitSetHabitDataShortcutAmountFormInput
+      -- Add Note
+    | OnAddNoteClick String

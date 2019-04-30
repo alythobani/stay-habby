@@ -9,6 +9,7 @@ import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.HabitData as HabitData
+import Models.HabitDayNote as HabitDayNote
 import Models.YmdDate as YmdDate
 import RemoteData
 import Time
@@ -25,9 +26,13 @@ type alias Model =
     , darkModeOn : Bool
     , editingTodayHabitAmount : Dict.Dict String Int
     , editingHistoryHabitAmount : Dict.Dict String (Dict.Dict String Int)
+
+    -- Remote Data
     , allHabits : RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
     , allHabitData : RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     , allFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
+
+    -- Add Habit
     , addHabit :
         { openView : Bool
         , kind : Habit.HabitKind
@@ -73,4 +78,8 @@ type alias Model =
 
     -- Full screen dialogs
     , activeDialogScreen : Maybe DialogScreen.DialogScreen
+
+    -- Add note
+    , addNoteDialogHabit : Maybe Habit.Habit
+    , addNoteDialogInput : String
     }

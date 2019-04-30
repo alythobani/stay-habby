@@ -592,20 +592,7 @@ body {
     }
     .edit-goal-dialog {
       .edit-goal-dialog-form {
-        position: absolute;
-        text-align: center;
-        top: 5vh;
-        right: 32.5vw;
-        z-index: 3;
-        width: 500px;
-        height: 650px;
-        font-size: 16px;
-        color: white;
-        border: 2px solid white;
-        background-color: black;
-        box-shadow: 5px 5px $woodsmoke;
-        display: flex;
-        flex-direction: column;
+        @extend .dialog-form-1;
 
         .edit-goal-dialog-form-header {
           position: relative;
@@ -799,6 +786,16 @@ body {
         background-color: black;
       }
     }
+    .add-note-dialog {
+      @extend .dialog-form-1;
+      .add-note-dialog-header {
+        position: relative;
+        top: 30px;
+        font-size: 24px;
+        font-weight: 400;
+        padding: 10px;
+      }
+    }
     .all-habit-lists {
       overflow: auto;
       height: 76vh;
@@ -936,7 +933,7 @@ body {
                   .action-button {
                     @extend .button-style-3;
                     height: 23px;
-                    width: 80px;
+                    width: 90px;
                   }
                 }
               }

@@ -66,6 +66,9 @@ view model =
             , renderErrorMessage
                 model.errorMessage
                 model.activeDialogScreen
+            , renderAddNoteDialog
+                model.activeDialogScreen
+                model.addNoteDialogHabit
             ]
         ]
     }
@@ -627,6 +630,14 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
                         , onClick <| OnEditGoalClick habitId
                         ]
                         [ text "Edit Goal" ]
+                    , button
+                        [ classList
+                            [ ( "action-button", True )
+                            , ( "display-none", not dropdown )
+                            ]
+                        , onClick <| OnAddNoteClick habitId
+                        ]
+                        [ text "Add Note" ]
                     ]
                 ]
 
@@ -1342,3 +1353,27 @@ renderErrorMessage errorMessage activeDialogScreen =
                     (Maybe.map (\em -> em ++ ". You may want to refresh the page.") errorMessage)
             ]
         ]
+
+
+renderAddNoteDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> Html Msg
+renderAddNoteDialog activeDialogScreen addNoteDialogHabit =
+    div
+        [ classList
+            [ ( "add-note-dialog", True )
+            , ( "display-none", activeDialogScreen /= Just DialogScreen.AddNoteScreen )
+            ]
+        ]
+        (case addNoteDialogHabit of
+            Just habit ->
+                let
+                    habitRecord =
+                        Habit.getCommonFields habit
+                in
+                [ div
+                    [ class "add-note-dialog-header" ]
+                    [ text habitRecord.name ]
+                ]
+
+            Nothing ->
+                []
+        )

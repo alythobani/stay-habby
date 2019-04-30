@@ -933,6 +933,31 @@ update msg model =
                 |> Task.attempt FocusResult
             )
 
+        -- Add note
+        OnAddNoteClick habitId ->
+            let
+                habitFilter : Habit.Habit -> Bool
+                habitFilter habit =
+                    habit |> Habit.getCommonFields |> .id |> (==) habitId
+
+                newAddNoteDialogHabit =
+                    case model.allHabits of
+                        RemoteData.Success habits ->
+                            List.filter habitFilter habits
+                                |> List.head
+
+                        _ ->
+                            Nothing
+            in
+            ( { model
+                | activeDialogScreen = Just DialogScreen.AddNoteScreen
+                , addNoteDialogHabit = newAddNoteDialogHabit
+                , todayViewerHabitActionsDropdown = Nothing
+                , historyViewerHabitActionsDropdown = Nothing
+              }
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

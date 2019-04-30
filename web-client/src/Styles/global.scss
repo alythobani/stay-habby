@@ -591,42 +591,31 @@ body {
       }
     }
     .edit-goal-dialog {
+      @extend .full-screen-centered-flex-container;
       .edit-goal-dialog-form {
         @extend .dialog-form-1;
+        min-height: 500px;
 
         .edit-goal-dialog-form-header {
-          position: relative;
-          top: 30px;
           font-size: 24px;
           font-weight: 400;
-          padding: 10px;
         }
 
         .edit-goal-dialog-form-line-break {
-          display: block;
-          width: 450px;
-          border: 0.5px solid $cape-cod;
-          position: relative;
-          left: 25px;
-          top: 40px;
+          @extend .dialog-form-line-break;
+          margin-top: 20px;
         }
 
         .edit-goal-dialog-form-current-goal-text {
-          position: relative;
-          top: 65px;
+          margin-top: 25px;
         }
 
         .edit-goal-dialog-form-current-goal-tag {
-          text-align: center;
-          position: relative;
-          top: 75px;
-          display: flex;
-          justify-content: center;
+          margin-top: 10px;
 
           button {
               @extend .button-style-1;
 
-              position: relative;
               height: 30px;
               width: 140px;
               cursor: default;
@@ -636,26 +625,23 @@ body {
         }
 
         .edit-goal-dialog-form-current-goal-description {
-          position: relative;
-          top: 85px;
+          margin-top: 10px;
           font-size: 14px;
         }
 
         .edit-goal-dialog-form-new-goal-line-break {
-          @extend .edit-goal-dialog-form-line-break;
-          top: 110px;
+          @extend .dialog-form-line-break;
+          margin-top: 20px;
           width: 400px;
           left: 50px;
         }
 
         .edit-goal-dialog-form-new-goal-header {
-          position: relative;
-          top: 130px;
+          margin-top: 20px;
         }
 
         .edit-goal-dialog-form-new-goal-frequency-tags {
-          position: relative;
-          top: 135px;
+          margin-top: 5px;
           display: flex;
           justify-content: center;
           button {
@@ -669,23 +655,24 @@ body {
         }
 
         .edit-goal-dialog-form-new-goal-description {
-          position: relative;
-          top: 145px;
+          margin-top: 5px;
           font-size: 14px;
         }
 
         .edit-goal-dialog-form-new-goal-forms {
-          position: relative;
-          top: 160px;
+          margin-top: 15px;
           display: flex;
           justify-content: center;
+          .edit-goal-dialog-form-new-goal-forms-input {
+            @extend .input-style-1;
+            text-align: center;
+            width: 100px;
+            height: 40px;
+            margin: 0 10px 10px 0;
+          }
           .edit-goal-dialog-form-new-goal-total-week-frequency-form {
               input {
-                  @extend .input-style-1;
-
-                  text-align: center;
-                  width: 100px;
-                  height: 40px;
+                  @extend .edit-goal-dialog-form-new-goal-forms-input;
               }
           }
 
@@ -695,13 +682,8 @@ body {
               width: 440px;
 
               input {
-                  @extend .input-style-1;
-
-                  text-align: center;
-                  height: 40px;
-                  width: 100px;
+                  @extend .edit-goal-dialog-form-new-goal-forms-input;
                   display: inline-block;
-                  margin: 0 10px 10px 0;
                   float: left;
               }
           }
@@ -712,44 +694,36 @@ body {
               width: 220px;
 
               input {
-                  @extend .input-style-1;
-
-                  text-align: center;
-                  height: 40px;
-                  width: 100px;
+                  @extend .edit-goal-dialog-form-new-goal-forms-input;
                   display: inline-block;
-                  margin: 0 10px 10px 0;
                   float: left;
               }
           }
         }
 
         .edit-goal-dialog-form-confirmation-message-line-break {
-          @extend .edit-goal-dialog-form-line-break;
-          top: 180px;
+          @extend .dialog-form-line-break;
+          margin-top: 20px;
           width: 400px;
-          left: 50px;
         }
 
         .edit-goal-dialog-form-confirmation-message {
-          position: relative;
-          top: 200px;
+          margin-top: 20px;
+          margin-left: 5px;
+          margin-right: 5px;
           font-size: 14px;
         }
 
         .edit-goal-dialog-form-submit-button-line-break {
-          @extend .edit-goal-dialog-form-line-break;
-          top: 220px;
+          @extend .dialog-form-line-break;
+          margin-top: 20px;
           width: 400px;
-          left: 50px;
           display: none;
         }
 
         .edit-goal-dialog-form-buttons {
-          position: relative;
-          top: 220px;
+          margin-top: 20px;
           width: 250px;
-          left: 125px;
           .edit-goal-dialog-form-buttons-cancel {
             @extend .button-style-1;
             height: 30px;
@@ -765,14 +739,7 @@ body {
       }
     }
     .error-message {
-      position: absolute;
-      left: 0px;
-      top: 0px;
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      @extend .full-screen-centered-flex-container;
       .error-message-text {
         display: flex;
         flex-direction: column;
@@ -787,13 +754,19 @@ body {
       }
     }
     .add-note-dialog {
-      @extend .dialog-form-1;
-      .add-note-dialog-header {
-        position: relative;
-        top: 30px;
-        font-size: 24px;
-        font-weight: 400;
-        padding: 10px;
+      @extend .full-screen-centered-flex-container;
+      .add-note-dialog-form {
+        @extend .dialog-form-1;
+        height: auto;
+        .add-note-dialog-header {
+          font-size: 24px;
+          font-weight: 400;
+          margin: 20px;
+        }
+        .add-note-dialog-header-line-break {
+          @extend .dialog-form-line-break;
+          margin: 10px;
+        }
       }
     }
     .all-habit-lists {

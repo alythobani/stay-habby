@@ -1370,8 +1370,12 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit =
                         Habit.getCommonFields habit
                 in
                 [ div
-                    [ class "add-note-dialog-header" ]
-                    [ text habitRecord.name ]
+                    [ class "add-note-dialog-form" ]
+                    [ div
+                        [ class "add-note-dialog-header" ]
+                        [ text habitRecord.name ]
+                    , div [ class "add-note-dialog-header-line-break" ] []
+                    ]
                 ]
 
             Nothing ->

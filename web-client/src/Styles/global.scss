@@ -757,15 +757,23 @@ body {
       @extend .full-screen-centered-flex-container;
       .add-note-dialog-form {
         @extend .dialog-form-1;
-        height: auto;
+        min-height: 200px;
+        min-width: 500px;
+        width: auto;
         .add-note-dialog-header {
           font-size: 24px;
           font-weight: 400;
-          margin: 20px;
         }
         .add-note-dialog-header-line-break {
           @extend .dialog-form-line-break;
-          margin: 10px;
+          margin-top: 20px;
+        }
+        .add-note-dialog-input {
+          @extend .input-style-1;
+          margin-top: 20px;
+          resize: both;
+          width: 450px;
+          height: 125px;
         }
       }
     }

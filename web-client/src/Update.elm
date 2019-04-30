@@ -958,6 +958,9 @@ update msg model =
             , Cmd.none
             )
 
+        OnAddNoteDialogInput newAddNoteInput ->
+            ( { model | addNoteDialogInput = newAddNoteInput }, Cmd.none )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

@@ -106,3 +106,4 @@ type Msg
     | OnExitSetHabitDataShortcutAmountFormInput
       -- Add Note
     | OnAddNoteClick String
+    | OnAddNoteDialogInput String

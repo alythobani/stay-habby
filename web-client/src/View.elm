@@ -69,9 +69,26 @@ view model =
             , renderAddNoteDialog
                 model.activeDialogScreen
                 model.addNoteDialogHabit
+                model.addNoteDialogInput
             ]
         ]
     }
+
+
+{-| An `Html.textarea` element that stops propagation of any `keydown` events within it.
+
+Useful for creating `textarea` elements for the user to type into without triggering any
+global keyboard shortcuts.
+
+-}
+textareaStopKeydownPropagation : List (Html.Attribute Msg) -> List (Html Msg) -> Html Msg
+textareaStopKeydownPropagation attrs htmls =
+    let
+        stopPropagationAttrs : List (Html.Attribute Msg)
+        stopPropagationAttrs =
+            Util.onKeydownStopPropagation (\keyKeyboard -> Just NoOp) :: attrs
+    in
+    textarea stopPropagationAttrs htmls
 
 
 {-| An `Html.input` element that stops propagation of any `keydown` events within it.
@@ -260,7 +277,7 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     , value addHabit.name
                     ]
                     []
-                , textarea
+                , textareaStopKeydownPropagation
                     [ class "add-habit-input-form-description"
                     , placeholder "Short description..."
                     , onInput OnAddHabitDescriptionInput
@@ -1355,8 +1372,8 @@ renderErrorMessage errorMessage activeDialogScreen =
         ]
 
 
-renderAddNoteDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> Html Msg
-renderAddNoteDialog activeDialogScreen addNoteDialogHabit =
+renderAddNoteDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> String -> Html Msg
+renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput =
     div
         [ classList
             [ ( "add-note-dialog", True )
@@ -1371,10 +1388,15 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit =
                 in
                 [ div
                     [ class "add-note-dialog-form" ]
-                    [ div
-                        [ class "add-note-dialog-header" ]
-                        [ text habitRecord.name ]
+                    [ div [ class "add-note-dialog-header" ] [ text habitRecord.name ]
                     , div [ class "add-note-dialog-header-line-break" ] []
+                    , textareaStopKeydownPropagation
+                        [ class "add-note-dialog-input"
+                        , placeholder "Add a note for today..."
+                        , onInput OnAddNoteDialogInput
+                        , value addNoteDialogInput
+                        ]
+                        []
                     ]
                 ]
 

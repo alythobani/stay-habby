@@ -56,11 +56,15 @@ type alias Model =
     , todayViewerHabitActionsDropdown : Maybe String
     , historyViewerHabitActionsDropdown : Maybe String
     , keysDown : Keyboard.Model
+
+    -- Set Habit Data Shortcut
     , setHabitDataShortcutHabitNameFilterText : String
     , setHabitDataShortcutFilteredHabits : Array.Array Habit.Habit
     , setHabitDataShortcutSelectedHabitIndex : Int
     , showSetHabitDataShortcutAmountForm : Bool
     , setHabitDataShortcutInputtedAmount : Maybe Int
+
+    -- Edit goal
     , editGoalDialogHabit : Maybe Habit.Habit
     , editGoal : Habit.EditGoalInputData
 

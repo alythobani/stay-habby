@@ -21,6 +21,7 @@ type Msg
     | TickMinute Time.Posix
     | OnGetHabitsAndHabitDataAndFrequencyStatsFailure ApiError
     | OnGetHabitsAndHabitDataAndFrequencyStatsSuccess Api.HabitsAndHabitDataAndFrequencyStats
+      -- Add Habit
     | OnOpenAddHabit
     | OnCancelAddHabit
     | OnSelectAddHabitKind Habit.HabitKind
@@ -43,10 +44,12 @@ type Msg
     | AddHabit Habit.CreateHabit
     | OnAddHabitFailure ApiError
     | OnAddHabitSuccess Habit.Habit
+      -- Set Habit Data
     | OnHabitDataInput String String
     | SetHabitData YmdDate.YmdDate String (Maybe Int)
     | OnSetHabitDataFailure ApiError
     | OnSetHabitDataSuccess HabitData.HabitData
+      --
     | OnToggleHistoryViewer
     | OnToggleTodayViewer
     | OnHistoryViewerDateInput String
@@ -63,15 +66,18 @@ type Msg
       -- Dropdowns
     | ToggleTodayViewerHabitActionsDropdown String
     | ToggleHistoryViewerHabitActionsDropdown String
+      --
     | OnToggleDarkMode
     | KeyboardMsg Keyboard.Msg
     | FocusResult (Result Dom.Error ())
+      -- Set Habit Data Shortcut
     | OnSetHabitDataShortcutInput String
     | OnSetHabitDataShortcutSelectNextHabit
     | OnSetHabitDataShortcutSelectPreviousHabit
     | OnToggleShowSetHabitDataShortcutAmountForm
     | OnSetHabitDataShortcutAmountFormInput String
     | OnSetHabitDataShortcutAmountFormSubmit YmdDate.YmdDate String (Maybe Int)
+      -- Edit goal
     | OnEditGoalClick String
     | CloseEditGoalDialog
     | OnEditGoalSelectFrequencyKind Habit.FrequencyKind

@@ -45,11 +45,15 @@ init { apiBaseUrl, currentTime } url key =
       , todayViewerHabitActionsDropdown = Nothing
       , historyViewerHabitActionsDropdown = Nothing
       , keysDown = Keyboard.init
+
+      -- Set Habit Data Shortcut
       , setHabitDataShortcutHabitNameFilterText = ""
       , setHabitDataShortcutFilteredHabits = Array.empty
       , setHabitDataShortcutSelectedHabitIndex = 0
       , showSetHabitDataShortcutAmountForm = False
       , setHabitDataShortcutInputtedAmount = Nothing
+
+      -- Edit goal
       , editGoalDialogHabit = Nothing
       , editGoal = Habit.initEditGoalData
 

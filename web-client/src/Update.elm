@@ -120,6 +120,7 @@ update msg model =
             , Cmd.none
             )
 
+        -- Add Habit
         OnOpenAddHabit ->
             ( updateAddHabit (\addHabit -> { addHabit | openView = True }), Cmd.none )
 
@@ -222,6 +223,7 @@ update msg model =
             , Cmd.none
             )
 
+        -- Set Habit Data
         OnHabitDataInput habitID newVal ->
             let
                 newEditingTodayHabitAmount amount =
@@ -291,6 +293,7 @@ update msg model =
                 ]
             )
 
+        --
         OnToggleHistoryViewer ->
             ( { model | openHistoryViewer = not model.openHistoryViewer }
             , Cmd.none
@@ -447,6 +450,7 @@ update msg model =
             , Cmd.none
             )
 
+        -- Dropdowns
         ToggleTodayViewerHabitActionsDropdown habitId ->
             let
                 updatedTodayViewerHabitActionsDropdown =
@@ -509,6 +513,7 @@ update msg model =
                 Result.Ok () ->
                     ( model, Cmd.none )
 
+        -- Set Habit Data Shortcut
         OnSetHabitDataShortcutInput habitNameFilterText ->
             let
                 habitFilter habit =
@@ -616,6 +621,7 @@ update msg model =
                         OnSetHabitDataSuccess
                     )
 
+        -- Edit goal
         OnEditGoalClick habitId ->
             let
                 habitFilter : Habit.Habit -> Bool
@@ -902,6 +908,7 @@ update msg model =
             , Cmd.none
             )
 
+        -- Full screen dialogs
         OnExitDialogScreen ->
             ( { model | activeDialogScreen = Nothing }, Cmd.none )
 

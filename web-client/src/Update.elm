@@ -966,9 +966,14 @@ extractInt string default =
         maybeInt =
             String.toInt string
     in
-    case maybeInt of
-        Just i ->
-            maybeInt
+    if string == "" then
+        -- override the default if user inputs an empty string (e.g. by backspacing)
+        Nothing
 
-        Nothing ->
-            default
+    else
+        case maybeInt of
+            Just i ->
+                maybeInt
+
+            Nothing ->
+                default

@@ -753,13 +753,31 @@ body {
         min-height: 200px;
         min-width: 500px;
         width: auto;
-        .add-note-dialog-header {
+        .add-note-dialog-header-habit-name {
           font-size: 24px;
           font-weight: 400;
         }
+        .add-note-dialog-header-date {
+          font-style: italic;
+          margin-top: 15px;
+        }
+        .add-note-dialog-header-note-added {
+          font-size: 13px;
+          margin-top: -5px;
+
+          color: $checkmark-green;
+          i:before {
+            content: "done";
+            font-size: 16px;
+            position: relative;
+            right: 4px;
+            top: 2px;
+          }
+        }
         .add-note-dialog-header-line-break {
           @extend .dialog-form-line-break;
-          margin-top: 20px;
+          margin-top: 10px;
+          width: 80%;
         }
         .add-note-dialog-input {
           @extend .input-style-1;

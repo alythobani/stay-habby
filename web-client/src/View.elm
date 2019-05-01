@@ -1399,7 +1399,17 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                 in
                 [ div
                     [ class "add-note-dialog-form" ]
-                    [ div [ class "add-note-dialog-header" ] [ text habitRecord.name ]
+                    [ div [ class "add-note-dialog-header-habit-name" ] [ text habitRecord.name ]
+                    , div [ class "add-note-dialog-header-date" ] [ text <| YmdDate.prettyPrintWithWeekday ymd ]
+                    , div
+                        [ classList
+                            [ ( "add-note-dialog-header-note-added", True )
+                            , ( "display-none", existingHabitDayNoteText /= Just addNoteDialogInput )
+                            ]
+                        ]
+                        [ i [ class "material-icons" ] []
+                        , text "Note Added"
+                        ]
                     , div [ class "add-note-dialog-header-line-break" ] []
                     , textareaStopKeydownPropagation
                         [ class "add-note-dialog-input"

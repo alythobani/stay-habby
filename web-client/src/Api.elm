@@ -1,4 +1,16 @@
-module Api exposing (AllRemoteData, QueriedFrequencyStats, frequencyToGraphQLString, graphQLRequest, mutationAddHabit, mutationEditHabitGoalFrequencies, mutationEditHabitSuspensions, mutationSetHabitData, queryAllRemoteData, queryPastFrequencyStats)
+module Api exposing
+    ( AllRemoteData
+    , QueriedFrequencyStats
+    , frequencyToGraphQLString
+    , graphQLRequest
+    , mutationAddHabit
+    , mutationEditHabitGoalFrequencies
+    , mutationEditHabitSuspensions
+    , mutationSetHabitData
+    , mutationSetHabitDayNote
+    , queryAllRemoteData
+    , queryPastFrequencyStats
+    )
 
 import DefaultServices.Http exposing (post)
 import DefaultServices.Util as Util

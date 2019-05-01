@@ -7,6 +7,7 @@ import DefaultServices.Keyboard as Keyboard
 import Models.ApiError exposing (ApiError)
 import Models.Habit as Habit
 import Models.HabitData as HabitData
+import Models.HabitDayNote as HabitDayNote
 import Models.YmdDate as YmdDate
 import Time
 import TimeZone
@@ -108,3 +109,6 @@ type Msg
       -- Add Note
     | OnAddNoteClick String
     | OnAddNoteDialogInput String
+    | OnAddNoteSubmitClick YmdDate.YmdDate String String
+    | OnAddNoteFailure ApiError
+    | OnAddNoteSuccess HabitDayNote.HabitDayNote

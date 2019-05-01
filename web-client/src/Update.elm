@@ -968,6 +968,31 @@ update msg model =
         OnAddNoteDialogInput newAddNoteInput ->
             ( { model | addNoteDialogInput = newAddNoteInput }, Cmd.none )
 
+        OnAddNoteSubmitClick ymd habitId note ->
+            ( { model
+                | activeDialogScreen = Nothing
+              }
+            , Api.mutationSetHabitDayNote ymd habitId note model.apiBaseUrl OnAddNoteFailure OnAddNoteSuccess
+            )
+
+        OnAddNoteFailure apiError ->
+            ( { model | errorMessage = Just <| "Error adding habit day note: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
+
+        OnAddNoteSuccess habitDayNote ->
+            ( { model
+                | addNoteDialogInput = ""
+                , allHabitDayNotes =
+                    RemoteData.map
+                        (\allHabitDayNotes ->
+                            Util.replaceOrAdd allHabitDayNotes (.id >> (==) habitDayNote.id) habitDayNote
+                        )
+                        model.allHabitDayNotes
+              }
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

@@ -70,6 +70,7 @@ view model =
                 model.activeDialogScreen
                 model.addNoteDialogHabit
                 model.addNoteDialogInput
+                model.ymd
             ]
         ]
     }
@@ -1365,8 +1366,8 @@ renderErrorMessage errorMessage activeDialogScreen =
         ]
 
 
-renderAddNoteDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> String -> Html Msg
-renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput =
+renderAddNoteDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> String -> Maybe YmdDate.YmdDate -> Html Msg
+renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput maybeYmd =
     div
         [ classList
             [ ( "add-note-dialog", True )
@@ -1399,12 +1400,15 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput =
                         [ button
                             [ class "add-note-dialog-form-buttons-submit"
                             , onClick <|
-                                case addNoteDialogInput of
-                                    "" ->
-                                        NoOp
+                                case maybeYmd of
+                                    Just ymd ->
+                                        if addNoteDialogInput == "" then
+                                            NoOp
 
-                                    _ ->
-                                        -- TODO: add note mutation
+                                        else
+                                            OnAddNoteSubmitClick ymd habitRecord.id addNoteDialogInput
+
+                                    Nothing ->
                                         NoOp
                             ]
                             [ text "Submit" ]

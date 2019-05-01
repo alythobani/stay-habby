@@ -1307,13 +1307,6 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeTodayYmd =
                                 [ text confirmationMessage ]
                             , div
                                 [ classList
-                                    [ ( "edit-goal-dialog-form-submit-button-line-break", True )
-                                    , ( "display-none", not <| Maybe.isJust newGoal )
-                                    ]
-                                ]
-                                []
-                            , div
-                                [ classList
                                     [ ( "edit-goal-dialog-form-buttons", True )
                                     , ( "display-none", not <| Maybe.isJust newGoal )
                                     ]

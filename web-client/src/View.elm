@@ -1390,6 +1390,30 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput =
                         , value addNoteDialogInput
                         ]
                         []
+                    , div
+                        [ classList
+                            [ ( "add-note-dialog-form-buttons", True )
+                            , ( "display-none", addNoteDialogInput == "" )
+                            ]
+                        ]
+                        [ button
+                            [ class "add-note-dialog-form-buttons-submit"
+                            , onClick <|
+                                case addNoteDialogInput of
+                                    "" ->
+                                        NoOp
+
+                                    _ ->
+                                        -- TODO: add note mutation
+                                        NoOp
+                            ]
+                            [ text "Submit" ]
+                        , button
+                            [ class "add-note-dialog-form-buttons-cancel"
+                            , onClick OnExitDialogScreen
+                            ]
+                            [ text "Cancel" ]
+                        ]
                     ]
                 ]
 

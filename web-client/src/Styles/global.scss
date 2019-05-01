@@ -768,6 +768,21 @@ body {
           width: 450px;
           height: 125px;
         }
+        .add-note-dialog-form-buttons {
+          margin-top: 20px;
+          width: 250px;
+          .add-note-dialog-form-buttons-cancel {
+            @extend .button-style-1;
+            height: 30px;
+            width: 100px;
+          }
+          .add-note-dialog-form-buttons-submit {
+            @extend .button-style-2;
+            float: right;
+            height: 30px;
+            width: 100px;
+          }
+        }
       }
     }
     .all-habit-lists {

@@ -960,11 +960,12 @@ update msg model =
             ( { model
                 | activeDialogScreen = Just DialogScreen.AddNoteScreen
                 , addNoteDialogHabit = Just habit
-                , addNoteDialogInput = Maybe.withDefault model.addNoteDialogInput existingHabitDayNoteText
+                , addNoteDialogInput = Maybe.withDefault "" existingHabitDayNoteText
                 , todayViewerHabitActionsDropdown = Nothing
                 , historyViewerHabitActionsDropdown = Nothing
               }
-            , Cmd.none
+            , Dom.focus "add-note-dialog-input-id"
+                |> Task.attempt FocusResult
             )
 
         OnAddNoteDialogInput newAddNoteInput ->

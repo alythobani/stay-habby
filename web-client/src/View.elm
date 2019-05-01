@@ -1411,11 +1411,20 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                         , text "Note Added"
                         ]
                     , div [ class "add-note-dialog-header-line-break" ] []
-                    , textareaStopKeydownPropagation
+                    , textarea
                         [ class "add-note-dialog-input"
                         , placeholder <| Maybe.withDefault "Add a note for today..." existingHabitDayNoteText
                         , onInput OnAddNoteDialogInput
                         , value addNoteDialogInput
+                        , id "add-note-dialog-input-id"
+                        , Util.onKeydownStopPropagation
+                            (\key ->
+                                if key == Keyboard.Escape then
+                                    Just OnExitDialogScreen
+
+                                else
+                                    Just NoOp
+                            )
                         ]
                         []
                     , div

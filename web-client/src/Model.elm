@@ -31,6 +31,7 @@ type alias Model =
     , allHabits : RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
     , allHabitData : RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     , allFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
+    , allHabitDayNotes : RemoteData.RemoteData ApiError.ApiError (List HabitDayNote.HabitDayNote)
 
     -- Add Habit
     , addHabit :
@@ -53,13 +54,21 @@ type alias Model =
         , times : Maybe Int
         , days : Maybe Int
         }
+
+    --
     , openTodayViewer : Bool
     , openHistoryViewer : Bool
+
+    --
     , historyViewerDateInput : String
     , historyViewerSelectedDate : Maybe YmdDate.YmdDate
     , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
+
+    -- Dropdowns
     , todayViewerHabitActionsDropdown : Maybe String
     , historyViewerHabitActionsDropdown : Maybe String
+
+    -- Keyboard
     , keysDown : Keyboard.Model
 
     -- Set Habit Data Shortcut

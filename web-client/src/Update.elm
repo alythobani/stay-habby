@@ -79,12 +79,16 @@ update msg model =
                         ( { model
                             | currentTimeZone = Just timeZone
                             , ymd = Just currentYmd
+                            , allHabits = RemoteData.Loading
+                            , allHabitData = RemoteData.Loading
+                            , allFrequencyStats = RemoteData.Loading
+                            , allHabitDayNotes = RemoteData.Loading
                           }
-                        , Api.queryHabitsAndHabitDataAndFrequencyStats
+                        , Api.queryAllRemoteData
                             currentYmd
                             model.apiBaseUrl
-                            OnGetHabitsAndHabitDataAndFrequencyStatsFailure
-                            OnGetHabitsAndHabitDataAndFrequencyStatsSuccess
+                            OnGetAllRemoteDataFailure
+                            OnGetAllRemoteDataSuccess
                         )
 
         OnUrlChange url ->
@@ -100,21 +104,24 @@ update msg model =
             , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
             )
 
-        OnGetHabitsAndHabitDataAndFrequencyStatsFailure apiError ->
+        -- All Habit Data
+        OnGetAllRemoteDataFailure apiError ->
             ( { model
                 | allHabits = RemoteData.Failure apiError
                 , allHabitData = RemoteData.Failure apiError
                 , allFrequencyStats = RemoteData.Failure apiError
+                , allHabitDayNotes = RemoteData.Failure apiError
                 , errorMessage = Just <| "Error retrieving habits / data / stats: " ++ ApiError.toString apiError
               }
             , Cmd.none
             )
 
-        OnGetHabitsAndHabitDataAndFrequencyStatsSuccess { habits, habitData, frequencyStatsList } ->
+        OnGetAllRemoteDataSuccess { habits, habitData, frequencyStatsList, habitDayNotes } ->
             ( { model
                 | allHabits = RemoteData.Success habits
                 , allHabitData = RemoteData.Success habitData
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
+                , allHabitDayNotes = RemoteData.Success habitDayNotes
                 , setHabitDataShortcutFilteredHabits = Array.fromList habits
               }
             , Cmd.none

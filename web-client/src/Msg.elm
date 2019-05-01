@@ -19,8 +19,9 @@ type Msg
     | OnUrlChange Url.Url
     | OnUrlRequest Browser.UrlRequest
     | TickMinute Time.Posix
-    | OnGetHabitsAndHabitDataAndFrequencyStatsFailure ApiError
-    | OnGetHabitsAndHabitDataAndFrequencyStatsSuccess Api.HabitsAndHabitDataAndFrequencyStats
+      -- All Habit Data
+    | OnGetAllRemoteDataFailure ApiError
+    | OnGetAllRemoteDataSuccess Api.AllRemoteData
       -- Add Habit
     | OnOpenAddHabit
     | OnCancelAddHabit

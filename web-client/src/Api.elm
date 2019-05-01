@@ -1,4 +1,4 @@
-module Api exposing (HabitsAndHabitDataAndFrequencyStats, QueriedFrequencyStats, frequencyToGraphQLString, graphQLRequest, mutationAddHabit, mutationEditHabitGoalFrequencies, mutationEditHabitSuspensions, mutationSetHabitData, queryHabitsAndHabitDataAndFrequencyStats, queryPastFrequencyStats)
+module Api exposing (AllRemoteData, QueriedFrequencyStats, frequencyToGraphQLString, graphQLRequest, mutationAddHabit, mutationEditHabitGoalFrequencies, mutationEditHabitSuspensions, mutationSetHabitData, queryAllRemoteData, queryPastFrequencyStats)
 
 import DefaultServices.Http exposing (post)
 import DefaultServices.Util as Util
@@ -21,22 +21,23 @@ graphQLRequest query decoder url handleError handleSuccess =
     post url decoder (Encode.object [ ( "query", Encode.string query ) ]) handleError handleSuccess
 
 
-type alias HabitsAndHabitDataAndFrequencyStats =
+type alias AllRemoteData =
     { habits : List Habit.Habit
     , habitData : List HabitData.HabitData
     , frequencyStatsList : List FrequencyStats.FrequencyStats
+    , habitDayNotes : List HabitDayNote.HabitDayNote
     }
 
 
 {-| Query for all fields on all habits and habit data, plus their frequency stats.
 -}
-queryHabitsAndHabitDataAndFrequencyStats :
+queryAllRemoteData :
     YmdDate.YmdDate
     -> String
     -> (ApiError -> b)
-    -> (HabitsAndHabitDataAndFrequencyStats -> b)
+    -> (AllRemoteData -> b)
     -> Cmd b
-queryHabitsAndHabitDataAndFrequencyStats ymd =
+queryAllRemoteData ymd =
     let
         queryString =
             """{
@@ -72,14 +73,18 @@ queryHabitsAndHabitDataAndFrequencyStats ymd =
     habit_has_started
     currently_suspended
   }
+  habitDayNotes: get_habit_day_notes"""
+                ++ HabitDayNote.graphQLOutputString
+                ++ """
 }"""
     in
     graphQLRequest
         queryString
-        (Decode.succeed HabitsAndHabitDataAndFrequencyStats
+        (Decode.succeed AllRemoteData
             |> required "habits" (Decode.list Habit.decodeHabit)
             |> required "habitData" (Decode.list HabitData.decodeHabitData)
             |> required "frequencyStatsList" (Decode.list FrequencyStats.decodeFrequencyStats)
+            |> required "habitDayNotes" (Decode.list HabitDayNote.decodeHabitDayNote)
             |> Decode.at [ "data" ]
         )
 

@@ -26,24 +26,45 @@ init { apiBaseUrl, currentTime } url key =
     in
     ( { key = key
       , url = url
+
+      -- Time / Date
       , currentPosix = currentPosix
       , currentTimeZone = Nothing
       , ymd = Nothing
+
+      --
       , apiBaseUrl = apiBaseUrl
+
+      --
       , darkModeOn = True
+
+      -- Habit Amounts
       , editingTodayHabitAmount = Dict.empty
       , editingHistoryHabitAmount = Dict.empty
-      , allHabitData = RemoteData.Loading
-      , allHabits = RemoteData.Loading
-      , allFrequencyStats = RemoteData.Loading
+
+      -- Remote Data
+      , allHabitData = RemoteData.NotAsked
+      , allHabits = RemoteData.NotAsked
+      , allFrequencyStats = RemoteData.NotAsked
+      , allHabitDayNotes = RemoteData.NotAsked
+
+      -- Add Habit
       , addHabit = Habit.initAddHabitData
+
+      --
       , openTodayViewer = True
       , openHistoryViewer = False
+
+      --
       , historyViewerDateInput = ""
       , historyViewerSelectedDate = Nothing
       , historyViewerFrequencyStats = RemoteData.NotAsked
+
+      -- Dropdowns
       , todayViewerHabitActionsDropdown = Nothing
       , historyViewerHabitActionsDropdown = Nothing
+
+      -- Keyboard
       , keysDown = Keyboard.init
 
       -- Set Habit Data Shortcut

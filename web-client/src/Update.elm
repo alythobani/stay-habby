@@ -941,24 +941,26 @@ update msg model =
             )
 
         -- Add note
-        OnAddNoteClick habitId ->
+        OnAddNoteClick habit ->
             let
-                habitFilter : Habit.Habit -> Bool
-                habitFilter habit =
-                    habit |> Habit.getCommonFields |> .id |> (==) habitId
+                habitRecord =
+                    Habit.getCommonFields habit
 
-                newAddNoteDialogHabit =
-                    case model.allHabits of
-                        RemoteData.Success habits ->
-                            List.filter habitFilter habits
+                existingHabitDayNoteText : Maybe String
+                existingHabitDayNoteText =
+                    case ( model.allHabitDayNotes, model.ymd ) of
+                        ( RemoteData.Success allHabitDayNotes, Just ymd ) ->
+                            List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) allHabitDayNotes
                                 |> List.head
+                                |> Maybe.map .note
 
                         _ ->
                             Nothing
             in
             ( { model
                 | activeDialogScreen = Just DialogScreen.AddNoteScreen
-                , addNoteDialogHabit = newAddNoteDialogHabit
+                , addNoteDialogHabit = Just habit
+                , addNoteDialogInput = Maybe.withDefault model.addNoteDialogInput existingHabitDayNoteText
                 , todayViewerHabitActionsDropdown = Nothing
                 , historyViewerHabitActionsDropdown = Nothing
               }

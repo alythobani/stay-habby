@@ -16,6 +16,7 @@ import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.HabitData as HabitData
+import Models.HabitDayNote as HabitDayNote
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -71,6 +72,7 @@ view model =
                 model.addNoteDialogHabit
                 model.addNoteDialogInput
                 model.ymd
+                model.allHabitDayNotes
             ]
         ]
     }
@@ -572,12 +574,12 @@ dropdownIcon openView msg =
 habitActionsDropdownDiv :
     Bool
     -> YmdDate.YmdDate
-    -> String
+    -> Habit.Habit
     -> Bool
     -> List Habit.SuspendedInterval
     -> Maybe YmdDate.YmdDate
     -> Html Msg
-habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeTodayYmd =
+habitActionsDropdownDiv dropdown ymd habit onTodayViewer suspensions maybeTodayYmd =
     case maybeTodayYmd of
         Just todayYmd ->
             let
@@ -605,6 +607,9 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
                         [] ->
                             -- Habit has never been suspended before, so it's active
                             False
+
+                habitRecord =
+                    Habit.getCommonFields habit
             in
             div [ class "actions-dropdown" ]
                 [ div
@@ -621,7 +626,7 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
                          else
                             ToggleHistoryViewerHabitActionsDropdown
                         )
-                            habitId
+                            habitRecord.id
                     ]
                     [ text "" ]
                 , div
@@ -631,7 +636,7 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
                             [ ( "action-button", True )
                             , ( "display-none", not dropdown )
                             ]
-                        , onClick <| OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer suspensions
+                        , onClick <| OnResumeOrSuspendHabitClick habitRecord.id currentlySuspended onTodayViewer suspensions
                         ]
                         [ text <|
                             if currentlySuspended then
@@ -645,7 +650,7 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
                             [ ( "action-button", True )
                             , ( "display-none", not dropdown )
                             ]
-                        , onClick <| OnEditGoalClick habitId
+                        , onClick <| OnEditGoalClick habitRecord.id
                         ]
                         [ text "Edit Goal" ]
                     , button
@@ -653,7 +658,7 @@ habitActionsDropdownDiv dropdown ymd habitId onTodayViewer suspensions maybeToda
                             [ ( "action-button", True )
                             , ( "display-none", not dropdown )
                             ]
-                        , onClick <| OnAddNoteClick habitId
+                        , onClick <| OnAddNoteClick habit
                         ]
                         [ text "Add Note" ]
                     ]
@@ -730,7 +735,7 @@ renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInp
                     )
                 ]
                 [ div [ class "habit-name" ] [ text habitRecord.name ]
-                , habitActionsDropdownDiv actionsDropdown ymd habitRecord.id onTodayViewer habitRecord.suspensions maybeTodayYmd
+                , habitActionsDropdownDiv actionsDropdown ymd habit onTodayViewer habitRecord.suspensions maybeTodayYmd
                 , case habitStats of
                     Nothing ->
                         frequencyStatisticDiv "Error retriving performance stats"
@@ -1366,19 +1371,31 @@ renderErrorMessage errorMessage activeDialogScreen =
         ]
 
 
-renderAddNoteDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> String -> Maybe YmdDate.YmdDate -> Html Msg
-renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput maybeYmd =
+renderAddNoteDialog :
+    Maybe DialogScreen.DialogScreen
+    -> Maybe Habit.Habit
+    -> String
+    -> Maybe YmdDate.YmdDate
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitDayNote.HabitDayNote)
+    -> Html Msg
+renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput maybeYmd rdAllHabitDayNotes =
     div
         [ classList
             [ ( "add-note-dialog", True )
             , ( "display-none", activeDialogScreen /= Just DialogScreen.AddNoteScreen )
             ]
         ]
-        (case addNoteDialogHabit of
-            Just habit ->
+        (case ( addNoteDialogHabit, maybeYmd, rdAllHabitDayNotes ) of
+            ( Just habit, Just ymd, RemoteData.Success allHabitDayNotes ) ->
                 let
                     habitRecord =
                         Habit.getCommonFields habit
+
+                    existingHabitDayNoteText : Maybe String
+                    existingHabitDayNoteText =
+                        List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) allHabitDayNotes
+                            |> List.head
+                            |> Maybe.map .note
                 in
                 [ div
                     [ class "add-note-dialog-form" ]
@@ -1386,7 +1403,7 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                     , div [ class "add-note-dialog-header-line-break" ] []
                     , textareaStopKeydownPropagation
                         [ class "add-note-dialog-input"
-                        , placeholder "Add a note for today..."
+                        , placeholder <| Maybe.withDefault "Add a note for today..." existingHabitDayNoteText
                         , onInput OnAddNoteDialogInput
                         , value addNoteDialogInput
                         ]
@@ -1400,16 +1417,11 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                         [ button
                             [ class "add-note-dialog-form-buttons-submit"
                             , onClick <|
-                                case maybeYmd of
-                                    Just ymd ->
-                                        if addNoteDialogInput == "" then
-                                            NoOp
+                                if addNoteDialogInput == "" then
+                                    NoOp
 
-                                        else
-                                            OnAddNoteSubmitClick ymd habitRecord.id addNoteDialogInput
-
-                                    Nothing ->
-                                        NoOp
+                                else
+                                    OnAddNoteSubmitClick ymd habitRecord.id addNoteDialogInput
                             ]
                             [ text "Submit" ]
                         , button
@@ -1421,6 +1433,6 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                     ]
                 ]
 
-            Nothing ->
+            _ ->
                 []
         )

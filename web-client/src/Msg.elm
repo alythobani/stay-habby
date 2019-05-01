@@ -107,7 +107,7 @@ type Msg
     | OpenSetHabitDataShortcutDialogScreen
     | OnExitSetHabitDataShortcutAmountFormInput
       -- Add Note
-    | OnAddNoteClick String
+    | OnAddNoteClick Habit.Habit
     | OnAddNoteDialogInput String
     | OnAddNoteSubmitClick YmdDate.YmdDate String String
     | OnAddNoteFailure ApiError

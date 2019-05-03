@@ -1,6 +1,6 @@
 # Stay Habby
 
-A habit tracker app, originally started by [Arie Milner](https://github.com/amilner42/habby) and later turned into my baby.
+A habit tracker app, originally started by [Arie Milner](https://github.com/amilner42/habby) and currently only further developed by me.
 
 ![Screenshot on April 15, 2019](screenshots/2019-04-15.png)
 
@@ -66,7 +66,3 @@ Great, you're good to develop now!
 Keep in mind that the frontend will be running on `localhost:8080`.
 The backend will be serving up the API on `localhost:8888/graphql`, which you can actually explore with graphiql by
 visiting `localhost:8888`, a must-use feature while developing on the API.
-
-### More Docs...
-
-TODO

@@ -176,8 +176,8 @@ mutationAddHabit createHabit ymd =
                     else
                         "bad_habit"
                   )
-                , ( "name", commonFields.name )
-                , ( "description", commonFields.description )
+                , ( "name", Util.encodeString commonFields.name )
+                , ( "description", Util.encodeString commonFields.description )
                 , ( "time_of_day"
                   , case createHabit of
                         Habit.CreateGoodHabit { timeOfDay } ->
@@ -186,8 +186,8 @@ mutationAddHabit createHabit ymd =
                         _ ->
                             ""
                   )
-                , ( "unit_name_singular", commonFields.unitNameSingular )
-                , ( "unit_name_plural", commonFields.unitNamePlural )
+                , ( "unit_name_singular", Util.encodeString commonFields.unitNameSingular )
+                , ( "unit_name_plural", Util.encodeString commonFields.unitNamePlural )
                 , ( "initial_frequency_name"
                   , if isGoodHabit then
                         "initial_target_frequency"
@@ -215,12 +215,12 @@ mutationAddHabit createHabit ymd =
               add_habit(create_habit_data: {
                 type_name: "{{type_name}}",
                 {{type_name}}: {
-                  name: "{{name}}",
-                  description: "{{description}}",
+                  name: {{name}},
+                  description: {{description}},
                   {{time_of_day}}
                   {{initial_frequency_name}}: {{initial_frequency_value}},
-                  unit_name_singular: "{{unit_name_singular}}",
-                  unit_name_plural: "{{unit_name_plural}}"
+                  unit_name_singular: {{unit_name_singular}},
+                  unit_name_plural: {{unit_name_plural}}
                 }
               }, frequency_start_date: {{frequency_start_date}}) {{habit_output}}
             }"""
@@ -334,7 +334,7 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
                     else
                         "bad_habit"
                   )
-                , ( "habit_id", habitId )
+                , ( "habit_id", Util.encodeString habitId )
                 , ( "new_frequencies"
                   , newFrequencies
                         |> List.map frequencyChangeRecordToGraphQLString
@@ -354,7 +354,7 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
         queryString =
             """mutation {
             edit_habit_goal_frequencies(
-              habit_id: "{{habit_id}}",
+              habit_id: {{habit_id}},
               habit_type: "{{habit_type}}",
               new_frequencies: [{{new_frequencies}}]
             ) {{habit_output}}
@@ -400,8 +400,8 @@ mutationSetHabitDayNote ymd habitId note =
         templateDict =
             Dict.fromList <|
                 [ ( "date", YmdDate.toGraphQLInputString ymd )
-                , ( "note", note )
-                , ( "habit_id", habitId )
+                , ( "note", Util.encodeString note )
+                , ( "habit_id", Util.encodeString habitId )
                 , ( "habit_day_note_output", HabitDayNote.graphQLOutputString )
                 ]
 
@@ -409,8 +409,8 @@ mutationSetHabitDayNote ymd habitId note =
             """mutation {
               set_habit_day_note(
                 date: {{date}},
-                note: "{{note}}",
-                habit_id: "{{habit_id}}"
+                note: {{note}},
+                habit_id: {{habit_id}}
               ) {{habit_day_note_output}}
             }"""
                 |> Util.templater templateDict
@@ -445,7 +445,7 @@ mutationEditHabitSuspensions habitId newSuspensions =
 
         templateDict =
             Dict.fromList
-                [ ( "habit_id", habitId )
+                [ ( "habit_id", Util.encodeString habitId )
                 , ( "new_suspensions"
                   , newSuspensions
                         |> List.map suspendedIntervalToGraphQLString
@@ -457,7 +457,7 @@ mutationEditHabitSuspensions habitId newSuspensions =
         queryString =
             """mutation {
             edit_habit_suspensions(
-              habit_id: "{{habit_id}}",
+              habit_id: {{habit_id}},
               new_suspensions: [{{new_suspensions}}]
             ) {{habit_output}}
             }"""

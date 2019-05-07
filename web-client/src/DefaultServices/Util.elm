@@ -1,4 +1,16 @@
-module DefaultServices.Util exposing (encodeBool, firstIndexInList, helper, hiddenDiv, notEmpty, onKeydown, onKeydownPreventDefault, onKeydownStopPropagation, replaceOrAdd, templater)
+module DefaultServices.Util exposing
+    ( encodeBool
+    , encodeString
+    , firstIndexInList
+    , helper
+    , hiddenDiv
+    , notEmpty
+    , onKeydown
+    , onKeydownPreventDefault
+    , onKeydownStopPropagation
+    , replaceOrAdd
+    , templater
+    )
 
 import DefaultServices.Keyboard as Keyboard
 import Dict
@@ -6,6 +18,7 @@ import Html exposing (Attribute, Html, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (keyCode, on, preventDefaultOn, stopPropagationOn)
 import Json.Decode as Decode
+import Json.Encode as Encode
 
 
 {-| Creates an empty div with class `display-none`.
@@ -38,6 +51,15 @@ templater dict templateString =
         dict
 
 
+{-| Encode a String as JSON that can be inputed into a graphQL query / mutation.
+-}
+encodeString : String -> String
+encodeString str =
+    Encode.encode 0 (Encode.string str)
+
+
+{-| Encode a Bool as JSON that can be inputed into a graphQL query / mutation.
+-}
 encodeBool : Bool -> String
 encodeBool bool =
     case bool of

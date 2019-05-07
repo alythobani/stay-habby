@@ -1,4 +1,8 @@
-module Models.HabitData exposing (HabitData, decodeHabitData)
+module Models.HabitData exposing
+    ( HabitData
+    , decodeHabitData
+    , graphQLOutputString
+    )
 
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
@@ -16,3 +20,17 @@ decodeHabitData =
         |> required "habit_id" Decode.string
         |> required "date" decodeYmdDate
         |> required "amount" Decode.int
+
+
+graphQLOutputString : String
+graphQLOutputString =
+    """{
+      _id
+      amount
+      date {
+        day
+        month
+        year
+      }
+      habit_id
+    }"""

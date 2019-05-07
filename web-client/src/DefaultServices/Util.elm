@@ -1,5 +1,8 @@
 module DefaultServices.Util exposing
     ( encodeBool
+    , encodeInt
+    , encodeListOfStrings
+    , encodeMaybe
     , encodeString
     , firstIndexInList
     , helper
@@ -56,6 +59,33 @@ templater dict templateString =
 encodeString : String -> String
 encodeString str =
     Encode.encode 0 (Encode.string str)
+
+
+{-| Encode an Int as JSON that can be inputed into a graphQL query / mutation.
+-}
+encodeInt : Int -> String
+encodeInt int =
+    Encode.encode 0 (Encode.int int)
+
+
+{-| Encode a `Maybe x` as JSON that can be inputed into a graphQL query / mutation.
+Encode `Nothing` as `null` and `Just a` as `encodeX a`.
+-}
+encodeMaybe : Maybe x -> (x -> String) -> String
+encodeMaybe maybeX encodeX =
+    case maybeX of
+        Just x ->
+            encodeX x
+
+        Nothing ->
+            "null"
+
+
+{-| Encode a List of Strings as JSON that can be inputed into a graphQL query / mutation.
+-}
+encodeListOfStrings : List String -> String
+encodeListOfStrings stringList =
+    Encode.encode 0 (Encode.list Encode.string stringList)
 
 
 {-| Encode a Bool as JSON that can be inputed into a graphQL query / mutation.

@@ -1,4 +1,17 @@
-module Models.YmdDate exposing (YmdDate, addDays, compareYmds, decodeYmdDate, fromDate, fromSimpleString, getFirstMondayAfterDate, prettyPrint, prettyPrintWithWeekday, toDate, toGraphQLInputString, toSimpleString)
+module Models.YmdDate exposing
+    ( YmdDate
+    , addDays
+    , compareYmds
+    , decodeYmdDate
+    , encodeYmdDate
+    , fromDate
+    , fromSimpleString
+    , getFirstMondayAfterDate
+    , prettyPrint
+    , prettyPrintWithWeekday
+    , toDate
+    , toSimpleString
+    )
 
 import Date
 import DefaultServices.Util as Util
@@ -171,14 +184,16 @@ toSimpleString { year, month, day } =
     String.fromInt day ++ "/" ++ String.fromInt month ++ "/" ++ (String.dropLeft 2 <| String.fromInt year)
 
 
-toGraphQLInputString : YmdDate -> String
-toGraphQLInputString ymd =
+{-| Encode a `YmdDate` as JSON that can be inputed into a graphQL query / mutation.
+-}
+encodeYmdDate : YmdDate -> String
+encodeYmdDate ymd =
     let
         templateDict =
             Dict.fromList
-                [ ( "day", String.fromInt ymd.day )
-                , ( "month", String.fromInt ymd.month )
-                , ( "year", String.fromInt ymd.year )
+                [ ( "day", Util.encodeInt ymd.day )
+                , ( "month", Util.encodeInt ymd.month )
+                , ( "year", Util.encodeInt ymd.year )
                 ]
 
         graphQLString =

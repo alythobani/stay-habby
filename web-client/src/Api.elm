@@ -51,44 +51,23 @@ queryAllRemoteData :
     -> Cmd b
 queryAllRemoteData ymd =
     let
+        templateDict =
+            Dict.fromList
+                [ ( "habit_output", Habit.graphQLOutputString )
+                , ( "habit_data_output", HabitData.graphQLOutputString )
+                , ( "current_client_date", YmdDate.encodeYmdDate ymd )
+                , ( "frequency_stats_output", FrequencyStats.graphQLOutputString )
+                , ( "habit_day_note_output", HabitDayNote.graphQLOutputString )
+                ]
+
         queryString =
             """{
-  habits: get_habits """
-                ++ Habit.graphQLOutputString
-                ++ """
-  habitData: get_habit_data {
-    _id
-    amount
-    date {
-      day
-      month
-      year
-    }
-    habit_id
-  }
-  frequencyStatsList: get_frequency_stats(current_client_date: {year: """
-                ++ String.fromInt ymd.year
-                ++ ", month: "
-                ++ String.fromInt ymd.month
-                ++ ", day: "
-                ++ String.fromInt ymd.day
-                ++ """}) {
-    habit_id
-    total_fragments
-    successful_fragments
-    total_done
-    current_fragment_streak
-    best_fragment_streak
-    current_fragment_total
-    current_fragment_goal
-    current_fragment_days_left
-    habit_has_started
-    currently_suspended
-  }
-  habitDayNotes: get_habit_day_notes"""
-                ++ HabitDayNote.graphQLOutputString
-                ++ """
+  habits: get_habits {{habit_output}}
+  habitData: get_habit_data {{habit_data_output}}
+  frequencyStatsList: get_frequency_stats(current_client_date: {{current_client_date}}) {{frequency_stats_output}}
+  habitDayNotes: get_habit_day_notes {{habit_day_note_output}}
 }"""
+                |> Util.templater templateDict
     in
     graphQLRequest
         queryString
@@ -116,34 +95,25 @@ queryPastFrequencyStats :
     -> Cmd b
 queryPastFrequencyStats ymd habitIds =
     let
-        queryString =
-            "{frequencyStatsList: get_frequency_stats(current_client_date: {year: "
-                ++ String.fromInt ymd.year
-                ++ ", month: "
-                ++ String.fromInt ymd.month
-                ++ ", day: "
-                ++ String.fromInt ymd.day
-                ++ "}"
-                ++ (if List.isEmpty habitIds then
+        templateDict =
+            Dict.fromList
+                [ ( "current_client_date", YmdDate.encodeYmdDate ymd )
+                , ( "habit_ids_input"
+                  , if List.isEmpty habitIds then
                         ""
 
                     else
-                        ", habit_ids: " ++ Debug.toString habitIds
-                   )
-                ++ """) {
-    habit_id
-    total_fragments
-    successful_fragments
-    total_done
-    current_fragment_streak
-    best_fragment_streak
-    current_fragment_total
-    current_fragment_goal
-    current_fragment_days_left
-    habit_has_started
-    currently_suspended
-  }
-}"""
+                        ", habit_ids: " ++ Util.encodeListOfStrings habitIds
+                  )
+                , ( "frequency_stats_output", FrequencyStats.graphQLOutputString )
+                ]
+
+        queryString =
+            """{frequencyStatsList: get_frequency_stats(
+                  current_client_date: {{current_client_date}}
+                  {{habit_ids_input}}) {{frequency_stats_output}}
+            }"""
+                |> Util.templater templateDict
     in
     graphQLRequest
         queryString
@@ -195,10 +165,8 @@ mutationAddHabit createHabit ymd =
                     else
                         "initial_threshold_frequency"
                   )
-                , ( "initial_frequency_value"
-                  , frequencyToGraphQLString commonFields.initialFrequency
-                  )
-                , ( "frequency_start_date", YmdDate.toGraphQLInputString startDate )
+                , ( "initial_frequency_value", frequencyToGraphQLString commonFields.initialFrequency )
+                , ( "frequency_start_date", YmdDate.encodeYmdDate startDate )
                 , ( "habit_output", Habit.graphQLOutputString )
                 ]
 
@@ -290,28 +258,8 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
                         [ ( "start_date_day", String.fromInt fcr.startDate.day )
                         , ( "start_date_month", String.fromInt fcr.startDate.month )
                         , ( "start_date_year", String.fromInt fcr.startDate.year )
-                        , ( "end_date"
-                          , case fcr.endDate of
-                                Just { day, month, year } ->
-                                    Util.templater
-                                        (Dict.fromList
-                                            [ ( "day", String.fromInt day )
-                                            , ( "month", String.fromInt month )
-                                            , ( "year", String.fromInt year )
-                                            ]
-                                        )
-                                        """{
-                          day: {{day}},
-                          month: {{month}},
-                          year: {{year}}
-                          }"""
-
-                                Nothing ->
-                                    "null"
-                          )
-                        , ( "new_frequency"
-                          , frequencyToGraphQLString fcr.newFrequency
-                          )
+                        , ( "end_date", Util.encodeMaybe fcr.endDate YmdDate.encodeYmdDate )
+                        , ( "new_frequency", frequencyToGraphQLString fcr.newFrequency )
                         ]
             in
             """{
@@ -365,30 +313,24 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
 
 
 mutationSetHabitData : YmdDate.YmdDate -> String -> Int -> String -> (ApiError -> b) -> (HabitData.HabitData -> b) -> Cmd b
-mutationSetHabitData { day, month, year } habitId amount =
+mutationSetHabitData ymd habitId amount =
     let
         templateDict =
             Dict.fromList <|
-                [ ( "day", String.fromInt day )
-                , ( "month", String.fromInt month )
-                , ( "year", String.fromInt year )
-                , ( "amount", String.fromInt amount )
-                , ( "habit_id", habitId )
+                [ ( "date", YmdDate.encodeYmdDate ymd )
+                , ( "amount", Util.encodeInt amount )
+                , ( "habit_id", Util.encodeString habitId )
+                , ( "habit_data_output", HabitData.graphQLOutputString )
                 ]
 
         query =
             """mutation {
-\tset_habit_data(date: { day: {{day}}, month: {{month}}, year: {{year}}}, amount: {{amount}}, habit_id: "{{habit_id}}") {
-\t\t_id,
-\t\tamount,
-\t\tdate {
-\t\t\tyear,
-\t\t\tmonth,
-\t\t\tday
-\t\t},
-\t\thabit_id
-\t}
-}"""
+              set_habit_data(
+                date: {{date}},
+                amount: {{amount}},
+                habit_id: {{habit_id}}
+              ) {{habit_data_output}}
+            }"""
                 |> Util.templater templateDict
     in
     graphQLRequest query (Decode.at [ "data", "set_habit_data" ] HabitData.decodeHabitData)
@@ -399,7 +341,7 @@ mutationSetHabitDayNote ymd habitId note =
     let
         templateDict =
             Dict.fromList <|
-                [ ( "date", YmdDate.toGraphQLInputString ymd )
+                [ ( "date", YmdDate.encodeYmdDate ymd )
                 , ( "note", Util.encodeString note )
                 , ( "habit_id", Util.encodeString habitId )
                 , ( "habit_day_note_output", HabitDayNote.graphQLOutputString )
@@ -421,20 +363,13 @@ mutationSetHabitDayNote ymd habitId note =
 mutationEditHabitSuspensions : String -> List Habit.SuspendedInterval -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
 mutationEditHabitSuspensions habitId newSuspensions =
     let
-        suspendedIntervalToGraphQLString : Habit.SuspendedInterval -> String
-        suspendedIntervalToGraphQLString suspendedInterval =
+        encodeSuspendedInterval : Habit.SuspendedInterval -> String
+        encodeSuspendedInterval suspendedInterval =
             let
                 suspendedIntervalTemplateDict =
                     Dict.fromList
-                        [ ( "start_date", YmdDate.toGraphQLInputString suspendedInterval.startDate )
-                        , ( "end_date"
-                          , case suspendedInterval.endDate of
-                                Just ymd ->
-                                    YmdDate.toGraphQLInputString ymd
-
-                                Nothing ->
-                                    "null"
-                          )
+                        [ ( "start_date", YmdDate.encodeYmdDate suspendedInterval.startDate )
+                        , ( "end_date", Util.encodeMaybe suspendedInterval.endDate YmdDate.encodeYmdDate )
                         ]
             in
             """{
@@ -448,7 +383,7 @@ mutationEditHabitSuspensions habitId newSuspensions =
                 [ ( "habit_id", Util.encodeString habitId )
                 , ( "new_suspensions"
                   , newSuspensions
-                        |> List.map suspendedIntervalToGraphQLString
+                        |> List.map encodeSuspendedInterval
                         |> String.join ", "
                   )
                 , ( "habit_output", Habit.graphQLOutputString )

@@ -337,6 +337,8 @@ body {
         }
 
         .add-habit-input-form {
+            position: relative;
+            bottom: 250px;
 
             .add-habit-input-form-name-and-description, .add-habit-input-form-unit-name {
                 box-sizing: border-box;
@@ -901,8 +903,7 @@ body {
               padding: 7px;
               margin: 15px 15px 0 2px;
               width: 325px;
-              min-width: 200px;
-              min-height: 80px;
+              height: 120px;
               box-sizing: border-box;
               color: white;
               border-width: 1px;

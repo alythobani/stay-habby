@@ -87,6 +87,9 @@ body {
         .today-panel-date {
           color: $silver-chalice;
         }
+        .today-panel-empty-habby-message {
+          color: $boulder;
+        }
         .add-habit {
           background-color: black;
           box-shadow: 0 0 1px $gallery;
@@ -293,6 +296,22 @@ body {
             font-size: 16px;
             display: inline-block;
             font-style: italic;
+        }
+
+        .today-panel-empty-habby-message {
+          @extend .full-screen-centered-flex-container;
+          position: relative;
+          height: 75vh;
+          width: 95vw;
+          color: $cape-cod;
+          .today-panel-empty-habby-message-header {
+            margin-top: -30px;
+            font-size: 30px;
+          }
+          .today-panel-empty-habby-message-body {
+            margin-top: 10px;
+            font-size: 16px;
+          }
         }
 
         .add-habit {

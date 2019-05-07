@@ -213,22 +213,34 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                     -- TODO: Redundant, but should be removed during the UI change of only one panel (no History Viewer)
                 in
                 div []
-                    [ div
-                        [ classList
-                            [ ( "display-none", not openView )
-                            , ( "all-habit-lists", True )
+                    [ if List.isEmpty habits then
+                        div
+                            [ class "today-panel-empty-habby-message" ]
+                            [ div
+                                [ class "today-panel-empty-habby-message-header" ]
+                                [ text "Welcome to Habby!" ]
+                            , div
+                                [ class "today-panel-empty-habby-message-body" ]
+                                [ text "Start by adding a habit below." ]
                             ]
-                        ]
-                        [ div
-                            [ class "habit-list good-habits" ]
-                            (List.map renderHabit sortedGoodHabits)
-                        , div
-                            [ class "habit-list bad-habits" ]
-                            (List.map renderHabit sortedBadHabits)
-                        , div
-                            [ class "habit-list suspended-habits" ]
-                            (List.map renderHabit sortedSuspendedHabits)
-                        ]
+
+                      else
+                        div
+                            [ classList
+                                [ ( "display-none", not openView )
+                                , ( "all-habit-lists", True )
+                                ]
+                            ]
+                            [ div
+                                [ class "habit-list good-habits" ]
+                                (List.map renderHabit sortedGoodHabits)
+                            , div
+                                [ class "habit-list bad-habits" ]
+                                (List.map renderHabit sortedBadHabits)
+                            , div
+                                [ class "habit-list suspended-habits" ]
+                                (List.map renderHabit sortedSuspendedHabits)
+                            ]
                     , button
                         [ class "add-habit"
                         , onClick <|

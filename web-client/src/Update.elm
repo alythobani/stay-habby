@@ -223,11 +223,23 @@ update msg model =
             )
 
         OnAddHabitSuccess habit ->
+            let
+                habitRecord =
+                    Habit.getCommonFields habit
+            in
             ( { model
                 | allHabits = RemoteData.map (\allHabits -> allHabits ++ [ habit ]) model.allHabits
                 , addHabit = Habit.initAddHabitData
               }
-            , Cmd.none
+            , Cmd.batch
+                [ getTodayViewerFrequencyStats [ habitRecord.id ]
+                , case model.historyViewerSelectedDate of
+                    Just ymd ->
+                        getHistoryViewerFrequencyStats ymd [ habitRecord.id ]
+
+                    Nothing ->
+                        Cmd.none
+                ]
             )
 
         -- Set Habit Data

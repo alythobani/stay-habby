@@ -754,7 +754,7 @@ renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInp
 
                     Just stats ->
                         if not stats.habitHasStarted then
-                            div [ class "current-progress" ] [ text "Start this habit!" ]
+                            div [ class "start-this-habit-message" ] [ text "Start this habit!" ]
 
                         else
                             div [ class "frequency-stats-list" ]

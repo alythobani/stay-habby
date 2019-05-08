@@ -986,6 +986,11 @@ body {
                   font-weight: 600;
               }
 
+              .start-this-habit-message {
+                @extend .current-progress;
+                float: right;
+              }
+
               .habit-amount-complete {
                   box-sizing: border-box;
                   position: absolute;

@@ -49,3 +49,5 @@ Note down a lag measure, or even just a diary entry, by adding a Note to a habit
 ![](demos/add-note-workout.gif)
 
 ---
+
+Keep Calm and Stay Habby!

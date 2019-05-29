@@ -803,6 +803,9 @@ renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInp
                                 if key == Keyboard.Enter then
                                     Just <| setHabitData ymd habitRecord.id editingHabitData
 
+                                else if key == Keyboard.KeyA then
+                                    Just OpenSetHabitDataShortcutDialogScreen
+
                                 else
                                     Just NoOp
                             )

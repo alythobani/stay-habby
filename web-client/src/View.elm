@@ -811,6 +811,9 @@ renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInp
                                 else if key == Keyboard.KeyA then
                                     Just OpenSetHabitDataShortcutDialogScreen
 
+                                else if key == Keyboard.KeyN then
+                                    Just OpenAddNoteHabitSelectionDialogScreen
+
                                 else
                                     Just NoOp
                             )

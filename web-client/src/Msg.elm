@@ -106,8 +106,13 @@ type Msg
     | OnExitDialogScreen
     | OpenSetHabitDataShortcutDialogScreen
     | OnExitSetHabitDataShortcutAmountFormInput
-      -- Add Note
-    | OnAddNoteClick Habit.Habit
+      -- Add Note Habit Selection
+    | OpenAddNoteHabitSelectionDialogScreen
+    | OnAddNoteHabitSelectionFilterTextInput String
+    | OnAddNoteHabitSelectionScreenSelectNextHabit
+    | OnAddNoteHabitSelectionScreenSelectPreviousHabit
+      -- Add Note Dialog
+    | OpenAddNoteDialog Habit.Habit
     | OnAddNoteDialogInput String
     | OnAddNoteSubmitClick YmdDate.YmdDate String String
     | OnAddNoteFailure ApiError

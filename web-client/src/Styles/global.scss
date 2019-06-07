@@ -551,35 +551,14 @@ body {
     .set-habit-data-shortcut {
       .set-habit-data-shortcut-habit-selection {
         .set-habit-data-shortcut-habit-selection-input {
-          position: absolute;
-          text-align: center;
-          top: 40vh;
-          right: 40vw;
-          z-index: 3;
-          width: 300px;
-          height: 20px;
-          font-size: 16px;
+          @extend .habit-selection-filter-text-input;
         }
         .set-habit-data-shortcut-habits-selection-habits-list {
-          position: absolute;
-          text-align: center;
-          top: 45vh;
-          right: 40vw;
-          color: white;
-          z-index: 3;
-          width: 300px;
-          border: 1px solid white;
+          @extend .habit-selection-habits-list;
           .set-habit-data-shortcut-habits-selection-habits-list-habit-name {
-            border: 0.5px solid white;
-            padding: 0.5px;
-            background-color: $shark-90;
+            @extend .habit-selection-habits-list-option;
             &.set-habit-data-shortcut-habits-selection-habits-list-selected-habit {
-              font-weight: 600;
-              font-style: normal;
-              border-width: 2px;
-              font-size: 15px;
-              padding: 1px;
-              background-color: $black-90;
+              @extend .habit-selection-habits-list-option-selected;
             }
           }
         }
@@ -767,6 +746,27 @@ body {
         background-color: black;
       }
     }
+
+
+    .add-note-habit-selection-screen {
+
+        .add-note-habit-selection-filter-text-input {
+          @extend .habit-selection-filter-text-input;
+        }
+
+        .add-note-habit-selection-habits-list {
+          @extend .habit-selection-habits-list;
+          .add-note-habit-selection-habits-list-option {
+            @extend .habit-selection-habits-list-option;
+            &.selected-habit {
+              @extend .habit-selection-habits-list-option-selected;
+            }
+          }
+        }
+
+    }
+
+
     .add-note-dialog {
       @extend .full-screen-centered-flex-container;
       .add-note-dialog-form {

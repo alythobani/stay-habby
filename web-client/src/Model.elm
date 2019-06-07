@@ -88,6 +88,11 @@ type alias Model =
     -- Full screen dialogs
     , activeDialogScreen : Maybe DialogScreen.DialogScreen
 
+    -- Add note habit selection
+    , addNoteHabitSelectionFilterText : String
+    , addNoteHabitSelectionFilteredHabits : Array.Array Habit.Habit
+    , addNoteHabitSelectionSelectedHabitIndex : Int
+
     -- Add note
     , addNoteDialogHabit : Maybe Habit.Habit
     , addNoteDialogInput : String

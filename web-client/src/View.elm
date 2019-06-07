@@ -67,6 +67,11 @@ view model =
             , renderErrorMessage
                 model.errorMessage
                 model.activeDialogScreen
+            , renderAddNoteHabitSelectionScreen
+                model.activeDialogScreen
+                model.addNoteHabitSelectionFilterText
+                model.addNoteHabitSelectionFilteredHabits
+                model.addNoteHabitSelectionSelectedHabitIndex
             , renderAddNoteDialog
                 model.activeDialogScreen
                 model.addNoteDialogHabit
@@ -670,7 +675,7 @@ habitActionsDropdownDiv dropdown ymd habit onTodayViewer suspensions maybeTodayY
                             [ ( "action-button", True )
                             , ( "display-none", not dropdown )
                             ]
-                        , onClick <| OnAddNoteClick habit
+                        , onClick <| OpenAddNoteDialog habit
                         ]
                         [ text "Add Note" ]
                     ]
@@ -1383,6 +1388,86 @@ renderErrorMessage errorMessage activeDialogScreen =
                     "No errors"
                     (Maybe.map (\em -> em ++ ". You may want to refresh the page.") errorMessage)
             ]
+        ]
+
+
+renderAddNoteHabitSelectionScreen :
+    Maybe DialogScreen.DialogScreen
+    -> String
+    -> Array.Array Habit.Habit
+    -> Int
+    -> Html Msg
+renderAddNoteHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen : Bool
+        showScreen =
+            activeDialogScreen == Just DialogScreen.AddNoteHabitSelectionScreen
+
+        selectedHabit =
+            Array.get selectedHabitIndex filteredHabits
+
+        readyToEnterHabit =
+            Maybe.isJust selectedHabit
+
+        renderHabitOption habit =
+            div
+                [ classList
+                    [ ( "add-note-habit-selection-habits-list-option", True )
+                    , ( "selected-habit"
+                      , case selectedHabit of
+                            Just h ->
+                                h == habit
+
+                            _ ->
+                                False
+                      )
+                    ]
+                ]
+                [ text <| .name <| Habit.getCommonFields habit ]
+    in
+    div
+        [ classList
+            [ ( "add-note-habit-selection-screen", True )
+            , ( "display-none", not showScreen )
+            ]
+        ]
+        [ input
+            [ id "add-note-habit-selection-filter-text-input"
+            , class "add-note-habit-selection-filter-text-input"
+            , placeholder "Enter a habit's name..."
+            , onInput OnAddNoteHabitSelectionFilterTextInput
+            , value habitSelectionFilterText
+            , Util.onKeydownStopPropagation
+                (\key ->
+                    if key == Keyboard.ArrowDown then
+                        Just OnAddNoteHabitSelectionScreenSelectNextHabit
+
+                    else if key == Keyboard.ArrowUp then
+                        Just OnAddNoteHabitSelectionScreenSelectPreviousHabit
+
+                    else if key == Keyboard.Enter && readyToEnterHabit then
+                        case selectedHabit of
+                            Just h ->
+                                Just <| OpenAddNoteDialog h
+
+                            _ ->
+                                Just NoOp
+
+                    else if key == Keyboard.Escape then
+                        Just OnExitDialogScreen
+
+                    else
+                        Just NoOp
+                )
+            ]
+            []
+        , div
+            [ classList
+                [ ( "add-note-habit-selection-habits-list", True )
+                , ( "display-none", Array.isEmpty filteredHabits )
+                ]
+            ]
+            (Array.map renderHabitOption filteredHabits |> Array.toList)
         ]
 
 

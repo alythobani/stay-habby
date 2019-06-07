@@ -123,6 +123,7 @@ update msg model =
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
                 , allHabitDayNotes = RemoteData.Success habitDayNotes
                 , setHabitDataShortcutFilteredHabits = Array.fromList habits
+                , addNoteHabitSelectionFilteredHabits = Array.fromList habits
               }
             , Cmd.none
             )
@@ -507,7 +508,11 @@ update msg model =
             -- of just updating the model (you should still update the model).
             case keyMsg of
                 Keyboard.Down keyCode ->
-                    if Keyboard.fromCode keyCode == Keyboard.KeyA then
+                    let
+                        key =
+                            Keyboard.fromCode keyCode
+                    in
+                    if key == Keyboard.KeyA then
                         if Maybe.isJust model.activeDialogScreen then
                             -- A dialog screen is already open, don't open the set habit data one
                             ( newModel, Cmd.none )
@@ -515,7 +520,15 @@ update msg model =
                         else
                             update OpenSetHabitDataShortcutDialogScreen newModel
 
-                    else if Keyboard.fromCode keyCode == Keyboard.Escape then
+                    else if key == Keyboard.KeyN then
+                        if Maybe.isJust model.activeDialogScreen then
+                            -- A dialog screen is already open, don't open the set habit data one
+                            ( newModel, Cmd.none )
+
+                        else
+                            update OpenAddNoteHabitSelectionDialogScreen newModel
+
+                    else if key == Keyboard.Escape then
                         update OnExitDialogScreen newModel
 
                     else
@@ -952,8 +965,71 @@ update msg model =
                 |> Task.attempt FocusResult
             )
 
-        -- Add note
-        OnAddNoteClick habit ->
+        -- Add Note Habit Selection
+        OpenAddNoteHabitSelectionDialogScreen ->
+            ( { model | activeDialogScreen = Just DialogScreen.AddNoteHabitSelectionScreen }
+            , Dom.focus "add-note-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnAddNoteHabitSelectionFilterTextInput habitNameFilterText ->
+            let
+                habitFilter habit =
+                    habit |> Habit.getCommonFields |> .name |> String.contains habitNameFilterText
+
+                newFilteredHabits =
+                    case model.allHabits of
+                        RemoteData.Success habits ->
+                            List.filter habitFilter habits
+
+                        _ ->
+                            []
+
+                oldSelectedHabit =
+                    Array.get model.addNoteHabitSelectionSelectedHabitIndex model.addNoteHabitSelectionFilteredHabits
+
+                newSelectedHabitIndex =
+                    case oldSelectedHabit of
+                        Just h ->
+                            Maybe.withDefault 0 (Util.firstIndexInList newFilteredHabits h)
+
+                        Nothing ->
+                            0
+            in
+            ( { model
+                | addNoteHabitSelectionFilterText = habitNameFilterText
+                , addNoteHabitSelectionFilteredHabits = Array.fromList newFilteredHabits
+                , addNoteHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+              }
+            , Cmd.none
+            )
+
+        OnAddNoteHabitSelectionScreenSelectNextHabit ->
+            let
+                filteredHabitsLength =
+                    Array.length model.addNoteHabitSelectionFilteredHabits
+
+                newSelectedHabitIndex =
+                    modBy filteredHabitsLength (model.addNoteHabitSelectionSelectedHabitIndex + 1)
+            in
+            ( { model | addNoteHabitSelectionSelectedHabitIndex = newSelectedHabitIndex }
+            , Cmd.none
+            )
+
+        OnAddNoteHabitSelectionScreenSelectPreviousHabit ->
+            let
+                filteredHabitsLength =
+                    Array.length model.addNoteHabitSelectionFilteredHabits
+
+                newSelectedHabitIndex =
+                    modBy filteredHabitsLength (model.addNoteHabitSelectionSelectedHabitIndex - 1)
+            in
+            ( { model | addNoteHabitSelectionSelectedHabitIndex = newSelectedHabitIndex }
+            , Cmd.none
+            )
+
+        -- Add Note Dialog
+        OpenAddNoteDialog habit ->
             let
                 habitRecord =
                     Habit.getCommonFields habit

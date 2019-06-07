@@ -84,6 +84,11 @@ init { apiBaseUrl, currentTime } url key =
       -- Full screen dialogs
       , activeDialogScreen = Nothing
 
+      -- Add note habit selection
+      , addNoteHabitSelectionFilterText = ""
+      , addNoteHabitSelectionFilteredHabits = Array.empty
+      , addNoteHabitSelectionSelectedHabitIndex = 0
+
       -- Add note
       , addNoteDialogHabit = Nothing
       , addNoteDialogInput = ""

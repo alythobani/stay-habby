@@ -104,6 +104,41 @@
   padding: 50px 20px 50px 20px;
 }
 
+.habit-selection-filter-text-input {
+  position: absolute;
+  text-align: center;
+  top: 40vh;
+  right: 40vw;
+  z-index: 3;
+  width: 300px;
+  height: 20px;
+  font-size: 16px;
+}
+
+.habit-selection-habits-list {
+  position: absolute;
+  text-align: center;
+  top: 45vh;
+  right: 40vw;
+  color: white;
+  z-index: 3;
+  width: 300px;
+  border: 1px solid white;
+}
+.habit-selection-habits-list-option {
+  border: 0.5px solid white;
+  padding: 0.5px;
+  background-color: $shark-90;
+}
+.habit-selection-habits-list-option-selected {
+  font-weight: 600;
+  font-style: normal;
+  border-width: 2px;
+  font-size: 15px;
+  padding: 1px;
+  background-color: $black-90;
+}
+
 .full-screen-centered-flex-container {
   position: absolute;
   left: 0px;

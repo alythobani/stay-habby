@@ -898,7 +898,10 @@ renderSetHabitDataShortcut activeDialogScreen setHabitDataShortcutHabitNameFilte
                         , ( "display-none", showAmountForm )
                         ]
                     ]
-                    [ input
+                    [ span
+                        [ class "set-habit-data-shortcut-habit-selection-header" ]
+                        [ text "Set Habit Data" ]
+                    , input
                         [ id "set-habit-data-shortcut-habit-selection-input"
                         , class "set-habit-data-shortcut-habit-selection-input"
                         , placeholder "Enter a habit's name..."
@@ -1431,7 +1434,10 @@ renderAddNoteHabitSelectionScreen activeDialogScreen habitSelectionFilterText fi
             , ( "display-none", not showScreen )
             ]
         ]
-        [ input
+        [ span
+            [ class "add-note-habit-selection-screen-header" ]
+            [ text "Add Note" ]
+        , input
             [ id "add-note-habit-selection-filter-text-input"
             , class "add-note-habit-selection-filter-text-input"
             , placeholder "Enter a habit's name..."

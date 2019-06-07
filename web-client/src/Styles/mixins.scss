@@ -104,11 +104,18 @@
   padding: 50px 20px 50px 20px;
 }
 
+.habit-selection-header {
+  position: absolute;
+  top: 11.5vh;
+  z-index: 3;
+  color: white;
+  font-size: 36px;
+}
+
 .habit-selection-filter-text-input {
   position: absolute;
   text-align: center;
-  top: 40vh;
-  right: 40vw;
+  top: 17vh;
   z-index: 3;
   width: 300px;
   height: 20px;
@@ -118,8 +125,7 @@
 .habit-selection-habits-list {
   position: absolute;
   text-align: center;
-  top: 45vh;
-  right: 40vw;
+  top: 21.5vh;
   color: white;
   z-index: 3;
   width: 300px;

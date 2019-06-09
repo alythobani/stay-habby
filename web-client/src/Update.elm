@@ -1069,13 +1069,14 @@ update msg model =
                 isAddNoteSubmitShortcut : Bool
                 isAddNoteSubmitShortcut =
                     (key == Keyboard.Enter)
-                        && List.member model.addNoteKeysDown
-                            [ [ Keyboard.OSLeft ]
-                            , [ Keyboard.OSRight ]
-                            , [ Keyboard.MetaLeft ]
-                            , [ Keyboard.MetaRight ]
-                            , [ Keyboard.ControlLeft ]
-                            , [ Keyboard.ControlRight ]
+                        && List.any
+                            (\specialKey -> List.member specialKey model.addNoteKeysDown)
+                            [ Keyboard.OSLeft
+                            , Keyboard.OSRight
+                            , Keyboard.MetaLeft
+                            , Keyboard.MetaRight
+                            , Keyboard.ControlLeft
+                            , Keyboard.ControlRight
                             ]
 
                 newModel =

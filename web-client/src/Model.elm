@@ -92,6 +92,7 @@ type alias Model =
     , addNoteHabitSelectionFilterText : String
     , addNoteHabitSelectionFilteredHabits : Array.Array Habit.Habit
     , addNoteHabitSelectionSelectedHabitIndex : Int
+    , addNoteKeysDown : List Keyboard.Key
 
     -- Add note
     , addNoteDialogHabit : Maybe Habit.Habit

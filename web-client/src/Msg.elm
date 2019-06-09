@@ -68,9 +68,11 @@ type Msg
       -- Dropdowns
     | ToggleTodayViewerHabitActionsDropdown String
     | ToggleHistoryViewerHabitActionsDropdown String
-      --
+      -- Dark Mode
     | OnToggleDarkMode
+      -- Keyboard
     | KeyboardMsg Keyboard.Msg
+      -- Dom
     | FocusResult (Result Dom.Error ())
       -- Set Habit Data Shortcut
     | OnSetHabitDataShortcutInput String
@@ -114,6 +116,8 @@ type Msg
       -- Add Note Dialog
     | OpenAddNoteDialog Habit.Habit
     | OnAddNoteDialogInput String
+    | OnAddNoteKeydown Keyboard.Key YmdDate.YmdDate String
+    | OnAddNoteKeyup Keyboard.Key
     | OnAddNoteSubmitClick YmdDate.YmdDate String String
     | OnAddNoteFailure ApiError
     | OnAddNoteSuccess HabitDayNote.HabitDayNote

@@ -1532,8 +1532,10 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                                     Just OnExitDialogScreen
 
                                 else
-                                    Just NoOp
+                                    Just <| OnAddNoteKeydown key ymd habitRecord.id
                             )
+                        , Util.onKeyupStopPropagation
+                            (\key -> Just <| OnAddNoteKeyup key)
                         ]
                         []
                     , div

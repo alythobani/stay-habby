@@ -1,5 +1,6 @@
 module DefaultServices.Util exposing
-    ( encodeBool
+    ( addToListIfNotPresent
+    , encodeBool
     , encodeInt
     , encodeListOfStrings
     , encodeMaybe
@@ -11,6 +12,8 @@ module DefaultServices.Util exposing
     , onKeydown
     , onKeydownPreventDefault
     , onKeydownStopPropagation
+    , onKeyupStopPropagation
+    , removeFromListIfPresent
     , replaceOrAdd
     , templater
     )
@@ -100,6 +103,28 @@ encodeBool bool =
             "false"
 
 
+{-| Add `x` to the end of `list`, if not already present in `list`.
+-}
+addToListIfNotPresent : List x -> x -> List x
+addToListIfNotPresent list x =
+    if List.member x list then
+        list
+
+    else
+        List.append list [ x ]
+
+
+{-| Remove any instances of `x` from `list`.
+-}
+removeFromListIfPresent : List a -> a -> List a
+removeFromListIfPresent list x =
+    if List.member x list then
+        List.filter (\a -> a /= x) list
+
+    else
+        list
+
+
 {-| Replace item(s) in list or add item to list if no replacements took place.
 
 TODO Make more efficient
@@ -181,6 +206,27 @@ onKeydownStopPropagation keyToMsg =
     in
     stopPropagationOn
         "keydown"
+        (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
+
+
+{-| Event handler for `keyUp` events that also `stopPropagation`.
+
+WARNING: It'll only stop propagation if your function returns a message not `Nothing`.
+
+-}
+onKeyupStopPropagation : (Keyboard.Key -> Maybe msg) -> Attribute msg
+onKeyupStopPropagation keyToMsg =
+    let
+        decodeMsgBoolFromCode : Keyboard.Key -> Decode.Decoder ( msg, Bool )
+        decodeMsgBoolFromCode code =
+            code
+                |> keyToMsg
+                |> Maybe.map (\msg -> ( msg, True ))
+                |> Maybe.map Decode.succeed
+                |> Maybe.withDefault (Decode.fail "")
+    in
+    stopPropagationOn
+        "keyup"
         (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
 
 

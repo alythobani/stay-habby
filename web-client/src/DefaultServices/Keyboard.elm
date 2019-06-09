@@ -80,10 +80,13 @@ type Key
     | CapsLock -- Note: only seems to be triggered if caps lock is toggled ON by the keystroke
     | ShiftLeft
     | ControlLeft
+    | ControlRight
     | AltLeft
     | MetaLeft
+    | OSLeft
     | Space
     | MetaRight
+    | OSRight
     | AltRight
     | ArrowLeft
     | ArrowRight
@@ -187,10 +190,13 @@ codeBook =
     , ( "CapsLock", CapsLock )
     , ( "ShiftLeft", ShiftLeft )
     , ( "ControlLeft", ControlLeft )
+    , ( "ControlRight", ControlRight )
     , ( "AltLeft", AltLeft )
     , ( "MetaLeft", MetaLeft )
+    , ( "OSLeft", OSLeft )
     , ( "Space", Space )
     , ( "MetaRight", MetaRight )
+    , ( "OSRight", OSRight )
     , ( "AltRight", AltRight )
     , ( "ArrowLeft", ArrowLeft )
     , ( "ArrowRight", ArrowRight )

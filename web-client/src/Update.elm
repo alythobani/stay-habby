@@ -1049,6 +1049,7 @@ update msg model =
                 | activeDialogScreen = Just DialogScreen.AddNoteScreen
                 , addNoteDialogHabit = Just habit
                 , addNoteDialogInput = Maybe.withDefault "" existingHabitDayNoteText
+                , addNoteKeysDown = []
                 , todayViewerHabitActionsDropdown = Nothing
                 , historyViewerHabitActionsDropdown = Nothing
               }
@@ -1059,9 +1060,40 @@ update msg model =
         OnAddNoteDialogInput newAddNoteInput ->
             ( { model | addNoteDialogInput = newAddNoteInput }, Cmd.none )
 
+        OnAddNoteKeydown key ymd habitId ->
+            let
+                newAddNoteKeysDown =
+                    Util.addToListIfNotPresent model.addNoteKeysDown key
+
+                -- Keyboard shortcut for Add Note Submit is cmd-enter (mac) or ctrl-enter
+                isAddNoteSubmitShortcut : Bool
+                isAddNoteSubmitShortcut =
+                    (key == Keyboard.Enter)
+                        && List.member model.addNoteKeysDown
+                            [ [ Keyboard.OSLeft ]
+                            , [ Keyboard.OSRight ]
+                            , [ Keyboard.MetaLeft ]
+                            , [ Keyboard.MetaRight ]
+                            , [ Keyboard.ControlLeft ]
+                            , [ Keyboard.ControlRight ]
+                            ]
+
+                newModel =
+                    { model | addNoteKeysDown = newAddNoteKeysDown }
+            in
+            if isAddNoteSubmitShortcut && (model.addNoteDialogInput /= "") then
+                update (OnAddNoteSubmitClick ymd habitId model.addNoteDialogInput) newModel
+
+            else
+                ( newModel, Cmd.none )
+
+        OnAddNoteKeyup key ->
+            ( { model | addNoteKeysDown = Util.removeFromListIfPresent model.addNoteKeysDown key }, Cmd.none )
+
         OnAddNoteSubmitClick ymd habitId note ->
             ( { model
                 | activeDialogScreen = Nothing
+                , addNoteKeysDown = []
               }
             , Api.mutationSetHabitDayNote ymd habitId note model.apiBaseUrl OnAddNoteFailure OnAddNoteSuccess
             )

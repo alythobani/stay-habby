@@ -1095,6 +1095,14 @@ update msg model =
             ( { model
                 | activeDialogScreen = Nothing
                 , addNoteKeysDown = []
+                , addNoteHabitSelectionFilterText = ""
+                , addNoteHabitSelectionFilteredHabits =
+                    case model.allHabits of
+                        RemoteData.Success habits ->
+                            Array.fromList habits
+
+                        _ ->
+                            Array.empty
               }
             , Api.mutationSetHabitDayNote ymd habitId note model.apiBaseUrl OnAddNoteFailure OnAddNoteSuccess
             )

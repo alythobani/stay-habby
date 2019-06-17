@@ -47,10 +47,6 @@ body {
         }
       }
 
-      .retrieving-habits-status {
-        color: $alto;
-      }
-
       .panels-container {
 
         .top-panel {
@@ -103,6 +99,14 @@ body {
         }
 
         .habits-panel {
+
+          .retrieving-habits-status {
+            color: $alto;
+            position: absolute;
+            top: 45%;
+            width: 100%;
+            text-align: center;
+          }
 
           .habits-panel-empty-habby-message {
             color: $boulder;

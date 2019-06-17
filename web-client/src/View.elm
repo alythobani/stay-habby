@@ -689,7 +689,9 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
         , habitActionsDropdownDiv actionsDropdown selectedYmd actualYmd habit habitRecord.suspensions
         , case habitStats of
             Nothing ->
-                frequencyStatisticDiv "Error retriving performance stats"
+                div
+                    [ class "frequency-stats-list" ]
+                    [ frequencyStatisticDiv "Loading..." ]
 
             Just stats ->
                 if not stats.habitHasStarted then

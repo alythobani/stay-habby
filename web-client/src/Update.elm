@@ -136,7 +136,10 @@ update msg model =
                         ( newDateDropdownModel, Cmd.none )
 
                     else
-                        ( { newDateDropdownModel | selectedYmd = Just newSelectedYmd }
+                        ( { newDateDropdownModel
+                            | selectedYmd = Just newSelectedYmd
+                            , allFrequencyStats = RemoteData.Loading
+                          }
                         , getFrequencyStatsOnDate newSelectedYmd []
                         )
 

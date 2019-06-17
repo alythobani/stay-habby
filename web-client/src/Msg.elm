@@ -22,6 +22,10 @@ type Msg
       -- Time / Date
     | TickMinute Time.Posix
     | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
+      -- Top Panel Date
+    | ToggleTopPanelDateDropdown
+    | SetSelectedDateToXDaysFromToday Int
+    | SetSelectedDateToCustomDate
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError
     | OnGetAllRemoteDataSuccess Api.AllRemoteData

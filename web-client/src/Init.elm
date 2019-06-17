@@ -32,6 +32,7 @@ init { apiBaseUrl, currentTime } url key =
       , currentTimeZone = Nothing
       , selectedYmd = Nothing
       , actualYmd = Nothing
+      , openTopPanelDateDropdown = False
 
       --
       , apiBaseUrl = apiBaseUrl

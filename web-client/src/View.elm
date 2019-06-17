@@ -35,6 +35,7 @@ view model =
                     model.actualYmd
                     model.darkModeOn
                     model.errorMessage
+                    model.openTopPanelDateDropdown
                 , renderHabitsPanel
                     model.selectedYmd
                     model.actualYmd
@@ -117,8 +118,9 @@ renderTopPanel :
     -> Maybe YmdDate.YmdDate
     -> Bool
     -> Maybe String
+    -> Bool
     -> Html Msg
-renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage =
+renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateDropdown =
     let
         topPanelTitleText : String
         topPanelTitleText =
@@ -184,6 +186,53 @@ renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage =
                 Maybe.withDefault
                     "..."
                     (Maybe.map YmdDate.prettyPrintWithWeekday maybeSelectedYmd)
+            , div [ class "top-panel-date-dropdown" ]
+                [ div
+                    [ class <|
+                        if openDateDropdown then
+                            "top-panel-date-dropdown-toggler-full"
+
+                        else
+                            "top-panel-date-dropdown-toggler-default"
+                    , onClick ToggleTopPanelDateDropdown
+                    ]
+                    [ text "" ]
+                , div
+                    [ class "top-panel-date-dropdown-buttons" ]
+                    [ button
+                        [ classList
+                            [ ( "top-panel-date-dropdown-button", True )
+                            , ( "display-none", not openDateDropdown )
+                            ]
+                        , onClick <| SetSelectedDateToXDaysFromToday 0
+                        ]
+                        [ text "Today" ]
+                    , button
+                        [ classList
+                            [ ( "top-panel-date-dropdown-button", True )
+                            , ( "display-none", not openDateDropdown )
+                            ]
+                        , onClick <| SetSelectedDateToXDaysFromToday -1
+                        ]
+                        [ text "Yesterday" ]
+                    , button
+                        [ classList
+                            [ ( "top-panel-date-dropdown-button", True )
+                            , ( "display-none", not openDateDropdown )
+                            ]
+                        , onClick <| SetSelectedDateToXDaysFromToday 1
+                        ]
+                        [ text "Tomorrow" ]
+                    , button
+                        [ classList
+                            [ ( "top-panel-date-dropdown-button", True )
+                            , ( "display-none", not openDateDropdown )
+                            ]
+                        , onClick <| SetSelectedDateToCustomDate
+                        ]
+                        [ text "Custom Date" ]
+                    ]
+                ]
             ]
         ]
 

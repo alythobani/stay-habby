@@ -88,6 +88,35 @@
   cursor: default;
 }
 
+// Dropdowns
+.dropdown-toggler-default {
+  font-size: 20px;
+  &:after {
+    content: "▿";
+  }
+  &:hover {
+    cursor: pointer;
+    &:after {
+      content: "▾";
+    }
+  }
+}
+.dropdown-toggler-full {
+  @extend .dropdown-toggler-default;
+  &:after {
+    content: "▾";
+  }
+}
+.dropdown-buttons {
+  z-index: 1;
+  position: absolute;
+}
+.dropdown-button {
+  @extend .button-style-3;
+  height: 23px;
+  width: 90px;
+}
+
 // Dialog forms
 .dialog-form-1 {
   text-align: center;

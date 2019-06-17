@@ -9,7 +9,7 @@ module Api exposing
     , mutationSetHabitData
     , mutationSetHabitDayNote
     , queryAllRemoteData
-    , queryPastFrequencyStats
+    , queryFrequencyStats
     )
 
 import DefaultServices.Http exposing (post)
@@ -84,16 +84,17 @@ type alias QueriedFrequencyStats =
     { frequencyStatsList : List FrequencyStats.FrequencyStats }
 
 
-{-| Query for frequency stats for the given habits.
+{-| Query for frequency stats for the given habits, based on habit data up until the given `ymd`.
+An empty habit list means we will query for all habits.
 -}
-queryPastFrequencyStats :
+queryFrequencyStats :
     YmdDate.YmdDate
     -> List String
     -> String
     -> (ApiError -> b)
     -> (QueriedFrequencyStats -> b)
     -> Cmd b
-queryPastFrequencyStats ymd habitIds =
+queryFrequencyStats ymd habitIds =
     let
         templateDict =
             Dict.fromList

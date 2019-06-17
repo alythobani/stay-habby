@@ -29,16 +29,20 @@ update msg model =
         updateEditGoal updater =
             { model | editGoal = updater model.editGoal }
 
+        getFrequencyStatsOnDate : YmdDate.YmdDate -> List String -> Cmd Msg
+        getFrequencyStatsOnDate ymd habitIds =
+            Api.queryFrequencyStats
+                ymd
+                habitIds
+                model.apiBaseUrl
+                OnGetFrequencyStatsFailure
+                OnGetFrequencyStatsSuccess
+
         getFrequencyStats : List String -> Cmd Msg
         getFrequencyStats habitIds =
             case model.selectedYmd of
                 Just ymd ->
-                    Api.queryPastFrequencyStats
-                        ymd
-                        habitIds
-                        model.apiBaseUrl
-                        OnGetFrequencyStatsFailure
-                        OnGetFrequencyStatsSuccess
+                    getFrequencyStatsOnDate ymd habitIds
 
                 Nothing ->
                     Cmd.none
@@ -87,6 +91,7 @@ update msg model =
             -- TODO
             ( model, Cmd.none )
 
+        -- Time / Date
         TickMinute posix ->
             ( { model | currentPosix = posix }
             , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
@@ -109,6 +114,38 @@ update msg model =
                             YmdDate.fromDate currentDate
                     in
                     ( { model | actualYmd = Just currentYmd }, Cmd.none )
+
+        -- Top Panel Date
+        ToggleTopPanelDateDropdown ->
+            ( { model | openTopPanelDateDropdown = not model.openTopPanelDateDropdown }, Cmd.none )
+
+        SetSelectedDateToXDaysFromToday numDaysToAdd ->
+            let
+                -- Close the date dropdown
+                newDateDropdownModel =
+                    { model | openTopPanelDateDropdown = False }
+            in
+            case model.actualYmd of
+                Just today ->
+                    let
+                        newSelectedYmd =
+                            YmdDate.addDays numDaysToAdd today
+                    in
+                    if model.selectedYmd == Just newSelectedYmd then
+                        -- Already on desired date, no need to re-query any data
+                        ( newDateDropdownModel, Cmd.none )
+
+                    else
+                        ( { newDateDropdownModel | selectedYmd = Just newSelectedYmd }
+                        , getFrequencyStatsOnDate newSelectedYmd []
+                        )
+
+                Nothing ->
+                    ( { newDateDropdownModel | errorMessage = Just "Error setting date: current date not available" }, Cmd.none )
+
+        SetSelectedDateToCustomDate ->
+            -- TODO
+            ( model, Cmd.none )
 
         -- All Habit Data
         OnGetAllRemoteDataFailure apiError ->

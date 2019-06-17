@@ -25,6 +25,7 @@ type alias Model =
     , currentTimeZone : Maybe Time.Zone
     , selectedYmd : Maybe YmdDate.YmdDate
     , actualYmd : Maybe YmdDate.YmdDate
+    , openTopPanelDateDropdown : Bool
 
     --
     , apiBaseUrl : String

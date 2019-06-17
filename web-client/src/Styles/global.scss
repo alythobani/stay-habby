@@ -83,6 +83,22 @@ body {
 
           .top-panel-date {
             color: $silver-chalice;
+            .top-panel-date-dropdown {
+                color: $alto;
+                .top-panel-date-dropdown-buttons {
+                  .top-panel-date-dropdown-button {
+                    background-color: black;
+                    color: $cloud;
+                    border: none;
+                    box-shadow: 0 0 1px $gallery;
+                    &:hover {
+                      border: 1px solid $boulder;
+                      color: $gallery;
+                    }
+                  }
+                }
+
+            }
           }
         }
 
@@ -204,6 +220,16 @@ body {
         width: 100%;
         @extend .no-select;
 
+        &:hover {
+          .top-panel-date {
+            .top-panel-date-dropdown {
+              .top-panel-date-dropdown-toggler-default {
+                visibility: visible;
+              }
+            }
+          }
+        }
+
         .top-panel-title {
             color: $chicago;
             font-size: 26px;
@@ -282,6 +308,25 @@ body {
             font-size: 16px;
             display: inline-block;
             font-style: italic;
+            .top-panel-date-dropdown {
+              color: $chicago;
+              float: right;
+              margin-left: 6px;
+              .top-panel-date-dropdown-toggler-default {
+                @extend .dropdown-toggler-default;
+                visibility: hidden;
+              }
+              .top-panel-date-dropdown-toggler-full {
+                @extend .dropdown-toggler-full;
+              }
+              .top-panel-date-dropdown-buttons {
+                @extend .dropdown-buttons;
+                .top-panel-date-dropdown-button {
+                  @extend .dropdown-button;
+                  font-style: italic;
+                }
+              }
+            }
         }
       }
 
@@ -406,36 +451,17 @@ body {
                   margin-left: 11px;
                   margin-top: -4px;
                   position: relative;
-                  &:hover {
-                    .actions-dropdown-toggler-default:after {
-                      content: "▾";
-                    }
-                  }
                   .actions-dropdown-toggler-default {
-                    font-size: 20px;
-                    text-align: center;
+                    @extend .dropdown-toggler-default;
                     visibility: hidden;
-                    &:after {
-                      content: "▿";
-                    }
-                    &:hover {
-                      cursor: pointer;
-                    }
                   }
                   .actions-dropdown-toggler-full {
-                    @extend .actions-dropdown-toggler-default;
-                    visibility: visible;
-                    &:after {
-                      content: "▾";
-                    }
+                    @extend .dropdown-toggler-full;
                   }
                   .action-buttons {
-                    z-index: 1;
-                    position: absolute;
+                    @extend .dropdown-buttons;
                     .action-button {
-                      @extend .button-style-3;
-                      height: 23px;
-                      width: 90px;
+                      @extend .dropdown-button;
                     }
                   }
                 }

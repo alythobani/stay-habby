@@ -28,17 +28,21 @@ view model =
     , body =
         [ div
             [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]
-            [ renderHabitsPanel
+            [ renderTopPanel
+                model.selectedYmd
+                model.actualYmd
+                model.darkModeOn
+                model.errorMessage
+            , renderHabitsPanel
                 model.selectedYmd
                 model.actualYmd
                 model.allHabits
                 model.allHabitData
                 model.allFrequencyStats
-                model.addHabit
                 model.editingHabitAmountDict
                 model.habitActionsDropdown
-                model.darkModeOn
-                model.errorMessage
+            , renderAddHabitForm
+                model.addHabit
             , renderDialogBackgroundScreen model.activeDialogScreen
             , renderSetHabitDataShortcut
                 model.activeDialogScreen
@@ -105,25 +109,16 @@ inputStopKeydownPropagation attrs htmls =
     input stopPropagationAttrs htmls
 
 
-renderHabitsPanel :
+renderTopPanel :
     Maybe YmdDate.YmdDate
     -> Maybe YmdDate.YmdDate
-    -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
-    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
-    -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
-    -> Habit.AddHabitInputData
-    -> Dict.Dict String Int
-    -> Maybe String
     -> Bool
     -> Maybe String
     -> Html Msg
-renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitAmountDict habitActionsDropdown darkModeOn errorMessage =
+renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage =
     let
-        maybeCreateHabitData =
-            Habit.extractCreateHabit addHabit
-
-        panelTitleText : String
-        panelTitleText =
+        topPanelTitleText : String
+        topPanelTitleText =
             case ( maybeSelectedYmd, maybeActualYmd ) of
                 ( Just selectedYmd, Just actualYmd ) ->
                     if selectedYmd == actualYmd then
@@ -149,29 +144,29 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                     "No Selected Date"
     in
     div
-        [ class "habits-panel" ]
-        [ div [ class "habits-panel-title" ] [ text panelTitleText ]
+        [ class "top-panel" ]
+        [ div [ class "top-panel-title" ] [ text topPanelTitleText ]
         , div
             [ classList
-                [ ( "error-message-icon", True )
+                [ ( "top-panel-error-message-icon", True )
                 , ( "display-none", not <| Maybe.isJust errorMessage )
                 ]
             , onClick OpenErrorMessageDialogScreen
             ]
             [ i [ class "material-icons" ] [] ]
         , div
-            [ class "dark-mode-switch"
+            [ class "top-panel-dark-mode-switch"
             , onClick OnToggleDarkMode
             ]
             [ div
                 [ classList
-                    [ ( "dark-mode-switch-toggler", True )
-                    , ( "dark-mode-switch-toggler-checked", darkModeOn )
+                    [ ( "top-panel-dark-mode-switch-toggler", True )
+                    , ( "top-panel-dark-mode-switch-toggler-checked", darkModeOn )
                     ]
                 ]
-                [ span [ class "dark-mode-switch-toggler-slider" ] [] ]
+                [ span [ class "top-panel-dark-mode-switch-toggler-slider" ] [] ]
             , div
-                [ class "dark-mode-switch-text" ]
+                [ class "top-panel-dark-mode-switch-text" ]
                 [ text <|
                     if darkModeOn then
                         "Dark Mode"
@@ -181,13 +176,28 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                 ]
             ]
         , div
-            [ class "habits-panel-date" ]
+            [ class "top-panel-date" ]
             [ text <|
                 Maybe.withDefault
                     "..."
                     (Maybe.map YmdDate.prettyPrintWithWeekday maybeSelectedYmd)
             ]
-        , case ( rdHabits, rdHabitData, ( maybeSelectedYmd, maybeActualYmd ) ) of
+        ]
+
+
+renderHabitsPanel :
+    Maybe YmdDate.YmdDate
+    -> Maybe YmdDate.YmdDate
+    -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
+    -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
+    -> Dict.Dict String Int
+    -> Maybe String
+    -> Html Msg
+renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequencyStatsList editingHabitAmountDict habitActionsDropdown =
+    div
+        [ class "habits-panel" ]
+        [ case ( rdHabits, rdHabitData, ( maybeSelectedYmd, maybeActualYmd ) ) of
             ( RemoteData.Success habits, RemoteData.Success habitData, ( Just selectedYmd, Just actualYmd ) ) ->
                 let
                     ( goodHabits, badHabits ) =
@@ -226,48 +236,30 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                             habitActionsDropdown
                             habit
                 in
-                div []
-                    [ if List.isEmpty habits then
-                        div
-                            [ class "habits-panel-empty-habby-message" ]
-                            [ div
-                                [ class "habits-panel-empty-habby-message-header" ]
-                                [ text "Welcome to Habby!" ]
-                            , div
-                                [ class "habits-panel-empty-habby-message-body" ]
-                                [ text "Start by adding a habit below." ]
-                            ]
-
-                      else
-                        div
-                            [ class "all-habit-lists" ]
-                            [ div
-                                [ class "habit-list good-habits" ]
-                                (List.map renderHabit sortedGoodHabits)
-                            , div
-                                [ class "habit-list bad-habits" ]
-                                (List.map renderHabit sortedBadHabits)
-                            , div
-                                [ class "habit-list suspended-habits" ]
-                                (List.map renderHabit sortedSuspendedHabits)
-                            ]
-                    , button
-                        [ class "add-habit"
-                        , onClick <|
-                            if addHabit.openView then
-                                OnCancelAddHabit
-
-                            else
-                                OnOpenAddHabit
+                if List.isEmpty habits then
+                    div
+                        [ class "habits-panel-empty-habby-message" ]
+                        [ div
+                            [ class "habits-panel-empty-habby-message-header" ]
+                            [ text "Welcome to Habby!" ]
+                        , div
+                            [ class "habits-panel-empty-habby-message-body" ]
+                            [ text "Start by adding a habit below." ]
                         ]
-                        [ text <|
-                            if addHabit.openView then
-                                "Cancel"
 
-                            else
-                                "Add Habit"
+                else
+                    div
+                        [ class "all-habit-lists" ]
+                        [ div
+                            [ class "habit-list good-habits" ]
+                            (List.map renderHabit sortedGoodHabits)
+                        , div
+                            [ class "habit-list bad-habits" ]
+                            (List.map renderHabit sortedBadHabits)
+                        , div
+                            [ class "habit-list suspended-habits" ]
+                            (List.map renderHabit sortedSuspendedHabits)
                         ]
-                    ]
 
             ( RemoteData.Failure apiError, _, _ ) ->
                 span [ class "retrieving-habits-status" ] [ text "Failure..." ]
@@ -277,11 +269,37 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
 
             _ ->
                 span [ class "retrieving-habits-status" ] [ text "Loading..." ]
-        , hr [ classList [ ( "add-habit-line-breaker", True ), ( "visibility-hidden height-0", not addHabit.openView ) ] ] []
+        ]
+
+
+renderAddHabitForm : Habit.AddHabitInputData -> Html Msg
+renderAddHabitForm addHabit =
+    let
+        maybeCreateHabitData =
+            Habit.extractCreateHabit addHabit
+    in
+    div
+        [ class "add-habit-form" ]
+        [ button
+            [ class "add-habit-form-button"
+            , onClick <|
+                if addHabit.openView then
+                    OnCancelAddHabit
+
+                else
+                    OnOpenAddHabit
+            ]
+            [ text <|
+                if addHabit.openView then
+                    "Cancel"
+
+                else
+                    "Add Habit"
+            ]
         , div
-            [ classList [ ( "add-habit-input-form", True ), ( "display-none", not addHabit.openView ) ] ]
+            [ classList [ ( "add-habit-form-body", True ), ( "display-none", not addHabit.openView ) ] ]
             [ div
-                [ class "add-habit-input-form-habit-tag-name" ]
+                [ class "add-habit-form-body-habit-tag-name" ]
                 [ button
                     [ classList [ ( "selected", addHabit.kind == Habit.GoodHabitKind ) ]
                     , onClick <| OnSelectAddHabitKind Habit.GoodHabitKind
@@ -294,16 +312,16 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                     [ text "Bad Habit" ]
                 ]
             , div
-                [ class "add-habit-input-form-name-and-description" ]
+                [ class "add-habit-form-body-name-and-description" ]
                 [ inputStopKeydownPropagation
-                    [ class "add-habit-input-form-name"
+                    [ class "add-habit-form-body-name"
                     , placeholder "Name..."
                     , onInput OnAddHabitNameInput
                     , value addHabit.name
                     ]
                     []
                 , textareaStopKeydownPropagation
-                    [ class "add-habit-input-form-description"
+                    [ class "add-habit-form-body-description"
                     , placeholder "Short description..."
                     , onInput OnAddHabitDescriptionInput
                     , value addHabit.description
@@ -312,7 +330,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                 ]
             , div
                 [ classList
-                    [ ( "add-habit-input-form-time-of-day", True )
+                    [ ( "add-habit-form-body-time-of-day", True )
                     , ( "display-none", addHabit.kind /= Habit.GoodHabitKind )
                     ]
                 ]
@@ -333,7 +351,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                     [ text "EVENING" ]
                 ]
             , div
-                [ class "add-habit-input-form-unit-name" ]
+                [ class "add-habit-form-body-unit-name" ]
                 [ inputStopKeydownPropagation
                     [ class "habit-unit-name-singular"
                     , placeholder "Unit name singular..."
@@ -350,7 +368,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                     []
                 ]
             , div
-                [ class "add-habit-input-form-frequency-tag-name" ]
+                [ class "add-habit-form-body-frequency-tag-name" ]
                 [ button
                     [ classList [ ( "selected", addHabit.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
                     , onClick <| OnAddHabitSelectFrequencyKind Habit.TotalWeekFrequencyKind
@@ -369,7 +387,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                 ]
             , div
                 [ classList
-                    [ ( "add-habit-input-form-x-times-per-week", True )
+                    [ ( "add-habit-form-body-x-times-per-week", True )
                     , ( "display-none", addHabit.frequencyKind /= Habit.TotalWeekFrequencyKind )
                     ]
                 ]
@@ -382,7 +400,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                 ]
             , div
                 [ classList
-                    [ ( "add-habit-input-form-specific-days-of-week", True )
+                    [ ( "add-habit-form-body-specific-days-of-week", True )
                     , ( "display-none", addHabit.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
                     ]
                 ]
@@ -431,7 +449,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                 ]
             , div
                 [ classList
-                    [ ( "add-habit-input-form-x-times-per-y-days", True )
+                    [ ( "add-habit-form-body-x-times-per-y-days", True )
                     , ( "display-none", addHabit.frequencyKind /= Habit.EveryXDayFrequencyKind )
                     ]
                 ]

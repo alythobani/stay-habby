@@ -28,21 +28,24 @@ view model =
     , body =
         [ div
             [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]
-            [ renderTopPanel
-                model.selectedYmd
-                model.actualYmd
-                model.darkModeOn
-                model.errorMessage
-            , renderHabitsPanel
-                model.selectedYmd
-                model.actualYmd
-                model.allHabits
-                model.allHabitData
-                model.allFrequencyStats
-                model.editingHabitAmountDict
-                model.habitActionsDropdown
-            , renderAddHabitForm
-                model.addHabit
+            [ div
+                [ class "panels-container" ]
+                [ renderTopPanel
+                    model.selectedYmd
+                    model.actualYmd
+                    model.darkModeOn
+                    model.errorMessage
+                , renderHabitsPanel
+                    model.selectedYmd
+                    model.actualYmd
+                    model.allHabits
+                    model.allHabitData
+                    model.allFrequencyStats
+                    model.editingHabitAmountDict
+                    model.habitActionsDropdown
+                , renderAddHabitForm
+                    model.addHabit
+                ]
             , renderDialogBackgroundScreen model.activeDialogScreen
             , renderSetHabitDataShortcut
                 model.activeDialogScreen
@@ -197,7 +200,7 @@ renderHabitsPanel :
 renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequencyStatsList editingHabitAmountDict habitActionsDropdown =
     div
         [ class "habits-panel" ]
-        [ case ( rdHabits, rdHabitData, ( maybeSelectedYmd, maybeActualYmd ) ) of
+        (case ( rdHabits, rdHabitData, ( maybeSelectedYmd, maybeActualYmd ) ) of
             ( RemoteData.Success habits, RemoteData.Success habitData, ( Just selectedYmd, Just actualYmd ) ) ->
                 let
                     ( goodHabits, badHabits ) =
@@ -237,7 +240,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                             habit
                 in
                 if List.isEmpty habits then
-                    div
+                    [ div
                         [ class "habits-panel-empty-habby-message" ]
                         [ div
                             [ class "habits-panel-empty-habby-message-header" ]
@@ -246,30 +249,29 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                             [ class "habits-panel-empty-habby-message-body" ]
                             [ text "Start by adding a habit below." ]
                         ]
+                    ]
 
                 else
-                    div
-                        [ class "all-habit-lists" ]
-                        [ div
-                            [ class "habit-list good-habits" ]
-                            (List.map renderHabit sortedGoodHabits)
-                        , div
-                            [ class "habit-list bad-habits" ]
-                            (List.map renderHabit sortedBadHabits)
-                        , div
-                            [ class "habit-list suspended-habits" ]
-                            (List.map renderHabit sortedSuspendedHabits)
-                        ]
+                    [ div
+                        [ class "habit-list good-habits" ]
+                        (List.map renderHabit sortedGoodHabits)
+                    , div
+                        [ class "habit-list bad-habits" ]
+                        (List.map renderHabit sortedBadHabits)
+                    , div
+                        [ class "habit-list suspended-habits" ]
+                        (List.map renderHabit sortedSuspendedHabits)
+                    ]
 
             ( RemoteData.Failure apiError, _, _ ) ->
-                span [ class "retrieving-habits-status" ] [ text "Failure..." ]
+                [ span [ class "retrieving-habits-status" ] [ text "Failure..." ] ]
 
             ( _, RemoteData.Failure apiError, _ ) ->
-                span [ class "retrieving-habits-status" ] [ text "Failure..." ]
+                [ span [ class "retrieving-habits-status" ] [ text "Failure..." ] ]
 
             _ ->
-                span [ class "retrieving-habits-status" ] [ text "Loading..." ]
-        ]
+                [ span [ class "retrieving-habits-status" ] [ text "Loading..." ] ]
+        )
 
 
 renderAddHabitForm : Habit.AddHabitInputData -> Html Msg
@@ -280,23 +282,7 @@ renderAddHabitForm addHabit =
     in
     div
         [ class "add-habit-form" ]
-        [ button
-            [ class "add-habit-form-button"
-            , onClick <|
-                if addHabit.openView then
-                    OnCancelAddHabit
-
-                else
-                    OnOpenAddHabit
-            ]
-            [ text <|
-                if addHabit.openView then
-                    "Cancel"
-
-                else
-                    "Add Habit"
-            ]
-        , div
+        [ div
             [ classList [ ( "add-habit-form-body", True ), ( "display-none", not addHabit.openView ) ] ]
             [ div
                 [ class "add-habit-form-body-habit-tag-name" ]
@@ -472,10 +458,26 @@ renderAddHabitForm addHabit =
 
                 Just createHabitData ->
                     button
-                        [ class "add-new-habit"
+                        [ class "add-habit-form-submit-button"
                         , onClick <| AddHabit createHabitData
                         ]
                         [ text "Create Habit" ]
+            ]
+        , button
+            [ class "add-habit-form-button"
+            , onClick <|
+                if addHabit.openView then
+                    OnCancelAddHabit
+
+                else
+                    OnOpenAddHabit
+            ]
+            [ text <|
+                if addHabit.openView then
+                    "Cancel"
+
+                else
+                    "Add Habit"
             ]
         ]
 

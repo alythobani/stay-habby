@@ -9,10 +9,10 @@ body {
     font-family: 'Raleway', sans-serif;
     position: absolute;
     box-sizing: border-box;
-    width: 100%;
-    min-height: 100%;
-    padding: 5px;
+    width: 100vw;
+    height: 100vh;
     color: $cape-cod;
+    @extend .full-screen-centered-flex-container;
 
     // DARK MODE
 
@@ -51,168 +51,171 @@ body {
         color: $alto;
       }
 
-      .habits-panel {
-        box-shadow: 0 0 1px $gunsmoke;
+      .panels-container {
 
-        .habits-panel-title {
-          color: $alto;
-          &:hover {
-              color: $silver-chalice;
-          }
-        }
+        .top-panel {
 
-        .error-message-icon {
-          color: red;
-          &:hover {
-            i:after {
-              content: "error";
-            }
+          .top-panel-title {
+            color: $alto;
           }
-          i {
-            &:after {
-              content: "error_outline";
-            }
+
+          .top-panel-error-message-icon {
             color: red;
-          }
-        }
-
-        .dark-mode-switch {
-          color: $alto;
-          &:hover {
-              color: $cloud;
-          }
-        }
-        .habits-panel-date {
-          color: $silver-chalice;
-        }
-        .habits-panel-empty-habby-message {
-          color: $boulder;
-        }
-        .add-habit {
-          background-color: black;
-          box-shadow: 0 0 1px $gallery;
-          color: $silver-chalice;
-          &:hover {
-            border: 1px solid $boulder;
-            color: $gallery;
-          }
-        }
-        .add-habit-line-breaker {
-          border-color: $woodsmoke;
-        }
-      }
-
-      .dialog-background-screen {
-        background-color: rgba(133, 133, 133, 0.44);
-      }
-
-      .all-habit-lists {
-        border: 1px solid $woodsmoke;
-        .habit-list {
-
-          &.good-habits {
-              .habit-success {
-                  border-color: $christi;
-                  .frequency-statistic {
-                      color: $la-palma;
-                  }
-                  .current-progress {
-                      color: $la-palma;
-                  }
-              }
-              .habit-failure {
-                  border-color: $blue-gem;
-                  .frequency-statistic {
-                      color: $jacksons-purple;
-                  }
-                  .current-progress {
-                      color: $jacksons-purple;
-                  }
-              }
-          }
-
-          &.bad-habits {
-              .habit-success {
-                  border-color: $fire-bush;
-                  .frequency-statistic {
-                      color: $tussock;
-                  }
-                  .current-progress {
-                      color: $tussock;
-                  }
-              }
-              .habit-failure {
-                  border-color: $guardsman-red;
-                  .frequency-statistic {
-                    color: $stiletto;
-                  }
-                  .current-progress {
-                      color: $stiletto;
-                  }
-              }
-          }
-
-          .habit {
-            border-width: 2px;
-            background-color: inherit !important;
-            color: $cloud;
-            .habit-amount-complete {
-              input {
-                background-color: $shark;
-                color: $gallery;
+            &:hover {
+              i:after {
+                content: "error";
               }
             }
-            .actions-dropdown {
-              .action-buttons {
-                .action-button {
-                  background-color: black;
-                  color: $cloud;
-                  border: none;
-                  box-shadow: 0 0 1px $gallery;
-                  &:hover {
-                    border: 1px solid $boulder;
-                    color: $gallery;
+            i {
+              &:after {
+                content: "error_outline";
+              }
+              color: red;
+            }
+          }
+
+          .top-panel-dark-mode-switch {
+            color: $alto;
+            &:hover {
+                color: $cloud;
+            }
+          }
+
+          .top-panel-date {
+            color: $silver-chalice;
+          }
+        }
+
+        .habits-panel {
+
+          .habits-panel-empty-habby-message {
+            color: $boulder;
+          }
+
+          .habit-list {
+
+            &.good-habits {
+                .habit-success {
+                    border-color: $christi;
+                    .frequency-statistic {
+                        color: $la-palma;
+                    }
+                    .current-progress {
+                        color: $la-palma;
+                    }
+                }
+                .habit-failure {
+                    border-color: $blue-gem;
+                    .frequency-statistic {
+                        color: $jacksons-purple;
+                    }
+                    .current-progress {
+                        color: $jacksons-purple;
+                    }
+                }
+            }
+
+            &.bad-habits {
+                .habit-success {
+                    border-color: $fire-bush;
+                    .frequency-statistic {
+                        color: $tussock;
+                    }
+                    .current-progress {
+                        color: $tussock;
+                    }
+                }
+                .habit-failure {
+                    border-color: $guardsman-red;
+                    .frequency-statistic {
+                      color: $stiletto;
+                    }
+                    .current-progress {
+                        color: $stiletto;
+                    }
+                }
+            }
+
+            .habit {
+              border-width: 2px;
+              background-color: inherit !important;
+              color: $cloud;
+              .habit-amount-complete {
+                input {
+                  background-color: $shark;
+                  color: $gallery;
+                }
+              }
+              .actions-dropdown {
+                .action-buttons {
+                  .action-button {
+                    background-color: black;
+                    color: $cloud;
+                    border: none;
+                    box-shadow: 0 0 1px $gallery;
+                    &:hover {
+                      border: 1px solid $boulder;
+                      color: $gallery;
+                    }
                   }
                 }
               }
             }
           }
         }
+
+        .add-habit-form {
+          background-color: black;
+          .add-habit-form-button {
+            background-color: black;
+            box-shadow: 0 0 1px $gallery;
+            color: $silver-chalice;
+            &:hover {
+              border: 1px solid $boulder;
+              color: $gallery;
+            }
+          }
+        }
+      }
+
+      .dialog-background-screen {
+        background-color: rgba(133, 133, 133, 0.44);
       }
     }
 
     // LIGHT MODE
 
-    .habits-panel {
+    .panels-container {
+      position: absolute;
+      width: 99vw;
+      height: 99vh;
+      box-sizing: border-box;
+      @extend .box-shadow-5;
+
+      .top-panel {
         position: relative;
         box-sizing: border-box;
         display: block;
-        padding: 20px;
+        padding-top: 20px;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-bottom: 5px;
         float: left;
         width: 100%;
-        height: 100vh;
-        overflow: auto;
-
-        @extend .box-shadow-5;
         @extend .no-select;
 
-        .habits-panel-title {
+        .top-panel-title {
             color: $chicago;
             font-size: 26px;
             font-weight: 600;
             margin-top: 3px;
             margin-bottom: 8px;
-            cursor: pointer;
-
-            &:hover {
-                color: $mine-shaft;
-            }
         }
 
-        .error-message-icon {
-          position: relative;
-          right: 200px;
-          bottom: 45px;
+        .top-panel-error-message-icon {
+          position: absolute;
+          top: 17px;
+          right: 225px;
           color: red;
           &:hover {
             cursor: pointer;
@@ -229,11 +232,11 @@ body {
           }
         }
 
-        .dark-mode-switch {
+        .top-panel-dark-mode-switch {
           position: absolute;
           top: 25px;
           right: 80px;
-          .dark-mode-switch-toggler {
+          .top-panel-dark-mode-switch-toggler {
             position: relative;
             border-radius: 20px;
             width: 45px;
@@ -243,7 +246,7 @@ body {
             -webkit-transition: 0.5s;
             -ms-transition: 0.5s;
             transition: 0.5s;
-            .dark-mode-switch-toggler-slider {
+            .top-panel-dark-mode-switch-toggler-slider {
               -webkit-transition: 0.5s;
               -ms-transition: 0.5s;
               transition: 0.5s;
@@ -255,14 +258,14 @@ body {
               width: 15px;
               height: 15px;
             }
-            &.dark-mode-switch-toggler-checked {
+            &.top-panel-dark-mode-switch-toggler-checked {
               background-color: $azure;
-              .dark-mode-switch-toggler-slider {
+              .top-panel-dark-mode-switch-toggler-slider {
                 left: 26px;
               }
             }
           }
-          .dark-mode-switch-text {
+          .top-panel-dark-mode-switch-text {
             float: right;
             margin-left: 10px;
             font-size: 15px;
@@ -274,18 +277,24 @@ body {
           }
         }
 
-        .habits-panel-date {
-            color: $silver-chalice;
+        .top-panel-date {
+            color: $boulder;
             font-size: 16px;
             display: inline-block;
             font-style: italic;
         }
+      }
+
+      .habits-panel {
+        overflow: scroll;
+        height: 76vh;
+        padding: 5px;
 
         .habits-panel-empty-habby-message {
           @extend .full-screen-centered-flex-container;
           position: relative;
-          height: 75vh;
-          width: 95vw;
+          height: 100%;
+          width: 100%;
           color: $cape-cod;
           .habits-panel-empty-habby-message-header {
             margin-top: -30px;
@@ -297,159 +306,360 @@ body {
           }
         }
 
-        .add-habit {
-            @extend .box-shadow-4;
-
-            border: none;
+        .habit-list {
             display: block;
-            width: 100%;
-            background-color: white;
-            vertical-align: middle;
-            text-align: center;
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            height: 60px;
-            margin-top: 15px;
-        }
+            overflow: auto;
+            margin-left: 10px;
 
-        .add-habit-line-breaker {
-            display: block;
-            width: 100%;
-            border: 0.5px solid $alto;
-        }
+            &.good-habits {
+                .habit-success {
+                    background-color: $screamin-green;
+                    border-color:  $de-york;
+                    .frequency-statistic {
+                        color: $forest-green;
+                    }
+                    .current-progress {
+                        color: $bilbao;
+                    }
+                }
+                .habit-failure {
+                    background-color: $chetwode-blue;
+                    border-color:  $blue-ribbon;
+                    .frequency-statistic {
+                        color: $fuscous-grey;
+                    }
+                    .current-progress {
+                        color: $cape-cod;
+                    }
+                }
+            }
 
-        .add-habit-input-form {
-            position: relative;
-            bottom: 250px;
+            &.bad-habits {
+                .habit-success {
+                    background-color: $koromiko;
+                    border-color:  $casablanca;
+                    .frequency-statistic {
+                        color: $himalaya;
+                    }
+                    .current-progress {
+                        color: $spicy-mustard;
+                    }
+                }
+                .habit-failure {
+                    background-color: $well-read;
+                    border-color: $red-berry;
+                    .frequency-statistic {
+                      color: $kilamanjaro;
+                    }
+                    .current-progress {
+                        color: $chocolate;
+                        font-weight: 700;
+                    }
+                }
+            }
 
-            .add-habit-input-form-name-and-description, .add-habit-input-form-unit-name {
+            &.suspended-habits {
+              .habit-success, .habit-failure {
+                background-color: $star-dust;
+                border-color: $boulder;
+              }
+              .frequency-statistic {
+                  color: $cape-cod;
+              }
+              .current-progress {
+                  color: $tuatara;
+              }
+            }
+
+            .habit {
+                float: left;
+                display: inline-block;
+                position: relative;
+                padding: 7px;
+                margin: 15px 15px 0 2px;
+                width: 325px;
+                height: 120px;
                 box-sizing: border-box;
-                display: inline-block;
-                float: left;
-                width: 250px;
+                color: white;
+                border-width: 1px;
+                border-style: solid;
 
-                .add-habit-input-form-name {
-                    @extend .input-style-1;
-
-                    height: 40px;
-                    width: 100%;
+                &:hover {
+                  .actions-dropdown {
+                    .actions-dropdown-toggler-default {
+                      visibility: visible;
+                    }
+                  }
                 }
 
-                .add-habit-input-form-description {
-                    @extend .input-style-1;
-
-                    height: 100px;
-                    width: 100%;
-                }
-
-                .habit-unit-name-singular, .habit-unit-name-plural {
-                    @extend .input-style-1;
-
-                    height: 40px;
-                    margin-bottom: 10px;
-                    width: 200px;
-                }
-            }
-
-            .add-habit-input-form-unit-name {
-                width: 200px;
-                margin-left: 10px;
-            }
-
-            .add-habit-input-form-time-of-day {
-                display: inline-block;
-                width: 100px;
-                float: left;
-
-                .habit-time-of-day {
-                    @extend .button-style-1;
-
-                    height: 40px;
-                    margin: 0 0 10px 10px;
-                    width: 90px;
-                }
-            }
-
-            .add-habit-input-form-frequency-tag-name {
-                display: inline-block;
-                width: 170px;
-                float: left;
-
-                button {
-                    @extend .button-style-1;
-
-                    margin: 0 0 10px 10px;
-                    height: 40px;
-                    width: 150px;
-                }
-            }
-
-            .add-habit-input-form-habit-tag-name {
-                display: inline-block;
-                width: 100px;
-                float: left;
-
-                button {
-                    @extend .button-style-1;
-
-                    width: 90px;
-                    height: 40px;
-                    margin: 0 0 10px 0;
-                }
-            }
-
-            .add-habit-input-form-x-times-per-week {
-                input {
-                    @extend .input-style-1;
-
-                    width: 100px;
-                    height: 40px;
-                }
-            }
-
-            .add-habit-input-form-specific-days-of-week {
-                display: block;
-                float: left;
-                width: 330px;
-
-                input {
-                    @extend .input-style-1;
-
-                    height: 40px;
-                    width: 100px;
-                    display: inline-block;
-                    margin: 0 10px 10px 0;
+                .habit-name {
+                    font-weight: 600;
+                    max-width: 130px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                     float: left;
                 }
-            }
 
-            .add-habit-input-form-x-times-per-y-days {
-                display: block;
-                float: left;
-                width: 110px;
+                .actions-dropdown {
+                  float: left;
+                  margin-left: 11px;
+                  margin-top: -4px;
+                  position: relative;
+                  &:hover {
+                    .actions-dropdown-toggler-default:after {
+                      content: "▾";
+                    }
+                  }
+                  .actions-dropdown-toggler-default {
+                    font-size: 20px;
+                    text-align: center;
+                    visibility: hidden;
+                    &:after {
+                      content: "▿";
+                    }
+                    &:hover {
+                      cursor: pointer;
+                    }
+                  }
+                  .actions-dropdown-toggler-full {
+                    @extend .actions-dropdown-toggler-default;
+                    visibility: visible;
+                    &:after {
+                      content: "▾";
+                    }
+                  }
+                  .action-buttons {
+                    z-index: 1;
+                    position: absolute;
+                    .action-button {
+                      @extend .button-style-3;
+                      height: 23px;
+                      width: 90px;
+                    }
+                  }
+                }
 
-                input {
-                    @extend .input-style-1;
+                .frequency-stats-list {
+                    float: right;
+                }
 
-                    height: 40px;
-                    width: 100px;
-                    display: inline-block;
-                    margin: 0 10px 10px 0;
-                    float: left;
+                .frequency-statistic {
+                    margin-left: 10px;
+                    height: 17px;
+                    width: 130px;
+                    font-weight: 200;
+                    font-size: 12px;
+                    text-align: right;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .current-progress {
+                    @extend .frequency-statistic;
+                    font-weight: 600;
+                }
+
+                .start-this-habit-message {
+                  @extend .current-progress;
+                  float: right;
+                }
+
+                .habit-amount-complete {
+                    box-sizing: border-box;
+                    position: absolute;
+                    bottom: 7px;
+                    border: none;
+                    width: 160px;
+
+                    input  {
+                        box-sizing: border-box;
+                        border: none;
+                        border-radius: 1px;
+                        height: 25px;
+                        padding: 5px;
+                        width: 100%;
+                    }
+
+                    i {
+                        display: none;
+                    }
+
+                    &.editing {
+                        width: 170px;
+
+                        i {
+                            display: block;
+                            position: absolute;
+                            right: -35px;
+                            top: -4px;
+                            font-size: 33px;
+                            cursor: pointer;
+                            color: $cape-cod;
+
+                            &:hover {
+                                color: $shark;
+                            }
+                        }
+                    }
                 }
             }
 
-            .add-new-habit {
-                @extend .button-style-2;
+            .habit-success {
+                @extend .habit;
+            }
+            .habit-failure {
+                @extend .habit;
+            }
+        }
+      }
+
+      .add-habit-form {
+        position: absolute;
+        box-sizing: border-box;
+        bottom: 0px;
+        width: 100%;
+        padding: 10px;
+        background-color: white;
+        .add-habit-form-button {
+          @extend .box-shadow-4;
+          border: none;
+          display: block;
+          width: 100%;
+          background-color: white;
+          vertical-align: middle;
+          text-align: center;
+          font-size: 20px;
+          font-weight: 600;
+          cursor: pointer;
+          height: 60px;
+          margin-top: 15px;
+        }
+
+        .add-habit-form-body {
+
+          .add-habit-form-body-habit-tag-name {
+              display: inline-block;
+              width: 100px;
+              float: left;
+              button {
+                  @extend .button-style-1;
+                  width: 90px;
+                  height: 40px;
+                  margin: 0 0 10px 0;
+              }
+          }
+
+          .add-habit-form-body-name-and-description, .add-habit-form-body-unit-name {
+            box-sizing: border-box;
+            display: inline-block;
+            float: left;
+            width: 250px;
+            .add-habit-form-body-name {
+                @extend .input-style-1;
 
                 height: 40px;
-                margin-top: 10px;
-                width: 160px;
-                border-radius: 5px;
-                font-size: 20px;
+                width: 100%;
             }
+            .add-habit-form-body-description {
+                @extend .input-style-1;
+
+                height: 100px;
+                width: 100%;
+            }
+            .habit-unit-name-singular, .habit-unit-name-plural {
+                @extend .input-style-1;
+
+                height: 40px;
+                margin-bottom: 10px;
+                width: 200px;
+            }
+          }
+
+          .add-habit-form-body-unit-name {
+              width: 200px;
+              margin-left: 10px;
+          }
+
+          .add-habit-form-body-time-of-day {
+              display: inline-block;
+              width: 100px;
+              float: left;
+
+              .habit-time-of-day {
+                  @extend .button-style-1;
+
+                  height: 40px;
+                  margin: 0 0 10px 10px;
+                  width: 90px;
+              }
+          }
+
+          .add-habit-form-body-frequency-tag-name {
+              display: inline-block;
+              width: 170px;
+              float: left;
+
+              button {
+                  @extend .button-style-1;
+
+                  margin: 0 0 10px 10px;
+                  height: 40px;
+                  width: 150px;
+              }
+          }
+
+          .add-habit-form-body-x-times-per-week {
+              input {
+                  @extend .input-style-1;
+                  margin-bottom: 10px;
+                  width: 100px;
+                  height: 40px;
+              }
+          }
+
+          .add-habit-form-body-specific-days-of-week {
+              display: block;
+              float: left;
+              width: 330px;
+
+              input {
+                  @extend .input-style-1;
+
+                  height: 40px;
+                  width: 100px;
+                  display: inline-block;
+                  margin: 0 10px 10px 0;
+                  float: left;
+              }
+          }
+
+          .add-habit-form-body-x-times-per-y-days {
+              display: block;
+              float: left;
+              width: 110px;
+
+              input {
+                  @extend .input-style-1;
+
+                  height: 40px;
+                  width: 100px;
+                  display: inline-block;
+                  margin: 0 10px 10px 0;
+                  float: left;
+              }
+          }
+
+          .add-habit-form-submit-button {
+              @extend .button-style-2;
+              height: 40px;
+              width: 160px;
+              border-radius: 5px;
+              font-size: 20px;
+          }
         }
+      }
     }
 
     .dialog-background-screen {
@@ -741,220 +951,6 @@ body {
             width: 100px;
           }
         }
-      }
-    }
-    .all-habit-lists {
-      overflow: auto;
-      height: 76vh;
-      margin-top: 10px;
-      padding-left: 5px;
-      border: 1px solid $gallery;
-      .habit-list {
-          display: block;
-          overflow: auto;
-          margin-left: 5px;
-
-          &.good-habits {
-              .habit-success {
-                  background-color: $screamin-green;
-                  border-color:  $de-york;
-                  .frequency-statistic {
-                      color: $forest-green;
-                  }
-                  .current-progress {
-                      color: $bilbao;
-                  }
-              }
-              .habit-failure {
-                  background-color: $chetwode-blue;
-                  border-color:  $blue-ribbon;
-                  .frequency-statistic {
-                      color: $fuscous-grey;
-                  }
-                  .current-progress {
-                      color: $cape-cod;
-                  }
-              }
-          }
-
-          &.bad-habits {
-              .habit-success {
-                  background-color: $koromiko;
-                  border-color:  $casablanca;
-                  .frequency-statistic {
-                      color: $himalaya;
-                  }
-                  .current-progress {
-                      color: $spicy-mustard;
-                  }
-              }
-              .habit-failure {
-                  background-color: $well-read;
-                  border-color: $red-berry;
-                  .frequency-statistic {
-                    color: $kilamanjaro;
-                  }
-                  .current-progress {
-                      color: $chocolate;
-                      font-weight: 700;
-                  }
-              }
-          }
-
-          &.suspended-habits {
-            .habit-success, .habit-failure {
-              background-color: $star-dust;
-              border-color: $boulder;
-            }
-            .frequency-statistic {
-                color: $cape-cod;
-            }
-            .current-progress {
-                color: $tuatara;
-            }
-          }
-
-          .habit {
-              float: left;
-              display: inline-block;
-              position: relative;
-              padding: 7px;
-              margin: 15px 15px 0 2px;
-              width: 325px;
-              height: 120px;
-              box-sizing: border-box;
-              color: white;
-              border-width: 1px;
-              border-style: solid;
-
-              &:hover {
-                .actions-dropdown {
-                  .actions-dropdown-toggler-default {
-                    visibility: visible;
-                  }
-                }
-              }
-
-              .habit-name {
-                  font-weight: 600;
-                  max-width: 130px;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  float: left;
-              }
-
-              .actions-dropdown {
-                float: left;
-                margin-left: 11px;
-                margin-top: -4px;
-                position: relative;
-                &:hover {
-                  .actions-dropdown-toggler-default:after {
-                    content: "▾";
-                  }
-                }
-                .actions-dropdown-toggler-default {
-                  font-size: 20px;
-                  text-align: center;
-                  visibility: hidden;
-                  &:after {
-                    content: "▿";
-                  }
-                  &:hover {
-                    cursor: pointer;
-                  }
-                }
-                .actions-dropdown-toggler-full {
-                  @extend .actions-dropdown-toggler-default;
-                  visibility: visible;
-                  &:after {
-                    content: "▾";
-                  }
-                }
-                .action-buttons {
-                  z-index: 1;
-                  position: absolute;
-                  .action-button {
-                    @extend .button-style-3;
-                    height: 23px;
-                    width: 90px;
-                  }
-                }
-              }
-
-              .frequency-stats-list {
-                  float: right;
-              }
-
-              .frequency-statistic {
-                  margin-left: 10px;
-                  height: 17px;
-                  width: 130px;
-                  font-weight: 200;
-                  font-size: 12px;
-                  text-align: right;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-              }
-
-              .current-progress {
-                  @extend .frequency-statistic;
-                  font-weight: 600;
-              }
-
-              .start-this-habit-message {
-                @extend .current-progress;
-                float: right;
-              }
-
-              .habit-amount-complete {
-                  box-sizing: border-box;
-                  position: absolute;
-                  bottom: 7px;
-                  border: none;
-                  width: 160px;
-
-                  input  {
-                      box-sizing: border-box;
-                      border: none;
-                      border-radius: 1px;
-                      height: 25px;
-                      padding: 5px;
-                      width: 100%;
-                  }
-
-                  i {
-                      display: none;
-                  }
-
-                  &.editing {
-                      width: 170px;
-
-                      i {
-                          display: block;
-                          position: absolute;
-                          right: -35px;
-                          top: -4px;
-                          font-size: 33px;
-                          cursor: pointer;
-                          color: $cape-cod;
-
-                          &:hover {
-                              color: $shark;
-                          }
-                      }
-                  }
-              }
-          }
-
-          .habit-success {
-              @extend .habit;
-          }
-          .habit-failure {
-              @extend .habit;
-          }
       }
     }
 }

@@ -1,17 +1,4 @@
-module View exposing
-    ( habitActionsDropdownDiv
-    , inputStopKeydownPropagation
-    , renderAddNoteDialog
-    , renderAddNoteHabitSelectionScreen
-    , renderDialogBackgroundScreen
-    , renderEditGoalDialog
-    , renderErrorMessage
-    , renderHabitBox
-    , renderHabitsPanel
-    , renderSetHabitDataShortcut
-    , textareaStopKeydownPropagation
-    , view
-    )
+module View exposing (view)
 
 import Array
 import Browser
@@ -236,7 +223,6 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                             actualYmd
                             habitData
                             editingHabitAmountDict
-                            OnHabitAmountInput
                             habitActionsDropdown
                             habit
                 in
@@ -582,11 +568,10 @@ renderHabitBox :
     -> YmdDate.YmdDate
     -> List HabitData.HabitData
     -> Dict.Dict String Int
-    -> (String -> String -> Msg)
     -> Maybe String
     -> Habit.Habit
     -> Html Msg
-renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict onHabitDataInput habitActionsDropdown habit =
+renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict habitActionsDropdown habit =
     let
         habitRecord =
             Habit.getCommonFields habit
@@ -682,7 +667,7 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
                             else
                                 habitRecord.unitNamePlural
                            )
-                , onInput <| onHabitDataInput habitRecord.id
+                , onInput <| OnHabitAmountInput habitRecord.id
                 , Util.onKeydownStopPropagation
                     (\key ->
                         if key == Keyboard.Enter then
@@ -885,9 +870,9 @@ renderSetHabitDataShortcut activeDialogScreen setHabitDataShortcutHabitNameFilte
 
 
 renderEditGoalDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Maybe YmdDate.YmdDate -> Html Msg
-renderEditGoalDialog activeDialogScreen habit editGoal maybeTodayYmd =
-    case maybeTodayYmd of
-        Just todayYmd ->
+renderEditGoalDialog activeDialogScreen habit editGoal maybeActualYmd =
+    case maybeActualYmd of
+        Just actualYmd ->
             div
                 [ classList
                     [ ( "edit-goal-dialog", True )
@@ -1000,17 +985,17 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeTodayYmd =
                             newStartDate : YmdDate.YmdDate
                             newStartDate =
                                 if isWeeklyNewGoal then
-                                    YmdDate.getFirstMondayAfterDate todayYmd
+                                    YmdDate.getFirstMondayAfterDate actualYmd
 
                                 else
-                                    todayYmd
+                                    actualYmd
 
                             newFrequencies =
                                 case newGoal of
                                     Just newFrequency ->
                                         case List.reverse oldFrequencies of
                                             currFcr :: rest ->
-                                                if List.member (YmdDate.compareYmds currFcr.startDate todayYmd) [ EQ, GT ] then
+                                                if List.member (YmdDate.compareYmds currFcr.startDate actualYmd) [ EQ, GT ] then
                                                     -- The current goal started today or later, we should overwrite it.
                                                     -- (At this point there should only possibly be one goal, the current one,
                                                     -- that started today or later.)
@@ -1057,7 +1042,7 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeTodayYmd =
                                                     ++ ". The new goal "
                                                     ++ Habit.prettyPrintFrequency newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
                                                     ++ " will officially start "
-                                                    ++ (if newStartDate == todayYmd then
+                                                    ++ (if newStartDate == actualYmd then
                                                             "today (" ++ YmdDate.prettyPrintWithWeekday newStartDate ++ ")."
 
                                                         else
@@ -1364,29 +1349,29 @@ renderAddNoteDialog :
     -> Maybe YmdDate.YmdDate
     -> RemoteData.RemoteData ApiError.ApiError (List HabitDayNote.HabitDayNote)
     -> Html Msg
-renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput maybeYmd rdAllHabitDayNotes =
+renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput maybeSelectedYmd rdAllHabitDayNotes =
     div
         [ classList
             [ ( "add-note-dialog", True )
             , ( "display-none", activeDialogScreen /= Just DialogScreen.AddNoteScreen )
             ]
         ]
-        (case ( addNoteDialogHabit, maybeYmd, rdAllHabitDayNotes ) of
-            ( Just habit, Just ymd, RemoteData.Success allHabitDayNotes ) ->
+        (case ( addNoteDialogHabit, maybeSelectedYmd, rdAllHabitDayNotes ) of
+            ( Just habit, Just selectedYmd, RemoteData.Success allHabitDayNotes ) ->
                 let
                     habitRecord =
                         Habit.getCommonFields habit
 
                     existingHabitDayNoteText : Maybe String
                     existingHabitDayNoteText =
-                        List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) allHabitDayNotes
+                        List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == selectedYmd) allHabitDayNotes
                             |> List.head
                             |> Maybe.map .note
                 in
                 [ div
                     [ class "add-note-dialog-form" ]
                     [ div [ class "add-note-dialog-header-habit-name" ] [ text habitRecord.name ]
-                    , div [ class "add-note-dialog-header-date" ] [ text <| YmdDate.prettyPrintWithWeekday ymd ]
+                    , div [ class "add-note-dialog-header-date" ] [ text <| YmdDate.prettyPrintWithWeekday selectedYmd ]
                     , div
                         [ classList
                             [ ( "add-note-dialog-header-note-added", True )
@@ -1409,7 +1394,7 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                                     Just OnExitDialogScreen
 
                                 else
-                                    Just <| OnAddNoteKeydown key ymd habitRecord.id
+                                    Just <| OnAddNoteKeydown key selectedYmd habitRecord.id
                             )
                         , Util.onKeyupStopPropagation
                             (\key -> Just <| OnAddNoteKeyup key)
@@ -1428,7 +1413,7 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                                     NoOp
 
                                 else
-                                    OnAddNoteSubmitClick ymd habitRecord.id addNoteDialogInput
+                                    OnAddNoteSubmitClick selectedYmd habitRecord.id addNoteDialogInput
                             ]
                             [ text "Submit" ]
                         , button

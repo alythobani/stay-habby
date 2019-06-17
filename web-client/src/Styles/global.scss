@@ -13,6 +13,9 @@ body {
     min-height: 100%;
     padding: 5px;
     color: $cape-cod;
+
+    // DARK MODE
+
     &.dark-mode {
       background-color: black;
 
@@ -44,26 +47,20 @@ body {
         }
       }
 
-      .panel {
-        box-shadow: 0 0 1px $gunsmoke;
-      }
-
-      .panel-title {
-        color: $alto;
-        &:hover {
-            color: $silver-chalice;
-        }
-      }
-
-      .panel-open-close-arrow {
-        color: $cloud;
-      }
-
       .retrieving-habits-status {
         color: $alto;
       }
 
-      .today-panel {
+      .habits-panel {
+        box-shadow: 0 0 1px $gunsmoke;
+
+        .habits-panel-title {
+          color: $alto;
+          &:hover {
+              color: $silver-chalice;
+          }
+        }
+
         .error-message-icon {
           color: red;
           &:hover {
@@ -78,16 +75,17 @@ body {
             color: red;
           }
         }
+
         .dark-mode-switch {
           color: $alto;
           &:hover {
               color: $cloud;
           }
         }
-        .today-panel-date {
+        .habits-panel-date {
           color: $silver-chalice;
         }
-        .today-panel-empty-habby-message {
+        .habits-panel-empty-habby-message {
           color: $boulder;
         }
         .add-habit {
@@ -101,37 +99,6 @@ body {
         }
         .add-habit-line-breaker {
           border-color: $woodsmoke;
-        }
-      }
-
-      .history-viewer-panel {
-        .date-entry {
-          .separating-text {
-              color: $cape-cod;
-          }
-          .select-yesterday, .before-yesterday {
-              border-color: $cape-cod;
-              color: $silver-chalice;
-              &:hover {
-                  background-color: transparent;
-                  border-color: $star-dust;
-                  color: $gallery;
-              }
-          }
-          input {
-            &::placeholder {
-              color: $boulder;
-            }
-          }
-        }
-        .change-date {
-          border-color: $cape-cod;
-          color: $silver-chalice;
-          &:hover {
-            background-color: transparent;
-            border-color: $star-dust;
-            color: $gallery;
-          }
         }
       }
 
@@ -214,16 +181,32 @@ body {
       }
     }
 
-    .today-panel {
-        @extend .panel;
+    // LIGHT MODE
+
+    .habits-panel {
+        position: relative;
+        box-sizing: border-box;
+        display: block;
+        padding: 20px;
+        float: left;
+        width: 100%;
+        height: 100vh;
+        overflow: auto;
+
+        @extend .box-shadow-5;
         @extend .no-select;
 
-        i {
-            @extend .panel-open-close-arrow;
-        }
+        .habits-panel-title {
+            color: $chicago;
+            font-size: 26px;
+            font-weight: 600;
+            margin-top: 3px;
+            margin-bottom: 8px;
+            cursor: pointer;
 
-        .today-panel-title {
-            @extend .panel-title;
+            &:hover {
+                color: $mine-shaft;
+            }
         }
 
         .error-message-icon {
@@ -291,24 +274,24 @@ body {
           }
         }
 
-        .today-panel-date {
+        .habits-panel-date {
             color: $silver-chalice;
             font-size: 16px;
             display: inline-block;
             font-style: italic;
         }
 
-        .today-panel-empty-habby-message {
+        .habits-panel-empty-habby-message {
           @extend .full-screen-centered-flex-container;
           position: relative;
           height: 75vh;
           width: 95vw;
           color: $cape-cod;
-          .today-panel-empty-habby-message-header {
+          .habits-panel-empty-habby-message-header {
             margin-top: -30px;
             font-size: 30px;
           }
-          .today-panel-empty-habby-message-body {
+          .habits-panel-empty-habby-message-body {
             margin-top: 10px;
             font-size: 16px;
           }
@@ -469,76 +452,6 @@ body {
         }
     }
 
-    .history-viewer-panel {
-        @extend .panel;
-        @extend .no-select;
-
-        margin-top: 10px;
-
-        .history-viewer-panel-title {
-            @extend .panel-title;
-        }
-
-        .selected-date-title {
-            color: $silver-chalice;
-            font-size: 16px;
-            display: inline-block;
-            font-style: italic;
-            margin-bottom: 5px;
-        }
-
-        i {
-            @extend .panel-open-close-arrow;
-        }
-
-        .date-entry {
-            display: block;
-
-            input {
-                width: 100px;
-                margin: 10px 0 0 10px;
-                @extend .input-style-1;
-                text-align: center;
-            }
-
-            .separating-text {
-                margin-left: 5px;
-                color: $cape-cod;
-            }
-
-            .select-yesterday, .before-yesterday {
-                border: 1px solid $boulder;
-                color: $star-dust;
-                border-radius: 5px;
-                padding: 5px;
-                margin-right: 10px;
-                font-size: 14px;
-                cursor: pointer;
-
-                &:hover {
-                    background-color: $cloud;
-                    color: $boulder;
-                }
-            }
-        }
-
-        .change-date {
-            position: absolute;
-            border: 1px solid $silver-chalice;
-            color: $star-dust;
-            border-radius: 5px;
-            margin-left: 10px;
-            cursor: pointer;
-            padding: 4px;
-            font-size: 12px;
-            top: 48px;
-
-            &:hover {
-                background-color: $cloud;
-                color: $boulder;
-            }
-        }
-    }
     .dialog-background-screen {
       position: absolute;
       left: 0px;
@@ -839,7 +752,6 @@ body {
       .habit-list {
           display: block;
           overflow: auto;
-          // margin-top: -5px;
           margin-left: 5px;
 
           &.good-habits {
@@ -1044,39 +956,6 @@ body {
               @extend .habit;
           }
       }
-    }
-    .panel {
-        position: relative;
-        box-sizing: border-box;
-        display: block;
-        padding: 20px;
-        float: left;
-        width: 100%;
-        height: 100vh;
-        overflow: auto;
-
-        @extend .box-shadow-5;
-    }
-
-    .panel-title {
-        color: $chicago;
-        font-size: 26px;
-        font-weight: 600;
-        margin-top: 3px;
-        margin-bottom: 8px;
-        cursor: pointer;
-
-        &:hover {
-            color: $mine-shaft;
-        }
-    }
-
-    .panel-open-close-arrow {
-        position: absolute;
-        right: 0px;
-        top: 10px;
-        font-size: 48px;
-        color: $star-dust;
     }
 }
 

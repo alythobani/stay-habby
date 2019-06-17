@@ -1,4 +1,17 @@
-module View exposing (dropdownIcon, habitActionsDropdownDiv, renderHabitBox, renderHistoryViewerPanel, renderSetHabitDataShortcut, renderTodayPanel, view)
+module View exposing
+    ( habitActionsDropdownDiv
+    , inputStopKeydownPropagation
+    , renderAddNoteDialog
+    , renderAddNoteHabitSelectionScreen
+    , renderDialogBackgroundScreen
+    , renderEditGoalDialog
+    , renderErrorMessage
+    , renderHabitBox
+    , renderHabitsPanel
+    , renderSetHabitDataShortcut
+    , textareaStopKeydownPropagation
+    , view
+    )
 
 import Array
 import Browser
@@ -28,27 +41,17 @@ view model =
     , body =
         [ div
             [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]
-            [ renderTodayPanel
-                model.ymd
+            [ renderHabitsPanel
+                model.selectedYmd
+                model.actualYmd
                 model.allHabits
                 model.allHabitData
                 model.allFrequencyStats
                 model.addHabit
-                model.editingTodayHabitAmount
-                model.openTodayViewer
-                model.todayViewerHabitActionsDropdown
+                model.editingHabitAmountDict
+                model.habitActionsDropdown
                 model.darkModeOn
                 model.errorMessage
-            , renderHistoryViewerPanel
-                model.openHistoryViewer
-                model.historyViewerDateInput
-                model.historyViewerSelectedDate
-                model.allHabits
-                model.allHabitData
-                model.historyViewerFrequencyStats
-                model.editingHistoryHabitAmount
-                model.historyViewerHabitActionsDropdown
-                model.ymd
             , renderDialogBackgroundScreen model.activeDialogScreen
             , renderSetHabitDataShortcut
                 model.activeDialogScreen
@@ -57,13 +60,13 @@ view model =
                 model.setHabitDataShortcutSelectedHabitIndex
                 model.showSetHabitDataShortcutAmountForm
                 model.allHabitData
-                model.ymd
+                model.selectedYmd
                 model.setHabitDataShortcutInputtedAmount
             , renderEditGoalDialog
                 model.activeDialogScreen
                 model.editGoalDialogHabit
                 model.editGoal
-                model.ymd
+                model.actualYmd
             , renderErrorMessage
                 model.errorMessage
                 model.activeDialogScreen
@@ -76,7 +79,7 @@ view model =
                 model.activeDialogScreen
                 model.addNoteDialogHabit
                 model.addNoteDialogInput
-                model.ymd
+                model.selectedYmd
                 model.allHabitDayNotes
             ]
         ]
@@ -115,26 +118,52 @@ inputStopKeydownPropagation attrs htmls =
     input stopPropagationAttrs htmls
 
 
-renderTodayPanel :
+renderHabitsPanel :
     Maybe YmdDate.YmdDate
+    -> Maybe YmdDate.YmdDate
     -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Habit.AddHabitInputData
     -> Dict.Dict String Int
-    -> Bool
     -> Maybe String
     -> Bool
     -> Maybe String
     -> Html Msg
-renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitDataDict openView habitActionsDropdown darkModeOn errorMessage =
+renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequencyStatsList addHabit editingHabitAmountDict habitActionsDropdown darkModeOn errorMessage =
     let
         maybeCreateHabitData =
             Habit.extractCreateHabit addHabit
+
+        panelTitleText : String
+        panelTitleText =
+            case ( maybeSelectedYmd, maybeActualYmd ) of
+                ( Just selectedYmd, Just actualYmd ) ->
+                    if selectedYmd == actualYmd then
+                        "Today's Progress"
+
+                    else if selectedYmd == YmdDate.addDays 1 actualYmd then
+                        "Tomorrow's Progress"
+
+                    else if selectedYmd == YmdDate.addDays -1 actualYmd then
+                        "Yesterday's Progress"
+
+                    else if YmdDate.compareYmds selectedYmd actualYmd == LT then
+                        "Past Progress"
+
+                    else
+                        "Future Progress"
+
+                ( _, Nothing ) ->
+                    -- We don't know the actual date
+                    "..."
+
+                ( Nothing, _ ) ->
+                    "No Selected Date"
     in
     div
-        [ class "today-panel" ]
-        [ div [ class "today-panel-title", onClick OnToggleTodayViewer ] [ text "Today's Progress" ]
+        [ class "habits-panel" ]
+        [ div [ class "habits-panel-title" ] [ text panelTitleText ]
         , div
             [ classList
                 [ ( "error-message-icon", True )
@@ -164,16 +193,15 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                         "Light Mode"
                 ]
             ]
-        , dropdownIcon openView NoOp
         , div
-            [ class "today-panel-date" ]
+            [ class "habits-panel-date" ]
             [ text <|
                 Maybe.withDefault
-                    "Today's date not available"
-                    (Maybe.map YmdDate.prettyPrint ymd)
+                    "..."
+                    (Maybe.map YmdDate.prettyPrintWithWeekday maybeSelectedYmd)
             ]
-        , case ( rdHabits, rdHabitData ) of
-            ( RemoteData.Success habits, RemoteData.Success habitData ) ->
+        , case ( rdHabits, rdHabitData, ( maybeSelectedYmd, maybeActualYmd ) ) of
+            ( RemoteData.Success habits, RemoteData.Success habitData, ( Just selectedYmd, Just actualYmd ) ) ->
                 let
                     ( goodHabits, badHabits ) =
                         Habit.splitHabits habits
@@ -204,38 +232,29 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                                 _ ->
                                     Nothing
                             )
-                            ymd
+                            selectedYmd
+                            actualYmd
                             habitData
-                            editingHabitDataDict
-                            OnHabitDataInput
-                            SetHabitData
+                            editingHabitAmountDict
+                            OnHabitAmountInput
                             habitActionsDropdown
-                            ToggleTodayViewerHabitActionsDropdown
-                            True
                             habit
-                            ymd
-
-                    -- TODO: Redundant, but should be removed during the UI change of only one panel (no History Viewer)
                 in
                 div []
                     [ if List.isEmpty habits then
                         div
-                            [ class "today-panel-empty-habby-message" ]
+                            [ class "habits-panel-empty-habby-message" ]
                             [ div
-                                [ class "today-panel-empty-habby-message-header" ]
+                                [ class "habits-panel-empty-habby-message-header" ]
                                 [ text "Welcome to Habby!" ]
                             , div
-                                [ class "today-panel-empty-habby-message-body" ]
+                                [ class "habits-panel-empty-habby-message-body" ]
                                 [ text "Start by adding a habit below." ]
                             ]
 
                       else
                         div
-                            [ classList
-                                [ ( "display-none", not openView )
-                                , ( "all-habit-lists", True )
-                                ]
-                            ]
+                            [ class "all-habit-lists" ]
                             [ div
                                 [ class "habit-list good-habits" ]
                                 (List.map renderHabit sortedGoodHabits)
@@ -264,10 +283,10 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
                         ]
                     ]
 
-            ( RemoteData.Failure apiError, _ ) ->
+            ( RemoteData.Failure apiError, _, _ ) ->
                 span [ class "retrieving-habits-status" ] [ text "Failure..." ]
 
-            ( _, RemoteData.Failure apiError ) ->
+            ( _, RemoteData.Failure apiError, _ ) ->
                 span [ class "retrieving-habits-status" ] [ text "Failure..." ]
 
             _ ->
@@ -457,232 +476,98 @@ renderTodayPanel ymd rdHabits rdHabitData rdFrequencyStatsList addHabit editingH
         ]
 
 
-renderHistoryViewerPanel :
-    Bool
-    -> String
-    -> Maybe YmdDate.YmdDate
-    -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
-    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
-    -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
-    -> Dict.Dict String (Dict.Dict String Int)
-    -> Maybe String
-    -> Maybe YmdDate.YmdDate
-    -> Html Msg
-renderHistoryViewerPanel openView dateInput maybeSelectedDate rdHabits rdHabitData rdFrequencyStatsList editingHabitDataDictDict habitActionsDropdown maybeTodayYmd =
-    case ( rdHabits, rdHabitData ) of
-        ( RemoteData.Success habits, RemoteData.Success habitData ) ->
-            div
-                [ class "history-viewer-panel" ]
-                [ div [ class "history-viewer-panel-title", onClick OnToggleHistoryViewer ] [ text "Browse and Edit History" ]
-                , dropdownIcon openView NoOp
-                , if not openView then
-                    Util.hiddenDiv
-
-                  else
-                    case maybeSelectedDate of
-                        Nothing ->
-                            div
-                                [ classList [ ( "date-entry", True ), ( "display-none", not openView ) ] ]
-                                [ span [ class "select-yesterday", onClick OnHistoryViewerSelectYesterday ] [ text "yesterday" ]
-                                , span
-                                    [ class "before-yesterday", onClick OnHistoryViewerSelectBeforeYesterday ]
-                                    [ text "before yesterday" ]
-                                , span [ class "separating-text" ] [ text "or exact date" ]
-                                , input
-                                    [ placeholder "dd/mm/yy"
-                                    , onInput OnHistoryViewerDateInput
-                                    , value dateInput
-                                    , Util.onKeydownStopPropagation
-                                        (\key ->
-                                            if key == Keyboard.Enter then
-                                                Just OnHistoryViewerSelectDateInput
-
-                                            else
-                                                Just NoOp
-                                        )
-                                    ]
-                                    []
-                                ]
-
-                        Just selectedDate ->
-                            let
-                                ( goodHabits, badHabits ) =
-                                    Habit.splitHabits habits
-
-                                ( sortedGoodHabits, sortedBadHabits, sortedSuspendedHabits ) =
-                                    case rdFrequencyStatsList of
-                                        RemoteData.Success frequencyStatsList ->
-                                            let
-                                                ( goodActiveHabits, badActiveHabits, suspendedHabits ) =
-                                                    HabitUtil.splitHabitsByCurrentlySuspended frequencyStatsList goodHabits badHabits
-                                            in
-                                            ( HabitUtil.sortHabitsByCurrentFragment frequencyStatsList goodActiveHabits
-                                            , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList badActiveHabits
-                                            , HabitUtil.sortHabitsByCurrentFragment frequencyStatsList suspendedHabits
-                                            )
-
-                                        _ ->
-                                            ( goodHabits, badHabits, [] )
-
-                                editingHabitDataDict =
-                                    Dict.get (YmdDate.toSimpleString selectedDate) editingHabitDataDictDict
-                                        |> Maybe.withDefault Dict.empty
-
-                                renderHabit habit =
-                                    renderHabitBox
-                                        (case rdFrequencyStatsList of
-                                            RemoteData.Success frequencyStatsList ->
-                                                HabitUtil.findFrequencyStatsForHabit
-                                                    habit
-                                                    frequencyStatsList
-
-                                            _ ->
-                                                Nothing
-                                        )
-                                        maybeSelectedDate
-                                        habitData
-                                        editingHabitDataDict
-                                        (OnHistoryViewerHabitDataInput selectedDate)
-                                        SetHabitData
-                                        habitActionsDropdown
-                                        ToggleHistoryViewerHabitActionsDropdown
-                                        False
-                                        habit
-                                        maybeTodayYmd
-                            in
-                            div
-                                []
-                                [ span [ class "selected-date-title" ] [ text <| YmdDate.prettyPrint selectedDate ]
-                                , span [ class "change-date", onClick OnHistoryViewerChangeDate ] [ text "change date" ]
-                                , div
-                                    [ class "all-habit-lists" ]
-                                    [ div [ class "habit-list good-habits" ] <| List.map renderHabit sortedGoodHabits
-                                    , div [ class "habit-list bad-habits" ] <| List.map renderHabit sortedBadHabits
-                                    , div [ class "habit-list suspended-habits" ] <| List.map renderHabit sortedSuspendedHabits
-                                    ]
-                                ]
-                ]
-
-        ( RemoteData.Failure apiError, _ ) ->
-            span [ class "retrieving-habits-status" ] [ text "Failure..." ]
-
-        ( _, RemoteData.Failure apiError ) ->
-            span [ class "retrieving-habits-status" ] [ text "Failure..." ]
-
-        _ ->
-            span [ class "retrieving-habits-status" ] [ text "Loading..." ]
-
-
-dropdownIcon : Bool -> msg -> Html msg
-dropdownIcon openView msg =
-    i
-        [ class "material-icons"
-        , onClick msg
-        ]
-        [ text <|
-            if openView then
-                "arrow_drop_down"
-
-            else
-                "arrow_drop_up"
-        ]
-
-
 habitActionsDropdownDiv :
     Bool
     -> YmdDate.YmdDate
+    -> YmdDate.YmdDate
     -> Habit.Habit
-    -> Bool
     -> List Habit.SuspendedInterval
-    -> Maybe YmdDate.YmdDate
     -> Html Msg
-habitActionsDropdownDiv dropdown ymd habit onTodayViewer suspensions maybeTodayYmd =
-    case maybeTodayYmd of
-        Just todayYmd ->
-            let
-                currentlySuspended : Bool
-                currentlySuspended =
-                    case List.reverse suspensions of
-                        currSuspendedInterval :: rest ->
-                            case currSuspendedInterval.endDate of
-                                Just endDateYmd ->
-                                    -- The latest `SuspendedInterval` has been closed already.
-                                    -- Assumption: no `SuspendedInterval`s were started or ended after today.
-                                    if YmdDate.compareYmds endDateYmd todayYmd == LT then
-                                        -- The end date was yesterday or earlier, so the habit is now active.
-                                        False
+habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
+    let
+        onToday : Bool
+        onToday =
+            selectedYmd == actualYmd
 
-                                    else
-                                        -- The end date is today (or later, but that shouldn't be possible).
-                                        -- Dates are inclusive, so the habit is currently suspended.
-                                        True
-
-                                Nothing ->
-                                    -- Suspended interval is endless, habit is currently suspended
-                                    True
-
-                        [] ->
-                            -- Habit has never been suspended before, so it's active
-                            False
-
-                habitRecord =
-                    Habit.getCommonFields habit
-            in
-            div [ class "actions-dropdown" ]
-                [ div
-                    [ class <|
-                        if dropdown then
-                            "actions-dropdown-toggler-full"
-
-                        else
-                            "actions-dropdown-toggler-default"
-                    , onClick <|
-                        (if onTodayViewer then
-                            ToggleTodayViewerHabitActionsDropdown
-
-                         else
-                            ToggleHistoryViewerHabitActionsDropdown
-                        )
-                            habitRecord.id
-                    ]
-                    [ text "" ]
-                , div
-                    [ class "action-buttons" ]
-                    [ button
-                        [ classList
-                            [ ( "action-button", True )
-                            , ( "display-none", not dropdown )
-                            ]
-                        , onClick <| OnResumeOrSuspendHabitClick habitRecord.id currentlySuspended onTodayViewer suspensions
-                        ]
-                        [ text <|
-                            if currentlySuspended then
-                                "Resume"
+        currentlySuspended : Bool
+        currentlySuspended =
+            case List.reverse suspensions of
+                currSuspendedInterval :: rest ->
+                    case currSuspendedInterval.endDate of
+                        Just endDateYmd ->
+                            -- The latest `SuspendedInterval` has been closed already.
+                            -- Assumption: no `SuspendedInterval`s were started or ended after today.
+                            if YmdDate.compareYmds endDateYmd actualYmd == LT then
+                                -- The end date was yesterday or earlier, so the habit is now active.
+                                False
 
                             else
-                                "Suspend"
-                        ]
-                    , button
-                        [ classList
-                            [ ( "action-button", True )
-                            , ( "display-none", not dropdown )
-                            ]
-                        , onClick <| OnEditGoalClick habitRecord.id
-                        ]
-                        [ text "Edit Goal" ]
-                    , button
-                        [ classList
-                            [ ( "action-button", True )
-                            , ( "display-none", not dropdown )
-                            ]
-                        , onClick <| OpenAddNoteDialog habit
-                        ]
-                        [ text "Add Note" ]
-                    ]
-                ]
+                                -- The end date is today (or later, but that shouldn't be possible).
+                                -- Dates are inclusive, so the habit is currently suspended.
+                                True
 
-        Nothing ->
-            div [] []
+                        Nothing ->
+                            -- Suspended interval is endless, habit is currently suspended
+                            True
+
+                [] ->
+                    -- Habit has never been suspended before, so it's active
+                    False
+
+        habitRecord =
+            Habit.getCommonFields habit
+    in
+    div [ class "actions-dropdown" ]
+        [ div
+            [ class <|
+                if dropdown then
+                    "actions-dropdown-toggler-full"
+
+                else
+                    "actions-dropdown-toggler-default"
+            , onClick <| ToggleHabitActionsDropdown habitRecord.id
+            ]
+            [ text "" ]
+        , div
+            [ class "action-buttons" ]
+            [ button
+                [ classList
+                    [ ( "action-button", True )
+                    , ( "display-none"
+                      , -- Don't allow user to suspend/resume a habit unless they're looking at today
+                        not dropdown || not onToday
+                      )
+                    ]
+                , onClick <| OnResumeOrSuspendHabitClick habitRecord.id currentlySuspended suspensions
+                ]
+                [ text <|
+                    if currentlySuspended then
+                        "Resume"
+
+                    else
+                        "Suspend"
+                ]
+            , button
+                [ classList
+                    [ ( "action-button", True )
+                    , ( "display-none"
+                      , -- Don't allow user to edit a habit's goal unless they're looking at today
+                        not dropdown || not onToday
+                      )
+                    ]
+                , onClick <| OnEditGoalClick habitRecord.id
+                ]
+                [ text "Edit Goal" ]
+            , button
+                [ classList
+                    [ ( "action-button", True )
+                    , ( "display-none", not dropdown )
+                    ]
+                , onClick <| OpenAddNoteDialog habit
+                ]
+                [ text "Add Note" ]
+            ]
+        ]
 
 
 {-| Renders a habit box with the habit data loaded for that particular date.
@@ -693,143 +578,135 @@ update the habit data.
 -}
 renderHabitBox :
     Maybe FrequencyStats.FrequencyStats
-    -> Maybe YmdDate.YmdDate
+    -> YmdDate.YmdDate
+    -> YmdDate.YmdDate
     -> List HabitData.HabitData
     -> Dict.Dict String Int
     -> (String -> String -> Msg)
-    -> (YmdDate.YmdDate -> String -> Maybe Int -> Msg)
     -> Maybe String
-    -> (String -> Msg)
-    -> Bool
     -> Habit.Habit
-    -> Maybe YmdDate.YmdDate
     -> Html Msg
-renderHabitBox habitStats maybeYmd habitData editingHabitDataDict onHabitDataInput setHabitData habitActionsDropdown toggleHabitActionsDropdown onTodayViewer habit maybeTodayYmd =
-    case maybeYmd of
-        Just ymd ->
-            let
-                habitRecord =
-                    Habit.getCommonFields habit
+renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict onHabitDataInput habitActionsDropdown habit =
+    let
+        habitRecord =
+            Habit.getCommonFields habit
 
-                habitDatum =
-                    List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) habitData
-                        |> List.head
-                        |> (\maybeHabitDatum ->
-                                case maybeHabitDatum of
-                                    Nothing ->
-                                        0
+        habitDatum =
+            List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == selectedYmd) habitData
+                |> List.head
+                |> (\maybeHabitDatum ->
+                        case maybeHabitDatum of
+                            Nothing ->
+                                0
 
-                                    Just { amount } ->
-                                        amount
-                           )
+                            Just { amount } ->
+                                amount
+                   )
 
-                editingHabitData =
-                    Dict.get habitRecord.id editingHabitDataDict
+        editingHabitAmount =
+            Dict.get habitRecord.id editingHabitAmountDict
 
-                actionsDropdown =
-                    habitActionsDropdown == Just habitRecord.id
+        actionsDropdown =
+            habitActionsDropdown == Just habitRecord.id
 
-                isCurrentFragmentSuccessful =
-                    case habitStats of
-                        Nothing ->
-                            False
+        isCurrentFragmentSuccessful =
+            case habitStats of
+                Nothing ->
+                    False
 
-                        Just stats ->
-                            HabitUtil.isHabitCurrentFragmentSuccessful habit stats
+                Just stats ->
+                    HabitUtil.isHabitCurrentFragmentSuccessful habit stats
 
-                frequencyStatisticDiv str =
-                    div
-                        [ class "frequency-statistic" ]
-                        [ text str ]
-            in
+        frequencyStatisticDiv str =
             div
-                [ class
-                    (if isCurrentFragmentSuccessful then
-                        "habit-success"
+                [ class "frequency-statistic" ]
+                [ text str ]
+    in
+    div
+        [ class
+            (if isCurrentFragmentSuccessful then
+                "habit-success"
 
-                     else
-                        "habit-failure"
-                    )
+             else
+                "habit-failure"
+            )
+        ]
+        [ div [ class "habit-name" ] [ text habitRecord.name ]
+        , habitActionsDropdownDiv actionsDropdown selectedYmd actualYmd habit habitRecord.suspensions
+        , case habitStats of
+            Nothing ->
+                frequencyStatisticDiv "Error retriving performance stats"
+
+            Just stats ->
+                if not stats.habitHasStarted then
+                    div [ class "start-this-habit-message" ] [ text "Start this habit!" ]
+
+                else
+                    div [ class "frequency-stats-list" ]
+                        [ div
+                            [ class "current-progress" ]
+                            [ text <|
+                                String.fromInt stats.currentFragmentTotal
+                                    ++ " out of "
+                                    ++ String.fromInt stats.currentFragmentGoal
+                                    ++ " "
+                                    ++ habitRecord.unitNamePlural
+                            ]
+                        , frequencyStatisticDiv ("Days left: " ++ String.fromInt stats.currentFragmentDaysLeft)
+                        , frequencyStatisticDiv
+                            ((String.fromInt <|
+                                round <|
+                                    toFloat stats.successfulFragments
+                                        * 100
+                                        / toFloat stats.totalFragments
+                             )
+                                ++ "%"
+                            )
+                        , frequencyStatisticDiv ("Streak: " ++ String.fromInt stats.currentFragmentStreak)
+                        , frequencyStatisticDiv ("Best streak: " ++ String.fromInt stats.bestFragmentStreak)
+                        , frequencyStatisticDiv ("Total done: " ++ String.fromInt stats.totalDone)
+                        ]
+        , div
+            [ classList
+                [ ( "habit-amount-complete", True )
+                , ( "editing", Maybe.isJust <| editingHabitAmount )
                 ]
-                [ div [ class "habit-name" ] [ text habitRecord.name ]
-                , habitActionsDropdownDiv actionsDropdown ymd habit onTodayViewer habitRecord.suspensions maybeTodayYmd
-                , case habitStats of
-                    Nothing ->
-                        frequencyStatisticDiv "Error retriving performance stats"
+            ]
+            [ input
+                [ placeholder <|
+                    String.fromInt habitDatum
+                        ++ " "
+                        ++ (if habitDatum == 1 then
+                                habitRecord.unitNameSingular
 
-                    Just stats ->
-                        if not stats.habitHasStarted then
-                            div [ class "start-this-habit-message" ] [ text "Start this habit!" ]
+                            else
+                                habitRecord.unitNamePlural
+                           )
+                , onInput <| onHabitDataInput habitRecord.id
+                , Util.onKeydownStopPropagation
+                    (\key ->
+                        if key == Keyboard.Enter then
+                            Just <| SetHabitData selectedYmd habitRecord.id editingHabitAmount
+
+                        else if key == Keyboard.KeyA then
+                            Just OpenSetHabitDataShortcutDialogScreen
+
+                        else if key == Keyboard.KeyN then
+                            Just OpenAddNoteHabitSelectionDialogScreen
 
                         else
-                            div [ class "frequency-stats-list" ]
-                                [ div
-                                    [ class "current-progress" ]
-                                    [ text <|
-                                        String.fromInt stats.currentFragmentTotal
-                                            ++ " out of "
-                                            ++ String.fromInt stats.currentFragmentGoal
-                                            ++ " "
-                                            ++ habitRecord.unitNamePlural
-                                    ]
-                                , frequencyStatisticDiv ("Days left: " ++ String.fromInt stats.currentFragmentDaysLeft)
-                                , frequencyStatisticDiv
-                                    ((String.fromInt <|
-                                        round <|
-                                            toFloat stats.successfulFragments
-                                                * 100
-                                                / toFloat stats.totalFragments
-                                     )
-                                        ++ "%"
-                                    )
-                                , frequencyStatisticDiv ("Streak: " ++ String.fromInt stats.currentFragmentStreak)
-                                , frequencyStatisticDiv ("Best streak: " ++ String.fromInt stats.bestFragmentStreak)
-                                , frequencyStatisticDiv ("Total done: " ++ String.fromInt stats.totalDone)
-                                ]
-                , div
-                    [ classList
-                        [ ( "habit-amount-complete", True )
-                        , ( "editing", Maybe.isJust <| editingHabitData )
-                        ]
-                    ]
-                    [ input
-                        [ placeholder <|
-                            String.fromInt habitDatum
-                                ++ " "
-                                ++ (if habitDatum == 1 then
-                                        habitRecord.unitNameSingular
-
-                                    else
-                                        habitRecord.unitNamePlural
-                                   )
-                        , onInput <| onHabitDataInput habitRecord.id
-                        , Util.onKeydownStopPropagation
-                            (\key ->
-                                if key == Keyboard.Enter then
-                                    Just <| setHabitData ymd habitRecord.id editingHabitData
-
-                                else if key == Keyboard.KeyA then
-                                    Just OpenSetHabitDataShortcutDialogScreen
-
-                                else if key == Keyboard.KeyN then
-                                    Just OpenAddNoteHabitSelectionDialogScreen
-
-                                else
-                                    Just NoOp
-                            )
-                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editingHabitData)
-                        ]
-                        []
-                    , i
-                        [ classList [ ( "material-icons", True ) ]
-                        , onClick <| setHabitData ymd habitRecord.id editingHabitData
-                        ]
-                        [ text "check_box" ]
-                    ]
+                            Just NoOp
+                    )
+                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editingHabitAmount)
                 ]
-
-        Nothing ->
-            div [] []
+                []
+            , i
+                [ classList [ ( "material-icons", True ) ]
+                , onClick <| SetHabitData selectedYmd habitRecord.id editingHabitAmount
+                ]
+                [ text "check_box" ]
+            ]
+        ]
 
 
 renderDialogBackgroundScreen : Maybe DialogScreen.DialogScreen -> Html Msg

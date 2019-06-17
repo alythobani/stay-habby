@@ -30,7 +30,8 @@ init { apiBaseUrl, currentTime } url key =
       -- Time / Date
       , currentPosix = currentPosix
       , currentTimeZone = Nothing
-      , ymd = Nothing
+      , selectedYmd = Nothing
+      , actualYmd = Nothing
 
       --
       , apiBaseUrl = apiBaseUrl
@@ -38,9 +39,8 @@ init { apiBaseUrl, currentTime } url key =
       --
       , darkModeOn = True
 
-      -- Habit Amounts
-      , editingTodayHabitAmount = Dict.empty
-      , editingHistoryHabitAmount = Dict.empty
+      -- User-Inputted Habit Amounts
+      , editingHabitAmountDict = Dict.empty
 
       -- Remote Data
       , allHabitData = RemoteData.NotAsked
@@ -52,17 +52,12 @@ init { apiBaseUrl, currentTime } url key =
       , addHabit = Habit.initAddHabitData
 
       --
-      , openTodayViewer = True
-      , openHistoryViewer = False
-
-      --
       , historyViewerDateInput = ""
       , historyViewerSelectedDate = Nothing
       , historyViewerFrequencyStats = RemoteData.NotAsked
 
-      -- Dropdowns
-      , todayViewerHabitActionsDropdown = Nothing
-      , historyViewerHabitActionsDropdown = Nothing
+      -- Habit Actions Dropdowns
+      , habitActionsDropdown = Nothing
 
       -- Keyboard
       , keysDown = Keyboard.init
@@ -94,5 +89,5 @@ init { apiBaseUrl, currentTime } url key =
       , addNoteDialogHabit = Nothing
       , addNoteDialogInput = ""
       }
-    , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
+    , Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
     )

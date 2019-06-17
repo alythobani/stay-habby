@@ -84,7 +84,7 @@ type alias QueriedFrequencyStats =
     { frequencyStatsList : List FrequencyStats.FrequencyStats }
 
 
-{-| Query for all fields on all habits and habit data, plus their frequency stats.
+{-| Query for frequency stats for the given habits.
 -}
 queryPastFrequencyStats :
     YmdDate.YmdDate

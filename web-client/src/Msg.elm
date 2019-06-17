@@ -16,10 +16,12 @@ import Url
 
 type Msg
     = NoOp
-    | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
+    | OnInitialTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
     | OnUrlChange Url.Url
     | OnUrlRequest Browser.UrlRequest
+      -- Time / Date
     | TickMinute Time.Posix
+    | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError
     | OnGetAllRemoteDataSuccess Api.AllRemoteData
@@ -47,27 +49,15 @@ type Msg
     | OnAddHabitFailure ApiError
     | OnAddHabitSuccess Habit.Habit
       -- Set Habit Data
-    | OnHabitDataInput String String
+    | OnHabitAmountInput String String
     | SetHabitData YmdDate.YmdDate String (Maybe Int)
     | OnSetHabitDataFailure ApiError
     | OnSetHabitDataSuccess HabitData.HabitData
-      --
-    | OnToggleHistoryViewer
-    | OnToggleTodayViewer
-    | OnHistoryViewerDateInput String
-    | OnHistoryViewerSelectYesterday
-    | OnHistoryViewerSelectBeforeYesterday
-    | OnHistoryViewerSelectDateInput
-    | SetHistoryViewerSelectedDate YmdDate.YmdDate
-    | OnGetTodayFrequencyStatsFailure ApiError
-    | OnGetTodayFrequencyStatsSuccess Api.QueriedFrequencyStats
-    | OnGetPastFrequencyStatsFailure ApiError
-    | OnGetPastFrequencyStatsSuccess Api.QueriedFrequencyStats
-    | OnHistoryViewerChangeDate
-    | OnHistoryViewerHabitDataInput YmdDate.YmdDate String String
-      -- Dropdowns
-    | ToggleTodayViewerHabitActionsDropdown String
-    | ToggleHistoryViewerHabitActionsDropdown String
+      -- Frequency Statistics
+    | OnGetFrequencyStatsFailure ApiError
+    | OnGetFrequencyStatsSuccess Api.QueriedFrequencyStats
+      -- Habit Actions Dropdowns
+    | ToggleHabitActionsDropdown String
       -- Dark Mode
     | OnToggleDarkMode
       -- Keyboard
@@ -99,7 +89,7 @@ type Msg
     | OnEditGoalSuccess Habit.Habit
     | OnEditGoalSubmitClick String (List Habit.FrequencyChangeRecord) String
       -- Suspending Habits
-    | OnResumeOrSuspendHabitClick String Bool Bool (List Habit.SuspendedInterval)
+    | OnResumeOrSuspendHabitClick String Bool (List Habit.SuspendedInterval)
     | OnResumeOrSuspendHabitFailure ApiError
     | OnResumeOrSuspendHabitSuccess Habit.Habit
       -- Error messages

@@ -29,34 +29,26 @@ update msg model =
         updateEditGoal updater =
             { model | editGoal = updater model.editGoal }
 
-        getTodayViewerFrequencyStats : List String -> Cmd Msg
-        getTodayViewerFrequencyStats habitIds =
-            case model.ymd of
+        getFrequencyStats : List String -> Cmd Msg
+        getFrequencyStats habitIds =
+            case model.selectedYmd of
                 Just ymd ->
                     Api.queryPastFrequencyStats
                         ymd
                         habitIds
                         model.apiBaseUrl
-                        OnGetTodayFrequencyStatsFailure
-                        OnGetTodayFrequencyStatsSuccess
+                        OnGetFrequencyStatsFailure
+                        OnGetFrequencyStatsSuccess
 
                 Nothing ->
                     Cmd.none
-
-        getHistoryViewerFrequencyStats : YmdDate.YmdDate -> List String -> Cmd Msg
-        getHistoryViewerFrequencyStats ymd habitIds =
-            Api.queryPastFrequencyStats
-                ymd
-                habitIds
-                model.apiBaseUrl
-                OnGetPastFrequencyStatsFailure
-                OnGetPastFrequencyStatsSuccess
     in
     case msg of
         NoOp ->
             ( model, Cmd.none )
 
-        OnTimeZoneRetrieval result ->
+        OnInitialTimeZoneRetrieval result ->
+            -- Called when the app first starts up and we attempt to retrieve the local time zone
             case result of
                 Result.Err error ->
                     ( { model | errorMessage = Just <| "Time Zone error: " ++ Debug.toString error }, Cmd.none )
@@ -71,25 +63,21 @@ update msg model =
                         currentYmd =
                             YmdDate.fromDate currentDate
                     in
-                    if model.ymd == Just currentYmd then
-                        -- Date hasn't changed. No need to re-query things.
-                        ( { model | currentTimeZone = Just timeZone }, Cmd.none )
-
-                    else
-                        ( { model
-                            | currentTimeZone = Just timeZone
-                            , ymd = Just currentYmd
-                            , allHabits = RemoteData.Loading
-                            , allHabitData = RemoteData.Loading
-                            , allFrequencyStats = RemoteData.Loading
-                            , allHabitDayNotes = RemoteData.Loading
-                          }
-                        , Api.queryAllRemoteData
-                            currentYmd
-                            model.apiBaseUrl
-                            OnGetAllRemoteDataFailure
-                            OnGetAllRemoteDataSuccess
-                        )
+                    ( { model
+                        | currentTimeZone = Just timeZone
+                        , selectedYmd = Just currentYmd
+                        , actualYmd = Just currentYmd
+                        , allHabits = RemoteData.Loading
+                        , allHabitData = RemoteData.Loading
+                        , allFrequencyStats = RemoteData.Loading
+                        , allHabitDayNotes = RemoteData.Loading
+                      }
+                    , Api.queryAllRemoteData
+                        currentYmd
+                        model.apiBaseUrl
+                        OnGetAllRemoteDataFailure
+                        OnGetAllRemoteDataSuccess
+                    )
 
         OnUrlChange url ->
             -- TODO
@@ -103,6 +91,24 @@ update msg model =
             ( { model | currentPosix = posix }
             , Task.attempt OnTimeZoneRetrieval TimeZone.getZone
             )
+
+        OnTimeZoneRetrieval result ->
+            -- Called every minute when we update the local time zone
+            case result of
+                Result.Err error ->
+                    ( { model | errorMessage = Just <| "Time Zone error: " ++ Debug.toString error }, Cmd.none )
+
+                Ok ( timeZoneName, timeZone ) ->
+                    let
+                        currentDate : Date.Date
+                        currentDate =
+                            Date.fromPosix timeZone model.currentPosix
+
+                        currentYmd : YmdDate.YmdDate
+                        currentYmd =
+                            YmdDate.fromDate currentDate
+                    in
+                    ( { model | actualYmd = Just currentYmd }, Cmd.none )
 
         -- All Habit Data
         OnGetAllRemoteDataFailure apiError ->
@@ -207,7 +213,7 @@ update msg model =
             )
 
         AddHabit createHabitData ->
-            case model.ymd of
+            case model.actualYmd of
                 Just ymd ->
                     ( model
                     , Api.mutationAddHabit createHabitData ymd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
@@ -232,26 +238,18 @@ update msg model =
                 | allHabits = RemoteData.map (\allHabits -> allHabits ++ [ habit ]) model.allHabits
                 , addHabit = Habit.initAddHabitData
               }
-            , Cmd.batch
-                [ getTodayViewerFrequencyStats [ habitRecord.id ]
-                , case model.historyViewerSelectedDate of
-                    Just ymd ->
-                        getHistoryViewerFrequencyStats ymd [ habitRecord.id ]
-
-                    Nothing ->
-                        Cmd.none
-                ]
+            , getFrequencyStats [ habitRecord.id ]
             )
 
         -- Set Habit Data
-        OnHabitDataInput habitID newVal ->
+        OnHabitAmountInput habitID newVal ->
             let
-                newEditingTodayHabitAmount amount =
-                    model.editingTodayHabitAmount
+                newEditingHabitAmountDict amount =
+                    model.editingHabitAmountDict
                         |> Dict.update habitID (always <| amount)
             in
             if String.isEmpty newVal then
-                ( { model | editingTodayHabitAmount = newEditingTodayHabitAmount Nothing }, Cmd.none )
+                ( { model | editingHabitAmountDict = newEditingHabitAmountDict Nothing }, Cmd.none )
 
             else
                 case String.toInt newVal of
@@ -259,9 +257,9 @@ update msg model =
                         ( model, Cmd.none )
 
                     Just newInt ->
-                        ( { model | editingTodayHabitAmount = newEditingTodayHabitAmount <| Just newInt }, Cmd.none )
+                        ( { model | editingHabitAmountDict = newEditingHabitAmountDict <| Just newInt }, Cmd.none )
 
-        SetHabitData ymd habitId maybeNewVal ->
+        SetHabitData selectedYmd habitId maybeNewVal ->
             case maybeNewVal of
                 Nothing ->
                     ( model, Cmd.none )
@@ -269,7 +267,7 @@ update msg model =
                 Just newVal ->
                     ( model
                     , Api.mutationSetHabitData
-                        ymd
+                        selectedYmd
                         habitId
                         newVal
                         model.apiBaseUrl
@@ -292,101 +290,20 @@ update msg model =
                                     Util.replaceOrAdd allHabitData (.id >> (==) updatedHabitDatum.id) updatedHabitDatum
                                 )
                                 model.allHabitData
-                        , editingTodayHabitAmount =
-                            Dict.update updatedHabitDatum.habitId (always Nothing) model.editingTodayHabitAmount
-                        , editingHistoryHabitAmount =
-                            Dict.update
-                                (YmdDate.toSimpleString updatedHabitDatum.date)
-                                (Maybe.map (Dict.update updatedHabitDatum.habitId (always Nothing)))
-                                model.editingHistoryHabitAmount
+                        , editingHabitAmountDict =
+                            Dict.update updatedHabitDatum.habitId (always Nothing) model.editingHabitAmountDict
                     }
             in
             ( newModel
-            , Cmd.batch
-                [ getTodayViewerFrequencyStats [ updatedHabitDatum.habitId ]
-                , case newModel.historyViewerSelectedDate of
-                    Just ymd ->
-                        getHistoryViewerFrequencyStats ymd [ updatedHabitDatum.habitId ]
-
-                    Nothing ->
-                        Cmd.none
-                ]
+            , getFrequencyStats [ updatedHabitDatum.habitId ]
             )
 
-        --
-        OnToggleHistoryViewer ->
-            ( { model | openHistoryViewer = not model.openHistoryViewer }
-            , Cmd.none
-            )
-
-        OnToggleTodayViewer ->
-            ( { model | openTodayViewer = not model.openTodayViewer }, Cmd.none )
-
-        OnHistoryViewerDateInput newDateInput ->
-            ( { model
-                | historyViewerDateInput =
-                    newDateInput
-                        |> String.filter
-                            (\char -> List.member char [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '/' ])
-              }
-            , Cmd.none
-            )
-
-        OnHistoryViewerSelectYesterday ->
-            case model.ymd of
-                Just ymd ->
-                    let
-                        yesterday : YmdDate.YmdDate
-                        yesterday =
-                            YmdDate.addDays -1 ymd
-                    in
-                    update (SetHistoryViewerSelectedDate yesterday) model
-
-                Nothing ->
-                    ( { model | errorMessage = Just "Error selecting yesterday: current date not available" }
-                    , Cmd.none
-                    )
-
-        OnHistoryViewerSelectBeforeYesterday ->
-            case model.ymd of
-                Just ymd ->
-                    let
-                        beforeYesterday : YmdDate.YmdDate
-                        beforeYesterday =
-                            YmdDate.addDays -2 ymd
-                    in
-                    update (SetHistoryViewerSelectedDate beforeYesterday) model
-
-                Nothing ->
-                    ( { model | errorMessage = Just "Error selecting before yesterday: current date not available" }
-                    , Cmd.none
-                    )
-
-        OnHistoryViewerSelectDateInput ->
-            let
-                maybeYmd =
-                    YmdDate.fromSimpleString model.historyViewerDateInput
-            in
-            case maybeYmd of
-                Just ymd ->
-                    update (SetHistoryViewerSelectedDate ymd) model
-
-                Nothing ->
-                    ( { model | errorMessage = Just "Error selecting date: invalid input" }
-                    , Cmd.none
-                    )
-
-        SetHistoryViewerSelectedDate ymd ->
-            ( { model | historyViewerSelectedDate = Just ymd }
-            , getHistoryViewerFrequencyStats ymd []
-            )
-
-        OnGetTodayFrequencyStatsFailure apiError ->
+        OnGetFrequencyStatsFailure apiError ->
             ( { model | errorMessage = Just <| "Error retrieving performance stats: " ++ ApiError.toString apiError }
             , Cmd.none
             )
 
-        OnGetTodayFrequencyStatsSuccess { frequencyStatsList } ->
+        OnGetFrequencyStatsSuccess { frequencyStatsList } ->
             let
                 updateAllFrequencyStats : List FrequencyStats.FrequencyStats -> List FrequencyStats.FrequencyStats
                 updateAllFrequencyStats allFrequencyStats =
@@ -411,87 +328,17 @@ update msg model =
             , Cmd.none
             )
 
-        OnGetPastFrequencyStatsFailure apiError ->
-            ( { model
-                | historyViewerFrequencyStats = RemoteData.Failure apiError
-                , errorMessage = Just <| "Error retrieving past performance stats: " ++ ApiError.toString apiError
-              }
-            , Cmd.none
-            )
-
-        OnGetPastFrequencyStatsSuccess { frequencyStatsList } ->
-            let
-                updateHistoryViewerFrequencyStats : List FrequencyStats.FrequencyStats -> List FrequencyStats.FrequencyStats
-                updateHistoryViewerFrequencyStats historyViewerFrequencyStats =
-                    List.foldl
-                        (\newStats statsList ->
-                            Util.replaceOrAdd statsList (\stats -> stats.habitId == newStats.habitId) newStats
-                        )
-                        historyViewerFrequencyStats
-                        frequencyStatsList
-            in
-            ( { model
-                | historyViewerFrequencyStats =
-                    case model.historyViewerFrequencyStats of
-                        RemoteData.Success frequencyStatsFrequencyStatsList ->
-                            RemoteData.map
-                                updateHistoryViewerFrequencyStats
-                                model.historyViewerFrequencyStats
-
-                        _ ->
-                            RemoteData.Success frequencyStatsList
-              }
-            , Cmd.none
-            )
-
-        OnHistoryViewerChangeDate ->
-            ( { model | historyViewerSelectedDate = Nothing }, Cmd.none )
-
-        OnHistoryViewerHabitDataInput forDate habitId newInput ->
-            let
-                editingHabitDataDict =
-                    model.editingHistoryHabitAmount
-                        |> Dict.get (YmdDate.toSimpleString forDate)
-                        |> Maybe.withDefault Dict.empty
-
-                newAmount =
-                    extractInt newInput (Dict.get habitId editingHabitDataDict)
-
-                updatedEditingHabitDataDict =
-                    editingHabitDataDict |> Dict.update habitId (always newAmount)
-            in
-            ( { model
-                | editingHistoryHabitAmount =
-                    model.editingHistoryHabitAmount
-                        |> Dict.update
-                            (YmdDate.toSimpleString forDate)
-                            (always <| Just updatedEditingHabitDataDict)
-              }
-            , Cmd.none
-            )
-
         -- Dropdowns
-        ToggleTodayViewerHabitActionsDropdown habitId ->
+        ToggleHabitActionsDropdown habitId ->
             let
-                updatedTodayViewerHabitActionsDropdown =
-                    if model.todayViewerHabitActionsDropdown == Just habitId then
+                updatedHabitActionsDropdown =
+                    if model.habitActionsDropdown == Just habitId then
                         Nothing
 
                     else
                         Just habitId
             in
-            ( { model | todayViewerHabitActionsDropdown = updatedTodayViewerHabitActionsDropdown }, Cmd.none )
-
-        ToggleHistoryViewerHabitActionsDropdown habitId ->
-            let
-                updatedHistoryViewerHabitActionsDropdown =
-                    if model.historyViewerHabitActionsDropdown == Just habitId then
-                        Nothing
-
-                    else
-                        Just habitId
-            in
-            ( { model | historyViewerHabitActionsDropdown = updatedHistoryViewerHabitActionsDropdown }, Cmd.none )
+            ( { model | habitActionsDropdown = updatedHabitActionsDropdown }, Cmd.none )
 
         OnToggleDarkMode ->
             ( { model | darkModeOn = not model.darkModeOn }, Cmd.none )
@@ -711,8 +558,7 @@ update msg model =
             ( { newModel
                 | activeDialogScreen = Just DialogScreen.EditGoalScreen
                 , editGoalDialogHabit = newEditGoalDialogHabit
-                , todayViewerHabitActionsDropdown = Nothing
-                , historyViewerHabitActionsDropdown = Nothing
+                , habitActionsDropdown = Nothing
               }
             , Cmd.none
             )
@@ -796,15 +642,7 @@ update msg model =
                 , editGoal = Habit.initEditGoalData
                 , activeDialogScreen = Nothing
               }
-            , Cmd.batch
-                [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
-                , case model.historyViewerSelectedDate of
-                    Just ymd ->
-                        getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
-
-                    Nothing ->
-                        Cmd.none
-                ]
+            , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
             )
 
         OnEditGoalSubmitClick habitId newFrequencies habitType ->
@@ -815,17 +653,13 @@ update msg model =
             )
 
         -- Suspending Habits
-        OnResumeOrSuspendHabitClick habitId currentlySuspended onTodayViewer oldSuspensions ->
-            case model.ymd of
+        OnResumeOrSuspendHabitClick habitId currentlySuspended oldSuspensions ->
+            case model.actualYmd of
                 Just ymd ->
                     let
                         newDropdownsModel =
                             -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
-                            if onTodayViewer then
-                                { model | todayViewerHabitActionsDropdown = Nothing }
-
-                            else
-                                { model | historyViewerHabitActionsDropdown = Nothing }
+                            { model | habitActionsDropdown = Nothing }
 
                         newSuspensions : List Habit.SuspendedInterval
                         newSuspensions =
@@ -923,15 +757,7 @@ update msg model =
                         )
                         model.allHabits
               }
-            , Cmd.batch
-                [ getTodayViewerFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
-                , case model.historyViewerSelectedDate of
-                    Just ymd ->
-                        getHistoryViewerFrequencyStats ymd [ habit |> Habit.getCommonFields |> .id ]
-
-                    Nothing ->
-                        Cmd.none
-                ]
+            , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
             )
 
         -- Error Messages
@@ -1036,7 +862,7 @@ update msg model =
 
                 existingHabitDayNoteText : Maybe String
                 existingHabitDayNoteText =
-                    case ( model.allHabitDayNotes, model.ymd ) of
+                    case ( model.allHabitDayNotes, model.selectedYmd ) of
                         ( RemoteData.Success allHabitDayNotes, Just ymd ) ->
                             List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) allHabitDayNotes
                                 |> List.head
@@ -1050,8 +876,7 @@ update msg model =
                 , addNoteDialogHabit = Just habit
                 , addNoteDialogInput = Maybe.withDefault "" existingHabitDayNoteText
                 , addNoteKeysDown = []
-                , todayViewerHabitActionsDropdown = Nothing
-                , historyViewerHabitActionsDropdown = Nothing
+                , habitActionsDropdown = Nothing
               }
             , Dom.focus "add-note-dialog-input-id"
                 |> Task.attempt FocusResult

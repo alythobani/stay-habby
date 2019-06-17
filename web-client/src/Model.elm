@@ -19,13 +19,19 @@ import Url
 type alias Model =
     { key : Navigation.Key
     , url : Url.Url
+
+    -- Time / Date
     , currentPosix : Time.Posix
     , currentTimeZone : Maybe Time.Zone
-    , ymd : Maybe YmdDate.YmdDate
+    , selectedYmd : Maybe YmdDate.YmdDate
+    , actualYmd : Maybe YmdDate.YmdDate
+
+    --
     , apiBaseUrl : String
     , darkModeOn : Bool
-    , editingTodayHabitAmount : Dict.Dict String Int
-    , editingHistoryHabitAmount : Dict.Dict String (Dict.Dict String Int)
+
+    -- User-Inputted Habit Amounts
+    , editingHabitAmountDict : Dict.Dict String Int
 
     -- Remote Data
     , allHabits : RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
@@ -56,17 +62,12 @@ type alias Model =
         }
 
     --
-    , openTodayViewer : Bool
-    , openHistoryViewer : Bool
-
-    --
     , historyViewerDateInput : String
     , historyViewerSelectedDate : Maybe YmdDate.YmdDate
     , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
 
     -- Dropdowns
-    , todayViewerHabitActionsDropdown : Maybe String
-    , historyViewerHabitActionsDropdown : Maybe String
+    , habitActionsDropdown : Maybe String
 
     -- Keyboard
     , keysDown : Keyboard.Model

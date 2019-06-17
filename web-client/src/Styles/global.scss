@@ -637,9 +637,10 @@ body {
           }
 
           .add-habit-form-body-x-times-per-week {
+            float: left;
               input {
                   @extend .input-style-1;
-                  margin-bottom: 10px;
+                  margin: 0 10px 10px 0;
                   width: 100px;
                   height: 40px;
               }

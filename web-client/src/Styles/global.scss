@@ -712,6 +712,15 @@ body {
         .choose-date-dialog-form-chosen-ymd-text {
           font-size: 18px;
         }
+        .choose-date-dialog-form-change-date-buttons {
+          .choose-date-dialog-form-change-date-button {
+            @extend .button-style-1;
+            display: inline-block;
+            margin: 10px 7px 0px 7px;
+            padding: 5px 10px 5px 10px;
+            font-size: 15px;
+          }
+        }
         .choose-date-dialog-form-calendar {
           margin-top: 20px;
           border: 2px solid white;
@@ -744,25 +753,25 @@ body {
                 &:hover {
                   outline-width: 2px;
                 }
-                &.choose-date-dialog-form-calendar-day-box-today {
+                &.choose-date-dialog-form-calendar-day-box-chosen {
                   outline: 2px solid blue;
                 }
-                &.choose-date-dialog-form-calendar-day-box-chosen {
+                &.choose-date-dialog-form-calendar-day-box-today {
                   outline: 2px solid green;
                 }
               }
             }
           }
         }
-        .choose-date-dialog-form-buttons {
+        .choose-date-dialog-form-submit-buttons {
           margin-top: 20px;
           width: 250px;
-          .choose-date-dialog-form-buttons-cancel {
+          .choose-date-dialog-form-submit-buttons-cancel {
             @extend .button-style-1;
             height: 30px;
             width: 100px;
           }
-          .choose-date-dialog-form-buttons-submit {
+          .choose-date-dialog-form-submit-buttons-submit {
             @extend .button-style-2;
             float: right;
             height: 30px;

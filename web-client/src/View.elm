@@ -841,9 +841,43 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
             [ class "choose-date-dialog-form" ]
             (case ( maybeChosenYmd, maybeActualYmd ) of
                 ( Just chosenYmd, Just actualYmd ) ->
+                    let
+                        yesterday =
+                            YmdDate.addDays -1 actualYmd
+
+                        tomorrow =
+                            YmdDate.addDays 1 actualYmd
+                    in
                     [ div
                         [ class "choose-date-dialog-form-chosen-ymd-text" ]
                         [ text <| YmdDate.prettyPrintWithWeekday chosenYmd ]
+                    , div
+                        [ class "choose-date-dialog-form-change-date-buttons" ]
+                        [ button
+                            [ classList
+                                [ ( "choose-date-dialog-form-change-date-button", True )
+                                , ( "selected", chosenYmd == yesterday )
+                                ]
+                            , onClick <| SetChooseDateDialogChosenYmd yesterday
+                            ]
+                            [ text "Yesterday" ]
+                        , button
+                            [ classList
+                                [ ( "choose-date-dialog-form-change-date-button", True )
+                                , ( "selected", chosenYmd == actualYmd )
+                                ]
+                            , onClick <| SetChooseDateDialogChosenYmd actualYmd
+                            ]
+                            [ text "Today" ]
+                        , button
+                            [ classList
+                                [ ( "choose-date-dialog-form-change-date-button", True )
+                                , ( "selected", chosenYmd == tomorrow )
+                                ]
+                            , onClick <| SetChooseDateDialogChosenYmd tomorrow
+                            ]
+                            [ text "Tomorrow" ]
+                        ]
                     , div
                         [ class "choose-date-dialog-form-calendar" ]
                         [ div
@@ -896,14 +930,14 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                             )
                         ]
                     , div
-                        [ class "choose-date-dialog-form-buttons" ]
+                        [ class "choose-date-dialog-form-submit-buttons" ]
                         [ button
-                            [ class "choose-date-dialog-form-buttons-submit"
+                            [ class "choose-date-dialog-form-submit-buttons-submit"
                             , onClick <| OnChooseDateDialogSubmitClick chosenYmd
                             ]
                             [ text "Submit" ]
                         , button
-                            [ class "choose-date-dialog-form-buttons-cancel"
+                            [ class "choose-date-dialog-form-submit-buttons-cancel"
                             , onClick OnExitDialogScreen
                             ]
                             [ text "Cancel" ]

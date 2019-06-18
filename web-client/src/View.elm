@@ -814,9 +814,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
                                 , onClick <| OnChooseDateDialogPreviousMonthClick chosenYmd
                                 ]
                                 []
-                            , span
-                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-text" ]
-                                [ text <| YmdDate.prettyPrintMonth chosenYmd.month ]
+                            , span [] [ text <| YmdDate.prettyPrintMonth chosenYmd.month ]
                             , span
                                 [ class "choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow"
                                 , onClick <| OnChooseDateDialogNextMonthClick chosenYmd
@@ -830,9 +828,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
                                 , onClick <| OnChooseDateDialogPreviousDayClick chosenYmd
                                 ]
                                 []
-                            , span
-                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-text" ]
-                                [ text <| YmdDate.prettyPrintDay chosenYmd.day ]
+                            , span [] [ text <| YmdDate.prettyPrintDay chosenYmd.day ]
                             , span
                                 [ class "choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow"
                                 , onClick <| OnChooseDateDialogNextDayClick chosenYmd
@@ -846,15 +842,26 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
                                 , onClick <| OnChooseDateDialogPreviousYearClick chosenYmd
                                 ]
                                 []
-                            , span
-                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-text" ]
-                                [ text <| String.fromInt chosenYmd.year ]
+                            , span [] [ text <| String.fromInt chosenYmd.year ]
                             , span
                                 [ class "choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow"
                                 , onClick <| OnChooseDateDialogNextYearClick chosenYmd
                                 ]
                                 []
                             ]
+                        ]
+                    , div
+                        [ class "choose-date-dialog-form-buttons" ]
+                        [ button
+                            [ class "choose-date-dialog-form-buttons-submit"
+                            , onClick <| OnChooseDateDialogSubmitClick chosenYmd
+                            ]
+                            [ text "Submit" ]
+                        , button
+                            [ class "choose-date-dialog-form-buttons-cancel"
+                            , onClick OnExitDialogScreen
+                            ]
+                            [ text "Cancel" ]
                         ]
                     ]
 

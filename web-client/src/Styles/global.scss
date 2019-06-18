@@ -707,10 +707,10 @@ body {
       @extend .full-screen-centered-flex-container;
       .choose-date-dialog-form {
         @extend .dialog-form-1;
+        @extend .no-select;
         padding: 40px 20px 40px 20px;
         .choose-date-dialog-form-chosen-ymd-text {
           font-size: 18px;
-          @extend .no-select;
         }
         .choose-date-dialog-form-calendar {
           margin-top: 20px;
@@ -723,12 +723,24 @@ body {
             .choose-date-dialog-form-calendar-month-or-day-or-year-left-arrow {
               @extend .select-previous-left-arrow;
             }
-            .choose-date-dialog-form-calendar-month-or-day-or-year-text {
-              @extend .no-select;
-            }
             .choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow {
               @extend .select-next-right-arrow;
             }
+          }
+        }
+        .choose-date-dialog-form-buttons {
+          margin-top: 20px;
+          width: 250px;
+          .choose-date-dialog-form-buttons-cancel {
+            @extend .button-style-1;
+            height: 30px;
+            width: 100px;
+          }
+          .choose-date-dialog-form-buttons-submit {
+            @extend .button-style-2;
+            float: right;
+            height: 30px;
+            width: 100px;
           }
         }
       }

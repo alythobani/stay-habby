@@ -24,6 +24,7 @@ type Msg
     | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
       -- Top Panel Date
     | ToggleTopPanelDateDropdown
+    | ChangeSelectedYmd YmdDate.YmdDate
     | SetSelectedDateToXDaysFromToday Int
     | OnChooseCustomDateClick
     | OnChooseDateDialogPreviousMonthClick YmdDate.YmdDate
@@ -32,7 +33,7 @@ type Msg
     | OnChooseDateDialogNextDayClick YmdDate.YmdDate
     | OnChooseDateDialogPreviousYearClick YmdDate.YmdDate
     | OnChooseDateDialogNextYearClick YmdDate.YmdDate
-    | SetSelectedDateToCustomDate
+    | OnChooseDateDialogSubmitClick YmdDate.YmdDate
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError
     | OnGetAllRemoteDataSuccess Api.AllRemoteData

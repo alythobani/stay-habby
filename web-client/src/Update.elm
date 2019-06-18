@@ -120,6 +120,19 @@ update msg model =
         ToggleTopPanelDateDropdown ->
             ( { model | openTopPanelDateDropdown = not model.openTopPanelDateDropdown }, Cmd.none )
 
+        ChangeSelectedYmd newYmd ->
+            if model.selectedYmd == Just newYmd then
+                -- Already on desired date, no need to re-query any data
+                ( model, Cmd.none )
+
+            else
+                ( { model
+                    | selectedYmd = Just newYmd
+                    , allFrequencyStats = RemoteData.Loading
+                  }
+                , getFrequencyStatsOnDate newYmd []
+                )
+
         SetSelectedDateToXDaysFromToday numDaysToAdd ->
             let
                 -- Close the date dropdown
@@ -132,17 +145,7 @@ update msg model =
                         newSelectedYmd =
                             YmdDate.addDays numDaysToAdd today
                     in
-                    if model.selectedYmd == Just newSelectedYmd then
-                        -- Already on desired date, no need to re-query any data
-                        ( newDateDropdownModel, Cmd.none )
-
-                    else
-                        ( { newDateDropdownModel
-                            | selectedYmd = Just newSelectedYmd
-                            , allFrequencyStats = RemoteData.Loading
-                          }
-                        , getFrequencyStatsOnDate newSelectedYmd []
-                        )
+                    update (ChangeSelectedYmd newSelectedYmd) newDateDropdownModel
 
                 Nothing ->
                     ( { newDateDropdownModel | errorMessage = Just "Error setting date: current date not available" }, Cmd.none )
@@ -151,6 +154,7 @@ update msg model =
             ( { model
                 | activeDialogScreen = Just DialogScreen.ChooseDateDialogScreen
                 , openTopPanelDateDropdown = False
+                , chooseDateDialogChosenYmd = model.selectedYmd
               }
             , Cmd.none
             )
@@ -197,9 +201,12 @@ update msg model =
             in
             ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
 
-        SetSelectedDateToCustomDate ->
-            -- TODO
-            ( model, Cmd.none )
+        OnChooseDateDialogSubmitClick chosenYmd ->
+            let
+                newDialogScreenModel =
+                    { model | activeDialogScreen = Nothing }
+            in
+            update (ChangeSelectedYmd chosenYmd) newDialogScreenModel
 
         -- All Habit Data
         OnGetAllRemoteDataFailure apiError ->

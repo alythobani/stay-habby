@@ -201,6 +201,13 @@ update msg model =
             in
             ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
 
+        OnChooseDateDialogCalendarDayBoxClick newDay chosenYmd ->
+            let
+                newYmd =
+                    { chosenYmd | day = newDay }
+            in
+            ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
+
         OnChooseDateDialogSubmitClick chosenYmd ->
             let
                 newDialogScreenModel =

@@ -727,6 +727,26 @@ body {
               @extend .select-next-right-arrow;
             }
           }
+          .choose-date-dialog-form-calendar-rows {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            .choose-date-dialog-form-calendar-row {
+              .choose-date-dialog-form-calendar-day-box {
+                display: inline-flex;
+                flex-direction: column;
+                justify-content: center;
+                margin: 5px;
+                width: 30px;
+                height: 30px;
+                outline: 1px solid white;
+                box-sizing: border-box;
+                cursor: pointer;
+                &:hover {
+                  outline-width: 2px;
+                }
+              }
+            }
+          }
         }
         .choose-date-dialog-form-buttons {
           margin-top: 20px;

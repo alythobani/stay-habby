@@ -9,6 +9,7 @@ module Models.YmdDate exposing
     , fromDate
     , fromSimpleString
     , getFirstMondayAfterDate
+    , numDaysInMonth
     , prettyPrint
     , prettyPrintDay
     , prettyPrintMonth
@@ -51,6 +52,35 @@ compareYmds ymdOne ymdTwo =
 
     else
         EQ
+
+
+numDaysInMonth : YmdDate -> Int
+numDaysInMonth { month, year } =
+    let
+        isLeapYear =
+            if modBy 4 year == 0 then
+                if modBy 100 year == 0 && not (modBy 400 year == 0) then
+                    -- Century years are not leap years unless they're divisible by 400
+                    False
+
+                else
+                    True
+
+            else
+                False
+    in
+    if List.member month [ 1, 3, 5, 7, 8, 10, 12 ] then
+        31
+
+    else if month == 2 then
+        if isLeapYear then
+            29
+
+        else
+            28
+
+    else
+        30
 
 
 prettyPrintMonth : Int -> String

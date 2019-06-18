@@ -33,6 +33,7 @@ type Msg
     | OnChooseDateDialogNextDayClick YmdDate.YmdDate
     | OnChooseDateDialogPreviousYearClick YmdDate.YmdDate
     | OnChooseDateDialogNextYearClick YmdDate.YmdDate
+    | OnChooseDateDialogCalendarDayBoxClick Int YmdDate.YmdDate
     | OnChooseDateDialogSubmitClick YmdDate.YmdDate
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError

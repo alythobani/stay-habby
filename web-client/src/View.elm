@@ -785,12 +785,42 @@ renderDialogBackgroundScreen activeDialogScreen =
         []
 
 
+renderCalendarDayBox : Int -> YmdDate.YmdDate -> Html Msg
+renderCalendarDayBox day chosenYmd =
+    div
+        [ class "choose-date-dialog-form-calendar-day-box"
+        , onClick <| OnChooseDateDialogCalendarDayBoxClick day chosenYmd
+        ]
+        [ text <| String.fromInt day ]
+
+
+renderCalendarRow : List Int -> YmdDate.YmdDate -> Html Msg
+renderCalendarRow days chosenYmd =
+    div
+        [ class "choose-date-dialog-form-calendar-row" ]
+        (List.map (\day -> renderCalendarDayBox day chosenYmd) days)
+
+
 renderChooseDateDialog : Maybe DialogScreen.DialogScreen -> Maybe YmdDate.YmdDate -> Html Msg
 renderChooseDateDialog activeDialogScreen maybeChosenYmd =
     let
         showDialog : Bool
         showDialog =
             activeDialogScreen == Just DialogScreen.ChooseDateDialogScreen
+
+        getCalendarRows : Int -> List (List Int)
+        getCalendarRows numDaysInMonth =
+            let
+                numRows =
+                    ceiling <| toFloat numDaysInMonth / 7
+
+                getRow : Int -> List Int
+                getRow rowIndex =
+                    List.range
+                        (rowIndex * 7 + 1)
+                        (min (rowIndex * 7 + 7) numDaysInMonth)
+            in
+            List.map getRow (List.range 0 (numRows - 1))
     in
     div
         [ classList
@@ -849,6 +879,12 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
                                 ]
                                 []
                             ]
+                        , div
+                            [ class "choose-date-dialog-form-calendar-rows" ]
+                            (List.map
+                                (\row -> renderCalendarRow row chosenYmd)
+                                (getCalendarRows <| YmdDate.numDaysInMonth chosenYmd)
+                            )
                         ]
                     , div
                         [ class "choose-date-dialog-form-buttons" ]

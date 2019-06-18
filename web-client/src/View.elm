@@ -808,49 +808,49 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
                     , div
                         [ class "choose-date-dialog-form-calendar" ]
                         [ div
-                            [ class "choose-date-dialog-form-calendar-month" ]
-                            [ div
-                                [ class "choose-date-dialog-form-calendar-month-left-arrow"
+                            [ class "choose-date-dialog-form-calendar-month-or-day-or-year" ]
+                            [ span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-left-arrow"
                                 , onClick <| OnChooseDateDialogPreviousMonthClick chosenYmd
                                 ]
                                 []
-                            , div
-                                [ class "choose-date-dialog-form-calendar-month-text" ]
+                            , span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-text" ]
                                 [ text <| YmdDate.prettyPrintMonth chosenYmd.month ]
-                            , div
-                                [ class "choose-date-dialog-form-calendar-month-right-arrow"
+                            , span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow"
                                 , onClick <| OnChooseDateDialogNextMonthClick chosenYmd
                                 ]
                                 []
                             ]
                         , div
-                            [ class "choose-date-dialog-form-calendar-day" ]
-                            [ div
-                                [ class "choose-date-dialog-form-calendar-day-left-arrow"
+                            [ class "choose-date-dialog-form-calendar-month-or-day-or-year" ]
+                            [ span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-left-arrow"
                                 , onClick <| OnChooseDateDialogPreviousDayClick chosenYmd
                                 ]
                                 []
-                            , div
-                                [ class "choose-date-dialog-form-calendar-day-text" ]
+                            , span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-text" ]
                                 [ text <| YmdDate.prettyPrintDay chosenYmd.day ]
-                            , div
-                                [ class "choose-date-dialog-form-calendar-day-right-arrow"
+                            , span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow"
                                 , onClick <| OnChooseDateDialogNextDayClick chosenYmd
                                 ]
                                 []
                             ]
                         , div
-                            [ class "choose-date-dialog-form-calendar-year" ]
-                            [ div
-                                [ class "choose-date-dialog-form-calendar-year-left-arrow"
+                            [ class "choose-date-dialog-form-calendar-month-or-day-or-year" ]
+                            [ span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-left-arrow"
                                 , onClick <| OnChooseDateDialogPreviousYearClick chosenYmd
                                 ]
                                 []
-                            , div
-                                [ class "choose-date-dialog-form-calendar-year-text" ]
+                            , span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-text" ]
                                 [ text <| String.fromInt chosenYmd.year ]
-                            , div
-                                [ class "choose-date-dialog-form-calendar-year-right-arrow"
+                            , span
+                                [ class "choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow"
                                 , onClick <| OnChooseDateDialogNextYearClick chosenYmd
                                 ]
                                 []

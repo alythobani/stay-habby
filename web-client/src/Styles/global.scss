@@ -707,34 +707,26 @@ body {
       @extend .full-screen-centered-flex-container;
       .choose-date-dialog-form {
         @extend .dialog-form-1;
+        padding: 40px 20px 40px 20px;
         .choose-date-dialog-form-chosen-ymd-text {
           font-size: 18px;
+          @extend .no-select;
         }
         .choose-date-dialog-form-calendar {
           margin-top: 20px;
           border: 2px solid white;
           min-height: 250px;
           width: 400px;
-          .choose-date-dialog-form-calendar-month,
-          .choose-date-dialog-form-calendar-day,
-          .choose-date-dialog-form-calendar-year {
+          .choose-date-dialog-form-calendar-month-or-day-or-year {
             margin: 15px 7px 0px 7px;
             display: inline-block;
-            .choose-date-dialog-form-calendar-year-left-arrow,
-            .choose-date-dialog-form-calendar-day-left-arrow,
-            .choose-date-dialog-form-calendar-month-left-arrow {
+            .choose-date-dialog-form-calendar-month-or-day-or-year-left-arrow {
               @extend .select-previous-left-arrow;
             }
-            .choose-date-dialog-form-calendar-month-text,
-            .choose-date-dialog-form-calendar-day-text,
-            .choose-date-dialog-form-calendar-year-text {
-              display: inline-block;
+            .choose-date-dialog-form-calendar-month-or-day-or-year-text {
               @extend .no-select;
-              font-weight: 450;
             }
-            .choose-date-dialog-form-calendar-month-right-arrow,
-            .choose-date-dialog-form-calendar-day-right-arrow,
-            .choose-date-dialog-form-calendar-year-right-arrow {
+            .choose-date-dialog-form-calendar-month-or-day-or-year-right-arrow {
               @extend .select-next-right-arrow;
             }
           }

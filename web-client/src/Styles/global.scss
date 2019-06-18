@@ -702,6 +702,14 @@ body {
       z-index: 2;
       background-color: rgba(101, 101, 101, 0.59);
     }
+
+    .choose-date-dialog {
+      @extend .full-screen-centered-flex-container;
+      .choose-date-dialog-form {
+        @extend .dialog-form-1;
+      }
+    }
+
     .set-habit-data-shortcut {
       .set-habit-data-shortcut-habit-selection {
         @extend .full-screen-centered-flex-container;

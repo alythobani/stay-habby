@@ -146,6 +146,14 @@ update msg model =
                 Nothing ->
                     ( { newDateDropdownModel | errorMessage = Just "Error setting date: current date not available" }, Cmd.none )
 
+        OnChooseCustomDateClick ->
+            ( { model
+                | activeDialogScreen = Just DialogScreen.ChooseDateDialogScreen
+                , openTopPanelDateDropdown = False
+              }
+            , Cmd.none
+            )
+
         SetSelectedDateToCustomDate ->
             -- TODO
             ( model, Cmd.none )

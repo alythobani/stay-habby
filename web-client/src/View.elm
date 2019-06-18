@@ -48,6 +48,11 @@ view model =
                     model.addHabit
                 ]
             , renderDialogBackgroundScreen model.activeDialogScreen
+            , renderChooseDateDialog
+                model.activeDialogScreen
+                model.chooseDateDialogChosenYmd
+                model.chooseDateDialogChosenMonth
+                model.chooseDateDialogChosenYear
             , renderSetHabitDataShortcut
                 model.activeDialogScreen
                 model.setHabitDataShortcutHabitNameFilterText
@@ -228,7 +233,7 @@ renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateD
                             [ ( "top-panel-date-dropdown-button", True )
                             , ( "display-none", not openDateDropdown )
                             ]
-                        , onClick <| SetSelectedDateToCustomDate
+                        , onClick OnChooseCustomDateClick
                         ]
                         [ text "Custom Date" ]
                     ]
@@ -780,6 +785,34 @@ renderDialogBackgroundScreen activeDialogScreen =
         , onClick OnExitDialogScreen
         ]
         []
+
+
+renderChooseDateDialog : Maybe DialogScreen.DialogScreen -> Maybe YmdDate.YmdDate -> Maybe Int -> Maybe Int -> Html Msg
+renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeChosenMonth maybeChosenYear =
+    let
+        showDialog : Bool
+        showDialog =
+            activeDialogScreen == Just DialogScreen.ChooseDateDialogScreen
+    in
+    div
+        [ classList
+            [ ( "choose-date-dialog", True )
+            , ( "display-none", not showDialog )
+            ]
+        ]
+        [ div
+            [ class "choose-date-dialog-form" ]
+            (case ( maybeChosenYmd, maybeChosenMonth, maybeChosenYear ) of
+                ( Just chosenYmd, Just chosenMonth, Just chosenYear ) ->
+                    [ div
+                        [ class "choose-date-dialog-form-chosen-ymd-text" ]
+                        [ text <| YmdDate.prettyPrintWithWeekday chosenYmd ]
+                    ]
+
+                _ ->
+                    [ text "Loading..." ]
+            )
+        ]
 
 
 renderSetHabitDataShortcut :

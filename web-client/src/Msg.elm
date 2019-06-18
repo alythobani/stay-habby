@@ -25,6 +25,7 @@ type Msg
       -- Top Panel Date
     | ToggleTopPanelDateDropdown
     | SetSelectedDateToXDaysFromToday Int
+    | OnChooseCustomDateClick
     | SetSelectedDateToCustomDate
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError

@@ -10,3 +10,4 @@ type DialogScreen
     | ErrorMessageScreen
     | AddNoteHabitSelectionScreen
     | AddNoteScreen
+    | ChooseDateDialogScreen

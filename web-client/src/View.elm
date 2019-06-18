@@ -51,6 +51,7 @@ view model =
             , renderChooseDateDialog
                 model.activeDialogScreen
                 model.chooseDateDialogChosenYmd
+                model.actualYmd
             , renderSetHabitDataShortcut
                 model.activeDialogScreen
                 model.setHabitDataShortcutHabitNameFilterText
@@ -785,24 +786,32 @@ renderDialogBackgroundScreen activeDialogScreen =
         []
 
 
-renderCalendarDayBox : Int -> YmdDate.YmdDate -> Html Msg
-renderCalendarDayBox day chosenYmd =
+renderCalendarDayBox : Int -> YmdDate.YmdDate -> YmdDate.YmdDate -> Html Msg
+renderCalendarDayBox day chosenYmd actualYmd =
+    let
+        representedYmd =
+            { chosenYmd | day = day }
+    in
     div
-        [ class "choose-date-dialog-form-calendar-day-box"
-        , onClick <| OnChooseDateDialogCalendarDayBoxClick day chosenYmd
+        [ classList
+            [ ( "choose-date-dialog-form-calendar-day-box", True )
+            , ( "choose-date-dialog-form-calendar-day-box-today", representedYmd == actualYmd )
+            , ( "choose-date-dialog-form-calendar-day-box-chosen", representedYmd == chosenYmd )
+            ]
+        , onClick <| SetChooseDateDialogChosenYmd representedYmd
         ]
         [ text <| String.fromInt day ]
 
 
-renderCalendarRow : List Int -> YmdDate.YmdDate -> Html Msg
-renderCalendarRow days chosenYmd =
+renderCalendarRow : List Int -> YmdDate.YmdDate -> YmdDate.YmdDate -> Html Msg
+renderCalendarRow days chosenYmd actualYmd =
     div
         [ class "choose-date-dialog-form-calendar-row" ]
-        (List.map (\day -> renderCalendarDayBox day chosenYmd) days)
+        (List.map (\day -> renderCalendarDayBox day chosenYmd actualYmd) days)
 
 
-renderChooseDateDialog : Maybe DialogScreen.DialogScreen -> Maybe YmdDate.YmdDate -> Html Msg
-renderChooseDateDialog activeDialogScreen maybeChosenYmd =
+renderChooseDateDialog : Maybe DialogScreen.DialogScreen -> Maybe YmdDate.YmdDate -> Maybe YmdDate.YmdDate -> Html Msg
+renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
     let
         showDialog : Bool
         showDialog =
@@ -830,8 +839,8 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
         ]
         [ div
             [ class "choose-date-dialog-form" ]
-            (case maybeChosenYmd of
-                Just chosenYmd ->
+            (case ( maybeChosenYmd, maybeActualYmd ) of
+                ( Just chosenYmd, Just actualYmd ) ->
                     [ div
                         [ class "choose-date-dialog-form-chosen-ymd-text" ]
                         [ text <| YmdDate.prettyPrintWithWeekday chosenYmd ]
@@ -882,7 +891,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
                         , div
                             [ class "choose-date-dialog-form-calendar-rows" ]
                             (List.map
-                                (\row -> renderCalendarRow row chosenYmd)
+                                (\row -> renderCalendarRow row chosenYmd actualYmd)
                                 (getCalendarRows <| YmdDate.numDaysInMonth chosenYmd)
                             )
                         ]
@@ -901,7 +910,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd =
                         ]
                     ]
 
-                Nothing ->
+                _ ->
                     [ text "Loading..." ]
             )
         ]

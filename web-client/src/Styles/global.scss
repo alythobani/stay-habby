@@ -744,6 +744,12 @@ body {
                 &:hover {
                   outline-width: 2px;
                 }
+                &.choose-date-dialog-form-calendar-day-box-today {
+                  outline: 2px solid blue;
+                }
+                &.choose-date-dialog-form-calendar-day-box-chosen {
+                  outline: 2px solid green;
+                }
               }
             }
           }

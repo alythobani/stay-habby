@@ -27,8 +27,6 @@ type alias Model =
     , actualYmd : Maybe YmdDate.YmdDate
     , openTopPanelDateDropdown : Bool
     , chooseDateDialogChosenYmd : Maybe YmdDate.YmdDate
-    , chooseDateDialogChosenMonth : Maybe Int
-    , chooseDateDialogChosenYear : Maybe Int
 
     --
     , apiBaseUrl : String

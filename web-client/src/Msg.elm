@@ -26,6 +26,12 @@ type Msg
     | ToggleTopPanelDateDropdown
     | SetSelectedDateToXDaysFromToday Int
     | OnChooseCustomDateClick
+    | OnChooseDateDialogPreviousMonthClick YmdDate.YmdDate
+    | OnChooseDateDialogNextMonthClick YmdDate.YmdDate
+    | OnChooseDateDialogPreviousDayClick YmdDate.YmdDate
+    | OnChooseDateDialogNextDayClick YmdDate.YmdDate
+    | OnChooseDateDialogPreviousYearClick YmdDate.YmdDate
+    | OnChooseDateDialogNextYearClick YmdDate.YmdDate
     | SetSelectedDateToCustomDate
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError

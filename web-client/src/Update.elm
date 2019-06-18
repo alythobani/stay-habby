@@ -71,6 +71,7 @@ update msg model =
                         | currentTimeZone = Just timeZone
                         , selectedYmd = Just currentYmd
                         , actualYmd = Just currentYmd
+                        , chooseDateDialogChosenYmd = Just currentYmd
                         , allHabits = RemoteData.Loading
                         , allHabitData = RemoteData.Loading
                         , allFrequencyStats = RemoteData.Loading
@@ -153,6 +154,48 @@ update msg model =
               }
             , Cmd.none
             )
+
+        OnChooseDateDialogPreviousMonthClick chosenYmd ->
+            let
+                newYmd =
+                    YmdDate.addMonths -1 chosenYmd
+            in
+            ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
+
+        OnChooseDateDialogNextMonthClick chosenYmd ->
+            let
+                newYmd =
+                    YmdDate.addMonths 1 chosenYmd
+            in
+            ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
+
+        OnChooseDateDialogPreviousDayClick chosenYmd ->
+            let
+                newYmd =
+                    YmdDate.addDays -1 chosenYmd
+            in
+            ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
+
+        OnChooseDateDialogNextDayClick chosenYmd ->
+            let
+                newYmd =
+                    YmdDate.addDays 1 chosenYmd
+            in
+            ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
+
+        OnChooseDateDialogPreviousYearClick chosenYmd ->
+            let
+                newYmd =
+                    YmdDate.addYears -1 chosenYmd
+            in
+            ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
+
+        OnChooseDateDialogNextYearClick chosenYmd ->
+            let
+                newYmd =
+                    YmdDate.addYears 1 chosenYmd
+            in
+            ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
 
         SetSelectedDateToCustomDate ->
             -- TODO

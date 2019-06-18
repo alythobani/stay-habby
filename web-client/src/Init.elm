@@ -34,8 +34,6 @@ init { apiBaseUrl, currentTime } url key =
       , actualYmd = Nothing
       , openTopPanelDateDropdown = False
       , chooseDateDialogChosenYmd = Nothing
-      , chooseDateDialogChosenMonth = Nothing
-      , chooseDateDialogChosenYear = Nothing
 
       --
       , apiBaseUrl = apiBaseUrl

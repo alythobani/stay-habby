@@ -17,6 +17,8 @@
   box-shadow:0 1px 4px $black-30, 0 0 40px $black-10 inset;
 }
 
+
+
 // Different button styles.
 .button-style-1 {
   color: $cape-cod;
@@ -65,6 +67,8 @@
   }
 }
 
+
+
 // Different input styles.
 .input-style-1 {
   box-sizing: border-box;
@@ -77,6 +81,9 @@
   font-size: 16px;
 }
 
+
+
+// No Select
 .no-select {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Chrome/Safari/Opera */
@@ -87,6 +94,8 @@
   not supported by any browser */
   cursor: default;
 }
+
+
 
 // Dropdowns
 .dropdown-toggler-default {
@@ -117,6 +126,8 @@
   width: 90px;
 }
 
+
+
 // Dialog forms
 .dialog-form-1 {
   text-align: center;
@@ -133,6 +144,39 @@
   padding: 50px 20px 50px 20px;
 }
 
+.dialog-form-line-break {
+  width: 450px;
+  border: 0.5px solid $cape-cod;
+}
+
+.select-next-or-previous-arrow {
+  display: inline-block;
+  font-size: 20px;
+  cursor: pointer;
+  &:hover {
+    font-weight: 600;
+  }
+}
+
+.select-previous-left-arrow {
+  @extend .select-next-or-previous-arrow;
+  margin-right: 9px;
+  &:after {
+    content: "<";
+  }
+}
+
+.select-next-right-arrow {
+  @extend .select-next-or-previous-arrow;
+  margin-left: 9px;
+  &:after {
+    content: ">";
+  }
+}
+
+
+
+// Habit Selection Screen
 .habit-selection-header {
   position: absolute;
   top: 11.5vh;
@@ -174,6 +218,9 @@
   background-color: $black-90;
 }
 
+
+
+// Full Screen Centered Flex
 .full-screen-centered-flex-container {
   position: absolute;
   left: 0px;
@@ -184,9 +231,4 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-.dialog-form-line-break {
-  width: 450px;
-  border: 0.5px solid $cape-cod;
 }

@@ -1,6 +1,8 @@
 module Models.YmdDate exposing
     ( YmdDate
     , addDays
+    , addMonths
+    , addYears
     , compareYmds
     , decodeYmdDate
     , encodeYmdDate
@@ -8,6 +10,8 @@ module Models.YmdDate exposing
     , fromSimpleString
     , getFirstMondayAfterDate
     , prettyPrint
+    , prettyPrintDay
+    , prettyPrintMonth
     , prettyPrintWithWeekday
     , toDate
     , toSimpleString
@@ -49,66 +53,69 @@ compareYmds ymdOne ymdTwo =
         EQ
 
 
+prettyPrintMonth : Int -> String
+prettyPrintMonth month =
+    case month of
+        1 ->
+            "January"
+
+        2 ->
+            "February"
+
+        3 ->
+            "March"
+
+        4 ->
+            "April"
+
+        5 ->
+            "May"
+
+        6 ->
+            "June"
+
+        7 ->
+            "July"
+
+        8 ->
+            "August"
+
+        9 ->
+            "September"
+
+        10 ->
+            "October"
+
+        11 ->
+            "November"
+
+        12 ->
+            "December"
+
+        _ ->
+            "Invalid Month Number"
+
+
+prettyPrintDay : Int -> String
+prettyPrintDay day =
+    String.fromInt day
+        ++ (if List.member day [ 1, 21, 31 ] then
+                "st"
+
+            else if List.member day [ 2, 22 ] then
+                "nd"
+
+            else if List.member day [ 3, 23 ] then
+                "rd"
+
+            else
+                "th"
+           )
+
+
 prettyPrint : YmdDate -> String
 prettyPrint ymd =
-    let
-        prettyMonth { month } =
-            case month of
-                1 ->
-                    "January"
-
-                2 ->
-                    "February"
-
-                3 ->
-                    "March"
-
-                4 ->
-                    "April"
-
-                5 ->
-                    "May"
-
-                6 ->
-                    "June"
-
-                7 ->
-                    "July"
-
-                8 ->
-                    "August"
-
-                9 ->
-                    "September"
-
-                10 ->
-                    "October"
-
-                11 ->
-                    "November"
-
-                12 ->
-                    "December"
-
-                _ ->
-                    "Invalid Month Number"
-
-        prettyDay { day } =
-            String.fromInt day
-                ++ (if List.member day [ 1, 21, 31 ] then
-                        "st"
-
-                    else if List.member day [ 2, 22 ] then
-                        "nd"
-
-                    else if List.member day [ 3, 23 ] then
-                        "rd"
-
-                    else
-                        "th"
-                   )
-    in
-    prettyMonth ymd ++ " " ++ prettyDay ymd ++ ", " ++ String.fromInt ymd.year
+    prettyPrintMonth ymd.month ++ " " ++ prettyPrintDay ymd.day ++ ", " ++ String.fromInt ymd.year
 
 
 prettyPrintWithWeekday : YmdDate -> String
@@ -122,6 +129,26 @@ addDays : Int -> YmdDate -> YmdDate
 addDays dayDelta ymd =
     toDate ymd
         |> Date.add Date.Days dayDelta
+        |> fromDate
+
+
+{-| Add months to a date to get a new date that many months away, you can add negative months to go back in time.
+Day values are clamped to the end of the month (e.g. Jan 31 -> Feb 28) if necessary.
+-}
+addMonths : Int -> YmdDate -> YmdDate
+addMonths monthDelta ymd =
+    toDate ymd
+        |> Date.add Date.Months monthDelta
+        |> fromDate
+
+
+{-| Add years to a date to get a new date that many years away, you can add negative years to go back in time.
+Day values are clamped to the end of the month (e.g. Jan 31 -> Feb 28) if necessary.
+-}
+addYears : Int -> YmdDate -> YmdDate
+addYears yearDelta ymd =
+    toDate ymd
+        |> Date.add Date.Years yearDelta
         |> fromDate
 
 

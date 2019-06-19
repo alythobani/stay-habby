@@ -736,17 +736,18 @@ body {
               @extend .select-next-right-arrow;
             }
           }
-          .choose-date-dialog-form-calendar-rows {
+          .choose-date-dialog-form-calendar-weekdays {
             margin-top: 10px;
-            margin-bottom: 10px;
+            .choose-date-dialog-form-calendar-weekday-box {
+              @extend .calendar-day-box;
+              height: 20px;
+            }
+          }
+          .choose-date-dialog-form-calendar-rows {
+            margin-bottom: 20px;
             .choose-date-dialog-form-calendar-row {
               .choose-date-dialog-form-calendar-day-box {
-                display: inline-flex;
-                flex-direction: column;
-                justify-content: center;
-                margin: 5px;
-                width: 30px;
-                height: 30px;
+                @extend .calendar-day-box;
                 outline: 1px solid white;
                 box-sizing: border-box;
                 cursor: pointer;

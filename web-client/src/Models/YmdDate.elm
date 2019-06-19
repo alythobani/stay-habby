@@ -13,6 +13,7 @@ module Models.YmdDate exposing
     , prettyPrint
     , prettyPrintDay
     , prettyPrintMonth
+    , prettyPrintWeekday
     , prettyPrintWithWeekday
     , toDate
     , toSimpleString
@@ -151,6 +152,38 @@ prettyPrint ymd =
 prettyPrintWithWeekday : YmdDate -> String
 prettyPrintWithWeekday ymd =
     ymd |> toDate |> Date.format "EEEE, MMMM ddd, y"
+
+
+prettyPrintWeekday : YmdDate -> String
+prettyPrintWeekday ymd =
+    let
+        weekdayNumberToString weekdayNumber =
+            case weekdayNumber of
+                1 ->
+                    "Monday"
+
+                2 ->
+                    "Tuesday"
+
+                3 ->
+                    "Wednesay"
+
+                4 ->
+                    "Thursday"
+
+                5 ->
+                    "Friday"
+
+                6 ->
+                    "Saturday"
+
+                7 ->
+                    "Sunday"
+
+                _ ->
+                    "Invalid Weekday Number"
+    in
+    ymd |> toDate |> Date.weekdayNumber |> weekdayNumberToString
 
 
 {-| Add days to a date to get a new date that many days away, you can add negative days to go back in time.

@@ -149,30 +149,6 @@
   border: 0.5px solid $cape-cod;
 }
 
-.select-next-or-previous-arrow {
-  font-size: 20px;
-  cursor: pointer;
-  &:hover {
-    font-weight: 600;
-  }
-}
-
-.select-previous-left-arrow {
-  @extend .select-next-or-previous-arrow;
-  margin-right: 9px;
-  &:after {
-    content: "<";
-  }
-}
-
-.select-next-right-arrow {
-  @extend .select-next-or-previous-arrow;
-  margin-left: 9px;
-  &:after {
-    content: ">";
-  }
-}
-
 
 
 // Habit Selection Screen
@@ -215,6 +191,39 @@
   font-size: 15px;
   padding: 1px;
   background-color: $black-90;
+}
+
+
+
+// Choose Custom Date Calendar
+.select-next-or-previous-arrow {
+  font-size: 20px;
+  cursor: pointer;
+  &:hover {
+    font-weight: 600;
+  }
+}
+.select-previous-left-arrow {
+  @extend .select-next-or-previous-arrow;
+  margin-right: 9px;
+  &:after {
+    content: "<";
+  }
+}
+.select-next-right-arrow {
+  @extend .select-next-or-previous-arrow;
+  margin-left: 9px;
+  &:after {
+    content: ">";
+  }
+}
+.calendar-day-box {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 5px;
+  width: 30px;
+  height: 30px;
 }
 
 

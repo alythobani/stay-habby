@@ -805,6 +805,18 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                 numCalendarRows =
                     ceiling <| toFloat numDaysInMonth / 7
 
+                weekdayLetters : List String
+                weekdayLetters =
+                    List.map
+                        (\ymd -> ymd |> YmdDate.prettyPrintWeekday |> String.left 1)
+                        (List.map (\day -> { chosenYmd | day = day }) (List.range 1 7))
+
+                renderWeekdayLetter : String -> Html Msg
+                renderWeekdayLetter weekdayLetter =
+                    div
+                        [ class "choose-date-dialog-form-calendar-weekday-box" ]
+                        [ text weekdayLetter ]
+
                 calendarRows : List (List Int)
                 calendarRows =
                     List.map
@@ -950,6 +962,9 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                                 ]
                                 []
                             ]
+                        , div
+                            [ class "choose-date-dialog-form-calendar-weekdays" ]
+                            (List.map renderWeekdayLetter weekdayLetters)
                         , div
                             [ class "choose-date-dialog-form-calendar-rows" ]
                             (List.map renderCalendarRow calendarRows)

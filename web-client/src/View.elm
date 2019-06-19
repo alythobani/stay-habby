@@ -820,7 +820,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                 calendarRows : List (List Int)
                 calendarRows =
                     List.map
-                        (\rowIndex -> List.range (rowIndex * 7 + 1) (min (rowIndex * 7 + 7) numDaysInMonth))
+                        (\rowIndex -> List.range (rowIndex * 7 + 1) (rowIndex * 7 + 7))
                         (List.range 0 (numCalendarRows - 1))
 
                 renderCalendarDayBox : Int -> Html Msg
@@ -834,6 +834,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                             [ ( "choose-date-dialog-form-calendar-day-box", True )
                             , ( "choose-date-dialog-form-calendar-day-box-today", representedYmd == actualYmd )
                             , ( "choose-date-dialog-form-calendar-day-box-chosen", representedYmd == chosenYmd )
+                            , ( "choose-date-dialog-form-calendar-day-box-empty-placeholder", day > numDaysInMonth )
                             ]
                         , onClick <| SetChooseDateDialogChosenYmd representedYmd
                         ]

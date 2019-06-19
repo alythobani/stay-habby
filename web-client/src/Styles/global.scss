@@ -760,6 +760,9 @@ body {
                 &.choose-date-dialog-form-calendar-day-box-today {
                   outline: 2px solid green;
                 }
+                &.choose-date-dialog-form-calendar-day-box-empty-placeholder {
+                  visibility: hidden;
+                }
               }
             }
           }

@@ -156,7 +156,8 @@ update msg model =
                 , openTopPanelDateDropdown = False
                 , chooseDateDialogChosenYmd = model.selectedYmd
               }
-            , Cmd.none
+            , Dom.focus "choose-date-dialog-form-id"
+                |> Task.attempt FocusResult
             )
 
         OnChooseDateDialogPreviousMonthClick chosenYmd ->
@@ -470,11 +471,19 @@ update msg model =
 
                     else if key == Keyboard.KeyN then
                         if Maybe.isJust model.activeDialogScreen then
-                            -- A dialog screen is already open, don't open the set habit data one
+                            -- A dialog screen is already open, don't open the Add Note one
                             ( newModel, Cmd.none )
 
                         else
                             update OpenAddNoteHabitSelectionDialogScreen newModel
+
+                    else if key == Keyboard.KeyC then
+                        if Maybe.isJust model.activeDialogScreen then
+                            -- A dialog screen is already open, don't open the Choose Date one
+                            ( newModel, Cmd.none )
+
+                        else
+                            update OnChooseCustomDateClick newModel
 
                     else if key == Keyboard.Escape then
                         update OnExitDialogScreen newModel
@@ -487,8 +496,10 @@ update msg model =
 
         FocusResult result ->
             case result of
-                Result.Err (Dom.NotFound id) ->
-                    ( model, Cmd.none )
+                Result.Err (Dom.NotFound domId) ->
+                    ( { model | errorMessage = Just <| "Error focusing on element: id '" ++ domId ++ "' not found" }
+                    , Cmd.none
+                    )
 
                 Result.Ok () ->
                     ( model, Cmd.none )

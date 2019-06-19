@@ -7,7 +7,7 @@ import DefaultServices.Util as Util
 import Dict
 import HabitUtil
 import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
-import Html.Attributes exposing (class, classList, id, placeholder, type_, value)
+import Html.Attributes exposing (class, classList, id, placeholder, tabindex, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Maybe.Extra as Maybe
 import Model exposing (Model)
@@ -754,6 +754,9 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
                         else if key == Keyboard.KeyN then
                             Just OpenAddNoteHabitSelectionDialogScreen
 
+                        else if key == Keyboard.KeyC then
+                            Just OnChooseCustomDateClick
+
                         else
                             Just NoOp
                     )
@@ -838,7 +841,41 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
             ]
         ]
         [ div
-            [ class "choose-date-dialog-form" ]
+            [ class "choose-date-dialog-form"
+            , id "choose-date-dialog-form-id"
+            , tabindex 0
+            , Util.onKeydownStopPropagation
+                (case ( maybeChosenYmd, maybeActualYmd ) of
+                    ( Just chosenYmd, Just actualYmd ) ->
+                        \key ->
+                            if key == Keyboard.KeyT then
+                                Just <| SetChooseDateDialogChosenYmd actualYmd
+
+                            else if key == Keyboard.ArrowDown then
+                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays 7 chosenYmd)
+
+                            else if key == Keyboard.ArrowUp then
+                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays -7 chosenYmd)
+
+                            else if key == Keyboard.ArrowLeft then
+                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays -1 chosenYmd)
+
+                            else if key == Keyboard.ArrowRight then
+                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays 1 chosenYmd)
+
+                            else if key == Keyboard.Enter then
+                                Just <| OnChooseDateDialogSubmitClick chosenYmd
+
+                            else if key == Keyboard.Escape then
+                                Just OnExitDialogScreen
+
+                            else
+                                Just NoOp
+
+                    _ ->
+                        always <| Just NoOp
+                )
+            ]
             (case ( maybeChosenYmd, maybeActualYmd ) of
                 ( Just chosenYmd, Just actualYmd ) ->
                     let

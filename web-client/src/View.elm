@@ -789,65 +789,68 @@ renderDialogBackgroundScreen activeDialogScreen =
         []
 
 
-renderCalendarDayBox : Int -> YmdDate.YmdDate -> YmdDate.YmdDate -> Html Msg
-renderCalendarDayBox day chosenYmd actualYmd =
-    let
-        representedYmd =
-            { chosenYmd | day = day }
-    in
-    div
-        [ classList
-            [ ( "choose-date-dialog-form-calendar-day-box", True )
-            , ( "choose-date-dialog-form-calendar-day-box-today", representedYmd == actualYmd )
-            , ( "choose-date-dialog-form-calendar-day-box-chosen", representedYmd == chosenYmd )
-            ]
-        , onClick <| SetChooseDateDialogChosenYmd representedYmd
-        ]
-        [ text <| String.fromInt day ]
-
-
-renderCalendarRow : List Int -> YmdDate.YmdDate -> YmdDate.YmdDate -> Html Msg
-renderCalendarRow days chosenYmd actualYmd =
-    div
-        [ class "choose-date-dialog-form-calendar-row" ]
-        (List.map (\day -> renderCalendarDayBox day chosenYmd actualYmd) days)
-
-
 renderChooseDateDialog : Maybe DialogScreen.DialogScreen -> Maybe YmdDate.YmdDate -> Maybe YmdDate.YmdDate -> Html Msg
 renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
     let
         showDialog : Bool
         showDialog =
             activeDialogScreen == Just DialogScreen.ChooseDateDialogScreen
-
-        getCalendarRows : Int -> List (List Int)
-        getCalendarRows numDaysInMonth =
+    in
+    case ( maybeChosenYmd, maybeActualYmd ) of
+        ( Just chosenYmd, Just actualYmd ) ->
             let
-                numRows =
+                numDaysInMonth =
+                    YmdDate.numDaysInMonth chosenYmd
+
+                numCalendarRows =
                     ceiling <| toFloat numDaysInMonth / 7
 
-                getRow : Int -> List Int
-                getRow rowIndex =
-                    List.range
-                        (rowIndex * 7 + 1)
-                        (min (rowIndex * 7 + 7) numDaysInMonth)
+                calendarRows : List (List Int)
+                calendarRows =
+                    List.map
+                        (\rowIndex -> List.range (rowIndex * 7 + 1) (min (rowIndex * 7 + 7) numDaysInMonth))
+                        (List.range 0 (numCalendarRows - 1))
+
+                renderCalendarDayBox : Int -> Html Msg
+                renderCalendarDayBox day =
+                    let
+                        representedYmd =
+                            { chosenYmd | day = day }
+                    in
+                    div
+                        [ classList
+                            [ ( "choose-date-dialog-form-calendar-day-box", True )
+                            , ( "choose-date-dialog-form-calendar-day-box-today", representedYmd == actualYmd )
+                            , ( "choose-date-dialog-form-calendar-day-box-chosen", representedYmd == chosenYmd )
+                            ]
+                        , onClick <| SetChooseDateDialogChosenYmd representedYmd
+                        ]
+                        [ text <| String.fromInt day ]
+
+                renderCalendarRow : List Int -> Html Msg
+                renderCalendarRow days =
+                    div
+                        [ class "choose-date-dialog-form-calendar-row" ]
+                        (List.map renderCalendarDayBox days)
+
+                yesterday =
+                    YmdDate.addDays -1 actualYmd
+
+                tomorrow =
+                    YmdDate.addDays 1 actualYmd
             in
-            List.map getRow (List.range 0 (numRows - 1))
-    in
-    div
-        [ classList
-            [ ( "choose-date-dialog", True )
-            , ( "display-none", not showDialog )
-            ]
-        ]
-        [ div
-            [ class "choose-date-dialog-form"
-            , id "choose-date-dialog-form-id"
-            , tabindex 0
-            , Util.onKeydownStopPropagation
-                (case ( maybeChosenYmd, maybeActualYmd ) of
-                    ( Just chosenYmd, Just actualYmd ) ->
-                        \key ->
+            div
+                [ classList
+                    [ ( "choose-date-dialog", True )
+                    , ( "display-none", not showDialog )
+                    ]
+                ]
+                [ div
+                    [ class "choose-date-dialog-form"
+                    , id "choose-date-dialog-form-id"
+                    , tabindex 0
+                    , Util.onKeydownStopPropagation
+                        (\key ->
                             if key == Keyboard.KeyT then
                                 Just <| SetChooseDateDialogChosenYmd actualYmd
 
@@ -871,20 +874,8 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
 
                             else
                                 Just NoOp
-
-                    _ ->
-                        always <| Just NoOp
-                )
-            ]
-            (case ( maybeChosenYmd, maybeActualYmd ) of
-                ( Just chosenYmd, Just actualYmd ) ->
-                    let
-                        yesterday =
-                            YmdDate.addDays -1 actualYmd
-
-                        tomorrow =
-                            YmdDate.addDays 1 actualYmd
-                    in
+                        )
+                    ]
                     [ div
                         [ class "choose-date-dialog-form-chosen-ymd-text" ]
                         [ text <| YmdDate.prettyPrintWithWeekday chosenYmd ]
@@ -961,10 +952,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                             ]
                         , div
                             [ class "choose-date-dialog-form-calendar-rows" ]
-                            (List.map
-                                (\row -> renderCalendarRow row chosenYmd actualYmd)
-                                (getCalendarRows <| YmdDate.numDaysInMonth chosenYmd)
-                            )
+                            (List.map renderCalendarRow calendarRows)
                         ]
                     , div
                         [ class "choose-date-dialog-form-submit-buttons" ]
@@ -980,11 +968,22 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                             [ text "Cancel" ]
                         ]
                     ]
+                ]
 
-                _ ->
+        _ ->
+            div
+                [ classList
+                    [ ( "choose-date-dialog", True )
+                    , ( "display-none", not showDialog )
+                    ]
+                ]
+                [ div
+                    [ class "choose-date-dialog-form"
+                    , id "choose-date-dialog-form-id"
+                    , tabindex 0
+                    ]
                     [ text "Loading..." ]
-            )
-        ]
+                ]
 
 
 renderSetHabitDataShortcut :

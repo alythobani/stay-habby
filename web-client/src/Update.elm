@@ -518,7 +518,7 @@ update msg model =
                             Keyboard.fromCode keyCode
                     in
                     case model.activeDialogScreen of
-                        Just _ ->
+                        Just screen ->
                             -- A dialog screen is already open
                             if key == Keyboard.Escape then
                                 update OnExitDialogScreen newModel
@@ -529,7 +529,7 @@ update msg model =
                         Nothing ->
                             -- No dialog screen is open, see if the user wants to open one
                             if key == Keyboard.KeyA then
-                                update OpenSetHabitDataShortcutDialogScreen newModel
+                                update OpenSetHabitDataShortcutHabitSelectionScreen newModel
 
                             else if key == Keyboard.KeyN then
                                 update OpenAddNoteHabitSelectionDialogScreen newModel
@@ -557,6 +557,13 @@ update msg model =
                     ( model, Cmd.none )
 
         -- Set Habit Data Shortcut
+        OpenSetHabitDataShortcutHabitSelectionScreen ->
+            ( { model | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutHabitSelectionScreen }
+            , Dom.focus
+                "set-habit-data-shortcut-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
         OnSetHabitDataShortcutHabitSelectionFilterTextInput newFilterText ->
             updateHabitSelectionFilterTextInput
                 newFilterText
@@ -582,56 +589,47 @@ update msg model =
                 (model.setHabitDataShortcutSelectedHabitIndex - 1)
                 (\newIndex -> { model | setHabitDataShortcutSelectedHabitIndex = newIndex })
 
-        OnToggleShowSetHabitDataShortcutAmountForm ->
-            let
-                newShowSetHabitDataShortcutAmountForm =
-                    not model.showSetHabitDataShortcutAmountForm
-            in
-            ( { model | showSetHabitDataShortcutAmountForm = newShowSetHabitDataShortcutAmountForm }
-            , if newShowSetHabitDataShortcutAmountForm then
-                Dom.focus "set-habit-data-shortcut-amount-form-input" |> Task.attempt FocusResult
-
-              else
-                Cmd.none
+        OpenSetHabitDataShortcutAmountScreen habit ->
+            ( { model
+                | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutAmountScreen
+                , setHabitDataShortcutAmountScreenHabit = Just habit
+              }
+            , Dom.focus
+                "set-habit-data-shortcut-amount-screen-input"
+                |> Task.attempt FocusResult
             )
 
-        OnSetHabitDataShortcutAmountFormInput newInput ->
+        OnSetHabitDataShortcutAmountScreenInput newInput ->
             let
-                newSetHabitDataShortcutInputtedAmount =
-                    extractInt newInput model.setHabitDataShortcutInputtedAmount
+                newInputInt =
+                    extractInt newInput model.setHabitDataShortcutAmountScreenInputInt
             in
-            ( { model | setHabitDataShortcutInputtedAmount = newSetHabitDataShortcutInputtedAmount }
+            ( { model | setHabitDataShortcutAmountScreenInputInt = newInputInt }
             , Cmd.none
             )
 
-        OnSetHabitDataShortcutAmountFormSubmit ymd habitId maybeNewVal ->
-            case maybeNewVal of
-                Nothing ->
-                    ( model, Cmd.none )
+        OnSetHabitDataShortcutAmountScreenSubmit ymd habitId newVal ->
+            ( { model
+                | activeDialogScreen = Nothing
+                , setHabitDataShortcutAmountScreenInputInt = Nothing
+                , setHabitDataShortcutHabitNameFilterText = ""
+                , setHabitDataShortcutFilteredHabits =
+                    case model.allHabits of
+                        RemoteData.Success habits ->
+                            Array.fromList habits
 
-                Just newVal ->
-                    ( { model
-                        | activeDialogScreen = Nothing
-                        , showSetHabitDataShortcutAmountForm = False
-                        , setHabitDataShortcutInputtedAmount = Nothing
-                        , setHabitDataShortcutHabitNameFilterText = ""
-                        , setHabitDataShortcutFilteredHabits =
-                            case model.allHabits of
-                                RemoteData.Success habits ->
-                                    Array.fromList habits
-
-                                _ ->
-                                    Array.empty
-                        , setHabitDataShortcutSelectedHabitIndex = 0
-                      }
-                    , Api.mutationSetHabitData
-                        ymd
-                        habitId
-                        newVal
-                        model.apiBaseUrl
-                        OnSetHabitDataFailure
-                        OnSetHabitDataSuccess
-                    )
+                        _ ->
+                            Array.empty
+                , setHabitDataShortcutSelectedHabitIndex = 0
+              }
+            , Api.mutationSetHabitData
+                ymd
+                habitId
+                newVal
+                model.apiBaseUrl
+                OnSetHabitDataFailure
+                OnSetHabitDataSuccess
+            )
 
         -- Edit goal
         OnEditGoalClick habitId ->
@@ -868,27 +866,6 @@ update msg model =
         -- Full screen dialogs
         OnExitDialogScreen ->
             ( { model | activeDialogScreen = Nothing }, Cmd.none )
-
-        OpenSetHabitDataShortcutDialogScreen ->
-            ( { model | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutScreen }
-            , Dom.focus
-                (if model.showSetHabitDataShortcutAmountForm then
-                    "set-habit-data-shortcut-amount-form-input"
-
-                 else
-                    "set-habit-data-shortcut-habit-selection-input"
-                )
-                |> Task.attempt FocusResult
-            )
-
-        OnExitSetHabitDataShortcutAmountFormInput ->
-            ( { model
-                | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutScreen
-                , showSetHabitDataShortcutAmountForm = False
-              }
-            , Dom.focus "set-habit-data-shortcut-habit-selection-input"
-                |> Task.attempt FocusResult
-            )
 
         -- Add Note Habit Selection
         OpenAddNoteHabitSelectionDialogScreen ->

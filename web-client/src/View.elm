@@ -52,15 +52,17 @@ view model =
                 model.activeDialogScreen
                 model.chooseDateDialogChosenYmd
                 model.actualYmd
-            , renderSetHabitDataShortcut
+            , renderSetHabitDataShortcutHabitSelectionScreen
                 model.activeDialogScreen
                 model.setHabitDataShortcutHabitNameFilterText
                 model.setHabitDataShortcutFilteredHabits
                 model.setHabitDataShortcutSelectedHabitIndex
-                model.showSetHabitDataShortcutAmountForm
+            , renderSetHabitDataShortcutAmountScreen
+                model.activeDialogScreen
                 model.allHabitData
+                model.setHabitDataShortcutAmountScreenHabit
+                model.setHabitDataShortcutAmountScreenInputInt
                 model.selectedYmd
-                model.setHabitDataShortcutInputtedAmount
             , renderEditGoalDialog
                 model.activeDialogScreen
                 model.editGoalDialogHabit
@@ -735,7 +737,7 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
                             Just <| SetHabitData selectedYmd habitRecord.id editingHabitAmount
 
                         else if key == Keyboard.KeyA then
-                            Just OpenSetHabitDataShortcutDialogScreen
+                            Just OpenSetHabitDataShortcutHabitSelectionScreen
 
                         else if key == Keyboard.KeyN then
                             Just OpenAddNoteHabitSelectionDialogScreen
@@ -1073,162 +1075,105 @@ renderHabitSelectionScreen showScreen headerText inputId onInputMsg filterText f
         ]
 
 
-renderSetHabitDataShortcut :
+renderSetHabitDataShortcutHabitSelectionScreen :
     Maybe DialogScreen.DialogScreen
     -> String
     -> Array.Array Habit.Habit
     -> Int
-    -> Bool
-    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
-    -> Maybe YmdDate.YmdDate
-    -> Maybe Int
     -> Html Msg
-renderSetHabitDataShortcut activeDialogScreen setHabitDataShortcutHabitNameFilterText filteredHabits selectedHabitIndex showAmountForm rdHabitData maybeYmd inputtedAmount =
-    case maybeYmd of
-        Just ymd ->
-            let
-                showSetHabitDataShortcut : Bool
-                showSetHabitDataShortcut =
-                    activeDialogScreen == Just DialogScreen.SetHabitDataShortcutScreen
+renderSetHabitDataShortcutHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen =
+            activeDialogScreen == Just DialogScreen.SetHabitDataShortcutHabitSelectionScreen
+    in
+    renderHabitSelectionScreen
+        showScreen
+        "Set Habit Data"
+        "set-habit-data-shortcut-habit-selection-filter-text-input"
+        OnSetHabitDataShortcutHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        OnSetHabitDataShortcutSelectPreviousHabit
+        OnSetHabitDataShortcutSelectNextHabit
+        OpenSetHabitDataShortcutAmountScreen
+        selectedHabitIndex
 
-                selectedHabit =
-                    Array.get selectedHabitIndex filteredHabits
 
-                readyToEnterHabit =
-                    Maybe.isJust selectedHabit
+renderSetHabitDataShortcutAmountScreen :
+    Maybe DialogScreen.DialogScreen
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
+    -> Maybe Habit.Habit
+    -> Maybe Int
+    -> Maybe YmdDate.YmdDate
+    -> Html Msg
+renderSetHabitDataShortcutAmountScreen activeDialogScreen rdHabitData maybeHabit maybeInputtedAmount maybeSelectedYmd =
+    div
+        [ classList
+            [ ( "set-habit-data-shortcut-amount-screen", True )
+            , ( "display-none", activeDialogScreen /= Just DialogScreen.SetHabitDataShortcutAmountScreen )
+            ]
+        ]
+        (case ( maybeHabit, maybeSelectedYmd, rdHabitData ) of
+            ( Just habit, Just selectedYmd, RemoteData.Success habitData ) ->
+                let
+                    habitRecord =
+                        Habit.getCommonFields habit
 
-                renderHabitOption habit =
-                    div
-                        [ classList
-                            [ ( "set-habit-data-shortcut-habits-selection-habits-list-habit-name", True )
-                            , ( "set-habit-data-shortcut-habits-selection-habits-list-selected-habit"
-                              , case selectedHabit of
-                                    Just h ->
-                                        h == habit
+                    habitDatum =
+                        List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == selectedYmd) habitData
+                            |> List.head
+                            |> (\maybeHabitDatum ->
+                                    case maybeHabitDatum of
+                                        Nothing ->
+                                            0
 
-                                    _ ->
-                                        False
-                              )
-                            ]
-                        ]
-                        [ text <| .name <| Habit.getCommonFields habit ]
-            in
-            div
-                [ classList
-                    [ ( "set-habit-data-shortcut", True )
-                    , ( "display-none", not showSetHabitDataShortcut )
-                    ]
-                ]
-                [ div
-                    [ classList
-                        [ ( "set-habit-data-shortcut-habit-selection", True )
-                        , ( "display-none", showAmountForm )
-                        ]
-                    ]
-                    [ span
-                        [ class "set-habit-data-shortcut-habit-selection-header" ]
-                        [ text "Set Habit Data" ]
-                    , input
-                        [ id "set-habit-data-shortcut-habit-selection-input"
-                        , class "set-habit-data-shortcut-habit-selection-input"
-                        , placeholder "Enter a habit's name..."
-                        , onInput <| OnSetHabitDataShortcutHabitSelectionFilterTextInput
-                        , value setHabitDataShortcutHabitNameFilterText
-                        , Util.onKeydownStopPropagation
-                            (\key ->
-                                if key == Keyboard.ArrowDown then
-                                    Just OnSetHabitDataShortcutSelectNextHabit
+                                        Just { amount } ->
+                                            amount
+                               )
 
-                                else if key == Keyboard.ArrowUp then
-                                    Just OnSetHabitDataShortcutSelectPreviousHabit
-
-                                else if key == Keyboard.Enter && readyToEnterHabit then
-                                    Just OnToggleShowSetHabitDataShortcutAmountForm
-
-                                else if key == Keyboard.Escape then
-                                    Just OnExitDialogScreen
+                    readyToEnterAmount =
+                        Maybe.isJust maybeInputtedAmount
+                in
+                [ span
+                    [ class "set-habit-data-shortcut-amount-screen-selected-habit-name" ]
+                    [ text <| .name habitRecord ]
+                , input
+                    [ id "set-habit-data-shortcut-amount-screen-input"
+                    , class "set-habit-data-shortcut-amount-screen-input"
+                    , placeholder <|
+                        String.fromInt habitDatum
+                            ++ " "
+                            ++ (if habitDatum == 1 then
+                                    habitRecord.unitNameSingular
 
                                 else
-                                    Just NoOp
-                            )
-                        ]
-                        []
-                    , div
-                        [ classList
-                            [ ( "set-habit-data-shortcut-habits-selection-habits-list", True )
-                            , ( "display-none", Array.isEmpty filteredHabits )
-                            ]
-                        ]
-                        (Array.map renderHabitOption filteredHabits |> Array.toList)
+                                    habitRecord.unitNamePlural
+                               )
+                    , onInput OnSetHabitDataShortcutAmountScreenInput
+                    , value <| Maybe.withDefault "" (Maybe.map String.fromInt maybeInputtedAmount)
+                    , Util.onKeydownStopPropagation
+                        (\key ->
+                            if key == Keyboard.Escape then
+                                Just OpenSetHabitDataShortcutHabitSelectionScreen
+
+                            else if key == Keyboard.Enter then
+                                case maybeInputtedAmount of
+                                    Just amount ->
+                                        Just <| OnSetHabitDataShortcutAmountScreenSubmit selectedYmd habitRecord.id amount
+
+                                    Nothing ->
+                                        Just NoOp
+
+                            else
+                                Just NoOp
+                        )
                     ]
-                , div
-                    [ classList
-                        [ ( "set-habit-data-shortcut-amount-form", True )
-                        , ( "display-none", not showAmountForm )
-                        ]
-                    ]
-                    (case selectedHabit of
-                        Just habit ->
-                            let
-                                habitRecord =
-                                    Habit.getCommonFields habit
-
-                                habitDatum =
-                                    case rdHabitData of
-                                        RemoteData.Success habitData ->
-                                            List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == ymd) habitData
-                                                |> List.head
-                                                |> (\maybeHabitDatum ->
-                                                        case maybeHabitDatum of
-                                                            Nothing ->
-                                                                0
-
-                                                            Just { amount } ->
-                                                                amount
-                                                   )
-
-                                        _ ->
-                                            0
-                            in
-                            [ span
-                                [ class "set-habit-data-shortcut-amount-form-selected-habit-name" ]
-                                [ text <| .name habitRecord ]
-                            , input
-                                [ id "set-habit-data-shortcut-amount-form-input"
-                                , class "set-habit-data-shortcut-amount-form-input"
-                                , placeholder <|
-                                    String.fromInt habitDatum
-                                        ++ " "
-                                        ++ (if habitDatum == 1 then
-                                                habitRecord.unitNameSingular
-
-                                            else
-                                                habitRecord.unitNamePlural
-                                           )
-                                , onInput OnSetHabitDataShortcutAmountFormInput
-                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt inputtedAmount)
-                                , Util.onKeydownStopPropagation
-                                    (\key ->
-                                        if key == Keyboard.Escape then
-                                            Just OnExitSetHabitDataShortcutAmountFormInput
-
-                                        else if key == Keyboard.Enter then
-                                            Just <| OnSetHabitDataShortcutAmountFormSubmit ymd habitRecord.id inputtedAmount
-
-                                        else
-                                            Just NoOp
-                                    )
-                                ]
-                                []
-                            ]
-
-                        Nothing ->
-                            []
-                    )
+                    []
                 ]
 
-        Nothing ->
-            div [] []
+            _ ->
+                []
+        )
 
 
 renderEditGoalDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Maybe YmdDate.YmdDate -> Html Msg
@@ -1629,79 +1574,20 @@ renderAddNoteHabitSelectionScreen :
     -> Html Msg
 renderAddNoteHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
     let
-        showScreen : Bool
         showScreen =
             activeDialogScreen == Just DialogScreen.AddNoteHabitSelectionScreen
-
-        selectedHabit =
-            Array.get selectedHabitIndex filteredHabits
-
-        readyToEnterHabit =
-            Maybe.isJust selectedHabit
-
-        renderHabitOption habit =
-            div
-                [ classList
-                    [ ( "add-note-habit-selection-habits-list-option", True )
-                    , ( "selected-habit"
-                      , case selectedHabit of
-                            Just h ->
-                                h == habit
-
-                            _ ->
-                                False
-                      )
-                    ]
-                ]
-                [ text <| .name <| Habit.getCommonFields habit ]
     in
-    div
-        [ classList
-            [ ( "add-note-habit-selection-screen", True )
-            , ( "display-none", not showScreen )
-            ]
-        ]
-        [ span
-            [ class "add-note-habit-selection-screen-header" ]
-            [ text "Add Note" ]
-        , input
-            [ id "add-note-habit-selection-filter-text-input"
-            , class "add-note-habit-selection-filter-text-input"
-            , placeholder "Enter a habit's name..."
-            , onInput OnAddNoteHabitSelectionFilterTextInput
-            , value habitSelectionFilterText
-            , Util.onKeydownStopPropagation
-                (\key ->
-                    if key == Keyboard.ArrowDown then
-                        Just OnAddNoteHabitSelectionScreenSelectNextHabit
-
-                    else if key == Keyboard.ArrowUp then
-                        Just OnAddNoteHabitSelectionScreenSelectPreviousHabit
-
-                    else if key == Keyboard.Enter && readyToEnterHabit then
-                        case selectedHabit of
-                            Just h ->
-                                Just <| OpenAddNoteDialog h
-
-                            _ ->
-                                Just NoOp
-
-                    else if key == Keyboard.Escape then
-                        Just OnExitDialogScreen
-
-                    else
-                        Just NoOp
-                )
-            ]
-            []
-        , div
-            [ classList
-                [ ( "add-note-habit-selection-habits-list", True )
-                , ( "display-none", Array.isEmpty filteredHabits )
-                ]
-            ]
-            (Array.map renderHabitOption filteredHabits |> Array.toList)
-        ]
+    renderHabitSelectionScreen
+        showScreen
+        "Add Note"
+        "add-note-habit-selection-filter-text-input"
+        OnAddNoteHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        OnAddNoteHabitSelectionScreenSelectPreviousHabit
+        OnAddNoteHabitSelectionScreenSelectNextHabit
+        OpenAddNoteDialog
+        selectedHabitIndex
 
 
 renderAddNoteDialog :

@@ -74,12 +74,14 @@ type alias Model =
     -- Keyboard
     , keysDown : Keyboard.Model
 
-    -- Set Habit Data Shortcut
+    -- Set Habit Data Shortcut Habit Selection
     , setHabitDataShortcutHabitNameFilterText : String
     , setHabitDataShortcutFilteredHabits : Array.Array Habit.Habit
     , setHabitDataShortcutSelectedHabitIndex : Int
-    , showSetHabitDataShortcutAmountForm : Bool
-    , setHabitDataShortcutInputtedAmount : Maybe Int
+
+    -- Set Habit Data Shortcut Amount Screen
+    , setHabitDataShortcutAmountScreenHabit : Maybe Habit.Habit
+    , setHabitDataShortcutAmountScreenInputInt : Maybe Int
 
     -- Edit goal
     , editGoalDialogHabit : Maybe Habit.Habit

@@ -79,12 +79,13 @@ type Msg
       -- Dom
     | FocusResult (Result Dom.Error ())
       -- Set Habit Data Shortcut
+    | OpenSetHabitDataShortcutHabitSelectionScreen
     | OnSetHabitDataShortcutHabitSelectionFilterTextInput String
     | OnSetHabitDataShortcutSelectNextHabit
     | OnSetHabitDataShortcutSelectPreviousHabit
-    | OnToggleShowSetHabitDataShortcutAmountForm
-    | OnSetHabitDataShortcutAmountFormInput String
-    | OnSetHabitDataShortcutAmountFormSubmit YmdDate.YmdDate String (Maybe Int)
+    | OpenSetHabitDataShortcutAmountScreen Habit.Habit
+    | OnSetHabitDataShortcutAmountScreenInput String
+    | OnSetHabitDataShortcutAmountScreenSubmit YmdDate.YmdDate String Int
       -- Edit goal
     | OnEditGoalClick String
     | CloseEditGoalDialog
@@ -110,8 +111,6 @@ type Msg
     | OpenErrorMessageDialogScreen
       -- Full screen dialogs
     | OnExitDialogScreen
-    | OpenSetHabitDataShortcutDialogScreen
-    | OnExitSetHabitDataShortcutAmountFormInput
       -- Add Note Habit Selection
     | OpenAddNoteHabitSelectionDialogScreen
     | OnAddNoteHabitSelectionFilterTextInput String

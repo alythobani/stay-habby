@@ -786,28 +786,9 @@ body {
       }
     }
 
-    .set-habit-data-shortcut {
-      .set-habit-data-shortcut-habit-selection {
+    .set-habit-data-shortcut-amount-screen {
         @extend .full-screen-centered-flex-container;
-        .set-habit-data-shortcut-habit-selection-header {
-          @extend .habit-selection-header;
-        }
-        .set-habit-data-shortcut-habit-selection-input {
-          @extend .habit-selection-filter-text-input;
-        }
-        .set-habit-data-shortcut-habits-selection-habits-list {
-          @extend .habit-selection-habits-list;
-          .set-habit-data-shortcut-habits-selection-habits-list-habit-name {
-            @extend .habit-selection-habits-list-option;
-            &.set-habit-data-shortcut-habits-selection-habits-list-selected-habit {
-              @extend .habit-selection-habits-list-option-selected;
-            }
-          }
-        }
-      }
-      .set-habit-data-shortcut-amount-form {
-        @extend .full-screen-centered-flex-container;
-        .set-habit-data-shortcut-amount-form-selected-habit-name {
+        .set-habit-data-shortcut-amount-screen-selected-habit-name {
           text-align: center;
           background-color: $shark-90;
           border: 2px solid white;
@@ -819,7 +800,7 @@ body {
           color: white;
           padding-top: 3px;
         }
-        .set-habit-data-shortcut-amount-form-input {
+        .set-habit-data-shortcut-amount-screen-input {
           text-align: center;
           z-index: 3;
           margin-bottom: 70px;
@@ -827,7 +808,6 @@ body {
           height: 20px;
           font-size: 16px;
         }
-      }
     }
     .edit-goal-dialog {
       @extend .full-screen-centered-flex-container;

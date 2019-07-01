@@ -68,8 +68,10 @@ init { apiBaseUrl, currentTime } url key =
       , setHabitDataShortcutHabitNameFilterText = ""
       , setHabitDataShortcutFilteredHabits = Array.empty
       , setHabitDataShortcutSelectedHabitIndex = 0
-      , showSetHabitDataShortcutAmountForm = False
-      , setHabitDataShortcutInputtedAmount = Nothing
+
+      -- Set Habit Data Shortcut Amount Screen
+      , setHabitDataShortcutAmountScreenHabit = Nothing
+      , setHabitDataShortcutAmountScreenInputInt = Nothing
 
       -- Edit goal
       , editGoalDialogHabit = Nothing

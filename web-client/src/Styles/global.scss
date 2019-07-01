@@ -987,23 +987,46 @@ body {
     }
 
 
-    .add-note-habit-selection-screen {
+    .habit-selection-screen {
         @extend .full-screen-centered-flex-container;
 
-        .add-note-habit-selection-screen-header {
-          @extend .habit-selection-header;
+        .habit-selection-screen-header {
+          position: absolute;
+          top: 11.5vh;
+          z-index: 3;
+          color: white;
+          font-size: 36px;
         }
 
-        .add-note-habit-selection-filter-text-input {
-          @extend .habit-selection-filter-text-input;
+        .habit-selection-filter-text-input {
+          position: absolute;
+          text-align: center;
+          top: 17vh;
+          z-index: 3;
+          width: 300px;
+          height: 20px;
+          font-size: 16px;
         }
 
-        .add-note-habit-selection-habits-list {
-          @extend .habit-selection-habits-list;
-          .add-note-habit-selection-habits-list-option {
-            @extend .habit-selection-habits-list-option;
+        .habit-selection-habits-list {
+          position: absolute;
+          text-align: center;
+          top: 21.5vh;
+          color: white;
+          z-index: 3;
+          width: 300px;
+          border: 1px solid white;
+          .habit-selection-habits-list-option {
+            border: 0.5px solid white;
+            padding: 0.5px;
+            background-color: $shark-90;
             &.selected-habit {
-              @extend .habit-selection-habits-list-option-selected;
+              font-weight: 600;
+              font-style: normal;
+              border-width: 2px;
+              font-size: 15px;
+              padding: 1px;
+              background-color: $black-90;
             }
           }
         }

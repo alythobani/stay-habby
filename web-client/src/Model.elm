@@ -100,4 +100,9 @@ type alias Model =
     -- Add note
     , addNoteDialogHabit : Maybe Habit.Habit
     , addNoteDialogInput : String
+
+    -- Suspend Or Resume Habit Selection
+    , suspendOrResumeHabitSelectionFilterText : String
+    , suspendOrResumeHabitSelectionFilteredHabits : Array.Array Habit.Habit
+    , suspendOrResumeHabitSelectionSelectedHabitIndex : Int
     }

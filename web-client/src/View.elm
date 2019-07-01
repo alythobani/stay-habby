@@ -80,6 +80,11 @@ view model =
                 model.addNoteDialogInput
                 model.selectedYmd
                 model.allHabitDayNotes
+            , renderSuspendOrResumeHabitSelectionScreen
+                model.activeDialogScreen
+                model.suspendOrResumeHabitSelectionFilterText
+                model.suspendOrResumeHabitSelectionFilteredHabits
+                model.suspendOrResumeHabitSelectionSelectedHabitIndex
             ]
         ]
     }
@@ -983,6 +988,91 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                 ]
 
 
+renderHabitSelectionScreen :
+    Bool
+    -> String
+    -> String
+    -> (String -> Msg)
+    -> String
+    -> Array.Array Habit.Habit
+    -> Msg
+    -> Msg
+    -> (Habit.Habit -> Msg)
+    -> Int
+    -> Html Msg
+renderHabitSelectionScreen showScreen headerText inputId onInputMsg filterText filteredHabits onArrowUp onArrowDown onChooseHabit selectedHabitIndex =
+    let
+        selectedHabit =
+            Array.get selectedHabitIndex filteredHabits
+
+        readyToEnterHabit =
+            Maybe.isJust selectedHabit
+
+        renderHabitOption habit =
+            div
+                [ classList
+                    [ ( "habit-selection-habits-list-option", True )
+                    , ( "selected-habit"
+                      , case selectedHabit of
+                            Just h ->
+                                h == habit
+
+                            _ ->
+                                False
+                      )
+                    ]
+                ]
+                [ text <| .name <| Habit.getCommonFields habit ]
+    in
+    div
+        [ classList
+            [ ( "habit-selection-screen", True )
+            , ( "display-none", not showScreen )
+            ]
+        ]
+        [ span
+            [ class "habit-selection-screen-header" ]
+            [ text headerText ]
+        , input
+            [ id inputId
+            , class "habit-selection-filter-text-input"
+            , placeholder "Enter a habit's name..."
+            , onInput onInputMsg
+            , value filterText
+            , Util.onKeydownStopPropagation
+                (\key ->
+                    if key == Keyboard.ArrowDown then
+                        Just onArrowDown
+
+                    else if key == Keyboard.ArrowUp then
+                        Just onArrowUp
+
+                    else if key == Keyboard.Enter && readyToEnterHabit then
+                        case selectedHabit of
+                            Just h ->
+                                Just <| onChooseHabit h
+
+                            _ ->
+                                Just NoOp
+
+                    else if key == Keyboard.Escape then
+                        Just OnExitDialogScreen
+
+                    else
+                        Just NoOp
+                )
+            ]
+            []
+        , div
+            [ classList
+                [ ( "habit-selection-habits-list", True )
+                , ( "display-none", Array.isEmpty filteredHabits )
+                ]
+            ]
+            (Array.map renderHabitOption filteredHabits |> Array.toList)
+        ]
+
+
 renderSetHabitDataShortcut :
     Maybe DialogScreen.DialogScreen
     -> String
@@ -1042,7 +1132,7 @@ renderSetHabitDataShortcut activeDialogScreen setHabitDataShortcutHabitNameFilte
                         [ id "set-habit-data-shortcut-habit-selection-input"
                         , class "set-habit-data-shortcut-habit-selection-input"
                         , placeholder "Enter a habit's name..."
-                        , onInput <| OnSetHabitDataShortcutInput
+                        , onInput <| OnSetHabitDataShortcutHabitSelectionFilterTextInput
                         , value setHabitDataShortcutHabitNameFilterText
                         , Util.onKeydownStopPropagation
                             (\key ->
@@ -1700,3 +1790,27 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
             _ ->
                 []
         )
+
+
+renderSuspendOrResumeHabitSelectionScreen :
+    Maybe DialogScreen.DialogScreen
+    -> String
+    -> Array.Array Habit.Habit
+    -> Int
+    -> Html Msg
+renderSuspendOrResumeHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen =
+            activeDialogScreen == Just DialogScreen.SuspendOrResumeHabitSelectionScreen
+    in
+    renderHabitSelectionScreen
+        showScreen
+        "Suspend Or Resume Habit"
+        "suspend-or-resume-habit-selection-filter-text-input"
+        OnSuspendOrResumeHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        OnSuspendOrResumeHabitSelectionSelectPreviousHabit
+        OnSuspendOrResumeHabitSelectionSelectNextHabit
+        OpenSuspendOrResumeConfirmationScreen
+        selectedHabitIndex

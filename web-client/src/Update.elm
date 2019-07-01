@@ -46,6 +46,61 @@ update msg model =
 
                 Nothing ->
                     Cmd.none
+
+        updateOnHabitSelectionChangeSelectedHabitIndex :
+            Array.Array Habit.Habit
+            -> Int
+            -> (Int -> Model)
+            -> ( Model, Cmd Msg )
+        updateOnHabitSelectionChangeSelectedHabitIndex filteredHabits newAttemptedIndex modelUpdater =
+            let
+                filteredHabitsLength =
+                    Array.length filteredHabits
+
+                newSelectedHabitIndex =
+                    modBy filteredHabitsLength newAttemptedIndex
+            in
+            ( modelUpdater newSelectedHabitIndex
+            , Cmd.none
+            )
+
+        updateHabitSelectionFilterTextInput :
+            String
+            -> Int
+            -> Array.Array Habit.Habit
+            -> (Array.Array Habit.Habit -> Int -> Model)
+            -> ( Model, Cmd Msg )
+        updateHabitSelectionFilterTextInput newFilterText oldIndex oldFilteredHabits modelUpdater =
+            let
+                habitFilter habit =
+                    habit |> Habit.getCommonFields |> .name |> String.contains newFilterText
+
+                newFilteredHabits =
+                    case model.allHabits of
+                        RemoteData.Success habits ->
+                            List.filter habitFilter habits
+
+                        _ ->
+                            []
+
+                oldSelectedHabit =
+                    Array.get oldIndex oldFilteredHabits
+
+                newSelectedHabitIndex =
+                    case oldSelectedHabit of
+                        Just h ->
+                            Maybe.map Tuple.first (Util.firstInstanceInList newFilteredHabits ((==) h))
+                                |> Maybe.withDefault 0
+
+                        Nothing ->
+                            0
+
+                newFilteredHabitsArray =
+                    Array.fromList newFilteredHabits
+            in
+            ( modelUpdater newFilteredHabitsArray newSelectedHabitIndex
+            , Cmd.none
+            )
     in
     case msg of
         NoOp ->
@@ -232,6 +287,7 @@ update msg model =
                 , allHabitDayNotes = RemoteData.Success habitDayNotes
                 , setHabitDataShortcutFilteredHabits = Array.fromList habits
                 , addNoteHabitSelectionFilteredHabits = Array.fromList habits
+                , suspendOrResumeHabitSelectionFilteredHabits = Array.fromList habits
               }
             , Cmd.none
             )
@@ -461,35 +517,31 @@ update msg model =
                         key =
                             Keyboard.fromCode keyCode
                     in
-                    if key == Keyboard.KeyA then
-                        if Maybe.isJust model.activeDialogScreen then
-                            -- A dialog screen is already open, don't open the set habit data one
-                            ( newModel, Cmd.none )
+                    case model.activeDialogScreen of
+                        Just _ ->
+                            -- A dialog screen is already open
+                            if key == Keyboard.Escape then
+                                update OnExitDialogScreen newModel
 
-                        else
-                            update OpenSetHabitDataShortcutDialogScreen newModel
+                            else
+                                ( newModel, Cmd.none )
 
-                    else if key == Keyboard.KeyN then
-                        if Maybe.isJust model.activeDialogScreen then
-                            -- A dialog screen is already open, don't open the Add Note one
-                            ( newModel, Cmd.none )
+                        Nothing ->
+                            -- No dialog screen is open, see if the user wants to open one
+                            if key == Keyboard.KeyA then
+                                update OpenSetHabitDataShortcutDialogScreen newModel
 
-                        else
-                            update OpenAddNoteHabitSelectionDialogScreen newModel
+                            else if key == Keyboard.KeyN then
+                                update OpenAddNoteHabitSelectionDialogScreen newModel
 
-                    else if key == Keyboard.KeyC then
-                        if Maybe.isJust model.activeDialogScreen then
-                            -- A dialog screen is already open, don't open the Choose Date one
-                            ( newModel, Cmd.none )
+                            else if key == Keyboard.KeyC then
+                                update OnChooseCustomDateClick newModel
 
-                        else
-                            update OnChooseCustomDateClick newModel
+                            else if key == Keyboard.KeyS then
+                                update OpenSuspendOrResumeHabitSelectionScreen newModel
 
-                    else if key == Keyboard.Escape then
-                        update OnExitDialogScreen newModel
-
-                    else
-                        ( newModel, Cmd.none )
+                            else
+                                ( newModel, Cmd.none )
 
                 _ ->
                     ( newModel, Cmd.none )
@@ -505,62 +557,30 @@ update msg model =
                     ( model, Cmd.none )
 
         -- Set Habit Data Shortcut
-        OnSetHabitDataShortcutInput habitNameFilterText ->
-            let
-                habitFilter habit =
-                    habit |> Habit.getCommonFields |> .name |> String.contains habitNameFilterText
-
-                newFilteredHabits =
-                    case model.allHabits of
-                        RemoteData.Success habits ->
-                            List.filter habitFilter habits
-
-                        _ ->
-                            []
-
-                oldSelectedHabit =
-                    Array.get model.setHabitDataShortcutSelectedHabitIndex model.setHabitDataShortcutFilteredHabits
-
-                newSelectedHabitIndex =
-                    case oldSelectedHabit of
-                        Just h ->
-                            Maybe.map Tuple.first (Util.firstInstanceInList newFilteredHabits ((==) h))
-                                |> Maybe.withDefault 0
-
-                        Nothing ->
-                            0
-            in
-            ( { model
-                | setHabitDataShortcutHabitNameFilterText = habitNameFilterText
-                , setHabitDataShortcutFilteredHabits = Array.fromList newFilteredHabits
-                , setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex
-              }
-            , Cmd.none
-            )
+        OnSetHabitDataShortcutHabitSelectionFilterTextInput newFilterText ->
+            updateHabitSelectionFilterTextInput
+                newFilterText
+                model.setHabitDataShortcutSelectedHabitIndex
+                model.setHabitDataShortcutFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | setHabitDataShortcutHabitNameFilterText = newFilterText
+                        , setHabitDataShortcutFilteredHabits = newFilteredHabitsArray
+                        , setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
 
         OnSetHabitDataShortcutSelectNextHabit ->
-            let
-                filteredHabitsLength =
-                    Array.length model.setHabitDataShortcutFilteredHabits
-
-                newSelectedHabitIndex =
-                    modBy filteredHabitsLength (model.setHabitDataShortcutSelectedHabitIndex + 1)
-            in
-            ( { model | setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex }
-            , Cmd.none
-            )
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.setHabitDataShortcutFilteredHabits
+                (model.setHabitDataShortcutSelectedHabitIndex + 1)
+                (\newIndex -> { model | setHabitDataShortcutSelectedHabitIndex = newIndex })
 
         OnSetHabitDataShortcutSelectPreviousHabit ->
-            let
-                filteredHabitsLength =
-                    Array.length model.setHabitDataShortcutFilteredHabits
-
-                newSelectedHabitIndex =
-                    modBy filteredHabitsLength (model.setHabitDataShortcutSelectedHabitIndex - 1)
-            in
-            ( { model | setHabitDataShortcutSelectedHabitIndex = newSelectedHabitIndex }
-            , Cmd.none
-            )
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.setHabitDataShortcutFilteredHabits
+                (model.setHabitDataShortcutSelectedHabitIndex - 1)
+                (\newIndex -> { model | setHabitDataShortcutSelectedHabitIndex = newIndex })
 
         OnToggleShowSetHabitDataShortcutAmountForm ->
             let
@@ -877,62 +897,30 @@ update msg model =
                 |> Task.attempt FocusResult
             )
 
-        OnAddNoteHabitSelectionFilterTextInput habitNameFilterText ->
-            let
-                habitFilter habit =
-                    habit |> Habit.getCommonFields |> .name |> String.contains habitNameFilterText
-
-                newFilteredHabits =
-                    case model.allHabits of
-                        RemoteData.Success habits ->
-                            List.filter habitFilter habits
-
-                        _ ->
-                            []
-
-                oldSelectedHabit =
-                    Array.get model.addNoteHabitSelectionSelectedHabitIndex model.addNoteHabitSelectionFilteredHabits
-
-                newSelectedHabitIndex =
-                    case oldSelectedHabit of
-                        Just h ->
-                            Maybe.map Tuple.first (Util.firstInstanceInList newFilteredHabits ((==) h))
-                                |> Maybe.withDefault 0
-
-                        Nothing ->
-                            0
-            in
-            ( { model
-                | addNoteHabitSelectionFilterText = habitNameFilterText
-                , addNoteHabitSelectionFilteredHabits = Array.fromList newFilteredHabits
-                , addNoteHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
-              }
-            , Cmd.none
-            )
+        OnAddNoteHabitSelectionFilterTextInput newFilterText ->
+            updateHabitSelectionFilterTextInput
+                newFilterText
+                model.addNoteHabitSelectionSelectedHabitIndex
+                model.addNoteHabitSelectionFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | addNoteHabitSelectionFilterText = newFilterText
+                        , addNoteHabitSelectionFilteredHabits = newFilteredHabitsArray
+                        , addNoteHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
 
         OnAddNoteHabitSelectionScreenSelectNextHabit ->
-            let
-                filteredHabitsLength =
-                    Array.length model.addNoteHabitSelectionFilteredHabits
-
-                newSelectedHabitIndex =
-                    modBy filteredHabitsLength (model.addNoteHabitSelectionSelectedHabitIndex + 1)
-            in
-            ( { model | addNoteHabitSelectionSelectedHabitIndex = newSelectedHabitIndex }
-            , Cmd.none
-            )
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.addNoteHabitSelectionFilteredHabits
+                (model.addNoteHabitSelectionSelectedHabitIndex + 1)
+                (\newIndex -> { model | addNoteHabitSelectionSelectedHabitIndex = newIndex })
 
         OnAddNoteHabitSelectionScreenSelectPreviousHabit ->
-            let
-                filteredHabitsLength =
-                    Array.length model.addNoteHabitSelectionFilteredHabits
-
-                newSelectedHabitIndex =
-                    modBy filteredHabitsLength (model.addNoteHabitSelectionSelectedHabitIndex - 1)
-            in
-            ( { model | addNoteHabitSelectionSelectedHabitIndex = newSelectedHabitIndex }
-            , Cmd.none
-            )
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.addNoteHabitSelectionFilteredHabits
+                (model.addNoteHabitSelectionSelectedHabitIndex - 1)
+                (\newIndex -> { model | addNoteHabitSelectionSelectedHabitIndex = newIndex })
 
         -- Add Note Dialog
         OpenAddNoteDialog habit ->
@@ -1027,6 +1015,44 @@ update msg model =
                         )
                         model.allHabitDayNotes
               }
+            , Cmd.none
+            )
+
+        -- Suspend Or Resume Habit Selection Screen
+        OpenSuspendOrResumeHabitSelectionScreen ->
+            ( { model | activeDialogScreen = Just DialogScreen.SuspendOrResumeHabitSelectionScreen }
+            , Dom.focus "suspend-or-resume-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnSuspendOrResumeHabitSelectionFilterTextInput newFilterText ->
+            updateHabitSelectionFilterTextInput
+                newFilterText
+                model.suspendOrResumeHabitSelectionSelectedHabitIndex
+                model.suspendOrResumeHabitSelectionFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | suspendOrResumeHabitSelectionFilterText = newFilterText
+                        , suspendOrResumeHabitSelectionFilteredHabits = newFilteredHabitsArray
+                        , suspendOrResumeHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
+
+        OnSuspendOrResumeHabitSelectionSelectNextHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.suspendOrResumeHabitSelectionFilteredHabits
+                (model.suspendOrResumeHabitSelectionSelectedHabitIndex + 1)
+                (\newIndex -> { model | suspendOrResumeHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnSuspendOrResumeHabitSelectionSelectPreviousHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.suspendOrResumeHabitSelectionFilteredHabits
+                (model.suspendOrResumeHabitSelectionSelectedHabitIndex - 1)
+                (\newIndex -> { model | suspendOrResumeHabitSelectionSelectedHabitIndex = newIndex })
+
+        -- Suspend Or Resume Confirmation Screen
+        OpenSuspendOrResumeConfirmationScreen habit ->
+            ( { model | activeDialogScreen = Just DialogScreen.SuspendOrResumeConfirmationScreen }
             , Cmd.none
             )
 

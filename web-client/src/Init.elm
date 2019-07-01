@@ -90,6 +90,11 @@ init { apiBaseUrl, currentTime } url key =
       -- Add note
       , addNoteDialogHabit = Nothing
       , addNoteDialogInput = ""
+
+      -- Suspend Or Resume Habit Selection
+      , suspendOrResumeHabitSelectionFilterText = ""
+      , suspendOrResumeHabitSelectionFilteredHabits = Array.empty
+      , suspendOrResumeHabitSelectionSelectedHabitIndex = 0
       }
     , Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
     )

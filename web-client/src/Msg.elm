@@ -79,7 +79,7 @@ type Msg
       -- Dom
     | FocusResult (Result Dom.Error ())
       -- Set Habit Data Shortcut
-    | OnSetHabitDataShortcutInput String
+    | OnSetHabitDataShortcutHabitSelectionFilterTextInput String
     | OnSetHabitDataShortcutSelectNextHabit
     | OnSetHabitDataShortcutSelectPreviousHabit
     | OnToggleShowSetHabitDataShortcutAmountForm
@@ -125,3 +125,10 @@ type Msg
     | OnAddNoteSubmitClick YmdDate.YmdDate String String
     | OnAddNoteFailure ApiError
     | OnAddNoteSuccess HabitDayNote.HabitDayNote
+      -- Suspend Or Resume Habit Selection Screen
+    | OpenSuspendOrResumeHabitSelectionScreen
+    | OnSuspendOrResumeHabitSelectionFilterTextInput String
+    | OnSuspendOrResumeHabitSelectionSelectNextHabit
+    | OnSuspendOrResumeHabitSelectionSelectPreviousHabit
+      -- Suspend Or Resume Confirmation Screen
+    | OpenSuspendOrResumeConfirmationScreen Habit.Habit

@@ -11,3 +11,5 @@ type DialogScreen
     | AddNoteHabitSelectionScreen
     | AddNoteScreen
     | ChooseDateDialogScreen
+    | SuspendOrResumeHabitSelectionScreen
+    | SuspendOrResumeConfirmationScreen

@@ -548,30 +548,17 @@ habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
         onToday =
             selectedYmd == actualYmd
 
+        suspensionsArray =
+            Array.fromList suspensions
+
+        currentSuspendedIntervalWithIndex : Maybe ( Int, Habit.SuspendedInterval )
+        currentSuspendedIntervalWithIndex =
+            Util.firstInstanceInArray suspensionsArray
+                (\interval -> YmdDate.withinYmdDateInterval interval.startDate interval.endDate selectedYmd)
+
         currentlySuspended : Bool
         currentlySuspended =
-            case List.reverse suspensions of
-                currSuspendedInterval :: rest ->
-                    case currSuspendedInterval.endDate of
-                        Just endDateYmd ->
-                            -- The latest `SuspendedInterval` has been closed already.
-                            -- Assumption: no `SuspendedInterval`s were started or ended after today.
-                            if YmdDate.compareYmds endDateYmd actualYmd == LT then
-                                -- The end date was yesterday or earlier, so the habit is now active.
-                                False
-
-                            else
-                                -- The end date is today (or later, but that shouldn't be possible).
-                                -- Dates are inclusive, so the habit is currently suspended.
-                                True
-
-                        Nothing ->
-                            -- Suspended interval is endless, habit is currently suspended
-                            True
-
-                [] ->
-                    -- Habit has never been suspended before, so it's active
-                    False
+            Maybe.isJust currentSuspendedIntervalWithIndex
 
         habitRecord =
             Habit.getCommonFields habit
@@ -588,16 +575,14 @@ habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
             ]
             [ text "" ]
         , div
-            [ class "action-buttons" ]
+            [ classList
+                [ ( "action-buttons", True )
+                , ( "display-none", not dropdown )
+                ]
+            ]
             [ button
-                [ classList
-                    [ ( "action-button", True )
-                    , ( "display-none"
-                      , -- Don't allow user to suspend/resume a habit unless they're looking at today
-                        not dropdown || not onToday
-                      )
-                    ]
-                , onClick <| OnResumeOrSuspendHabitClick habitRecord.id currentlySuspended suspensions
+                [ class "action-button"
+                , onClick <| OnResumeOrSuspendHabitClick habitRecord.id currentSuspendedIntervalWithIndex suspensionsArray selectedYmd
                 ]
                 [ text <|
                     if currentlySuspended then
@@ -609,19 +594,15 @@ habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
             , button
                 [ classList
                     [ ( "action-button", True )
-                    , ( "display-none"
-                      , -- Don't allow user to edit a habit's goal unless they're looking at today
-                        not dropdown || not onToday
-                      )
+
+                    -- Don't allow user to edit a habit's goal unless they're looking at today
+                    , ( "display-none", not onToday )
                     ]
                 , onClick <| OnEditGoalClick habitRecord.id
                 ]
                 [ text "Edit Goal" ]
             , button
-                [ classList
-                    [ ( "action-button", True )
-                    , ( "display-none", not dropdown )
-                    ]
+                [ class "action-button"
                 , onClick <| OpenAddNoteDialog habit
                 ]
                 [ text "Add Note" ]

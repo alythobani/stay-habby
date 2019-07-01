@@ -524,7 +524,8 @@ update msg model =
                 newSelectedHabitIndex =
                     case oldSelectedHabit of
                         Just h ->
-                            Maybe.withDefault 0 (Util.firstIndexInList newFilteredHabits h)
+                            Maybe.map Tuple.first (Util.firstInstanceInList newFilteredHabits ((==) h))
+                                |> Maybe.withDefault 0
 
                         Nothing ->
                             0
@@ -765,92 +766,58 @@ update msg model =
             )
 
         -- Suspending Habits
-        OnResumeOrSuspendHabitClick habitId currentlySuspended oldSuspensions ->
-            case model.actualYmd of
-                Just ymd ->
-                    let
-                        newDropdownsModel =
-                            -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
-                            { model | habitActionsDropdown = Nothing }
+        OnResumeOrSuspendHabitClick habitId currentSuspendedIntervalWithIndex oldSuspensionsArray selectedYmd ->
+            let
+                newDropdownsModel =
+                    -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
+                    { model | habitActionsDropdown = Nothing }
 
-                        newSuspensions : List Habit.SuspendedInterval
-                        newSuspensions =
-                            if currentlySuspended then
-                                -- User is trying to Resume the Habit
-                                case List.reverse oldSuspensions of
-                                    currSuspendedInterval :: rest ->
-                                        -- Check if the last SuspendedInterval has been resumed yet
-                                        case currSuspendedInterval.endDate of
-                                            Just endDateYmd ->
-                                                -- It's already been closed, nothing to do
-                                                oldSuspensions
-
-                                            Nothing ->
-                                                -- We should close the suspended interval to resume the habit
-                                                if YmdDate.compareYmds currSuspendedInterval.startDate ymd == LT then
-                                                    -- The suspended interval started earlier than today.
-                                                    -- To resume today, we set its endDate to yesterday.
-                                                    let
-                                                        yesterday =
-                                                            YmdDate.addDays -1 ymd
-
-                                                        newCurrSuspendedInterval =
-                                                            { currSuspendedInterval | endDate = Just yesterday }
-                                                    in
-                                                    List.reverse <| newCurrSuspendedInterval :: rest
-
-                                                else
-                                                    -- it was suspended today (or later, but that shouldn't be possible), we can just get rid of it
-                                                    List.take (List.length oldSuspensions - 1) oldSuspensions
-
-                                    [] ->
-                                        -- Habit has never been suspended before, so it's already active. Nothing to do
-                                        []
+                newSuspensionsArray : Array.Array Habit.SuspendedInterval
+                newSuspensionsArray =
+                    case currentSuspendedIntervalWithIndex of
+                        Just ( index, currentInterval ) ->
+                            -- Habit is currently suspended. User is trying to Resume the Habit.
+                            if currentInterval.startDate == selectedYmd then
+                                -- Selected day is the first day of the suspended interval; we can just cancel this suspension.
+                                -- (Either the habit will be active until the next suspended interval, or indefinitely active if
+                                -- there is no next interval. Either way, removing the interval does what we want.)
+                                Array.filter ((/=) currentInterval) oldSuspensionsArray
 
                             else
-                                -- User is trying to Suspend the Habit
-                                case List.reverse oldSuspensions of
-                                    currSuspendedInterval :: rest ->
-                                        -- Check if the last SuspendedInterval has still in effect
-                                        case currSuspendedInterval.endDate of
-                                            Just endDateYmd ->
-                                                -- The habit has been resumed.
-                                                if YmdDate.compareYmds endDateYmd ymd == LT then
-                                                    -- The SuspendedInterval's last day was yesterday or earlier.
-                                                    -- To suspend the habit, we should add a new SuspendedInterval that starts today.
-                                                    let
-                                                        newSuspendedInterval =
-                                                            { startDate = ymd, endDate = Nothing }
-                                                    in
-                                                    List.reverse <| newSuspendedInterval :: currSuspendedInterval :: rest
+                                -- Selected day isn't the first day of the suspended interval. We want the habit to remain suspended
+                                -- until the selected day, so we'll set the interval's end date to the day before the selected day.
+                                Array.set index { currentInterval | endDate = Just <| YmdDate.addDays -1 selectedYmd } oldSuspensionsArray
 
-                                                else
-                                                    -- The SuspendedInterval's last day is today (or later, but that shouldn't be possible).
-                                                    -- This means the habit is already currently suspended, so there's nothing to do.
-                                                    -- (For that reason this branch should never even execute)
-                                                    oldSuspensions
+                        Nothing ->
+                            -- Habit is currently active. User is trying to Suspend the Habit.
+                            let
+                                nextSuspendedIntervalWithIndex : Maybe ( Int, Habit.SuspendedInterval )
+                                nextSuspendedIntervalWithIndex =
+                                    -- First interval that starts after today
+                                    Util.firstInstanceInArray oldSuspensionsArray
+                                        (\interval -> YmdDate.compareYmds interval.startDate selectedYmd == GT)
+                            in
+                            case nextSuspendedIntervalWithIndex of
+                                Just ( index, nextInterval ) ->
+                                    -- We want the habit to be suspended starting today, so we'll set the next interval's start date
+                                    -- to today.
+                                    Array.set index { nextInterval | startDate = selectedYmd } oldSuspensionsArray
 
-                                            Nothing ->
-                                                -- The last suspension is still in effect (so the habit is still suspended), nothing to do.
-                                                oldSuspensions
+                                Nothing ->
+                                    -- There is no next interval, so we'll add one that starts today.
+                                    Array.push { startDate = selectedYmd, endDate = Nothing } oldSuspensionsArray
 
-                                    [] ->
-                                        -- Let's give the Habit its first suspension
-                                        [ { startDate = ymd, endDate = Nothing } ]
-                    in
-                    ( newDropdownsModel
-                    , Api.mutationEditHabitSuspensions
-                        habitId
-                        newSuspensions
-                        model.apiBaseUrl
-                        OnResumeOrSuspendHabitFailure
-                        OnResumeOrSuspendHabitSuccess
-                    )
-
-                Nothing ->
-                    ( { model | errorMessage = Just "Error suspending/resuming habit: current date not available" }
-                    , Cmd.none
-                    )
+                newSuspensionsList =
+                    Array.toList newSuspensionsArray
+            in
+            ( newDropdownsModel
+            , Api.mutationEditHabitSuspensions
+                habitId
+                newSuspensionsList
+                model.apiBaseUrl
+                OnResumeOrSuspendHabitFailure
+                OnResumeOrSuspendHabitSuccess
+            )
 
         OnResumeOrSuspendHabitFailure apiError ->
             ( { model | errorMessage = Just <| "Error suspending/resuming habit: " ++ ApiError.toString apiError }
@@ -929,7 +896,8 @@ update msg model =
                 newSelectedHabitIndex =
                     case oldSelectedHabit of
                         Just h ->
-                            Maybe.withDefault 0 (Util.firstIndexInList newFilteredHabits h)
+                            Maybe.map Tuple.first (Util.firstInstanceInList newFilteredHabits ((==) h))
+                                |> Maybe.withDefault 0
 
                         Nothing ->
                             0

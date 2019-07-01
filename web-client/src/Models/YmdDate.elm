@@ -17,6 +17,7 @@ module Models.YmdDate exposing
     , prettyPrintWithWeekday
     , toDate
     , toSimpleString
+    , withinYmdDateInterval
     )
 
 import Date
@@ -53,6 +54,29 @@ compareYmds ymdOne ymdTwo =
 
     else
         EQ
+
+
+{-| Returns True iff `ymd` falls within the inclusive date interval from `startDate` to `endDate`
+(or endless interval if `endDate` is Nothing).
+-}
+withinYmdDateInterval : YmdDate -> Maybe YmdDate -> YmdDate -> Bool
+withinYmdDateInterval startDate maybeEndDate ymd =
+    let
+        compareStartDateOrder =
+            compareYmds startDate ymd
+    in
+    case maybeEndDate of
+        Just endDate ->
+            let
+                compareEndDateOrder =
+                    compareYmds endDate ymd
+            in
+            List.member compareStartDateOrder [ LT, EQ ]
+                && List.member compareEndDateOrder [ EQ, GT ]
+
+        Nothing ->
+            -- Never ending interval starting at `startDate`
+            List.member compareStartDateOrder [ LT, EQ ]
 
 
 numDaysInMonth : YmdDate -> Int

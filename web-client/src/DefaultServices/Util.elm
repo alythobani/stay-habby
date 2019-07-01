@@ -5,8 +5,8 @@ module DefaultServices.Util exposing
     , encodeListOfStrings
     , encodeMaybe
     , encodeString
-    , firstIndexInList
-    , helper
+    , firstInstanceInArray
+    , firstInstanceInList
     , hiddenDiv
     , notEmpty
     , onKeydown
@@ -18,6 +18,7 @@ module DefaultServices.Util exposing
     , templater
     )
 
+import Array
 import DefaultServices.Keyboard as Keyboard
 import Dict
 import Html exposing (Attribute, Html, div)
@@ -230,25 +231,25 @@ onKeyupStopPropagation keyToMsg =
         (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
 
 
-{-| Helper function for `firstIndexInList`
+{-| Returns `Just` the index and value of the first element in `array` that passes `filterFunction`.
+Returns `Nothing` if no element passes `filterFunction`.
 -}
-helper : List a -> a -> Int -> Maybe Int
-helper list elem offset =
-    case list of
-        [] ->
-            Nothing
-
-        x :: xs ->
-            if x == elem then
-                Just offset
-
-            else
-                helper xs elem (offset + 1)
+firstInstanceInArray : Array.Array a -> (a -> Bool) -> Maybe ( Int, a )
+firstInstanceInArray array filterFunction =
+    let
+        indexedList =
+            Array.toIndexedList array
+    in
+    indexedList |> List.filter (\( index, elem ) -> filterFunction elem) |> List.head
 
 
-{-| Returns `Just` the index of the first occurrence of `element` in `list`.
-Returns `Nothing` if `element` is not found in `list`.
+{-| Returns `Just` the index and value of the first element in `list` that passes `filterFunction`.
+Returns `Nothing` if no element passes `filterFunction`.
 -}
-firstIndexInList : List a -> a -> Maybe Int
-firstIndexInList list element =
-    helper list element 0
+firstInstanceInList : List a -> (a -> Bool) -> Maybe ( Int, a )
+firstInstanceInList list filterFunction =
+    let
+        indexedList =
+            list |> Array.fromList |> Array.toIndexedList
+    in
+    indexedList |> List.filter (\( index, elem ) -> filterFunction elem) |> List.head

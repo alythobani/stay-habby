@@ -1,6 +1,7 @@
 module Msg exposing (Msg(..))
 
 import Api
+import Array
 import Browser
 import Browser.Dom as Dom
 import DefaultServices.Keyboard as Keyboard
@@ -102,7 +103,7 @@ type Msg
     | OnEditGoalSuccess Habit.Habit
     | OnEditGoalSubmitClick String (List Habit.FrequencyChangeRecord) String
       -- Suspending Habits
-    | OnResumeOrSuspendHabitClick String Bool (List Habit.SuspendedInterval)
+    | OnResumeOrSuspendHabitClick String (Maybe ( Int, Habit.SuspendedInterval )) (Array.Array Habit.SuspendedInterval) YmdDate.YmdDate
     | OnResumeOrSuspendHabitFailure ApiError
     | OnResumeOrSuspendHabitSuccess Habit.Habit
       -- Error messages

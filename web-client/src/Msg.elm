@@ -93,8 +93,7 @@ type Msg
     | OnEditGoalHabitSelectionSelectPreviousHabit
       -- Edit Goal
     | OpenEditGoalScreen Habit.Habit
-    | OnEditGoalClick String
-    | CloseEditGoalDialog
+    | OnEditGoalScreenKeydown Keyboard.Key
     | OnEditGoalSelectFrequencyKind Habit.FrequencyKind
     | OnEditGoalTimesPerWeekInput String
     | OnEditGoalSpecificDayMondayInput String
@@ -108,7 +107,7 @@ type Msg
     | OnEditGoalDaysInput String
     | OnEditGoalFailure ApiError
     | OnEditGoalSuccess Habit.Habit
-    | OnEditGoalSubmitClick String (List Habit.FrequencyChangeRecord) String
+    | OnEditGoalSubmit
       -- Error messages
     | OpenErrorMessageDialogScreen
       -- Full screen dialogs

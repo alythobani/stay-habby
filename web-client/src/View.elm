@@ -616,7 +616,7 @@ habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
                     -- Don't allow user to edit a habit's goal unless they're looking at today
                     , ( "display-none", not onToday )
                     ]
-                , onClick <| OnEditGoalClick habitRecord.id
+                , onClick <| OpenEditGoalScreen habit
                 ]
                 [ text "Edit Goal" ]
             , button
@@ -1454,8 +1454,9 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeActualYmd =
                                         , ( "display-none", editGoal.frequencyKind /= Habit.TotalWeekFrequencyKind )
                                         ]
                                     ]
-                                    [ inputStopKeydownPropagation
+                                    [ input
                                         [ placeholder "X"
+                                        , id "edit-goal-dialog-x-per-week-input"
                                         , onInput OnEditGoalTimesPerWeekInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.timesPerWeek)
                                         ]
@@ -1467,43 +1468,44 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeActualYmd =
                                         , ( "display-none", editGoal.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
                                         ]
                                     ]
-                                    [ inputStopKeydownPropagation
+                                    [ input
                                         [ placeholder "Monday"
+                                        , id "edit-goal-dialog-monday-input"
                                         , onInput OnEditGoalSpecificDayMondayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.mondayTimes)
                                         ]
                                         []
-                                    , inputStopKeydownPropagation
+                                    , input
                                         [ placeholder "Tuesday"
                                         , onInput OnEditGoalSpecificDayTuesdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.tuesdayTimes)
                                         ]
                                         []
-                                    , inputStopKeydownPropagation
+                                    , input
                                         [ placeholder "Wednesday"
                                         , onInput OnEditGoalSpecificDayWednesdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.wednesdayTimes)
                                         ]
                                         []
-                                    , inputStopKeydownPropagation
+                                    , input
                                         [ placeholder "Thursday"
                                         , onInput OnEditGoalSpecificDayThursdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.thursdayTimes)
                                         ]
                                         []
-                                    , inputStopKeydownPropagation
+                                    , input
                                         [ placeholder "Friday"
                                         , onInput OnEditGoalSpecificDayFridayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.fridayTimes)
                                         ]
                                         []
-                                    , inputStopKeydownPropagation
+                                    , input
                                         [ placeholder "Saturday"
                                         , onInput OnEditGoalSpecificDaySaturdayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.saturdayTimes)
                                         ]
                                         []
-                                    , inputStopKeydownPropagation
+                                    , input
                                         [ placeholder "Sunday"
                                         , onInput OnEditGoalSpecificDaySundayInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.sundayTimes)
@@ -1516,13 +1518,14 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeActualYmd =
                                         , ( "display-none", editGoal.frequencyKind /= Habit.EveryXDayFrequencyKind )
                                         ]
                                     ]
-                                    [ inputStopKeydownPropagation
+                                    [ input
                                         [ placeholder "Times"
+                                        , id "edit-goal-dialog-every-x-days-times-input"
                                         , onInput OnEditGoalTimesInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.times)
                                         ]
                                         []
-                                    , inputStopKeydownPropagation
+                                    , input
                                         [ placeholder "Days"
                                         , onInput OnEditGoalDaysInput
                                         , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.days)
@@ -1552,26 +1555,12 @@ renderEditGoalDialog activeDialogScreen habit editGoal maybeActualYmd =
                                 ]
                                 [ button
                                     [ class "edit-goal-dialog-form-buttons-submit"
-                                    , onClick <|
-                                        case newFrequencies of
-                                            Just fcrs ->
-                                                OnEditGoalSubmitClick
-                                                    habitRecord.id
-                                                    fcrs
-                                                    (if isGoodHabit then
-                                                        "good_habit"
-
-                                                     else
-                                                        "bad_habit"
-                                                    )
-
-                                            Nothing ->
-                                                NoOp
+                                    , onClick OnEditGoalSubmit
                                     ]
                                     [ text "Submit" ]
                                 , button
                                     [ class "edit-goal-dialog-form-buttons-cancel"
-                                    , onClick CloseEditGoalDialog
+                                    , onClick OnExitDialogScreen
                                     ]
                                     [ text "Cancel" ]
                                 ]

@@ -522,6 +522,9 @@ update msg model =
                         Just DialogScreen.SuspendOrResumeConfirmationScreen ->
                             update (OnSuspendOrResumeConfirmationScreenKeydown key) newModel
 
+                        Just DialogScreen.EditGoalScreen ->
+                            update (OnEditGoalScreenKeydown key) newModel
+
                         Just screen ->
                             -- A dialog screen is already open
                             if key == Keyboard.Escape then
@@ -672,80 +675,115 @@ update msg model =
 
         -- Edit Goal
         OpenEditGoalScreen habit ->
-            ( model, Cmd.none )
+            case model.selectedYmd of
+                Just selectedYmd ->
+                    let
+                        habitRecord =
+                            Habit.getCommonFields habit
 
-        -- TODO
-        OnEditGoalClick habitId ->
-            let
-                habitFilter : Habit.Habit -> Bool
-                habitFilter habit =
-                    habit |> Habit.getCommonFields |> .id |> (==) habitId
+                        currentGoal : Maybe Habit.FrequencyChangeRecord
+                        currentGoal =
+                            case habit of
+                                Habit.GoodHabit goodHabit ->
+                                    List.head <| List.reverse goodHabit.targetFrequencies
 
-                newEditGoalDialogHabit =
-                    case model.allHabits of
-                        RemoteData.Success habits ->
-                            List.filter habitFilter habits
-                                |> List.head
+                                Habit.BadHabit badHabit ->
+                                    List.head <| List.reverse badHabit.thresholdFrequencies
 
-                        _ ->
-                            Nothing
+                        ( newEditGoalFrequencyKind, idToFocusOn ) =
+                            case currentGoal of
+                                Just fcr ->
+                                    case fcr.newFrequency of
+                                        Habit.TotalWeekFrequency f ->
+                                            ( Just Habit.TotalWeekFrequencyKind
+                                            , Just "edit-goal-dialog-x-per-week-input"
+                                            )
 
-                currentGoal : Maybe Habit.FrequencyChangeRecord
-                currentGoal =
-                    case newEditGoalDialogHabit of
-                        Just h ->
-                            case h of
-                                Habit.GoodHabit gh ->
-                                    List.head <| List.reverse gh.targetFrequencies
+                                        Habit.SpecificDayOfWeekFrequency f ->
+                                            ( Just Habit.SpecificDayOfWeekFrequencyKind
+                                            , Just "edit-goal-dialog-monday-input"
+                                            )
 
-                                Habit.BadHabit bh ->
-                                    List.head <| List.reverse bh.thresholdFrequencies
+                                        Habit.EveryXDayFrequency f ->
+                                            ( Just Habit.EveryXDayFrequencyKind
+                                            , Just "edit-goal-dialog-every-x-days-times-input"
+                                            )
+
+                                Nothing ->
+                                    ( Nothing, Nothing )
+
+                        newModel =
+                            case newEditGoalFrequencyKind of
+                                Just fk ->
+                                    updateEditGoal (\editGoal -> { editGoal | frequencyKind = fk })
+
+                                Nothing ->
+                                    model
+                    in
+                    ( { newModel
+                        | activeDialogScreen = Just DialogScreen.EditGoalScreen
+                        , editGoalDialogHabit = Just habit
+                        , habitActionsDropdown = Nothing
+                      }
+                    , case idToFocusOn of
+                        Just domId ->
+                            Dom.focus domId
+                                |> Task.attempt FocusResult
 
                         Nothing ->
-                            Nothing
+                            Cmd.none
+                    )
 
-                newEditGoalFrequencyKind : Maybe Habit.FrequencyKind
-                newEditGoalFrequencyKind =
-                    case currentGoal of
-                        Just fcr ->
-                            case fcr.newFrequency of
-                                Habit.TotalWeekFrequency f ->
-                                    Just Habit.TotalWeekFrequencyKind
+                Nothing ->
+                    ( model, Cmd.none )
 
-                                Habit.SpecificDayOfWeekFrequency f ->
-                                    Just Habit.SpecificDayOfWeekFrequencyKind
+        OnEditGoalScreenKeydown key ->
+            if key == Keyboard.Enter then
+                update OnEditGoalSubmit model
 
-                                Habit.EveryXDayFrequency f ->
-                                    Just Habit.EveryXDayFrequencyKind
+            else if key == Keyboard.Escape then
+                update OnExitDialogScreen model
 
-                        Nothing ->
-                            Nothing
+            else if key == Keyboard.ArrowLeft then
+                case model.editGoal.frequencyKind of
+                    Habit.EveryXDayFrequencyKind ->
+                        update (OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind) model
 
-                newModel =
-                    case newEditGoalFrequencyKind of
-                        Just fk ->
-                            updateEditGoal (\editGoal -> { editGoal | frequencyKind = fk })
+                    Habit.SpecificDayOfWeekFrequencyKind ->
+                        update (OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind) model
 
-                        Nothing ->
-                            model
-            in
-            ( { newModel
-                | activeDialogScreen = Just DialogScreen.EditGoalScreen
-                , editGoalDialogHabit = newEditGoalDialogHabit
-                , habitActionsDropdown = Nothing
-              }
-            , Cmd.none
-            )
+                    Habit.TotalWeekFrequencyKind ->
+                        update (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind) model
 
-        CloseEditGoalDialog ->
-            ( { model
-                | activeDialogScreen = Nothing
-              }
-            , Cmd.none
-            )
+            else if key == Keyboard.ArrowRight then
+                case model.editGoal.frequencyKind of
+                    Habit.EveryXDayFrequencyKind ->
+                        update (OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind) model
+
+                    Habit.SpecificDayOfWeekFrequencyKind ->
+                        update (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind) model
+
+                    Habit.TotalWeekFrequencyKind ->
+                        update (OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind) model
+
+            else
+                ( model, Cmd.none )
 
         OnEditGoalSelectFrequencyKind frequencyKind ->
-            ( updateEditGoal (\editGoal -> { editGoal | frequencyKind = frequencyKind }), Cmd.none )
+            ( updateEditGoal (\editGoal -> { editGoal | frequencyKind = frequencyKind })
+            , Dom.focus
+                (case frequencyKind of
+                    Habit.EveryXDayFrequencyKind ->
+                        "edit-goal-dialog-every-x-days-times-input"
+
+                    Habit.SpecificDayOfWeekFrequencyKind ->
+                        "edit-goal-dialog-monday-input"
+
+                    Habit.TotalWeekFrequencyKind ->
+                        "edit-goal-dialog-x-per-week-input"
+                )
+                |> Task.attempt FocusResult
+            )
 
         OnEditGoalTimesPerWeekInput timesPerWeek ->
             ( updateEditGoal (\editGoal -> { editGoal | timesPerWeek = extractInt timesPerWeek editGoal.timesPerWeek })
@@ -819,13 +857,30 @@ update msg model =
             , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
             )
 
-        OnEditGoalSubmitClick habitId newFrequencies habitType ->
-            ( { model
-                | activeDialogScreen = Nothing
-              }
-            , Api.mutationEditHabitGoalFrequencies habitId newFrequencies habitType model.apiBaseUrl OnEditGoalFailure OnEditGoalSuccess
-            )
+        OnEditGoalSubmit ->
+            -- case (model.editGoalDialogHabit, Habit.extractNewGoal model.editGoal) of
+            --     (Just habit, Just newGoal) ->
+            --         let
+            --             oldFrequencies : List Habit.FrequencyChangeRecord
+            --             oldFrequencies =
+            --                 case habit of
+            --                     Habit.GoodHabit gh ->
+            --                         gh.targetFrequencies
+            --
+            --                     Habit.BadHabit bh ->
+            --                         bh.thresholdFrequencies
+            --         in
+            --
+            --
+            --     Nothing ->
+            -- TODO
+            ( model, Cmd.none )
 
+        -- ( { model
+        --     | activeDialogScreen = Nothing
+        --   }
+        -- , Api.mutationEditHabitGoalFrequencies habitId newFrequencies habitType model.apiBaseUrl OnEditGoalFailure OnEditGoalSuccess
+        -- )
         -- Error Messages
         OpenErrorMessageDialogScreen ->
             ( { model | activeDialogScreen = Just DialogScreen.ErrorMessageScreen }

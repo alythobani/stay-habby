@@ -751,6 +751,9 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
                         else if key == Keyboard.KeyC then
                             Just OnChooseCustomDateClick
 
+                        else if key == Keyboard.KeyS then
+                            Just OpenSuspendOrResumeHabitSelectionScreen
+
                         else
                             Just NoOp
                     )

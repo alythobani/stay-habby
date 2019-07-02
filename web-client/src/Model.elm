@@ -107,4 +107,9 @@ type alias Model =
     , suspendOrResumeHabitSelectionFilterText : String
     , suspendOrResumeHabitSelectionFilteredHabits : Array.Array Habit.Habit
     , suspendOrResumeHabitSelectionSelectedHabitIndex : Int
+
+    -- Suspend Or Resume Confirmation Dialog
+    , suspendOrResumeHabit : Maybe Habit.Habit
+    , suspendOrResumeHabitConfirmationMessage : String
+    , suspendOrResumeHabitNewSuspensions : Maybe (List Habit.SuspendedInterval)
     }

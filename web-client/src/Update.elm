@@ -518,6 +518,9 @@ update msg model =
                             Keyboard.fromCode keyCode
                     in
                     case model.activeDialogScreen of
+                        Just DialogScreen.SuspendOrResumeConfirmationScreen ->
+                            update (OnSuspendOrResumeConfirmationScreenKeydown key) newModel
+
                         Just screen ->
                             -- A dialog screen is already open
                             if key == Keyboard.Escape then
@@ -783,80 +786,6 @@ update msg model =
             , Api.mutationEditHabitGoalFrequencies habitId newFrequencies habitType model.apiBaseUrl OnEditGoalFailure OnEditGoalSuccess
             )
 
-        -- Suspending Habits
-        OnResumeOrSuspendHabitClick habitId currentSuspendedIntervalWithIndex oldSuspensionsArray selectedYmd ->
-            let
-                newDropdownsModel =
-                    -- Close the Habit Actions Dropdown that was used to suspend/resume the habit
-                    { model | habitActionsDropdown = Nothing }
-
-                newSuspensionsArray : Array.Array Habit.SuspendedInterval
-                newSuspensionsArray =
-                    case currentSuspendedIntervalWithIndex of
-                        Just ( index, currentInterval ) ->
-                            -- Habit is currently suspended. User is trying to Resume the Habit.
-                            if currentInterval.startDate == selectedYmd then
-                                -- Selected day is the first day of the suspended interval; we can just cancel this suspension.
-                                -- (Either the habit will be active until the next suspended interval, or indefinitely active if
-                                -- there is no next interval. Either way, removing the interval does what we want.)
-                                Array.filter ((/=) currentInterval) oldSuspensionsArray
-
-                            else
-                                -- Selected day isn't the first day of the suspended interval. We want the habit to remain suspended
-                                -- until the selected day, so we'll set the interval's end date to the day before the selected day.
-                                Array.set index { currentInterval | endDate = Just <| YmdDate.addDays -1 selectedYmd } oldSuspensionsArray
-
-                        Nothing ->
-                            -- Habit is currently active. User is trying to Suspend the Habit.
-                            let
-                                nextSuspendedIntervalWithIndex : Maybe ( Int, Habit.SuspendedInterval )
-                                nextSuspendedIntervalWithIndex =
-                                    -- First interval that starts after today
-                                    Util.firstInstanceInArray oldSuspensionsArray
-                                        (\interval -> YmdDate.compareYmds interval.startDate selectedYmd == GT)
-                            in
-                            case nextSuspendedIntervalWithIndex of
-                                Just ( index, nextInterval ) ->
-                                    -- We want the habit to be suspended starting today, so we'll set the next interval's start date
-                                    -- to today.
-                                    Array.set index { nextInterval | startDate = selectedYmd } oldSuspensionsArray
-
-                                Nothing ->
-                                    -- There is no next interval, so we'll add one that starts today.
-                                    Array.push { startDate = selectedYmd, endDate = Nothing } oldSuspensionsArray
-
-                newSuspensionsList =
-                    Array.toList newSuspensionsArray
-            in
-            ( newDropdownsModel
-            , Api.mutationEditHabitSuspensions
-                habitId
-                newSuspensionsList
-                model.apiBaseUrl
-                OnResumeOrSuspendHabitFailure
-                OnResumeOrSuspendHabitSuccess
-            )
-
-        OnResumeOrSuspendHabitFailure apiError ->
-            ( { model | errorMessage = Just <| "Error suspending/resuming habit: " ++ ApiError.toString apiError }
-            , Cmd.none
-            )
-
-        OnResumeOrSuspendHabitSuccess habit ->
-            ( { model
-                | allHabits =
-                    RemoteData.map
-                        (\allHabits ->
-                            Util.replaceOrAdd
-                                allHabits
-                                (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
-                                habit
-                        )
-                        model.allHabits
-              }
-            , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
-            )
-
         -- Error Messages
         OpenErrorMessageDialogScreen ->
             ( { model | activeDialogScreen = Just DialogScreen.ErrorMessageScreen }
@@ -1029,8 +958,211 @@ update msg model =
 
         -- Suspend Or Resume Confirmation Screen
         OpenSuspendOrResumeConfirmationScreen habit ->
-            ( { model | activeDialogScreen = Just DialogScreen.SuspendOrResumeConfirmationScreen }
+            case model.selectedYmd of
+                Just selectedYmd ->
+                    let
+                        habitRecord =
+                            Habit.getCommonFields habit
+
+                        oldSuspensionsArray =
+                            Array.fromList habitRecord.suspensions
+
+                        -- Current suspended interval
+                        currentSuspendedIntervalWithIndex : Maybe ( Int, Habit.SuspendedInterval )
+                        currentSuspendedIntervalWithIndex =
+                            Util.firstInstanceInArray oldSuspensionsArray
+                                (\interval -> YmdDate.withinYmdDateInterval interval.startDate interval.endDate selectedYmd)
+
+                        -- First interval that starts after today
+                        nextSuspendedIntervalWithIndex : Maybe ( Int, Habit.SuspendedInterval )
+                        nextSuspendedIntervalWithIndex =
+                            Util.firstInstanceInArray oldSuspensionsArray
+                                (\interval -> YmdDate.compareYmds interval.startDate selectedYmd == GT)
+
+                        -- Last interval that ends before today
+                        previousSuspendedIntervalWithIndex : Maybe ( Int, Habit.SuspendedInterval )
+                        previousSuspendedIntervalWithIndex =
+                            Util.lastInstanceInArray oldSuspensionsArray
+                                (\interval ->
+                                    case interval.endDate of
+                                        Just endYmd ->
+                                            YmdDate.compareYmds endYmd selectedYmd == LT
+
+                                        Nothing ->
+                                            False
+                                )
+
+                        habitNameMessage =
+                            habitRecord.name ++ " is currently "
+
+                        untilMessage ymd =
+                            "until " ++ YmdDate.prettyPrintWithWeekday ymd ++ "."
+
+                        indefinitelyMessage =
+                            "indefinitely."
+
+                        resumeMessage =
+                            habitNameMessage
+                                ++ "suspended. If you resume it now, it will stay active "
+                                ++ (case nextSuspendedIntervalWithIndex of
+                                        Just ( nextIndex, nextInterval ) ->
+                                            untilMessage nextInterval.startDate
+
+                                        Nothing ->
+                                            indefinitelyMessage
+                                   )
+
+                        suspendMessage =
+                            habitNameMessage
+                                ++ "active. If you suspend it now, it will stay suspended "
+                                ++ (case nextSuspendedIntervalWithIndex of
+                                        Just ( nextIndex, nextInterval ) ->
+                                            nextInterval.endDate |> Maybe.map untilMessage |> Maybe.withDefault indefinitelyMessage
+
+                                        Nothing ->
+                                            indefinitelyMessage
+                                   )
+
+                        confirmationMessage : String
+                        confirmationMessage =
+                            case currentSuspendedIntervalWithIndex of
+                                Just ( currentIndex, currentInterval ) ->
+                                    -- Habit is currently suspended. User is trying to Resume the Habit.
+                                    resumeMessage
+
+                                Nothing ->
+                                    suspendMessage
+
+                        newSuspensionsArray : Array.Array Habit.SuspendedInterval
+                        newSuspensionsArray =
+                            case currentSuspendedIntervalWithIndex of
+                                Just ( index, currentInterval ) ->
+                                    -- Habit is currently suspended. User is trying to Resume the Habit.
+                                    if currentInterval.startDate == selectedYmd then
+                                        -- Selected day is the first day of the suspended interval; we can just cancel this suspension.
+                                        Array.filter ((/=) currentInterval) oldSuspensionsArray
+
+                                    else
+                                        -- Selected day isn't the first day of the suspended interval. We want the habit to remain suspended
+                                        -- until the selected day, so we'll set the interval's end date to the day before the selected day.
+                                        Array.set
+                                            index
+                                            { currentInterval | endDate = Just <| YmdDate.addDays -1 selectedYmd }
+                                            oldSuspensionsArray
+
+                                Nothing ->
+                                    -- Habit is currently active. User is trying to Suspend the Habit.
+                                    case nextSuspendedIntervalWithIndex of
+                                        Just ( nextIndex, nextInterval ) ->
+                                            -- There is a next interval
+                                            case previousSuspendedIntervalWithIndex of
+                                                Just ( previousIndex, previousInterval ) ->
+                                                    -- There is a previous interval
+                                                    if previousInterval.endDate == Just (YmdDate.addDays -1 selectedYmd) then
+                                                        -- The previous interval ended yesterday anyway, so now we can just remove the next interval
+                                                        -- and set the previous interval's end date to that of the next interval.
+                                                        oldSuspensionsArray
+                                                            |> Array.filter ((/=) nextInterval)
+                                                            |> Array.set previousIndex { previousInterval | endDate = nextInterval.endDate }
+
+                                                    else
+                                                        -- The previous interval ended before yesterday, so we'll set the next interval's start
+                                                        -- date to today.
+                                                        Array.set nextIndex { nextInterval | startDate = selectedYmd } oldSuspensionsArray
+
+                                                Nothing ->
+                                                    -- No previous interval
+                                                    Array.set nextIndex { nextInterval | startDate = selectedYmd } oldSuspensionsArray
+
+                                        Nothing ->
+                                            -- There is no next interval
+                                            case previousSuspendedIntervalWithIndex of
+                                                Just ( previousIndex, previousInterval ) ->
+                                                    if previousInterval.endDate == Just (YmdDate.addDays -1 selectedYmd) then
+                                                        -- The previous interval ended yesterday anyway, we can just make it endless
+                                                        Array.set previousIndex { previousInterval | endDate = Nothing } oldSuspensionsArray
+
+                                                    else
+                                                        -- The previous interval ended before yesterday, we'll just start a new one today
+                                                        Array.push { startDate = selectedYmd, endDate = Nothing } oldSuspensionsArray
+
+                                                Nothing ->
+                                                    -- There is no previous interval either, we can just start a suspended interval today
+                                                    Array.push { startDate = selectedYmd, endDate = Nothing } oldSuspensionsArray
+                    in
+                    ( { model
+                        | activeDialogScreen = Just DialogScreen.SuspendOrResumeConfirmationScreen
+                        , habitActionsDropdown = Nothing
+                        , suspendOrResumeHabit = Just habit
+                        , suspendOrResumeHabitConfirmationMessage = confirmationMessage
+                        , suspendOrResumeHabitNewSuspensions = Just <| Array.toList newSuspensionsArray
+                      }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OnSuspendOrResumeConfirmationScreenKeydown key ->
+            if key == Keyboard.Enter then
+                case ( model.suspendOrResumeHabit, model.suspendOrResumeHabitNewSuspensions ) of
+                    ( Just habit, Just newSuspensions ) ->
+                        let
+                            habitRecord =
+                                Habit.getCommonFields habit
+                        in
+                        update (OnResumeOrSuspendSubmitClick habitRecord.id newSuspensions) model
+
+                    _ ->
+                        ( model, Cmd.none )
+
+            else if key == Keyboard.Escape then
+                update OnExitDialogScreen model
+
+            else
+                ( model, Cmd.none )
+
+        OnResumeOrSuspendSubmitClick habitId newSuspensionsList ->
+            ( { model
+                | activeDialogScreen = Nothing
+                , suspendOrResumeHabit = Nothing
+                , suspendOrResumeHabitConfirmationMessage = ""
+                , suspendOrResumeHabitNewSuspensions = Nothing
+              }
+            , Api.mutationEditHabitSuspensions
+                habitId
+                newSuspensionsList
+                model.apiBaseUrl
+                OnResumeOrSuspendHabitFailure
+                OnResumeOrSuspendHabitSuccess
+            )
+
+        OnResumeOrSuspendHabitFailure apiError ->
+            ( { model | errorMessage = Just <| "Error suspending/resuming habit: " ++ ApiError.toString apiError }
             , Cmd.none
+            )
+
+        OnResumeOrSuspendHabitSuccess habit ->
+            let
+                replaceHabitInList habitList =
+                    Util.replaceOrAdd
+                        habitList
+                        (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
+                        habit
+
+                replaceHabitInArray habitArray =
+                    habitArray |> Array.toList |> replaceHabitInList |> Array.fromList
+            in
+            ( { model
+                | allHabits =
+                    RemoteData.map
+                        replaceHabitInList
+                        model.allHabits
+                , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
+                , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
+                , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
+              }
+            , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
             )
 
 

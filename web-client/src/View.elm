@@ -87,6 +87,12 @@ view model =
                 model.suspendOrResumeHabitSelectionFilterText
                 model.suspendOrResumeHabitSelectionFilteredHabits
                 model.suspendOrResumeHabitSelectionSelectedHabitIndex
+            , renderSuspendOrResumeConfirmationScreen
+                model.activeDialogScreen
+                model.suspendOrResumeHabit
+                model.selectedYmd
+                model.suspendOrResumeHabitConfirmationMessage
+                model.suspendOrResumeHabitNewSuspensions
             ]
         ]
     }
@@ -589,7 +595,7 @@ habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
             ]
             [ button
                 [ class "action-button"
-                , onClick <| OnResumeOrSuspendHabitClick habitRecord.id currentSuspendedIntervalWithIndex suspensionsArray selectedYmd
+                , onClick <| OpenSuspendOrResumeConfirmationScreen habit
                 ]
                 [ text <|
                     if currentlySuspended then
@@ -1700,3 +1706,52 @@ renderSuspendOrResumeHabitSelectionScreen activeDialogScreen habitSelectionFilte
         OnSuspendOrResumeHabitSelectionSelectNextHabit
         OpenSuspendOrResumeConfirmationScreen
         selectedHabitIndex
+
+
+renderSuspendOrResumeConfirmationScreen :
+    Maybe DialogScreen.DialogScreen
+    -> Maybe Habit.Habit
+    -> Maybe YmdDate.YmdDate
+    -> String
+    -> Maybe (List Habit.SuspendedInterval)
+    -> Html Msg
+renderSuspendOrResumeConfirmationScreen activeDialogScreen maybeHabit maybeSelectedYmd confirmationMessage maybeNewSuspensions =
+    div
+        [ classList
+            [ ( "suspend-or-resume-confirmation-screen", True )
+            , ( "display-none", activeDialogScreen /= Just DialogScreen.SuspendOrResumeConfirmationScreen )
+            ]
+        ]
+        (case ( maybeHabit, maybeSelectedYmd, maybeNewSuspensions ) of
+            ( Just habit, Just selectedYmd, Just newSuspensions ) ->
+                let
+                    habitRecord =
+                        Habit.getCommonFields habit
+                in
+                [ div
+                    [ class "suspend-or-resume-confirmation-screen-dialog" ]
+                    [ div [ class "suspend-or-resume-confirmation-screen-dialog-header-habit-name" ] [ text habitRecord.name ]
+                    , div
+                        [ class "suspend-or-resume-confirmation-screen-dialog-header-date" ]
+                        [ text <| YmdDate.prettyPrintWithWeekday selectedYmd ]
+                    , div [ class "suspend-or-resume-confirmation-screen-dialog-header-line-break" ] []
+                    , div [ class "suspend-or-resume-confirmation-screen-dialog-confirmation-message" ] [ text confirmationMessage ]
+                    , div
+                        [ class "suspend-or-resume-confirmation-screen-dialog-form-buttons" ]
+                        [ button
+                            [ class "suspend-or-resume-confirmation-screen-dialog-form-buttons-submit"
+                            , onClick <| OnResumeOrSuspendSubmitClick habitRecord.id newSuspensions
+                            ]
+                            [ text "Confirm" ]
+                        , button
+                            [ class "suspend-or-resume-confirmation-screen-dialog-form-buttons-cancel"
+                            , onClick OnExitDialogScreen
+                            ]
+                            [ text "Cancel" ]
+                        ]
+                    ]
+                ]
+
+            _ ->
+                []
+        )

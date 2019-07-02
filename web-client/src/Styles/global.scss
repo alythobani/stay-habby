@@ -1013,6 +1013,47 @@ body {
 
     }
 
+    .suspend-or-resume-confirmation-screen {
+      @extend .full-screen-centered-flex-container;
+      .suspend-or-resume-confirmation-screen-dialog {
+        @extend .dialog-form-1;
+        min-height: 200px;
+        min-width: 500px;
+        .suspend-or-resume-confirmation-screen-dialog-header-habit-name {
+          font-size: 24px;
+          font-weight: 400;
+        }
+        .suspend-or-resume-confirmation-screen-dialog-header-date {
+          font-style: italic;
+          margin-top: 15px;
+        }
+        .suspend-or-resume-confirmation-screen-dialog-header-line-break {
+          @extend .dialog-form-line-break;
+          margin-top: 30px;
+          width: 80%;
+        }
+        .suspend-or-resume-confirmation-screen-dialog-confirmation-message {
+          width: 400px;
+          margin-top: 30px;
+        }
+        .suspend-or-resume-confirmation-screen-dialog-form-buttons {
+          margin-top: 30px;
+          width: 250px;
+          .suspend-or-resume-confirmation-screen-dialog-form-buttons-cancel {
+            @extend .button-style-1;
+            height: 30px;
+            width: 100px;
+          }
+          .suspend-or-resume-confirmation-screen-dialog-form-buttons-submit {
+            @extend .button-style-2;
+            float: right;
+            height: 30px;
+            width: 100px;
+          }
+        }
+      }
+    }
+
 
     .add-note-dialog {
       @extend .full-screen-centered-flex-container;

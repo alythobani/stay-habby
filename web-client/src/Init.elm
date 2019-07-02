@@ -97,6 +97,11 @@ init { apiBaseUrl, currentTime } url key =
       , suspendOrResumeHabitSelectionFilterText = ""
       , suspendOrResumeHabitSelectionFilteredHabits = Array.empty
       , suspendOrResumeHabitSelectionSelectedHabitIndex = 0
+
+      -- Suspend Or Resume Confirmation Dialog
+      , suspendOrResumeHabit = Nothing
+      , suspendOrResumeHabitConfirmationMessage = ""
+      , suspendOrResumeHabitNewSuspensions = Nothing
       }
     , Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
     )

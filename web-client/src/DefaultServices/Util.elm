@@ -8,6 +8,7 @@ module DefaultServices.Util exposing
     , firstInstanceInArray
     , firstInstanceInList
     , hiddenDiv
+    , lastInstanceInArray
     , notEmpty
     , onKeydown
     , onKeydownPreventDefault
@@ -143,7 +144,7 @@ replaceOrAdd list pred replaceWith =
                     a
             )
         |> (\newList ->
-                if newList == list then
+                if newList == list && not (List.member replaceWith list) then
                     replaceWith :: list
 
                 else
@@ -229,6 +230,18 @@ onKeyupStopPropagation keyToMsg =
     stopPropagationOn
         "keyup"
         (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
+
+
+{-| Returns `Just` the index and value of the last element in `array` that passes `filterFunction`.
+Returns `Nothing` if no element passes `filterFunction`.
+-}
+lastInstanceInArray : Array.Array a -> (a -> Bool) -> Maybe ( Int, a )
+lastInstanceInArray array filterFunction =
+    let
+        indexedList =
+            Array.toIndexedList array
+    in
+    indexedList |> List.filter (\( index, elem ) -> filterFunction elem) |> List.reverse |> List.head
 
 
 {-| Returns `Just` the index and value of the first element in `array` that passes `filterFunction`.

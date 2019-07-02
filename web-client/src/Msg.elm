@@ -103,10 +103,6 @@ type Msg
     | OnEditGoalFailure ApiError
     | OnEditGoalSuccess Habit.Habit
     | OnEditGoalSubmitClick String (List Habit.FrequencyChangeRecord) String
-      -- Suspending Habits
-    | OnResumeOrSuspendHabitClick String (Maybe ( Int, Habit.SuspendedInterval )) (Array.Array Habit.SuspendedInterval) YmdDate.YmdDate
-    | OnResumeOrSuspendHabitFailure ApiError
-    | OnResumeOrSuspendHabitSuccess Habit.Habit
       -- Error messages
     | OpenErrorMessageDialogScreen
       -- Full screen dialogs
@@ -131,3 +127,7 @@ type Msg
     | OnSuspendOrResumeHabitSelectionSelectPreviousHabit
       -- Suspend Or Resume Confirmation Screen
     | OpenSuspendOrResumeConfirmationScreen Habit.Habit
+    | OnSuspendOrResumeConfirmationScreenKeydown Keyboard.Key
+    | OnResumeOrSuspendSubmitClick String (List Habit.SuspendedInterval)
+    | OnResumeOrSuspendHabitFailure ApiError
+    | OnResumeOrSuspendHabitSuccess Habit.Habit

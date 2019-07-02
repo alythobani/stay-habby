@@ -286,6 +286,7 @@ update msg model =
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
                 , allHabitDayNotes = RemoteData.Success habitDayNotes
                 , setHabitDataShortcutFilteredHabits = Array.fromList habits
+                , editGoalHabitSelectionFilteredHabits = Array.fromList habits
                 , addNoteHabitSelectionFilteredHabits = Array.fromList habits
                 , suspendOrResumeHabitSelectionFilteredHabits = Array.fromList habits
               }
@@ -534,6 +535,9 @@ update msg model =
                             if key == Keyboard.KeyA then
                                 update OpenSetHabitDataShortcutHabitSelectionScreen newModel
 
+                            else if key == Keyboard.KeyE then
+                                update OpenEditGoalHabitSelectionScreen newModel
+
                             else if key == Keyboard.KeyN then
                                 update OpenAddNoteHabitSelectionDialogScreen newModel
 
@@ -634,7 +638,43 @@ update msg model =
                 OnSetHabitDataSuccess
             )
 
-        -- Edit goal
+        -- Edit Goal Habit Selection
+        OpenEditGoalHabitSelectionScreen ->
+            ( { model | activeDialogScreen = Just DialogScreen.EditGoalHabitSelectionScreen }
+            , Dom.focus "edit-goal-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnEditGoalHabitSelectionFilterTextInput newFilterText ->
+            updateHabitSelectionFilterTextInput
+                newFilterText
+                model.editGoalHabitSelectionSelectedHabitIndex
+                model.editGoalHabitSelectionFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | editGoalHabitSelectionFilterText = newFilterText
+                        , editGoalHabitSelectionFilteredHabits = newFilteredHabitsArray
+                        , editGoalHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
+
+        OnEditGoalHabitSelectionSelectNextHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.editGoalHabitSelectionFilteredHabits
+                (model.editGoalHabitSelectionSelectedHabitIndex + 1)
+                (\newIndex -> { model | editGoalHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnEditGoalHabitSelectionSelectPreviousHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.editGoalHabitSelectionFilteredHabits
+                (model.editGoalHabitSelectionSelectedHabitIndex - 1)
+                (\newIndex -> { model | editGoalHabitSelectionSelectedHabitIndex = newIndex })
+
+        -- Edit Goal
+        OpenEditGoalScreen habit ->
+            ( model, Cmd.none )
+
+        -- TODO
         OnEditGoalClick habitId ->
             let
                 habitFilter : Habit.Habit -> Bool
@@ -1159,6 +1199,7 @@ update msg model =
                         replaceHabitInList
                         model.allHabits
                 , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
+                , editGoalHabitSelectionFilteredHabits = replaceHabitInArray model.editGoalHabitSelectionFilteredHabits
                 , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
                 , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
               }

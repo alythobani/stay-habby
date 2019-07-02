@@ -63,6 +63,11 @@ view model =
                 model.setHabitDataShortcutAmountScreenHabit
                 model.setHabitDataShortcutAmountScreenInputInt
                 model.selectedYmd
+            , renderEditGoalHabitSelectionScreen
+                model.activeDialogScreen
+                model.editGoalHabitSelectionFilterText
+                model.editGoalHabitSelectionFilteredHabits
+                model.editGoalHabitSelectionSelectedHabitIndex
             , renderEditGoalDialog
                 model.activeDialogScreen
                 model.editGoalDialogHabit
@@ -1183,6 +1188,30 @@ renderSetHabitDataShortcutAmountScreen activeDialogScreen rdHabitData maybeHabit
             _ ->
                 []
         )
+
+
+renderEditGoalHabitSelectionScreen :
+    Maybe DialogScreen.DialogScreen
+    -> String
+    -> Array.Array Habit.Habit
+    -> Int
+    -> Html Msg
+renderEditGoalHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen =
+            activeDialogScreen == Just DialogScreen.EditGoalHabitSelectionScreen
+    in
+    renderHabitSelectionScreen
+        showScreen
+        "Edit Goal"
+        "edit-goal-habit-selection-filter-text-input"
+        OnEditGoalHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        OnEditGoalHabitSelectionSelectPreviousHabit
+        OnEditGoalHabitSelectionSelectNextHabit
+        OpenEditGoalScreen
+        selectedHabitIndex
 
 
 renderEditGoalDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Maybe YmdDate.YmdDate -> Html Msg

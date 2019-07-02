@@ -86,7 +86,13 @@ type Msg
     | OpenSetHabitDataShortcutAmountScreen Habit.Habit
     | OnSetHabitDataShortcutAmountScreenInput String
     | OnSetHabitDataShortcutAmountScreenSubmit YmdDate.YmdDate String Int
-      -- Edit goal
+      -- Edit Goal Habit Selection
+    | OpenEditGoalHabitSelectionScreen
+    | OnEditGoalHabitSelectionFilterTextInput String
+    | OnEditGoalHabitSelectionSelectNextHabit
+    | OnEditGoalHabitSelectionSelectPreviousHabit
+      -- Edit Goal
+    | OpenEditGoalScreen Habit.Habit
     | OnEditGoalClick String
     | CloseEditGoalDialog
     | OnEditGoalSelectFrequencyKind Habit.FrequencyKind

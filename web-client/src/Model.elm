@@ -83,7 +83,12 @@ type alias Model =
     , setHabitDataShortcutAmountScreenHabit : Maybe Habit.Habit
     , setHabitDataShortcutAmountScreenInputInt : Maybe Int
 
-    -- Edit goal
+    -- Edit Goal Habit Selection
+    , editGoalHabitSelectionFilterText : String
+    , editGoalHabitSelectionFilteredHabits : Array.Array Habit.Habit
+    , editGoalHabitSelectionSelectedHabitIndex : Int
+
+    -- Edit Goal
     , editGoalDialogHabit : Maybe Habit.Habit
     , editGoal : Habit.EditGoalInputData
 

@@ -73,6 +73,11 @@ init { apiBaseUrl, currentTime } url key =
       , setHabitDataShortcutAmountScreenHabit = Nothing
       , setHabitDataShortcutAmountScreenInputInt = Nothing
 
+      -- Edit Goal Habit Selection
+      , editGoalHabitSelectionFilterText = ""
+      , editGoalHabitSelectionFilteredHabits = Array.empty
+      , editGoalHabitSelectionSelectedHabitIndex = 0
+
       -- Edit goal
       , editGoalDialogHabit = Nothing
       , editGoal = Habit.initEditGoalData

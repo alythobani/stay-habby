@@ -28,6 +28,7 @@ type Msg
     | ChangeSelectedYmd YmdDate.YmdDate
     | SetSelectedDateToXDaysFromToday Int
     | OpenChooseCustomDateDialog
+    | OnChooseDateDialogScreenKeydown Keyboard.Key
     | OnChooseDateDialogPreviousMonthClick YmdDate.YmdDate
     | OnChooseDateDialogNextMonthClick YmdDate.YmdDate
     | OnChooseDateDialogPreviousDayClick YmdDate.YmdDate
@@ -77,7 +78,6 @@ type Msg
       -- Keyboard
     | KeyboardMsg Keyboard.Msg
     | OnMainScreenKeydown Keyboard.Key
-    | OnChooseDateDialogScreenKeydown Keyboard.Key
       -- Dom
     | FocusResult (Result Dom.Error ())
       -- Set Habit Data Shortcut

@@ -11,6 +11,7 @@ import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
+import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.YmdDate as YmdDate
 import RemoteData
 import Time
@@ -105,4 +106,5 @@ type alias Model =
     -- Graph Dialog
     , graphHabit : Maybe Habit.Habit
     , graphNumDaysToShow : Graph.NumberOfDaysToShow
+    , graphData : Maybe (List HabitGoalIntervalList.HabitGoalInterval)
     }

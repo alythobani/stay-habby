@@ -148,3 +148,5 @@ type Msg
     | OpenGraphDialogScreen Habit.Habit
     | OnGraphDialogScreenKeydown Keyboard.Key
     | SetGraphNumDaysToShow Graph.NumberOfDaysToShow
+    | OnGetGraphHabitGoalIntervalListFailure ApiError
+    | OnGetGraphHabitGoalIntervalListSuccess Api.QueriedHabitGoalIntervalLists

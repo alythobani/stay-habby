@@ -73,6 +73,34 @@ update msg model =
                 Nothing ->
                     Cmd.none
 
+        getGraphHabitGoalIntervalList : Habit.Habit -> Graph.NumberOfDaysToShow -> YmdDate.YmdDate -> Cmd Msg
+        getGraphHabitGoalIntervalList graphHabit numDaysToShow endYmd =
+            let
+                habitIds =
+                    [ graphHabit |> Habit.getCommonFields |> .id ]
+
+                maybeStartYmd =
+                    case numDaysToShow of
+                        Graph.AllTime ->
+                            Nothing
+
+                        Graph.LastMonth ->
+                            Just <| YmdDate.addMonths -1 endYmd
+
+                        Graph.LastThreeMonths ->
+                            Just <| YmdDate.addMonths -3 endYmd
+
+                        Graph.LastYear ->
+                            Just <| YmdDate.addYears -1 endYmd
+            in
+            Api.queryHabitGoalIntervalLists
+                maybeStartYmd
+                endYmd
+                habitIds
+                model.apiBaseUrl
+                OnGetGraphHabitGoalIntervalListFailure
+                OnGetGraphHabitGoalIntervalListSuccess
+
         updateOnHabitSelectionChangeSelectedHabitIndex :
             Array.Array Habit.Habit
             -> Int
@@ -1784,13 +1812,19 @@ update msg model =
 
         -- Graph Dialog Screen
         OpenGraphDialogScreen habit ->
-            ( { model
-                | activeDialogScreen = Just DialogScreen.GraphDialogScreen
-                , graphHabit = Just habit
-                , habitActionsDropdown = Nothing
-              }
-            , Cmd.none
-            )
+            case model.selectedYmd of
+                Just selectedYmd ->
+                    ( { model
+                        | activeDialogScreen = Just DialogScreen.GraphDialogScreen
+                        , graphHabit = Just habit
+                        , habitActionsDropdown = Nothing
+                        , graphData = Nothing
+                      }
+                    , getGraphHabitGoalIntervalList habit model.graphNumDaysToShow selectedYmd
+                    )
+
+                Nothing ->
+                    ( { model | errorMessage = Just "Error opening habit graph: no date selected" }, Cmd.none )
 
         OnGraphDialogScreenKeydown key ->
             if key == Keyboard.KeyM then
@@ -1812,9 +1846,45 @@ update msg model =
                 ( model, Cmd.none )
 
         SetGraphNumDaysToShow numDaysToShow ->
-            ( { model | graphNumDaysToShow = numDaysToShow }
+            case ( model.graphHabit, model.selectedYmd ) of
+                ( Just graphHabit, Just selectedYmd ) ->
+                    ( { model
+                        | graphNumDaysToShow = numDaysToShow
+                        , graphData = Nothing
+                      }
+                    , getGraphHabitGoalIntervalList graphHabit numDaysToShow selectedYmd
+                    )
+
+                ( Nothing, _ ) ->
+                    ( { model | errorMessage = Just "Error setting graph's number of days to show: no habit selected" }, Cmd.none )
+
+                _ ->
+                    ( { model | errorMessage = Just "Error setting graph's number of days to show: no date selected" }, Cmd.none )
+
+        OnGetGraphHabitGoalIntervalListFailure apiError ->
+            ( { model | errorMessage = Just <| "Error retrieving graph data: " ++ ApiError.toString apiError }
             , Cmd.none
             )
+
+        OnGetGraphHabitGoalIntervalListSuccess { habitGoalIntervalLists } ->
+            let
+                habitGoalIntervalList : Maybe HabitGoalIntervalList.HabitGoalIntervalList
+                habitGoalIntervalList =
+                    List.head habitGoalIntervalLists
+            in
+            case ( habitGoalIntervalList, model.graphHabit ) of
+                ( Just intervalList, Just graphHabit ) ->
+                    if intervalList.habitId /= (graphHabit |> Habit.getCommonFields |> .id) then
+                        ( { model | errorMessage = Just "Error retrieving graph data: wrong habit" }, Cmd.none )
+
+                    else
+                        ( { model | graphData = Just intervalList.goalIntervals }, Cmd.none )
+
+                ( Nothing, _ ) ->
+                    ( { model | errorMessage = Just "Error retrieving graph data: no data received from server" }, Cmd.none )
+
+                _ ->
+                    ( { model | errorMessage = Just "Error retrieving graph data: no habit selected" }, Cmd.none )
 
 
 extractInt : String -> Maybe Int -> Maybe Int

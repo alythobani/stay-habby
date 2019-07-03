@@ -115,7 +115,7 @@ queryHabitGoalIntervalLists maybeStartYmd endYmd habitIds =
                 ]
 
         queryString =
-            """{habitGoalIntervalLists: get_frequency_stats(
+            """{habitGoalIntervalLists: get_habit_goal_interval_lists(
                   start_date: {{start_date}}
                   end_date: {{end_date}}
                   {{habit_ids_input}}) {{goal_interval_list_output}}

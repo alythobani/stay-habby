@@ -360,6 +360,14 @@ update msg model =
             if key == Keyboard.Escape then
                 update OnExitDialogScreen model
 
+            else if key == Keyboard.Enter then
+                case Habit.extractCreateHabit model.addHabit of
+                    Just createHabitData ->
+                        update (OnAddHabitSubmit createHabitData) model
+
+                    Nothing ->
+                        ( model, Cmd.none )
+
             else
                 ( model, Cmd.none )
 

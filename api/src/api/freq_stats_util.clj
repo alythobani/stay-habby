@@ -1,7 +1,8 @@
 (ns api.freq-stats-util
   "A namespace for holding utilities related to calculation of performance statistics."
   (:require [api.dt-util :refer [date-geq?, date-leq?, first-monday-before-datetime, get-consecutive-datetimes,
-                                 day-of-week-keyword, days-spanned-between-datetimes, earliest-datetime]]
+                                 day-of-week-keyword, days-spanned-between-datetimes, earliest-datetime,
+                                 latest-datetime]]
             [api.habit-util :refer [get-frequencies]]
             [clj-time.core :as t]))
 
@@ -108,31 +109,37 @@
   "Initializes habit goal fragments for a habit based on a `frequency_change_record` (`fcr`).
   Partitions the datetimes spanned by `fcr` based on the goal length.
   Then converts each sequence of datetimes in the partition into a habit goal fragment."
-  [current-date fcr suspended-intervals]
+  [start-date end-date fcr suspended-intervals]
   (let [freq (:new_frequency fcr),
         fragment-length (get-habit-goal-fragment-length freq),
+        goal-start-date (if (nil? start-date)
+                          ; No limit to start date
+                          (:start_date fcr)
+                          (latest-datetime (:start_date fcr) start-date))
         goal-end-date (if (nil? (:end_date fcr))
                         ; Neverending (i.e. current) goal. Cut off last fragment at today.
-                        current-date
+                        end-date
                         ; This goal ends. Cut off last fragment at the end date, or today if the end_date falls after today.
-                        (earliest-datetime (:end_date fcr) current-date)),
+                        (earliest-datetime (:end_date fcr) end-date)),
         partitioned-datetimes (partition-datetimes-based-on-fragment-length fragment-length
-                                                                            (:start_date fcr)
+                                                                            goal-start-date
                                                                             goal-end-date)]
     (map #(create-habit-goal-fragment % freq suspended-intervals) partitioned-datetimes)))
 
 (defn create-habit-goal-fragments
   "Bring together all fragments generated for each of the habit's goals, into one array of fragments."
-  [current-date freq-change-records suspended-intervals]
+  [start-date end-date freq-change-records suspended-intervals]
   (apply concat
-         (map #(create-habit-goal-fragments-for-an-fcr current-date % suspended-intervals) freq-change-records)))
+         (map #(create-habit-goal-fragments-for-an-fcr start-date end-date % suspended-intervals)
+              freq-change-records)))
 
 (defn get-habit-goal-fragments
   "Creates and evaluates habit goal fragments for a habit based on data from `current-date` or earlier.
   Returns `nil` if `sorted-habit-data` is empty, i.e. the habit has no relevant data."
   [sorted-habit-data current-date habit-type freq-change-records suspended-intervals]
   (if-not (empty? sorted-habit-data)
-    (let [habit-goal-fragments (create-habit-goal-fragments current-date
+    (let [habit-goal-fragments (create-habit-goal-fragments nil
+                                                            current-date
                                                             freq-change-records
                                                             suspended-intervals)]
       (map #(evaluate-habit-goal-fragment % sorted-habit-data habit-type) habit-goal-fragments))))

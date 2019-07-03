@@ -120,7 +120,7 @@
            :get_habit_goal_interval_lists {:type (non-null (list (non-null :habit_goal_interval_list)))
                                            :description "Get a list of evaluated goal intervals for each habit requested."
                                            :args {:habit_ids {:type (list (non-null ID))}
-                                                  :start_date {:type (non-null :date_data)}
+                                                  :start_date {:type :date_data}
                                                   :end_date {:type (non-null :date_data)}}
                                            :resolve :query/get-habit-goal-interval-lists}
 

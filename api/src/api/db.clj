@@ -131,8 +131,9 @@
   Only returns `habit_goal_interval`s that started after `start-date-time`, and cuts them off at `end-date-time`."
   [{:keys [db habit_ids start-date-time end-date-time], :or {db habby_db}}]
   (let [all-habits (get-habits {:db db, :habit_ids habit_ids}),
+        start-date (if (nil? start-date-time) nil (date-to-y-m-d-map start-date-time))
         all-relevant-habits-data (get-habit-data {:db db,
-                                                  :after_date (date-to-y-m-d-map start-date-time)
+                                                  :after_date start-date
                                                   :before_date (date-to-y-m-d-map end-date-time),
                                                   :habit_ids habit_ids})]
     (map #(get-habit-goal-interval-list %

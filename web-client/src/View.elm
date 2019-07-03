@@ -726,20 +726,8 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
                         if key == Keyboard.Enter then
                             Just <| SetHabitData selectedYmd habitRecord.id editingHabitAmount
 
-                        else if key == Keyboard.KeyA then
-                            Just OpenSetHabitDataShortcutHabitSelectionScreen
-
-                        else if key == Keyboard.KeyN then
-                            Just OpenAddNoteHabitSelectionDialogScreen
-
-                        else if key == Keyboard.KeyC then
-                            Just OnChooseCustomDateClick
-
-                        else if key == Keyboard.KeyS then
-                            Just OpenSuspendOrResumeHabitSelectionScreen
-
                         else
-                            Just NoOp
+                            Nothing
                     )
                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editingHabitAmount)
                 ]

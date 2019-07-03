@@ -234,8 +234,7 @@ update msg model =
                 , openTopPanelDateDropdown = False
                 , chooseDateDialogChosenYmd = model.selectedYmd
               }
-            , Dom.focus "choose-date-dialog-form-id"
-                |> Task.attempt FocusResult
+            , Cmd.none
             )
 
         OnChooseDateDialogPreviousMonthClick chosenYmd ->
@@ -561,6 +560,9 @@ update msg model =
                         Just DialogScreen.AddNewHabitScreen ->
                             update (OnAddHabitFormKeydown key) newModel
 
+                        Just DialogScreen.ChooseDateDialogScreen ->
+                            update (OnChooseDateDialogScreenKeydown key) newModel
+
                         Just screen ->
                             -- A dialog screen is already open
                             if key == Keyboard.Escape then
@@ -600,6 +602,40 @@ update msg model =
 
             else
                 ( model, Cmd.none )
+
+        OnChooseDateDialogScreenKeydown key ->
+            case ( model.actualYmd, model.chooseDateDialogChosenYmd ) of
+                ( Just actualYmd, Just chosenYmd ) ->
+                    if key == Keyboard.KeyT then
+                        update (SetChooseDateDialogChosenYmd actualYmd) model
+
+                    else if key == Keyboard.ArrowDown then
+                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays 7 chosenYmd)) model
+
+                    else if key == Keyboard.ArrowUp then
+                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays -7 chosenYmd)) model
+
+                    else if key == Keyboard.ArrowLeft then
+                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays -1 chosenYmd)) model
+
+                    else if key == Keyboard.ArrowRight then
+                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays 1 chosenYmd)) model
+
+                    else if key == Keyboard.Enter then
+                        update (OnChooseDateDialogSubmitClick chosenYmd) model
+
+                    else if key == Keyboard.Escape then
+                        update OnExitDialogScreen model
+
+                    else
+                        ( model, Cmd.none )
+
+                _ ->
+                    if key == Keyboard.Escape then
+                        update OnExitDialogScreen model
+
+                    else
+                        ( model, Cmd.none )
 
         -- Dom
         FocusResult result ->

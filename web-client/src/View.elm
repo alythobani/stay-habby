@@ -828,36 +828,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                     ]
                 ]
                 [ div
-                    [ class "choose-date-dialog-form"
-                    , id "choose-date-dialog-form-id"
-                    , tabindex 0
-                    , Util.onKeydownStopPropagation
-                        (\key ->
-                            if key == Keyboard.KeyT then
-                                Just <| SetChooseDateDialogChosenYmd actualYmd
-
-                            else if key == Keyboard.ArrowDown then
-                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays 7 chosenYmd)
-
-                            else if key == Keyboard.ArrowUp then
-                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays -7 chosenYmd)
-
-                            else if key == Keyboard.ArrowLeft then
-                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays -1 chosenYmd)
-
-                            else if key == Keyboard.ArrowRight then
-                                Just <| SetChooseDateDialogChosenYmd (YmdDate.addDays 1 chosenYmd)
-
-                            else if key == Keyboard.Enter then
-                                Just <| OnChooseDateDialogSubmitClick chosenYmd
-
-                            else if key == Keyboard.Escape then
-                                Just OnExitDialogScreen
-
-                            else
-                                Just NoOp
-                        )
-                    ]
+                    [ class "choose-date-dialog-form" ]
                     [ div
                         [ class "choose-date-dialog-form-chosen-ymd-text" ]
                         [ text <| YmdDate.prettyPrintWithWeekday chosenYmd ]

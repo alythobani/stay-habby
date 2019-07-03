@@ -5,7 +5,8 @@ module Models.DialogScreen exposing (DialogScreen(..))
 
 
 type DialogScreen
-    = EditGoalHabitSelectionScreen
+    = AddNewHabitScreen
+    | EditGoalHabitSelectionScreen
     | EditGoalScreen
     | SetHabitDataShortcutHabitSelectionScreen
     | SetHabitDataShortcutAmountScreen

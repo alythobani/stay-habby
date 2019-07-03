@@ -45,7 +45,6 @@ type alias AddHabitInputData =
     , goodHabitTime : HabitTime
     , kind : HabitKind
     , name : String
-    , openView : Bool
     , unitNamePlural : String
     , unitNameSingular : String
     , timesPerWeek : Maybe Int
@@ -164,8 +163,7 @@ type HabitTime
 
 initAddHabitData : AddHabitInputData
 initAddHabitData =
-    { openView = False
-    , kind = GoodHabitKind
+    { kind = GoodHabitKind
     , name = ""
     , description = ""
     , goodHabitTime = Anytime

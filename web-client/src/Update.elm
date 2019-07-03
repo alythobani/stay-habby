@@ -317,11 +317,17 @@ update msg model =
             )
 
         -- Add Habit
-        OnOpenAddHabit ->
-            ( updateAddHabit (\addHabit -> { addHabit | openView = True }), Cmd.none )
+        OpenAddHabitForm ->
+            ( { model | activeDialogScreen = Just DialogScreen.AddNewHabitScreen }
+            , Dom.focus "add-habit-form-body-name-input" |> Task.attempt FocusResult
+            )
 
-        OnCancelAddHabit ->
-            ( updateAddHabit (\addHabit -> { addHabit | openView = False }), Cmd.none )
+        OnAddHabitFormKeydown key ->
+            if key == Keyboard.Escape then
+                update OnExitDialogScreen model
+
+            else
+                ( model, Cmd.none )
 
         OnSelectAddHabitKind habitKind ->
             ( updateAddHabit (\addHabit -> { addHabit | kind = habitKind }), Cmd.none )
@@ -394,11 +400,11 @@ update msg model =
             , Cmd.none
             )
 
-        AddHabit createHabitData ->
+        OnAddHabitSubmit createHabitData ->
             case model.actualYmd of
-                Just ymd ->
+                Just actualYmd ->
                     ( model
-                    , Api.mutationAddHabit createHabitData ymd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+                    , Api.mutationAddHabit createHabitData actualYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
                     )
 
                 Nothing ->
@@ -552,6 +558,9 @@ update msg model =
                         Just DialogScreen.EditGoalScreen ->
                             update (OnEditGoalScreenKeydown key) newModel
 
+                        Just DialogScreen.AddNewHabitScreen ->
+                            update (OnAddHabitFormKeydown key) newModel
+
                         Just screen ->
                             -- A dialog screen is already open
                             if key == Keyboard.Escape then
@@ -576,6 +585,9 @@ update msg model =
 
             else if key == Keyboard.KeyE then
                 update OpenEditGoalHabitSelectionScreen model
+
+            else if key == Keyboard.KeyH then
+                update OpenAddHabitForm model
 
             else if key == Keyboard.KeyN then
                 update OpenAddNoteHabitSelectionDialogScreen model
@@ -1292,12 +1304,12 @@ update msg model =
                     )
 
                 ( Nothing, _ ) ->
-                    ( { model | errorMessage = Just "Error editing habit goal: no habit selected." }
+                    ( { model | errorMessage = Just "Error editing habit goal: no habit selected" }
                     , Cmd.none
                     )
 
                 _ ->
-                    ( { model | errorMessage = Just "Error editing habit goal: could not generate new list of goals." }
+                    ( { model | errorMessage = Just "Error editing habit goal: could not generate new list of goals" }
                     , Cmd.none
                     )
 

@@ -185,7 +185,8 @@ body {
         }
 
         .add-habit-form {
-          background-color: black;
+          background-color: inherit;
+          z-index: 3;
           .add-habit-form-button {
             background-color: black;
             box-shadow: 0 0 1px $gallery;

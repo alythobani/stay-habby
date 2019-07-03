@@ -45,6 +45,7 @@ view model =
                     model.editingHabitAmountDict
                     model.habitActionsDropdown
                 , renderAddHabitForm
+                    model.activeDialogScreen
                     model.addHabit
                 ]
             , renderDialogBackgroundScreen model.activeDialogScreen
@@ -103,38 +104,6 @@ view model =
             ]
         ]
     }
-
-
-{-| An `Html.textarea` element that stops propagation of any `keydown` events within it.
-
-Useful for creating `textarea` elements for the user to type into without triggering any
-global keyboard shortcuts.
-
--}
-textareaStopKeydownPropagation : List (Html.Attribute Msg) -> List (Html Msg) -> Html Msg
-textareaStopKeydownPropagation attrs htmls =
-    let
-        stopPropagationAttrs : List (Html.Attribute Msg)
-        stopPropagationAttrs =
-            Util.onKeydownStopPropagation (\keyKeyboard -> Just NoOp) :: attrs
-    in
-    textarea stopPropagationAttrs htmls
-
-
-{-| An `Html.input` element that stops propagation of any `keydown` events within it.
-
-Useful for creating `input` elements for the user to type into without triggering any
-global keyboard shortcuts.
-
--}
-inputStopKeydownPropagation : List (Html.Attribute Msg) -> List (Html Msg) -> Html Msg
-inputStopKeydownPropagation attrs htmls =
-    let
-        stopPropagationAttrs : List (Html.Attribute Msg)
-        stopPropagationAttrs =
-            Util.onKeydownStopPropagation (\keyKeyboard -> Just NoOp) :: attrs
-    in
-    input stopPropagationAttrs htmls
 
 
 renderTopPanel :
@@ -347,16 +316,23 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
         )
 
 
-renderAddHabitForm : Habit.AddHabitInputData -> Html Msg
-renderAddHabitForm addHabit =
+renderAddHabitForm : Maybe DialogScreen.DialogScreen -> Habit.AddHabitInputData -> Html Msg
+renderAddHabitForm activeDialogScreen addHabit =
     let
         maybeCreateHabitData =
             Habit.extractCreateHabit addHabit
+
+        showForm =
+            activeDialogScreen == Just DialogScreen.AddNewHabitScreen
     in
     div
         [ class "add-habit-form" ]
         [ div
-            [ classList [ ( "add-habit-form-body", True ), ( "display-none", not addHabit.openView ) ] ]
+            [ classList
+                [ ( "add-habit-form-body", True )
+                , ( "display-none", not showForm )
+                ]
+            ]
             [ div
                 [ class "add-habit-form-body-habit-tag-name" ]
                 [ button
@@ -372,14 +348,15 @@ renderAddHabitForm addHabit =
                 ]
             , div
                 [ class "add-habit-form-body-name-and-description" ]
-                [ inputStopKeydownPropagation
+                [ input
                     [ class "add-habit-form-body-name"
+                    , id "add-habit-form-body-name-input"
                     , placeholder "Name..."
                     , onInput OnAddHabitNameInput
                     , value addHabit.name
                     ]
                     []
-                , textareaStopKeydownPropagation
+                , textarea
                     [ class "add-habit-form-body-description"
                     , placeholder "Short description..."
                     , onInput OnAddHabitDescriptionInput
@@ -411,14 +388,14 @@ renderAddHabitForm addHabit =
                 ]
             , div
                 [ class "add-habit-form-body-unit-name" ]
-                [ inputStopKeydownPropagation
+                [ input
                     [ class "habit-unit-name-singular"
                     , placeholder "Unit name singular..."
                     , onInput OnAddHabitUnitNameSingularInput
                     , value addHabit.unitNameSingular
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ class "habit-unit-name-plural"
                     , placeholder "Unit name plural..."
                     , onInput OnAddHabitUnitNamePluralInput
@@ -450,7 +427,7 @@ renderAddHabitForm addHabit =
                     , ( "display-none", addHabit.frequencyKind /= Habit.TotalWeekFrequencyKind )
                     ]
                 ]
-                [ inputStopKeydownPropagation
+                [ input
                     [ placeholder "X"
                     , onInput OnAddHabitTimesPerWeekInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.timesPerWeek)
@@ -463,43 +440,43 @@ renderAddHabitForm addHabit =
                     , ( "display-none", addHabit.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
                     ]
                 ]
-                [ inputStopKeydownPropagation
+                [ input
                     [ placeholder "Monday"
                     , onInput OnAddHabitSpecificDayMondayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.mondayTimes)
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ placeholder "Tuesday"
                     , onInput OnAddHabitSpecificDayTuesdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.tuesdayTimes)
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ placeholder "Wednesday"
                     , onInput OnAddHabitSpecificDayWednesdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.wednesdayTimes)
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ placeholder "Thursday"
                     , onInput OnAddHabitSpecificDayThursdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.thursdayTimes)
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ placeholder "Friday"
                     , onInput OnAddHabitSpecificDayFridayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.fridayTimes)
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ placeholder "Saturday"
                     , onInput OnAddHabitSpecificDaySaturdayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.saturdayTimes)
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ placeholder "Sunday"
                     , onInput OnAddHabitSpecificDaySundayInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.sundayTimes)
@@ -512,13 +489,13 @@ renderAddHabitForm addHabit =
                     , ( "display-none", addHabit.frequencyKind /= Habit.EveryXDayFrequencyKind )
                     ]
                 ]
-                [ inputStopKeydownPropagation
+                [ input
                     [ placeholder "Times"
                     , onInput OnAddHabitTimesInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.times)
                     ]
                     []
-                , inputStopKeydownPropagation
+                , input
                     [ placeholder "Days"
                     , onInput OnAddHabitDaysInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.days)
@@ -532,21 +509,21 @@ renderAddHabitForm addHabit =
                 Just createHabitData ->
                     button
                         [ class "add-habit-form-submit-button"
-                        , onClick <| AddHabit createHabitData
+                        , onClick <| OnAddHabitSubmit createHabitData
                         ]
                         [ text "Create Habit" ]
             ]
         , button
             [ class "add-habit-form-button"
             , onClick <|
-                if addHabit.openView then
-                    OnCancelAddHabit
+                if showForm then
+                    OnExitDialogScreen
 
                 else
-                    OnOpenAddHabit
+                    OpenAddHabitForm
             ]
             [ text <|
-                if addHabit.openView then
+                if showForm then
                     "Cancel"
 
                 else

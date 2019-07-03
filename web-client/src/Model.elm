@@ -42,26 +42,7 @@ type alias Model =
     , allHabitDayNotes : RemoteData.RemoteData ApiError.ApiError (List HabitDayNote.HabitDayNote)
 
     -- Add Habit
-    , addHabit :
-        { openView : Bool
-        , kind : Habit.HabitKind
-        , name : String
-        , description : String
-        , goodHabitTime : Habit.HabitTime
-        , unitNameSingular : String
-        , unitNamePlural : String
-        , frequencyKind : Habit.FrequencyKind
-        , timesPerWeek : Maybe Int
-        , mondayTimes : Maybe Int
-        , tuesdayTimes : Maybe Int
-        , wednesdayTimes : Maybe Int
-        , thursdayTimes : Maybe Int
-        , fridayTimes : Maybe Int
-        , saturdayTimes : Maybe Int
-        , sundayTimes : Maybe Int
-        , times : Maybe Int
-        , days : Maybe Int
-        }
+    , addHabit : Habit.AddHabitInputData
 
     -- Dropdowns
     , habitActionsDropdown : Maybe String

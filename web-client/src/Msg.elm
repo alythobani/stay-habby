@@ -40,8 +40,8 @@ type Msg
     | OnGetAllRemoteDataFailure ApiError
     | OnGetAllRemoteDataSuccess Api.AllRemoteData
       -- Add Habit
-    | OnOpenAddHabit
-    | OnCancelAddHabit
+    | OpenAddHabitForm
+    | OnAddHabitFormKeydown Keyboard.Key
     | OnSelectAddHabitKind Habit.HabitKind
     | OnAddHabitNameInput String
     | OnAddHabitDescriptionInput String
@@ -59,7 +59,7 @@ type Msg
     | OnAddHabitSpecificDaySundayInput String
     | OnAddHabitTimesInput String
     | OnAddHabitDaysInput String
-    | AddHabit Habit.CreateHabit
+    | OnAddHabitSubmit Habit.CreateHabit
     | OnAddHabitFailure ApiError
     | OnAddHabitSuccess Habit.Habit
       -- Set Habit Data

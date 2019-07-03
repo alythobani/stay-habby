@@ -263,6 +263,10 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                             _ ->
                                 ( goodHabits, badHabits, [] )
 
+                    firstHabit : Maybe Habit.Habit
+                    firstHabit =
+                        List.head <| sortedGoodHabits ++ sortedBadHabits ++ sortedSuspendedHabits
+
                     renderHabit habit =
                         renderHabitBox
                             (case rdFrequencyStatsList of
@@ -279,6 +283,7 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                             habitData
                             editingHabitAmountDict
                             habitActionsDropdown
+                            (firstHabit == Just habit)
                             habit
                 in
                 if List.isEmpty habits then
@@ -620,9 +625,10 @@ renderHabitBox :
     -> List HabitData.HabitData
     -> Dict.Dict String Int
     -> Maybe String
+    -> Bool
     -> Habit.Habit
     -> Html Msg
-renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict habitActionsDropdown habit =
+renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict habitActionsDropdown isFirstHabit habit =
     let
         habitRecord =
             Habit.getCommonFields habit
@@ -630,14 +636,8 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
         habitDatum =
             List.filter (\{ habitId, date } -> habitId == habitRecord.id && date == selectedYmd) habitData
                 |> List.head
-                |> (\maybeHabitDatum ->
-                        case maybeHabitDatum of
-                            Nothing ->
-                                0
-
-                            Just { amount } ->
-                                amount
-                   )
+                |> Maybe.map .amount
+                |> Maybe.withDefault 0
 
         editingHabitAmount =
             Dict.get habitRecord.id editingHabitAmountDict
@@ -657,6 +657,35 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
             div
                 [ class "frequency-statistic" ]
                 [ text str ]
+
+        amountInputAttrs =
+            [ placeholder <|
+                String.fromInt habitDatum
+                    ++ " "
+                    ++ (if habitDatum == 1 then
+                            habitRecord.unitNameSingular
+
+                        else
+                            habitRecord.unitNamePlural
+                       )
+            , onInput <| OnHabitAmountInput habitRecord.id
+            , Util.onKeydownStopPropagation
+                (\key ->
+                    if key == Keyboard.Enter then
+                        Just <| SetHabitData selectedYmd habitRecord.id editingHabitAmount
+
+                    else
+                        Nothing
+                )
+            , value <| Maybe.withDefault "" (Maybe.map String.fromInt editingHabitAmount)
+            ]
+
+        amountInputAttrsWithPossibleId =
+            if isFirstHabit then
+                id "first-habit-amount-input" :: amountInputAttrs
+
+            else
+                amountInputAttrs
     in
     div
         [ class
@@ -711,26 +740,7 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
                 ]
             ]
             [ input
-                [ placeholder <|
-                    String.fromInt habitDatum
-                        ++ " "
-                        ++ (if habitDatum == 1 then
-                                habitRecord.unitNameSingular
-
-                            else
-                                habitRecord.unitNamePlural
-                           )
-                , onInput <| OnHabitAmountInput habitRecord.id
-                , Util.onKeydownStopPropagation
-                    (\key ->
-                        if key == Keyboard.Enter then
-                            Just <| SetHabitData selectedYmd habitRecord.id editingHabitAmount
-
-                        else
-                            Nothing
-                    )
-                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editingHabitAmount)
-                ]
+                amountInputAttrsWithPossibleId
                 []
             , i
                 [ classList [ ( "material-icons", True ) ]

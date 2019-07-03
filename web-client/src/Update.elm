@@ -1357,7 +1357,20 @@ update msg model =
 
         -- Full screen dialogs
         OnExitDialogScreen ->
-            ( { model | activeDialogScreen = Nothing }, Cmd.none )
+            let
+                -- If there is at least one habit, we can focus on its amount input when exiting a dialog form
+                shouldAttemptFocus =
+                    model.allHabits
+                        |> RemoteData.map (not << List.isEmpty)
+                        |> (==) (RemoteData.Success True)
+            in
+            ( { model | activeDialogScreen = Nothing }
+            , if shouldAttemptFocus then
+                Dom.focus "first-habit-amount-input" |> Task.attempt FocusResult
+
+              else
+                Cmd.none
+            )
 
         -- Add Note Habit Selection
         OpenAddNoteHabitSelectionDialogScreen ->

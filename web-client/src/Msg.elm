@@ -27,7 +27,7 @@ type Msg
     | ToggleTopPanelDateDropdown
     | ChangeSelectedYmd YmdDate.YmdDate
     | SetSelectedDateToXDaysFromToday Int
-    | OnChooseCustomDateClick
+    | OpenChooseCustomDateDialog
     | OnChooseDateDialogPreviousMonthClick YmdDate.YmdDate
     | OnChooseDateDialogNextMonthClick YmdDate.YmdDate
     | OnChooseDateDialogPreviousDayClick YmdDate.YmdDate

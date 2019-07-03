@@ -221,7 +221,7 @@ renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateD
                             [ ( "top-panel-date-dropdown-button", True )
                             , ( "display-none", not openDateDropdown )
                             ]
-                        , onClick OnChooseCustomDateClick
+                        , onClick OpenChooseCustomDateDialog
                         ]
                         [ text "Custom Date" ]
                     ]
@@ -682,7 +682,7 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
 
         amountInputAttrsWithPossibleId =
             if isFirstHabit then
-                id "first-habit-amount-input" :: amountInputAttrs
+                id "first-habit-amount-input" :: tabindex 0 :: amountInputAttrs
 
             else
                 amountInputAttrs
@@ -838,7 +838,10 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                     ]
                 ]
                 [ div
-                    [ class "choose-date-dialog-form" ]
+                    [ class "choose-date-dialog-form"
+                    , id "choose-date-dialog-form-id"
+                    , tabindex 1
+                    ]
                     [ div
                         [ class "choose-date-dialog-form-chosen-ymd-text" ]
                         [ text <| YmdDate.prettyPrintWithWeekday chosenYmd ]
@@ -946,7 +949,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                 [ div
                     [ class "choose-date-dialog-form"
                     , id "choose-date-dialog-form-id"
-                    , tabindex 0
+                    , tabindex 1
                     ]
                     [ text "Loading..." ]
                 ]

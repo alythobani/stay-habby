@@ -228,13 +228,14 @@ update msg model =
                 Nothing ->
                     ( { newDateDropdownModel | errorMessage = Just "Error setting date: current date not available" }, Cmd.none )
 
-        OnChooseCustomDateClick ->
+        OpenChooseCustomDateDialog ->
             ( { model
                 | activeDialogScreen = Just DialogScreen.ChooseDateDialogScreen
                 , openTopPanelDateDropdown = False
                 , chooseDateDialogChosenYmd = model.selectedYmd
               }
-            , Cmd.none
+            , Dom.focus "choose-date-dialog-form-id"
+                |> Task.attempt FocusResult
             )
 
         OnChooseDateDialogPreviousMonthClick chosenYmd ->
@@ -595,7 +596,7 @@ update msg model =
                 update OpenAddNoteHabitSelectionDialogScreen model
 
             else if key == Keyboard.KeyC then
-                update OnChooseCustomDateClick model
+                update OpenChooseCustomDateDialog model
 
             else if key == Keyboard.KeyS then
                 update OpenSuspendOrResumeHabitSelectionScreen model

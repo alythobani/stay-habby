@@ -6,4 +6,6 @@ module Models.Graph exposing (NumberOfDaysToShow(..))
 
 type NumberOfDaysToShow
     = AllTime
-    | LastXDays Int
+    | LastMonth
+    | LastThreeMonths
+    | LastYear

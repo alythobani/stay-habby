@@ -12,6 +12,7 @@ import Model exposing (Model)
 import Models.ApiError as ApiError
 import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
+import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
@@ -614,6 +615,9 @@ update msg model =
 
                         Just DialogScreen.AddNoteScreen ->
                             update (OnAddNoteKeydown key) newModel
+
+                        Just DialogScreen.GraphDialogScreen ->
+                            update (OnGraphDialogScreenKeydown key) newModel
 
                         Just screen ->
                             -- A dialog screen is already open
@@ -1786,6 +1790,25 @@ update msg model =
               }
             , Cmd.none
             )
+
+        OnGraphDialogScreenKeydown key ->
+            if key == Keyboard.KeyM then
+                update (SetGraphNumDaysToShow Graph.LastMonth) model
+
+            else if key == Keyboard.KeyT then
+                update (SetGraphNumDaysToShow Graph.LastThreeMonths) model
+
+            else if key == Keyboard.KeyY then
+                update (SetGraphNumDaysToShow Graph.LastYear) model
+
+            else if key == Keyboard.KeyA then
+                update (SetGraphNumDaysToShow Graph.AllTime) model
+
+            else if key == Keyboard.Escape then
+                update OnExitDialogScreen model
+
+            else
+                ( model, Cmd.none )
 
         SetGraphNumDaysToShow numDaysToShow ->
             ( { model | graphNumDaysToShow = numDaysToShow }

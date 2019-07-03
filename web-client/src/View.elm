@@ -1661,13 +1661,30 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                     habitRecord =
                         Habit.getCommonFields habit
 
-                    graphTitle =
-                        case numDaysToShow of
+                    numDaysButtonText numDays =
+                        case numDays of
                             Graph.AllTime ->
                                 "All Time"
 
-                            Graph.LastXDays x ->
-                                "Last " ++ String.fromInt x ++ " Days"
+                            Graph.LastMonth ->
+                                "Last Month"
+
+                            Graph.LastThreeMonths ->
+                                "Last Three Months"
+
+                            Graph.LastYear ->
+                                "Last Year"
+
+                    changeNumDaysToShowButton : Graph.NumberOfDaysToShow -> Html Msg
+                    changeNumDaysToShowButton numDays =
+                        button
+                            [ classList
+                                [ ( "graph-screen-dialog-change-numdays-button", True )
+                                , ( "selected", numDaysToShow == numDays )
+                                ]
+                            , onClick <| SetGraphNumDaysToShow numDays
+                            ]
+                            [ text <| numDaysButtonText numDays ]
                 in
                 [ div
                     [ class "graph-screen-dialog" ]
@@ -1678,45 +1695,14 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                     , div [ class "graph-screen-dialog-header-line-break" ] []
                     , div
                         [ class "graph-screen-dialog-change-numdays-buttons" ]
-                        [ button
-                            [ classList
-                                [ ( "graph-screen-dialog-change-numdays-button", True )
-                                , ( "selected", numDaysToShow == Graph.LastXDays 30 )
-                                ]
-                            , onClick <| SetGraphNumDaysToShow (Graph.LastXDays 30)
-                            ]
-                            [ text "Last Month" ]
-                        , button
-                            [ classList
-                                [ ( "graph-screen-dialog-change-numdays-button", True )
-                                , ( "selected", numDaysToShow == Graph.LastXDays 90 )
-                                ]
-                            , onClick <| SetGraphNumDaysToShow (Graph.LastXDays 90)
-                            ]
-                            [ text "Last Three Months" ]
-                        , button
-                            [ classList
-                                [ ( "graph-screen-dialog-change-numdays-button", True )
-                                , ( "selected", numDaysToShow == Graph.LastXDays 365 )
-                                ]
-                            , onClick <| SetGraphNumDaysToShow (Graph.LastXDays 365)
-                            ]
-                            [ text "Last Year" ]
-                        , button
-                            [ classList
-                                [ ( "graph-screen-dialog-change-numdays-button", True )
-                                , ( "selected", numDaysToShow == Graph.AllTime )
-                                ]
-                            , onClick <| SetGraphNumDaysToShow Graph.AllTime
-                            ]
-                            [ text "All Time" ]
+                        [ changeNumDaysToShowButton Graph.LastMonth
+                        , changeNumDaysToShowButton Graph.LastThreeMonths
+                        , changeNumDaysToShowButton Graph.LastYear
+                        , changeNumDaysToShowButton Graph.AllTime
                         ]
                     , div
                         [ class "graph-screen-dialog-graph-container" ]
-                        [ div
-                            [ class "graph-screen-dialog-graph-container-title" ]
-                            [ text graphTitle ]
-                        ]
+                        []
                     ]
                 ]
 

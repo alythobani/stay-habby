@@ -146,4 +146,5 @@ type Msg
     | OnGraphHabitSelectionSelectPreviousHabit
       -- Graph Dialog Screen
     | OpenGraphDialogScreen Habit.Habit
+    | OnGraphDialogScreenKeydown Keyboard.Key
     | SetGraphNumDaysToShow Graph.NumberOfDaysToShow

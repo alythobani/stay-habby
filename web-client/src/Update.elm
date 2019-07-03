@@ -842,27 +842,14 @@ update msg model =
             else if key == Keyboard.Escape then
                 update OnExitDialogScreen model
 
-            else if key == Keyboard.ArrowLeft then
-                case model.editGoal.frequencyKind of
-                    Habit.EveryXDayFrequencyKind ->
-                        update (OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind) model
+            else if key == Keyboard.KeyX then
+                update (OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind) model
 
-                    Habit.SpecificDayOfWeekFrequencyKind ->
-                        update (OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind) model
+            else if key == Keyboard.KeyS then
+                update (OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind) model
 
-                    Habit.TotalWeekFrequencyKind ->
-                        update (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind) model
-
-            else if key == Keyboard.ArrowRight then
-                case model.editGoal.frequencyKind of
-                    Habit.EveryXDayFrequencyKind ->
-                        update (OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind) model
-
-                    Habit.SpecificDayOfWeekFrequencyKind ->
-                        update (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind) model
-
-                    Habit.TotalWeekFrequencyKind ->
-                        update (OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind) model
+            else if key == Keyboard.KeyY then
+                update (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind) model
 
             else
                 ( model, Cmd.none )

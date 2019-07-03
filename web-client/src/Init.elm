@@ -7,6 +7,7 @@ import DefaultServices.Keyboard as Keyboard
 import Dict
 import Flags exposing (Flags)
 import Model exposing (Model)
+import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
@@ -112,6 +113,7 @@ init { apiBaseUrl, currentTime } url key =
 
       -- Graph Dialog
       , graphHabit = Nothing
+      , graphNumDaysToShow = Graph.LastXDays 90
       }
     , Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
     )

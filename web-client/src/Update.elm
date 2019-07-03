@@ -1787,6 +1787,11 @@ update msg model =
             , Cmd.none
             )
 
+        SetGraphNumDaysToShow numDaysToShow ->
+            ( { model | graphNumDaysToShow = numDaysToShow }
+            , Cmd.none
+            )
+
 
 extractInt : String -> Maybe Int -> Maybe Int
 extractInt string default =

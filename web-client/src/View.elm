@@ -14,6 +14,7 @@ import Model exposing (Model)
 import Models.ApiError as ApiError
 import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
+import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
@@ -110,6 +111,7 @@ view model =
                 model.activeDialogScreen
                 model.graphHabit
                 model.selectedYmd
+                model.graphNumDaysToShow
             ]
         ]
     }
@@ -1644,8 +1646,9 @@ renderGraphDialogScreen :
     Maybe DialogScreen.DialogScreen
     -> Maybe Habit.Habit
     -> Maybe YmdDate.YmdDate
+    -> Graph.NumberOfDaysToShow
     -> Html Msg
-renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd =
+renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow =
     div
         [ classList
             [ ( "graph-screen", True )
@@ -1657,6 +1660,14 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd =
                 let
                     habitRecord =
                         Habit.getCommonFields habit
+
+                    graphTitle =
+                        case numDaysToShow of
+                            Graph.AllTime ->
+                                "All Time"
+
+                            Graph.LastXDays x ->
+                                "Last " ++ String.fromInt x ++ " Days"
                 in
                 [ div
                     [ class "graph-screen-dialog" ]
@@ -1665,6 +1676,47 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd =
                         [ class "graph-screen-dialog-header-date" ]
                         [ text <| YmdDate.prettyPrintWithWeekday selectedYmd ]
                     , div [ class "graph-screen-dialog-header-line-break" ] []
+                    , div
+                        [ class "graph-screen-dialog-change-numdays-buttons" ]
+                        [ button
+                            [ classList
+                                [ ( "graph-screen-dialog-change-numdays-button", True )
+                                , ( "selected", numDaysToShow == Graph.LastXDays 30 )
+                                ]
+                            , onClick <| SetGraphNumDaysToShow (Graph.LastXDays 30)
+                            ]
+                            [ text "Last Month" ]
+                        , button
+                            [ classList
+                                [ ( "graph-screen-dialog-change-numdays-button", True )
+                                , ( "selected", numDaysToShow == Graph.LastXDays 90 )
+                                ]
+                            , onClick <| SetGraphNumDaysToShow (Graph.LastXDays 90)
+                            ]
+                            [ text "Last Three Months" ]
+                        , button
+                            [ classList
+                                [ ( "graph-screen-dialog-change-numdays-button", True )
+                                , ( "selected", numDaysToShow == Graph.LastXDays 365 )
+                                ]
+                            , onClick <| SetGraphNumDaysToShow (Graph.LastXDays 365)
+                            ]
+                            [ text "Last Year" ]
+                        , button
+                            [ classList
+                                [ ( "graph-screen-dialog-change-numdays-button", True )
+                                , ( "selected", numDaysToShow == Graph.AllTime )
+                                ]
+                            , onClick <| SetGraphNumDaysToShow Graph.AllTime
+                            ]
+                            [ text "All Time" ]
+                        ]
+                    , div
+                        [ class "graph-screen-dialog-graph-container" ]
+                        [ div
+                            [ class "graph-screen-dialog-graph-container-title" ]
+                            [ text graphTitle ]
+                        ]
                     ]
                 ]
 

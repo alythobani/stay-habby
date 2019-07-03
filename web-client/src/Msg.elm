@@ -6,6 +6,7 @@ import Browser
 import Browser.Dom as Dom
 import DefaultServices.Keyboard as Keyboard
 import Models.ApiError exposing (ApiError)
+import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
@@ -145,3 +146,4 @@ type Msg
     | OnGraphHabitSelectionSelectPreviousHabit
       -- Graph Dialog Screen
     | OpenGraphDialogScreen Habit.Habit
+    | SetGraphNumDaysToShow Graph.NumberOfDaysToShow

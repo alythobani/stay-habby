@@ -7,6 +7,7 @@ import Dict
 import Models.ApiError as ApiError
 import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
+import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
@@ -103,4 +104,5 @@ type alias Model =
 
     -- Graph Dialog
     , graphHabit : Maybe Habit.Habit
+    , graphNumDaysToShow : Graph.NumberOfDaysToShow
     }

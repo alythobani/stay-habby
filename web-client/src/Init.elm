@@ -53,11 +53,6 @@ init { apiBaseUrl, currentTime } url key =
       -- Add Habit
       , addHabit = Habit.initAddHabitData
 
-      --
-      , historyViewerDateInput = ""
-      , historyViewerSelectedDate = Nothing
-      , historyViewerFrequencyStats = RemoteData.NotAsked
-
       -- Habit Actions Dropdowns
       , habitActionsDropdown = Nothing
 

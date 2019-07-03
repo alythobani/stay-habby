@@ -63,11 +63,6 @@ type alias Model =
         , days : Maybe Int
         }
 
-    --
-    , historyViewerDateInput : String
-    , historyViewerSelectedDate : Maybe YmdDate.YmdDate
-    , historyViewerFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
-
     -- Dropdowns
     , habitActionsDropdown : Maybe String
 

@@ -512,7 +512,7 @@ update msg model =
             , Cmd.none
             )
 
-        -- Dropdowns
+        -- Habit Actions Dropdowns
         ToggleHabitActionsDropdown habitId ->
             let
                 updatedHabitActionsDropdown =
@@ -524,9 +524,11 @@ update msg model =
             in
             ( { model | habitActionsDropdown = updatedHabitActionsDropdown }, Cmd.none )
 
+        -- Dark Mode
         OnToggleDarkMode ->
             ( { model | darkModeOn = not model.darkModeOn }, Cmd.none )
 
+        -- Keyboard
         KeyboardMsg keyMsg ->
             let
                 newKeysDown =
@@ -559,28 +561,35 @@ update msg model =
                                 ( newModel, Cmd.none )
 
                         Nothing ->
-                            -- No dialog screen is open, see if the user wants to open one
-                            if key == Keyboard.KeyA then
-                                update OpenSetHabitDataShortcutHabitSelectionScreen newModel
-
-                            else if key == Keyboard.KeyE then
-                                update OpenEditGoalHabitSelectionScreen newModel
-
-                            else if key == Keyboard.KeyN then
-                                update OpenAddNoteHabitSelectionDialogScreen newModel
-
-                            else if key == Keyboard.KeyC then
-                                update OnChooseCustomDateClick newModel
-
-                            else if key == Keyboard.KeyS then
-                                update OpenSuspendOrResumeHabitSelectionScreen newModel
-
-                            else
-                                ( newModel, Cmd.none )
+                            -- No dialog screen is open (user is on main screen)
+                            update (OnMainScreenKeydown key) newModel
 
                 _ ->
                     ( newModel, Cmd.none )
 
+        OnMainScreenKeydown key ->
+            if key == Keyboard.KeyA then
+                update OpenSetHabitDataShortcutHabitSelectionScreen model
+
+            else if key == Keyboard.KeyD then
+                update OnToggleDarkMode model
+
+            else if key == Keyboard.KeyE then
+                update OpenEditGoalHabitSelectionScreen model
+
+            else if key == Keyboard.KeyN then
+                update OpenAddNoteHabitSelectionDialogScreen model
+
+            else if key == Keyboard.KeyC then
+                update OnChooseCustomDateClick model
+
+            else if key == Keyboard.KeyS then
+                update OpenSuspendOrResumeHabitSelectionScreen model
+
+            else
+                ( model, Cmd.none )
+
+        -- Dom
         FocusResult result ->
             case result of
                 Result.Err (Dom.NotFound domId) ->

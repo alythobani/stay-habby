@@ -76,6 +76,7 @@ type Msg
     | OnToggleDarkMode
       -- Keyboard
     | KeyboardMsg Keyboard.Msg
+    | OnMainScreenKeydown Keyboard.Key
       -- Dom
     | FocusResult (Result Dom.Error ())
       -- Set Habit Data Shortcut

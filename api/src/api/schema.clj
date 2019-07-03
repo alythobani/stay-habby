@@ -115,6 +115,15 @@
   [context args value]
   (db/delete-habit args))
 
+(defn resolve-query-get-habit-goal-interval-lists
+  "@refer `db/get-habit-goal-interval-lists`."
+  [context {:keys [start_date end_date] :as all} value]
+  (map tag-type
+    (db/get-habit-goal-interval-lists
+      (assoc (dissoc all :start_date :end_date)
+             :start-date-time (date-from-y-m-d-map start_date)
+             :end-date-time (date-from-y-m-d-map end_date)))))
+
 (defn resolve-query-get-frequency-stats
   "@refer `db/get-frequency-stats`."
   [context {:keys [current_client_date] :as all} value]
@@ -164,7 +173,10 @@
    :query/suspended-end-date-to-y-m-d-format (create-nilable-date-to-y-m-d-resolver :end_date)
    :query/start-date-to-y-m-d-format (create-date-to-y-m-d-resolver :start_date)
    :query/end-date-to-y-m-d-format (create-nilable-date-to-y-m-d-resolver :end_date)
+   :query/habit-goal-interval-start-date-to-y-m-d-format (create-date-to-y-m-d-resolver :start_date)
+   :query/habit-goal-interval-end-date-to-y-m-d-format (create-date-to-y-m-d-resolver :end_date)
    :query/resolve-mutation-delete-habit (create-async-resolver resolve-mutation-delete-habit)
+   :query/get-habit-goal-interval-lists (create-async-resolver resolve-query-get-habit-goal-interval-lists)
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)
    :query/resolve-mutation-edit-habit-suspensions (create-async-resolver resolve-mutation-edit-habit-suspensions)
    :query/resolve-mutation-edit-habit-goal-frequencies (create-async-resolver resolve-mutation-edit-habit-goal-frequencies)

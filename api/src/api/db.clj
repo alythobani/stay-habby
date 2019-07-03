@@ -6,6 +6,7 @@
             [monger.joda-time]
             [api.util :refer :all]
             [api.freq-stats-util :refer [get-freq-stats-for-habit]]
+            [api.goal-intervals-util :refer [get-habit-goal-interval-list]]
             [clj-time.core :as t])
   (:import org.bson.types.ObjectId org.joda.time.DateTimeZone))
 
@@ -123,6 +124,22 @@
                       {$set {:note note}
                        $setOnInsert {:date date-time, :habit_id (ObjectId. habit_id), :_id (ObjectId.)}}
                       {:upsert true, :return-new true}))
+
+(defn get-habit-goal-interval-lists
+  "Returns a list of `habit_goal_interval_list`s, one for each ID in `habit_ids`.
+  Retrieves habits and habit data from database `db`.
+  Only returns `habit_goal_interval`s that started after `start-date-time`, and cuts them off at `end-date-time`."
+  [{:keys [db habit_ids start-date-time end-date-time], :or {db habby_db}}]
+  (let [all-habits (get-habits {:db db, :habit_ids habit_ids}),
+        all-relevant-habits-data (get-habit-data {:db db,
+                                                  :after_date (date-to-y-m-d-map start-date-time)
+                                                  :before_date (date-to-y-m-d-map end-date-time),
+                                                  :habit_ids habit_ids})]
+    (map #(get-habit-goal-interval-list %
+                                        all-relevant-habits-data
+                                        start-date-time
+                                        end-date-time)
+         all-habits)))
 
 (defn get-frequency-stats
   "Returns performance statistics for the requested habits.

@@ -70,6 +70,21 @@
                                               :resolve :query/date-to-y-m-d-format}
                                        :amount {:type (non-null Int)}}}
 
+           :habit_goal_interval {:description "An interval of time governed by one of a habit's goals."
+                                 :fields {:start_date {:type (non-null :date)
+                                                       :resolve :query/habit-goal-interval-start-date-to-y-m-d-format}
+                                          :end_date {:type (non-null :date)
+                                                     :resolve :query/habit-goal-interval-end-date-to-y-m-d-format}
+                                          :total_done {:type (non-null Int)}
+                                          :successful {:type (non-null Boolean)}
+                                          :suspended {:type (non-null Boolean)}
+                                          :valid {:type (non-null Boolean)}
+                                          :goal_amount {:type (non-null Int)}}}
+
+           :habit_goal_interval_list {:description "A list of evaluated habit goal intervals for a habit."
+                                      :fields {:habit_id {:type (non-null ID)}
+                                               :goal_intervals {:type (non-null (list (non-null :habit_goal_interval)))}}}
+
            :habit_frequency_stats {:description "Statistics for how the user has performed with this habit."
                                    :fields {:habit_id {:type (non-null ID)}
                                             :total_fragments {:type (non-null Int)}
@@ -101,6 +116,13 @@
                                    :before_date {:type :date_data},
                                    :habit_ids {:type (list (non-null ID))}}
                             :resolve :query/get-habit-data}
+
+           :get_habit_goal_interval_lists {:type (non-null (list (non-null :habit_goal_interval_list)))
+                                           :description "Get a list of evaluated goal intervals for each habit requested."
+                                           :args {:habit_ids {:type (list (non-null ID))}
+                                                  :start_date {:type (non-null :date_data)}
+                                                  :end_date {:type (non-null :date_data)}}
+                                           :resolve :query/get-habit-goal-interval-lists}
 
            :get_frequency_stats {:type (non-null (list (non-null :habit_frequency_stats)))
                                  :description "Get a success percentage for each habit requested."

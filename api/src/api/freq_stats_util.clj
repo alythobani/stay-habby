@@ -51,57 +51,57 @@
   `datetimes` should be nonempty, be sorted increasingly by date, and correspond to a habit goal fragment.
   `:valid`: true iff the fragment has elapsed its expected fragment length (i.e. was not cut off by the
             current date or the next goal)
-  `:goal-amount`: the goal amount for the fragment
+  `:goal_amount`: the goal amount for the fragment
   `:expected-fragment-length`: the number of days in each full fragment for `freq`
-  Initializes `:total-done` to 0 and `:successful` to false. (To be evaluated later.)"
+  Initializes `:total_done` to 0 and `:successful` to false. (To be evaluated later.)"
   [datetimes freq suspended-intervals]
   (let [fragment-start-dt (first datetimes),
         fragment-end-dt (last datetimes),
         expected-fragment-length (get-habit-goal-fragment-length freq),
         actual-fragment-length (days-spanned-between-datetimes (first datetimes) (last datetimes))]
-    {:start-date fragment-start-dt,
-     :end-date fragment-end-dt,
-     :total-done 0,
+    {:start_date fragment-start-dt,
+     :end_date fragment-end-dt,
+     :total_done 0,
      :successful false,
      ; `some` returns `nil` if the pred is not satisfied by any array element. `some?` converts to a boolean.
      :suspended (some? (some #(count-fragment-as-suspended? fragment-start-dt fragment-end-dt %) suspended-intervals)),
      :valid (= expected-fragment-length actual-fragment-length),
-     :goal-amount (get-habit-goal-amount-for-datetime fragment-start-dt freq),
+     :goal_amount (get-habit-goal-amount-for-datetime fragment-start-dt freq),
      :expected-fragment-length expected-fragment-length,
      :actual-fragment-length actual-fragment-length}))
 
 (defn during-habit-goal-fragment?
   "Returns true iff `datetime` occurs during `habit-goal-fragment`."
   [datetime habit-goal-fragment]
-  (and (date-geq? datetime (:start-date habit-goal-fragment))
-       (date-leq? datetime (:end-date habit-goal-fragment))))
+  (and (date-geq? datetime (:start_date habit-goal-fragment))
+       (date-leq? datetime (:end_date habit-goal-fragment))))
 
 (defn get-habit-data-during-fragment
   "Finds all `habit_day_record`s in `habit-data` that occur during `habit-goal-fragment`."
   [habit-data habit-goal-fragment]
   (filter #(during-habit-goal-fragment? (:date %) habit-goal-fragment) habit-data))
 
-(defn evaluate-habit-goal-fragment-total-done
-  "Updates the `:total-done` field of `habit-goal-fragment` based on a list of `habit_day_record`s."
+(defn evaluate-habit-goal-fragment-total_done
+  "Updates the `:total_done` field of `habit-goal-fragment` based on a list of `habit_day_record`s."
   [habit-goal-fragment habit-data-during-fragment]
-  (reduce #(update %1 :total-done + (:amount %2))
+  (reduce #(update %1 :total_done + (:amount %2))
           habit-goal-fragment
           habit-data-during-fragment))
 
 (defn evaluate-habit-goal-fragment-successful
-  "Evaluates the `:successful` field of `habit-goal-fragment` based on its `:total-done` field, the type of habit, and the habit's goal."
+  "Evaluates the `:successful` field of `habit-goal-fragment` based on its `:total_done` field, the type of habit, and the habit's goal."
   [habit-goal-fragment habit-type]
   (assoc habit-goal-fragment
          :successful ((if (= habit-type "good_habit") >= <=)
-                      (:total-done habit-goal-fragment)
-                      (:goal-amount habit-goal-fragment))))
+                      (:total_done habit-goal-fragment)
+                      (:goal_amount habit-goal-fragment))))
 
 (defn evaluate-habit-goal-fragment
-  "Evaluates `:total-done` and `:successful` fields of a habit goal fragment."
+  "Evaluates `:total_done` and `:successful` fields of a habit goal fragment."
   [habit-goal-fragment habit-data habit-type]
   (let [habit-data-during-fragment (get-habit-data-during-fragment habit-data habit-goal-fragment)]
     (-> habit-goal-fragment
-        (evaluate-habit-goal-fragment-total-done habit-data-during-fragment)
+        (evaluate-habit-goal-fragment-total_done habit-data-during-fragment)
         (evaluate-habit-goal-fragment-successful habit-type))))
 
 (defn create-habit-goal-fragments-for-an-fcr
@@ -144,28 +144,28 @@
     (if (or (:suspended habit-goal-fragment)
             (not (:valid habit-goal-fragment)))
       ; Don't count towards stats, other than `:total_done`
-      (update habit-frequency-stats :total_done + (:total-done habit-goal-fragment))
+      (update habit-frequency-stats :total_done + (:total_done habit-goal-fragment))
       ; Can count normally towards stats
       (as-> habit-frequency-stats $
             (update $ :total_fragments inc)
             (update $ :successful_fragments (if successful inc identity))
-            (update $ :total_done + (:total-done habit-goal-fragment))
+            (update $ :total_done + (:total_done habit-goal-fragment))
             (update $ :current_fragment_streak (if successful inc (constantly 0)))
             (assoc $ :best_fragment_streak (max (:current_fragment_streak $) (:best_fragment_streak $)))))))
 
 (defn update-freq-stats-with-current-fragment
   "Updates fields of a `habit_frequency_stats` based on the current habit goal fragment and its goal `freq`.
   Computes `:current_fragment_days_left` based on the fragment length defined by `freq` minus the span
-  of `current-fragment`, whose `:end-date` field was cut short at the current date during construction.
+  of `current-fragment`, whose `:end_date` field was cut short at the current date during construction.
   Only ever treats the current fragment as successful for good habits, and only ever treats it as failed for bad
   habits; we don't punish unfinished good habits or reward unfinished bad habits."
   [freq-stats current-fragment habit-type]
   (let [treat-as-successful (and (= habit-type "good_habit") (:successful current-fragment))
         treat-as-failed (and (= habit-type "bad_habit") (not (:successful current-fragment)))]
     (as-> freq-stats $
-          (update $ :total_done + (:total-done current-fragment))
-          (assoc $ :current_fragment_total (:total-done current-fragment))
-          (assoc $ :current_fragment_goal (:goal-amount current-fragment))
+          (update $ :total_done + (:total_done current-fragment))
+          (assoc $ :current_fragment_total (:total_done current-fragment))
+          (assoc $ :current_fragment_goal (:goal_amount current-fragment))
           (assoc $ :current_fragment_days_left (- (:expected-fragment-length current-fragment)
                                                   (:actual-fragment-length current-fragment)))
           (if (:suspended current-fragment)

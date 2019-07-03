@@ -1507,16 +1507,6 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                         , onInput OnAddNoteDialogInput
                         , value addNoteDialogInput
                         , id "add-note-dialog-input-id"
-                        , Util.onKeydownStopPropagation
-                            (\key ->
-                                if key == Keyboard.Escape then
-                                    Just OnExitDialogScreen
-
-                                else
-                                    Just <| OnAddNoteKeydown key selectedYmd habitRecord.id
-                            )
-                        , Util.onKeyupStopPropagation
-                            (\key -> Just <| OnAddNoteKeyup key)
                         ]
                         []
                     , div
@@ -1527,12 +1517,7 @@ renderAddNoteDialog activeDialogScreen addNoteDialogHabit addNoteDialogInput may
                         ]
                         [ button
                             [ class "add-note-dialog-form-buttons-submit"
-                            , onClick <|
-                                if addNoteDialogInput == "" then
-                                    NoOp
-
-                                else
-                                    OnAddNoteSubmitClick selectedYmd habitRecord.id addNoteDialogInput
+                            , onClick OnAddNoteSubmit
                             ]
                             [ text "Submit" ]
                         , button

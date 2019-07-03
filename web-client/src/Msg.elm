@@ -122,10 +122,9 @@ type Msg
     | OnAddNoteHabitSelectionScreenSelectPreviousHabit
       -- Add Note Dialog
     | OpenAddNoteDialog Habit.Habit
+    | OnAddNoteKeydown Keyboard.Key
     | OnAddNoteDialogInput String
-    | OnAddNoteKeydown Keyboard.Key YmdDate.YmdDate String
-    | OnAddNoteKeyup Keyboard.Key
-    | OnAddNoteSubmitClick YmdDate.YmdDate String String
+    | OnAddNoteSubmit
     | OnAddNoteFailure ApiError
     | OnAddNoteSuccess HabitDayNote.HabitDayNote
       -- Suspend Or Resume Habit Selection Screen

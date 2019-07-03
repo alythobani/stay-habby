@@ -16,6 +16,7 @@ import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
+import Set
 import Task
 import TimeZone
 
@@ -605,6 +606,9 @@ update msg model =
 
                         Just DialogScreen.ChooseDateDialogScreen ->
                             update (OnChooseDateDialogScreenKeydown key) newModel
+
+                        Just DialogScreen.AddNoteScreen ->
+                            update (OnAddNoteKeydown key) newModel
 
                         Just screen ->
                             -- A dialog screen is already open
@@ -1421,62 +1425,72 @@ update msg model =
                 | activeDialogScreen = Just DialogScreen.AddNoteScreen
                 , addNoteDialogHabit = Just habit
                 , addNoteDialogInput = Maybe.withDefault "" existingHabitDayNoteText
-                , addNoteKeysDown = []
                 , habitActionsDropdown = Nothing
               }
             , Dom.focus "add-note-dialog-input-id"
                 |> Task.attempt FocusResult
             )
 
+        OnAddNoteKeydown key ->
+            let
+                modelKeysDownList : List Keyboard.Key
+                modelKeysDownList =
+                    Set.toList model.keysDown |> List.map Keyboard.fromCode
+
+                specialKeys =
+                    [ Keyboard.OSLeft
+                    , Keyboard.OSRight
+                    , Keyboard.MetaLeft
+                    , Keyboard.MetaRight
+                    , Keyboard.ControlLeft
+                    , Keyboard.ControlRight
+                    ]
+
+                specialKeyIsPressed : Bool
+                specialKeyIsPressed =
+                    List.any (\specialKey -> List.member specialKey modelKeysDownList) specialKeys
+            in
+            if key == Keyboard.Enter then
+                if specialKeyIsPressed then
+                    update OnAddNoteSubmit model
+
+                else
+                    ( model, Cmd.none )
+
+            else if key == Keyboard.Escape then
+                update OnExitDialogScreen model
+
+            else
+                ( model, Cmd.none )
+
         OnAddNoteDialogInput newAddNoteInput ->
             ( { model | addNoteDialogInput = newAddNoteInput }, Cmd.none )
 
-        OnAddNoteKeydown key ymd habitId ->
-            let
-                newAddNoteKeysDown =
-                    Util.addToListIfNotPresent model.addNoteKeysDown key
+        OnAddNoteSubmit ->
+            case ( String.isEmpty model.addNoteDialogInput, model.selectedYmd, model.addNoteDialogHabit ) of
+                ( False, Just selectedYmd, Just habit ) ->
+                    ( { model
+                        | activeDialogScreen = Nothing
+                        , addNoteHabitSelectionFilterText = ""
+                        , addNoteHabitSelectionFilteredHabits =
+                            case model.allHabits of
+                                RemoteData.Success habits ->
+                                    Array.fromList habits
 
-                -- Keyboard shortcut for Add Note Submit is cmd-enter (mac) or ctrl-enter
-                isAddNoteSubmitShortcut : Bool
-                isAddNoteSubmitShortcut =
-                    (key == Keyboard.Enter)
-                        && List.any
-                            (\specialKey -> List.member specialKey model.addNoteKeysDown)
-                            [ Keyboard.OSLeft
-                            , Keyboard.OSRight
-                            , Keyboard.MetaLeft
-                            , Keyboard.MetaRight
-                            , Keyboard.ControlLeft
-                            , Keyboard.ControlRight
-                            ]
+                                _ ->
+                                    Array.empty
+                      }
+                    , Api.mutationSetHabitDayNote
+                        selectedYmd
+                        (habit |> Habit.getCommonFields |> .id)
+                        model.addNoteDialogInput
+                        model.apiBaseUrl
+                        OnAddNoteFailure
+                        OnAddNoteSuccess
+                    )
 
-                newModel =
-                    { model | addNoteKeysDown = newAddNoteKeysDown }
-            in
-            if isAddNoteSubmitShortcut && (model.addNoteDialogInput /= "") then
-                update (OnAddNoteSubmitClick ymd habitId model.addNoteDialogInput) newModel
-
-            else
-                ( newModel, Cmd.none )
-
-        OnAddNoteKeyup key ->
-            ( { model | addNoteKeysDown = Util.removeFromListIfPresent model.addNoteKeysDown key }, Cmd.none )
-
-        OnAddNoteSubmitClick ymd habitId note ->
-            ( { model
-                | activeDialogScreen = Nothing
-                , addNoteKeysDown = []
-                , addNoteHabitSelectionFilterText = ""
-                , addNoteHabitSelectionFilteredHabits =
-                    case model.allHabits of
-                        RemoteData.Success habits ->
-                            Array.fromList habits
-
-                        _ ->
-                            Array.empty
-              }
-            , Api.mutationSetHabitDayNote ymd habitId note model.apiBaseUrl OnAddNoteFailure OnAddNoteSuccess
-            )
+                _ ->
+                    ( model, Cmd.none )
 
         OnAddNoteFailure apiError ->
             ( { model | errorMessage = Just <| "Error adding habit day note: " ++ ApiError.toString apiError }

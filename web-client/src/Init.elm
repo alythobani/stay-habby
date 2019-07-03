@@ -90,7 +90,6 @@ init { apiBaseUrl, currentTime } url key =
       , addNoteHabitSelectionFilterText = ""
       , addNoteHabitSelectionFilteredHabits = Array.empty
       , addNoteHabitSelectionSelectedHabitIndex = 0
-      , addNoteKeysDown = []
 
       -- Add note
       , addNoteDialogHabit = Nothing

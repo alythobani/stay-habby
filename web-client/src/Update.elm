@@ -29,6 +29,29 @@ update msg model =
         updateEditGoal updater =
             { model | editGoal = updater model.editGoal }
 
+        updateHabitListsWithNewHabit : Habit.Habit -> Model
+        updateHabitListsWithNewHabit habit =
+            let
+                replaceHabitInList habitList =
+                    Util.replaceOrAdd
+                        habitList
+                        (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
+                        habit
+
+                replaceHabitInArray habitArray =
+                    habitArray |> Array.toList |> replaceHabitInList |> Array.fromList
+            in
+            { model
+                | allHabits =
+                    RemoteData.map
+                        replaceHabitInList
+                        model.allHabits
+                , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
+                , editGoalHabitSelectionFilteredHabits = replaceHabitInArray model.editGoalHabitSelectionFilteredHabits
+                , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
+                , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
+            }
+
         getFrequencyStatsOnDate : YmdDate.YmdDate -> List String -> Cmd Msg
         getFrequencyStatsOnDate ymd habitIds =
             Api.queryFrequencyStats
@@ -392,10 +415,12 @@ update msg model =
             let
                 habitRecord =
                     Habit.getCommonFields habit
+
+                updatedHabitListsModel =
+                    updateHabitListsWithNewHabit habit
             in
-            ( { model
-                | allHabits = RemoteData.map (\allHabits -> allHabits ++ [ habit ]) model.allHabits
-                , addHabit = Habit.initAddHabitData
+            ( { updatedHabitListsModel
+                | addHabit = Habit.initAddHabitData
               }
             , getFrequencyStats [ habitRecord.id ]
             )
@@ -1224,25 +1249,11 @@ update msg model =
 
         OnEditGoalSuccess habit ->
             let
-                replaceHabitInList habitList =
-                    Util.replaceOrAdd
-                        habitList
-                        (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
-                        habit
-
-                replaceHabitInArray habitArray =
-                    habitArray |> Array.toList |> replaceHabitInList |> Array.fromList
+                updatedHabitListsModel =
+                    updateHabitListsWithNewHabit habit
             in
-            ( { model
-                | allHabits =
-                    RemoteData.map
-                        replaceHabitInList
-                        model.allHabits
-                , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
-                , editGoalHabitSelectionFilteredHabits = replaceHabitInArray model.editGoalHabitSelectionFilteredHabits
-                , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
-                , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
-                , editGoal = Habit.initEditGoalData
+            ( { updatedHabitListsModel
+                | editGoal = Habit.initEditGoalData
               }
             , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
             )
@@ -1639,25 +1650,10 @@ update msg model =
 
         OnResumeOrSuspendHabitSuccess habit ->
             let
-                replaceHabitInList habitList =
-                    Util.replaceOrAdd
-                        habitList
-                        (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
-                        habit
-
-                replaceHabitInArray habitArray =
-                    habitArray |> Array.toList |> replaceHabitInList |> Array.fromList
+                updatedHabitListsModel =
+                    updateHabitListsWithNewHabit habit
             in
-            ( { model
-                | allHabits =
-                    RemoteData.map
-                        replaceHabitInList
-                        model.allHabits
-                , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
-                , editGoalHabitSelectionFilteredHabits = replaceHabitInArray model.editGoalHabitSelectionFilteredHabits
-                , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
-                , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
-              }
+            ( updatedHabitListsModel
             , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
             )
 

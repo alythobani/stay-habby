@@ -90,6 +90,9 @@ type alias Model =
 
     -- Edit Goal
     , editGoalDialogHabit : Maybe Habit.Habit
+    , editGoalDialogHabitCurrentFcrWithIndex : Maybe ( Int, Habit.FrequencyChangeRecord )
+    , editGoalConfirmationMessage : Maybe String
+    , editGoalNewFrequenciesList : Maybe (List Habit.FrequencyChangeRecord)
     , editGoal : Habit.EditGoalInputData
 
     -- Error messages

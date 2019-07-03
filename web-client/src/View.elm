@@ -71,8 +71,10 @@ view model =
             , renderEditGoalDialog
                 model.activeDialogScreen
                 model.editGoalDialogHabit
+                model.editGoalDialogHabitCurrentFcrWithIndex
+                model.editGoalConfirmationMessage
+                model.editGoalNewFrequenciesList
                 model.editGoal
-                model.actualYmd
             , renderErrorMessage
                 model.errorMessage
                 model.activeDialogScreen
@@ -1214,361 +1216,254 @@ renderEditGoalHabitSelectionScreen activeDialogScreen habitSelectionFilterText f
         selectedHabitIndex
 
 
-renderEditGoalDialog : Maybe DialogScreen.DialogScreen -> Maybe Habit.Habit -> Habit.EditGoalInputData -> Maybe YmdDate.YmdDate -> Html Msg
-renderEditGoalDialog activeDialogScreen habit editGoal maybeActualYmd =
-    case maybeActualYmd of
-        Just actualYmd ->
+renderEditGoalDialog :
+    Maybe DialogScreen.DialogScreen
+    -> Maybe Habit.Habit
+    -> Maybe ( Int, Habit.FrequencyChangeRecord )
+    -> Maybe String
+    -> Maybe (List Habit.FrequencyChangeRecord)
+    -> Habit.EditGoalInputData
+    -> Html Msg
+renderEditGoalDialog activeDialogScreen maybeHabit currentFcrWithIndex confirmationMessage newFrequencies editGoal =
+    case maybeHabit of
+        Just habit ->
             div
                 [ classList
                     [ ( "edit-goal-dialog", True )
                     , ( "display-none", activeDialogScreen /= Just DialogScreen.EditGoalScreen )
                     ]
                 ]
-                (case habit of
-                    Just h ->
-                        let
-                            habitRecord =
-                                Habit.getCommonFields h
+                (let
+                    habitRecord =
+                        Habit.getCommonFields habit
 
-                            isGoodHabit =
-                                case h of
-                                    Habit.GoodHabit _ ->
-                                        True
+                    ( currentGoalTag, currentGoalDesc ) =
+                        case currentFcrWithIndex of
+                            Just ( currentIndex, currentFcr ) ->
+                                ( case currentFcr.newFrequency of
+                                    Habit.EveryXDayFrequency f ->
+                                        "Y Per X Days"
 
-                                    _ ->
-                                        False
+                                    Habit.TotalWeekFrequency f ->
+                                        "X Per Week"
 
-                            currentGoal : Maybe Habit.FrequencyChangeRecord
-                            currentGoal =
-                                case h of
-                                    Habit.GoodHabit gh ->
-                                        List.head <| List.reverse gh.targetFrequencies
+                                    Habit.SpecificDayOfWeekFrequency f ->
+                                        "Specific Days of Week"
+                                , Habit.prettyPrintFrequency currentFcr.newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
+                                )
 
-                                    Habit.BadHabit bh ->
-                                        List.head <| List.reverse bh.thresholdFrequencies
+                            Nothing ->
+                                ( "N/A", "No current goal." )
 
-                            ( currentGoalTag, currentGoalDesc ) =
-                                case currentGoal of
-                                    Just fcr ->
-                                        ( case fcr.newFrequency of
-                                            Habit.EveryXDayFrequency f ->
-                                                "Y Per X Days"
+                    newGoalDesc : String
+                    newGoalDesc =
+                        case editGoal.frequencyKind of
+                            Habit.TotalWeekFrequencyKind ->
+                                Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.timesPerWeek)
+                                    ++ " "
+                                    ++ (if Maybe.withDefault 0 editGoal.timesPerWeek == 1 then
+                                            habitRecord.unitNameSingular
 
-                                            Habit.TotalWeekFrequency f ->
-                                                "X Per Week"
+                                        else
+                                            habitRecord.unitNamePlural
+                                       )
+                                    ++ " per week"
 
-                                            Habit.SpecificDayOfWeekFrequency f ->
-                                                "Specific Days of Week"
-                                        , Habit.prettyPrintFrequency fcr.newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
-                                        )
+                            Habit.SpecificDayOfWeekFrequencyKind ->
+                                "Mo "
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.mondayTimes)
+                                    ++ " Tu "
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.tuesdayTimes)
+                                    ++ " We "
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.wednesdayTimes)
+                                    ++ " Th "
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.thursdayTimes)
+                                    ++ " Fr "
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.fridayTimes)
+                                    ++ " Sa "
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.saturdayTimes)
+                                    ++ " Su "
+                                    ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.sundayTimes)
 
-                                    Nothing ->
-                                        ( "N/A", "N/A" )
+                            Habit.EveryXDayFrequencyKind ->
+                                Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.times)
+                                    ++ " "
+                                    ++ (if Maybe.withDefault 0 editGoal.times == 1 then
+                                            habitRecord.unitNameSingular
 
-                            newGoalDesc : String
-                            newGoalDesc =
-                                case editGoal.frequencyKind of
-                                    Habit.TotalWeekFrequencyKind ->
-                                        Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.timesPerWeek)
-                                            ++ " "
-                                            ++ (if Maybe.withDefault 0 editGoal.timesPerWeek == 1 then
-                                                    habitRecord.unitNameSingular
+                                        else
+                                            habitRecord.unitNamePlural
+                                       )
+                                    ++ " per "
+                                    ++ (if Maybe.withDefault 0 editGoal.days == 1 then
+                                            "day"
 
-                                                else
-                                                    habitRecord.unitNamePlural
-                                               )
-                                            ++ " per week"
-
-                                    Habit.SpecificDayOfWeekFrequencyKind ->
-                                        "Mo "
-                                            ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.mondayTimes)
-                                            ++ " Tu "
-                                            ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.tuesdayTimes)
-                                            ++ " We "
-                                            ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.wednesdayTimes)
-                                            ++ " Th "
-                                            ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.thursdayTimes)
-                                            ++ " Fr "
-                                            ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.fridayTimes)
-                                            ++ " Sa "
-                                            ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.saturdayTimes)
-                                            ++ " Su "
-                                            ++ Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.sundayTimes)
-
-                                    Habit.EveryXDayFrequencyKind ->
-                                        Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.times)
-                                            ++ " "
-                                            ++ (if Maybe.withDefault 0 editGoal.times == 1 then
-                                                    habitRecord.unitNameSingular
-
-                                                else
-                                                    habitRecord.unitNamePlural
-                                               )
-                                            ++ " per "
-                                            ++ (if Maybe.withDefault 0 editGoal.days == 1 then
-                                                    "day"
-
-                                                else
-                                                    Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.days) ++ " days"
-                                               )
-
-                            oldFrequencies : List Habit.FrequencyChangeRecord
-                            oldFrequencies =
-                                case h of
-                                    Habit.GoodHabit gh ->
-                                        gh.targetFrequencies
-
-                                    Habit.BadHabit bh ->
-                                        bh.thresholdFrequencies
-
-                            newGoal =
-                                Habit.extractNewGoal editGoal
-
-                            isWeeklyNewGoal =
-                                editGoal.frequencyKind == Habit.TotalWeekFrequencyKind
-
-                            newStartDate : YmdDate.YmdDate
-                            newStartDate =
-                                if isWeeklyNewGoal then
-                                    YmdDate.getFirstMondayAfterDate actualYmd
-
-                                else
-                                    actualYmd
-
-                            newFrequencies =
-                                case newGoal of
-                                    Just newFrequency ->
-                                        case List.reverse oldFrequencies of
-                                            currFcr :: rest ->
-                                                if List.member (YmdDate.compareYmds currFcr.startDate actualYmd) [ EQ, GT ] then
-                                                    -- The current goal started today or later, we should overwrite it.
-                                                    -- (At this point there should only possibly be one goal, the current one,
-                                                    -- that started today or later.)
-                                                    case rest of
-                                                        secondLastFcr :: restTwo ->
-                                                            Just <|
-                                                                List.reverse <|
-                                                                    { startDate = newStartDate
-                                                                    , endDate = Nothing
-                                                                    , newFrequency = newFrequency
-                                                                    }
-                                                                        :: { secondLastFcr | endDate = Just <| YmdDate.addDays -1 newStartDate }
-                                                                        :: restTwo
-
-                                                        [] ->
-                                                            -- `currFcr` was the only goal and we are replacing it
-                                                            Just [ { startDate = newStartDate, endDate = Nothing, newFrequency = newFrequency } ]
-
-                                                else
-                                                    Just <|
-                                                        List.reverse <|
-                                                            { startDate = newStartDate, endDate = Nothing, newFrequency = newFrequency }
-                                                                :: { currFcr | endDate = Just <| YmdDate.addDays -1 newStartDate }
-                                                                :: rest
-
-                                            [] ->
-                                                -- there are no existing goals (this shouldn't happen though)
-                                                Just [ { startDate = newStartDate, endDate = Nothing, newFrequency = newFrequency } ]
-
-                                    Nothing ->
-                                        -- User has not fully filled out form, we don't need to compute `newFrequencies` yet
-                                        Nothing
-
-                            confirmationMessage : String
-                            confirmationMessage =
-                                case newGoal of
-                                    Just newFrequency ->
-                                        case currentGoal of
-                                            Just fcr ->
-                                                "The previous goal for "
-                                                    ++ habitRecord.name
-                                                    ++ " was "
-                                                    ++ Habit.prettyPrintFrequency fcr.newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
-                                                    ++ ". The new goal "
-                                                    ++ Habit.prettyPrintFrequency newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
-                                                    ++ " will officially start "
-                                                    ++ (if newStartDate == actualYmd then
-                                                            "today (" ++ YmdDate.prettyPrintWithWeekday newStartDate ++ ")."
-
-                                                        else
-                                                            "on " ++ YmdDate.prettyPrintWithWeekday newStartDate ++ "."
-                                                       )
-
-                                            Nothing ->
-                                                "The new goal "
-                                                    ++ newGoalDesc
-                                                    ++ " will officially start on "
-                                                    ++ YmdDate.prettyPrintWithWeekday newStartDate
-                                                    ++ "."
-
-                                    Nothing ->
-                                        ""
-                        in
+                                        else
+                                            Maybe.withDefault "_" (Maybe.map String.fromInt editGoal.days) ++ " days"
+                                       )
+                 in
+                 [ div
+                    [ class "edit-goal-dialog-form" ]
+                    [ div
+                        [ class "edit-goal-dialog-form-header" ]
+                        [ text habitRecord.name ]
+                    , div [ class "edit-goal-dialog-form-line-break" ] []
+                    , div
+                        [ class "edit-goal-dialog-form-current-goal-text" ]
+                        [ text "Current Goal" ]
+                    , div
+                        [ class "edit-goal-dialog-form-current-goal-tag" ]
+                        [ button [] [ text currentGoalTag ] ]
+                    , div
+                        [ class "edit-goal-dialog-form-current-goal-description" ]
+                        [ text currentGoalDesc ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-line-break" ]
+                        []
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-header" ]
+                        [ text "New Goal" ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-frequency-tags" ]
+                        [ button
+                            [ classList [ ( "selected", editGoal.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
+                            , onClick <| OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind
+                            ]
+                            [ text "X Per Week" ]
+                        , button
+                            [ classList [ ( "selected", editGoal.frequencyKind == Habit.SpecificDayOfWeekFrequencyKind ) ]
+                            , onClick <| OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind
+                            ]
+                            [ text "Specific Days of Week" ]
+                        , button
+                            [ classList [ ( "selected", editGoal.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
+                            , onClick <| OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind
+                            ]
+                            [ text "Y Per X Days" ]
+                        ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-description" ]
+                        [ text newGoalDesc ]
+                    , div
+                        [ class "edit-goal-dialog-form-new-goal-forms" ]
                         [ div
-                            [ class "edit-goal-dialog-form" ]
-                            [ div
-                                [ class "edit-goal-dialog-form-header" ]
-                                [ text habitRecord.name ]
-                            , div [ class "edit-goal-dialog-form-line-break" ] []
-                            , div
-                                [ class "edit-goal-dialog-form-current-goal-text" ]
-                                [ text "Current Goal" ]
-                            , div
-                                [ class "edit-goal-dialog-form-current-goal-tag" ]
-                                [ button [] [ text currentGoalTag ] ]
-                            , div
-                                [ class "edit-goal-dialog-form-current-goal-description" ]
-                                [ text currentGoalDesc ]
-                            , div
-                                [ class "edit-goal-dialog-form-new-goal-line-break" ]
-                                []
-                            , div
-                                [ class "edit-goal-dialog-form-new-goal-header" ]
-                                [ text "New Goal" ]
-                            , div
-                                [ class "edit-goal-dialog-form-new-goal-frequency-tags" ]
-                                [ button
-                                    [ classList [ ( "selected", editGoal.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
-                                    , onClick <| OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind
-                                    ]
-                                    [ text "X Per Week" ]
-                                , button
-                                    [ classList [ ( "selected", editGoal.frequencyKind == Habit.SpecificDayOfWeekFrequencyKind ) ]
-                                    , onClick <| OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind
-                                    ]
-                                    [ text "Specific Days of Week" ]
-                                , button
-                                    [ classList [ ( "selected", editGoal.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
-                                    , onClick <| OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind
-                                    ]
-                                    [ text "Y Per X Days" ]
-                                ]
-                            , div
-                                [ class "edit-goal-dialog-form-new-goal-description" ]
-                                [ text newGoalDesc ]
-                            , div
-                                [ class "edit-goal-dialog-form-new-goal-forms" ]
-                                [ div
-                                    [ classList
-                                        [ ( "edit-goal-dialog-form-new-goal-total-week-frequency-form", True )
-                                        , ( "display-none", editGoal.frequencyKind /= Habit.TotalWeekFrequencyKind )
-                                        ]
-                                    ]
-                                    [ input
-                                        [ placeholder "X"
-                                        , id "edit-goal-dialog-x-per-week-input"
-                                        , onInput OnEditGoalTimesPerWeekInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.timesPerWeek)
-                                        ]
-                                        []
-                                    ]
-                                , div
-                                    [ classList
-                                        [ ( "edit-goal-dialog-form-new-goal-specific-day-of-week-frequency-form", True )
-                                        , ( "display-none", editGoal.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
-                                        ]
-                                    ]
-                                    [ input
-                                        [ placeholder "Monday"
-                                        , id "edit-goal-dialog-monday-input"
-                                        , onInput OnEditGoalSpecificDayMondayInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.mondayTimes)
-                                        ]
-                                        []
-                                    , input
-                                        [ placeholder "Tuesday"
-                                        , onInput OnEditGoalSpecificDayTuesdayInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.tuesdayTimes)
-                                        ]
-                                        []
-                                    , input
-                                        [ placeholder "Wednesday"
-                                        , onInput OnEditGoalSpecificDayWednesdayInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.wednesdayTimes)
-                                        ]
-                                        []
-                                    , input
-                                        [ placeholder "Thursday"
-                                        , onInput OnEditGoalSpecificDayThursdayInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.thursdayTimes)
-                                        ]
-                                        []
-                                    , input
-                                        [ placeholder "Friday"
-                                        , onInput OnEditGoalSpecificDayFridayInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.fridayTimes)
-                                        ]
-                                        []
-                                    , input
-                                        [ placeholder "Saturday"
-                                        , onInput OnEditGoalSpecificDaySaturdayInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.saturdayTimes)
-                                        ]
-                                        []
-                                    , input
-                                        [ placeholder "Sunday"
-                                        , onInput OnEditGoalSpecificDaySundayInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.sundayTimes)
-                                        ]
-                                        []
-                                    ]
-                                , div
-                                    [ classList
-                                        [ ( "edit-goal-dialog-form-new-goal-every-x-days-frequency-form", True )
-                                        , ( "display-none", editGoal.frequencyKind /= Habit.EveryXDayFrequencyKind )
-                                        ]
-                                    ]
-                                    [ input
-                                        [ placeholder "Times"
-                                        , id "edit-goal-dialog-every-x-days-times-input"
-                                        , onInput OnEditGoalTimesInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.times)
-                                        ]
-                                        []
-                                    , input
-                                        [ placeholder "Days"
-                                        , onInput OnEditGoalDaysInput
-                                        , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.days)
-                                        ]
-                                        []
-                                    ]
-                                ]
-                            , div
-                                [ classList
-                                    [ ( "edit-goal-dialog-form-confirmation-message-line-break", True )
-                                    , ( "display-none", not <| Maybe.isJust newGoal )
-                                    ]
-                                ]
-                                []
-                            , div
-                                [ classList
-                                    [ ( "edit-goal-dialog-form-confirmation-message", True )
-                                    , ( "display-none", not <| Maybe.isJust newGoal )
-                                    ]
-                                ]
-                                [ text confirmationMessage ]
-                            , div
-                                [ classList
-                                    [ ( "edit-goal-dialog-form-buttons", True )
-                                    , ( "display-none", not <| Maybe.isJust newGoal )
-                                    ]
-                                ]
-                                [ button
-                                    [ class "edit-goal-dialog-form-buttons-submit"
-                                    , onClick OnEditGoalSubmit
-                                    ]
-                                    [ text "Submit" ]
-                                , button
-                                    [ class "edit-goal-dialog-form-buttons-cancel"
-                                    , onClick OnExitDialogScreen
-                                    ]
-                                    [ text "Cancel" ]
+                            [ classList
+                                [ ( "edit-goal-dialog-form-new-goal-total-week-frequency-form", True )
+                                , ( "display-none", editGoal.frequencyKind /= Habit.TotalWeekFrequencyKind )
                                 ]
                             ]
+                            [ input
+                                [ placeholder "X"
+                                , id "edit-goal-dialog-x-per-week-input"
+                                , onInput OnEditGoalTimesPerWeekInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.timesPerWeek)
+                                ]
+                                []
+                            ]
+                        , div
+                            [ classList
+                                [ ( "edit-goal-dialog-form-new-goal-specific-day-of-week-frequency-form", True )
+                                , ( "display-none", editGoal.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder "Monday"
+                                , id "edit-goal-dialog-monday-input"
+                                , onInput OnEditGoalSpecificDayMondayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.mondayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "Tuesday"
+                                , onInput OnEditGoalSpecificDayTuesdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.tuesdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "Wednesday"
+                                , onInput OnEditGoalSpecificDayWednesdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.wednesdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "Thursday"
+                                , onInput OnEditGoalSpecificDayThursdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.thursdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "Friday"
+                                , onInput OnEditGoalSpecificDayFridayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.fridayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "Saturday"
+                                , onInput OnEditGoalSpecificDaySaturdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.saturdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "Sunday"
+                                , onInput OnEditGoalSpecificDaySundayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.sundayTimes)
+                                ]
+                                []
+                            ]
+                        , div
+                            [ classList
+                                [ ( "edit-goal-dialog-form-new-goal-every-x-days-frequency-form", True )
+                                , ( "display-none", editGoal.frequencyKind /= Habit.EveryXDayFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder "Times"
+                                , id "edit-goal-dialog-every-x-days-times-input"
+                                , onInput OnEditGoalTimesInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.times)
+                                ]
+                                []
+                            , input
+                                [ placeholder "Days"
+                                , onInput OnEditGoalDaysInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.days)
+                                ]
+                                []
+                            ]
                         ]
-
-                    Nothing ->
+                    , div
+                        [ classList
+                            [ ( "edit-goal-dialog-form-confirmation-message-line-break", True )
+                            , ( "display-none", not <| Maybe.isJust confirmationMessage )
+                            ]
+                        ]
                         []
+                    , div
+                        [ classList
+                            [ ( "edit-goal-dialog-form-confirmation-message", True )
+                            , ( "display-none", not <| Maybe.isJust confirmationMessage )
+                            ]
+                        ]
+                        [ text <| Maybe.withDefault "" confirmationMessage ]
+                    , div
+                        [ classList
+                            [ ( "edit-goal-dialog-form-buttons", True )
+                            , ( "display-none", not <| Maybe.isJust newFrequencies )
+                            ]
+                        ]
+                        [ button
+                            [ class "edit-goal-dialog-form-buttons-submit"
+                            , onClick OnEditGoalSubmit
+                            ]
+                            [ text "Submit" ]
+                        , button
+                            [ class "edit-goal-dialog-form-buttons-cancel"
+                            , onClick OnExitDialogScreen
+                            ]
+                            [ text "Cancel" ]
+                        ]
+                    ]
+                 ]
                 )
 
         Nothing ->

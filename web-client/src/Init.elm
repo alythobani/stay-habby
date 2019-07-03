@@ -80,6 +80,9 @@ init { apiBaseUrl, currentTime } url key =
 
       -- Edit goal
       , editGoalDialogHabit = Nothing
+      , editGoalDialogHabitCurrentFcrWithIndex = Nothing
+      , editGoalConfirmationMessage = Nothing
+      , editGoalNewFrequenciesList = Nothing
       , editGoal = Habit.initEditGoalData
 
       -- Error messages

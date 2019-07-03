@@ -681,57 +681,72 @@ update msg model =
                         habitRecord =
                             Habit.getCommonFields habit
 
-                        currentGoal : Maybe Habit.FrequencyChangeRecord
-                        currentGoal =
+                        oldFrequencies : List Habit.FrequencyChangeRecord
+                        oldFrequencies =
                             case habit of
                                 Habit.GoodHabit goodHabit ->
-                                    List.head <| List.reverse goodHabit.targetFrequencies
+                                    goodHabit.targetFrequencies
 
                                 Habit.BadHabit badHabit ->
-                                    List.head <| List.reverse badHabit.thresholdFrequencies
+                                    badHabit.thresholdFrequencies
+
+                        -- Current `FrequencyChangeRecord`
+                        currentFcrWithIndex : Maybe ( Int, Habit.FrequencyChangeRecord )
+                        currentFcrWithIndex =
+                            Util.firstInstanceInList
+                                oldFrequencies
+                                (\fcr -> YmdDate.withinYmdDateInterval fcr.startDate fcr.endDate selectedYmd)
 
                         ( newEditGoalFrequencyKind, idToFocusOn ) =
-                            case currentGoal of
-                                Just fcr ->
-                                    case fcr.newFrequency of
+                            case currentFcrWithIndex of
+                                Just ( currentIndex, currentFcr ) ->
+                                    case currentFcr.newFrequency of
                                         Habit.TotalWeekFrequency f ->
-                                            ( Just Habit.TotalWeekFrequencyKind
-                                            , Just "edit-goal-dialog-x-per-week-input"
+                                            ( Habit.TotalWeekFrequencyKind
+                                            , "edit-goal-dialog-x-per-week-input"
                                             )
 
                                         Habit.SpecificDayOfWeekFrequency f ->
-                                            ( Just Habit.SpecificDayOfWeekFrequencyKind
-                                            , Just "edit-goal-dialog-monday-input"
+                                            ( Habit.SpecificDayOfWeekFrequencyKind
+                                            , "edit-goal-dialog-monday-input"
                                             )
 
                                         Habit.EveryXDayFrequency f ->
-                                            ( Just Habit.EveryXDayFrequencyKind
-                                            , Just "edit-goal-dialog-every-x-days-times-input"
+                                            ( Habit.EveryXDayFrequencyKind
+                                            , "edit-goal-dialog-every-x-days-times-input"
                                             )
 
                                 Nothing ->
-                                    ( Nothing, Nothing )
+                                    -- No current goal
+                                    ( Habit.TotalWeekFrequencyKind
+                                    , "edit-goal-dialog-x-per-week-input"
+                                    )
+
+                        newEditGoalModel =
+                            updateEditGoal (\editGoal -> { editGoal | frequencyKind = newEditGoalFrequencyKind })
 
                         newModel =
-                            case newEditGoalFrequencyKind of
-                                Just fk ->
-                                    updateEditGoal (\editGoal -> { editGoal | frequencyKind = fk })
+                            { newEditGoalModel
+                                | activeDialogScreen = Just DialogScreen.EditGoalScreen
+                                , editGoalDialogHabit = Just habit
+                                , habitActionsDropdown = Nothing
+                                , editGoalDialogHabitCurrentFcrWithIndex = currentFcrWithIndex
+                            }
 
-                                Nothing ->
-                                    model
+                        ( newConfirmationMessageModel, newCmdMsg ) =
+                            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
                     in
-                    ( { newModel
+                    ( { newConfirmationMessageModel
                         | activeDialogScreen = Just DialogScreen.EditGoalScreen
                         , editGoalDialogHabit = Just habit
                         , habitActionsDropdown = Nothing
+                        , editGoalDialogHabitCurrentFcrWithIndex = currentFcrWithIndex
                       }
-                    , case idToFocusOn of
-                        Just domId ->
-                            Dom.focus domId
-                                |> Task.attempt FocusResult
-
-                        Nothing ->
-                            Cmd.none
+                    , Cmd.batch
+                        [ newCmdMsg
+                        , Dom.focus idToFocusOn
+                            |> Task.attempt FocusResult
+                        ]
                     )
 
                 Nothing ->
@@ -770,70 +785,437 @@ update msg model =
                 ( model, Cmd.none )
 
         OnEditGoalSelectFrequencyKind frequencyKind ->
-            ( updateEditGoal (\editGoal -> { editGoal | frequencyKind = frequencyKind })
-            , Dom.focus
-                (case frequencyKind of
-                    Habit.EveryXDayFrequencyKind ->
-                        "edit-goal-dialog-every-x-days-times-input"
+            let
+                newEditGoalModel =
+                    updateEditGoal (\editGoal -> { editGoal | frequencyKind = frequencyKind })
 
-                    Habit.SpecificDayOfWeekFrequencyKind ->
-                        "edit-goal-dialog-monday-input"
+                ( newRefreshedModel, newCmdMsg ) =
+                    update RefreshEditGoalConfirmationMessageAndNewSuspensions newEditGoalModel
+            in
+            ( newRefreshedModel
+            , Cmd.batch
+                [ newCmdMsg
+                , Dom.focus
+                    (case frequencyKind of
+                        Habit.EveryXDayFrequencyKind ->
+                            "edit-goal-dialog-every-x-days-times-input"
 
-                    Habit.TotalWeekFrequencyKind ->
-                        "edit-goal-dialog-x-per-week-input"
-                )
-                |> Task.attempt FocusResult
+                        Habit.SpecificDayOfWeekFrequencyKind ->
+                            "edit-goal-dialog-monday-input"
+
+                        Habit.TotalWeekFrequencyKind ->
+                            "edit-goal-dialog-x-per-week-input"
+                    )
+                    |> Task.attempt FocusResult
+                ]
             )
 
         OnEditGoalTimesPerWeekInput timesPerWeek ->
-            ( updateEditGoal (\editGoal -> { editGoal | timesPerWeek = extractInt timesPerWeek editGoal.timesPerWeek })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | timesPerWeek = extractInt timesPerWeek editGoal.timesPerWeek })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalSpecificDayMondayInput mondayTimes ->
-            ( updateEditGoal (\editGoal -> { editGoal | mondayTimes = extractInt mondayTimes editGoal.mondayTimes })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | mondayTimes = extractInt mondayTimes editGoal.mondayTimes })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalSpecificDayTuesdayInput tuesdayTimes ->
-            ( updateEditGoal (\editGoal -> { editGoal | tuesdayTimes = extractInt tuesdayTimes editGoal.tuesdayTimes })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | tuesdayTimes = extractInt tuesdayTimes editGoal.tuesdayTimes })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalSpecificDayWednesdayInput wednesdayTimes ->
-            ( updateEditGoal (\editGoal -> { editGoal | wednesdayTimes = extractInt wednesdayTimes editGoal.wednesdayTimes })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | wednesdayTimes = extractInt wednesdayTimes editGoal.wednesdayTimes })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalSpecificDayThursdayInput thursdayTimes ->
-            ( updateEditGoal (\editGoal -> { editGoal | thursdayTimes = extractInt thursdayTimes editGoal.thursdayTimes })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | thursdayTimes = extractInt thursdayTimes editGoal.thursdayTimes })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalSpecificDayFridayInput fridayTimes ->
-            ( updateEditGoal (\editGoal -> { editGoal | fridayTimes = extractInt fridayTimes editGoal.fridayTimes })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | fridayTimes = extractInt fridayTimes editGoal.fridayTimes })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalSpecificDaySaturdayInput saturdayTimes ->
-            ( updateEditGoal (\editGoal -> { editGoal | saturdayTimes = extractInt saturdayTimes editGoal.saturdayTimes })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | saturdayTimes = extractInt saturdayTimes editGoal.saturdayTimes })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalSpecificDaySundayInput sundayTimes ->
-            ( updateEditGoal (\editGoal -> { editGoal | sundayTimes = extractInt sundayTimes editGoal.sundayTimes })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | sundayTimes = extractInt sundayTimes editGoal.sundayTimes })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalTimesInput times ->
-            ( updateEditGoal (\editGoal -> { editGoal | times = extractInt times editGoal.times })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | times = extractInt times editGoal.times })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
 
         OnEditGoalDaysInput days ->
-            ( updateEditGoal (\editGoal -> { editGoal | days = extractInt days editGoal.days })
-            , Cmd.none
-            )
+            let
+                newModel =
+                    updateEditGoal (\editGoal -> { editGoal | days = extractInt days editGoal.days })
+            in
+            update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
+
+        RefreshEditGoalConfirmationMessageAndNewSuspensions ->
+            case ( model.editGoalDialogHabit, Habit.extractNewGoal model.editGoal, model.selectedYmd ) of
+                ( Just habit, Just newGoal, Just selectedYmd ) ->
+                    let
+                        yesterday =
+                            YmdDate.addDays -1 selectedYmd
+
+                        habitRecord =
+                            Habit.getCommonFields habit
+
+                        ( habitType, oldFrequenciesList ) =
+                            case habit of
+                                Habit.GoodHabit gh ->
+                                    ( "good_habit", gh.targetFrequencies )
+
+                                Habit.BadHabit bh ->
+                                    ( "bad_habit", bh.thresholdFrequencies )
+
+                        oldFrequenciesArray =
+                            Array.fromList oldFrequenciesList
+
+                        -- First `FrequencyChangeRecord` that starts after today
+                        nextFcrWithIndex : Maybe ( Int, Habit.FrequencyChangeRecord )
+                        nextFcrWithIndex =
+                            Util.firstInstanceInArray oldFrequenciesArray
+                                (\fcr -> YmdDate.compareYmds fcr.startDate selectedYmd == GT)
+
+                        -- Last `FrequencyChangeRecord` that ended before today
+                        previousFcrWithIndex : Maybe ( Int, Habit.FrequencyChangeRecord )
+                        previousFcrWithIndex =
+                            Util.lastInstanceInArray oldFrequenciesArray
+                                (\fcr ->
+                                    case fcr.endDate of
+                                        Just endYmd ->
+                                            YmdDate.compareYmds endYmd selectedYmd == LT
+
+                                        Nothing ->
+                                            False
+                                )
+
+                        arrayLength =
+                            Array.length oldFrequenciesArray
+
+                        newFrequenciesArray : Array.Array Habit.FrequencyChangeRecord
+                        newFrequenciesArray =
+                            case model.editGoalDialogHabitCurrentFcrWithIndex of
+                                -- There is a current goal
+                                Just ( currentIndex, currentFcr ) ->
+                                    if currentFcr.newFrequency == newGoal then
+                                        -- Current goal is same as new goal already, nothing to change
+                                        oldFrequenciesArray
+
+                                    else if currentFcr.startDate == selectedYmd then
+                                        -- Current goal started today, we should just replace it
+                                        case nextFcrWithIndex of
+                                            -- There is a next goal
+                                            Just ( nextIndex, nextFcr ) ->
+                                                if nextFcr.newFrequency == newGoal then
+                                                    -- Next goal is the same as the new one
+                                                    case previousFcrWithIndex of
+                                                        Just ( previousIndex, previousFcr ) ->
+                                                            -- There is a previous goal
+                                                            if previousFcr.newFrequency == newGoal then
+                                                                -- Previous goal is also the same. Merge it with next goal.
+                                                                Array.append
+                                                                    (Array.slice
+                                                                        0
+                                                                        (previousIndex + 1)
+                                                                        (Array.set
+                                                                            previousIndex
+                                                                            { previousFcr | endDate = nextFcr.endDate }
+                                                                            oldFrequenciesArray
+                                                                        )
+                                                                    )
+                                                                    (Array.slice
+                                                                        (nextIndex + 1)
+                                                                        arrayLength
+                                                                        oldFrequenciesArray
+                                                                    )
+
+                                                            else
+                                                                -- Previous goal is different. Merge new and next goal into one.
+                                                                Array.append
+                                                                    (Array.slice 0 (previousIndex + 1) oldFrequenciesArray)
+                                                                    (Array.slice
+                                                                        nextIndex
+                                                                        arrayLength
+                                                                        (Array.set
+                                                                            nextIndex
+                                                                            { nextFcr | startDate = selectedYmd }
+                                                                            oldFrequenciesArray
+                                                                        )
+                                                                    )
+
+                                                        Nothing ->
+                                                            -- There are no previous goals. Merge new and next goal into one.
+                                                            oldFrequenciesArray
+                                                                |> Array.set nextIndex { nextFcr | startDate = selectedYmd }
+                                                                |> Array.slice nextIndex arrayLength
+
+                                                else
+                                                    -- Next goal is different
+                                                    case previousFcrWithIndex of
+                                                        Just ( previousIndex, previousFcr ) ->
+                                                            -- There is a previous goal
+                                                            if previousFcr.newFrequency == newGoal then
+                                                                -- Previous goal is the same, merge it with new one
+                                                                Array.append
+                                                                    (oldFrequenciesArray
+                                                                        |> Array.set
+                                                                            previousIndex
+                                                                            { previousFcr | endDate = Just <| YmdDate.addDays -1 nextFcr.startDate }
+                                                                        |> Array.slice 0 (previousIndex + 1)
+                                                                    )
+                                                                    (Array.slice nextIndex arrayLength oldFrequenciesArray)
+
+                                                            else
+                                                                -- Previous goal is different. Just replace current goal.
+                                                                Array.set currentIndex { currentFcr | newFrequency = newGoal } oldFrequenciesArray
+
+                                                        Nothing ->
+                                                            -- There are no previous goals. Just replace current goal.
+                                                            Array.set currentIndex { currentFcr | newFrequency = newGoal } oldFrequenciesArray
+
+                                            Nothing ->
+                                                -- There are no next goals
+                                                case previousFcrWithIndex of
+                                                    Just ( previousIndex, previousFcr ) ->
+                                                        -- There is a previous goal
+                                                        if previousFcr.newFrequency == newGoal then
+                                                            -- Previous goal is the same, merge it with new one
+                                                            oldFrequenciesArray
+                                                                |> Array.set previousIndex { previousFcr | endDate = currentFcr.endDate }
+                                                                |> Array.slice 0 (previousIndex + 1)
+
+                                                        else
+                                                            -- Previous goal is different. Just replace current goal.
+                                                            Array.set currentIndex { currentFcr | newFrequency = newGoal } oldFrequenciesArray
+
+                                                    Nothing ->
+                                                        -- There are no previous goals. Just replace current goal.
+                                                        Array.set currentIndex { currentFcr | newFrequency = newGoal } oldFrequenciesArray
+
+                                    else
+                                        -- current goal started yesterday or earlier, we should start a new one
+                                        case nextFcrWithIndex of
+                                            Just ( nextIndex, nextFcr ) ->
+                                                -- There is a next goal
+                                                if nextFcr.newFrequency == newGoal then
+                                                    -- Next goal is the same, we should just extend it to today
+                                                    oldFrequenciesArray
+                                                        |> Array.set
+                                                            currentIndex
+                                                            { currentFcr | endDate = Just yesterday }
+                                                        |> Array.set
+                                                            nextIndex
+                                                            { nextFcr | startDate = selectedYmd }
+
+                                                else
+                                                    -- Next goal is different, just make a new goal between the current and next goal
+                                                    Array.append
+                                                        (Array.slice
+                                                            0
+                                                            (currentIndex + 1)
+                                                            (Array.set
+                                                                currentIndex
+                                                                { currentFcr | endDate = Just yesterday }
+                                                                oldFrequenciesArray
+                                                            )
+                                                            |> Array.push
+                                                                { startDate = selectedYmd
+                                                                , endDate = Just <| YmdDate.addDays -1 nextFcr.startDate
+                                                                , newFrequency = newGoal
+                                                                }
+                                                        )
+                                                        (Array.slice nextIndex arrayLength oldFrequenciesArray)
+
+                                            Nothing ->
+                                                -- There are no next goals. Just add a new one starting today.
+                                                oldFrequenciesArray
+                                                    |> Array.set currentIndex { currentFcr | endDate = Just yesterday }
+                                                    |> Array.slice 0 (currentIndex + 1)
+                                                    |> Array.push { startDate = selectedYmd, endDate = Nothing, newFrequency = newGoal }
+
+                                Nothing ->
+                                    -- No current goal
+                                    case previousFcrWithIndex of
+                                        Just ( previousIndex, previousFcr ) ->
+                                            -- There's a previous goal but not a current one. This shouldn't happen but we can fix it anyway.
+                                            if previousFcr.newFrequency == newGoal then
+                                                -- Previous goal is the same
+                                                case nextFcrWithIndex of
+                                                    Just ( nextIndex, nextFcr ) ->
+                                                        -- There is a next goal
+                                                        if nextFcr.newFrequency == newGoal then
+                                                            -- Next goal is also the same. Merge previous and next goal together.
+                                                            Array.append
+                                                                (oldFrequenciesArray
+                                                                    |> Array.set previousIndex { previousFcr | endDate = nextFcr.endDate }
+                                                                    |> Array.slice 0 (previousIndex + 1)
+                                                                )
+                                                                (Array.slice (nextIndex + 1) arrayLength oldFrequenciesArray)
+
+                                                        else
+                                                            -- Next goal is different. Just merge previous and new goal.
+                                                            Array.append
+                                                                (oldFrequenciesArray
+                                                                    |> Array.set
+                                                                        previousIndex
+                                                                        { previousFcr | endDate = Just <| YmdDate.addDays -1 nextFcr.startDate }
+                                                                )
+                                                                (Array.slice nextIndex arrayLength oldFrequenciesArray)
+
+                                                    Nothing ->
+                                                        -- There are no next goals. Just make previous goal endless.
+                                                        oldFrequenciesArray
+                                                            |> Array.set previousIndex { previousFcr | endDate = Nothing }
+                                                            |> Array.slice 0 (previousIndex + 1)
+
+                                            else
+                                                -- Previous goal is different
+                                                case nextFcrWithIndex of
+                                                    Just ( nextIndex, nextFcr ) ->
+                                                        -- There is a next goal
+                                                        if nextFcr.newFrequency == newGoal then
+                                                            -- Next goal is the same. Extend previous to yesterday and next goal to today.
+                                                            Array.append
+                                                                (oldFrequenciesArray
+                                                                    |> Array.set previousIndex { previousFcr | endDate = Just yesterday }
+                                                                    |> Array.slice 0 (previousIndex + 1)
+                                                                )
+                                                                (oldFrequenciesArray
+                                                                    |> Array.set nextIndex { nextFcr | startDate = selectedYmd }
+                                                                    |> Array.slice nextIndex arrayLength
+                                                                )
+
+                                                        else
+                                                            -- Next goal is different. Extend previous to yesterday, start a new goal today.
+                                                            Array.append
+                                                                (oldFrequenciesArray
+                                                                    |> Array.set previousIndex { previousFcr | endDate = Just yesterday }
+                                                                    |> Array.slice 0 (previousIndex + 1)
+                                                                    |> Array.push
+                                                                        { startDate = selectedYmd
+                                                                        , endDate = Just <| YmdDate.addDays -1 nextFcr.startDate
+                                                                        , newFrequency = newGoal
+                                                                        }
+                                                                )
+                                                                (Array.slice nextIndex arrayLength oldFrequenciesArray)
+
+                                                    Nothing ->
+                                                        -- There are no next goals. Extend previous to yesterday and start a new goal today.
+                                                        oldFrequenciesArray
+                                                            |> Array.set previousIndex { previousFcr | endDate = Just yesterday }
+                                                            |> Array.slice 0 (previousIndex + 1)
+                                                            |> Array.push { startDate = selectedYmd, endDate = Nothing, newFrequency = newGoal }
+
+                                        Nothing ->
+                                            -- There are no previous goals
+                                            case nextFcrWithIndex of
+                                                Just ( nextIndex, nextFcr ) ->
+                                                    -- There is a next goal
+                                                    if nextFcr.newFrequency == newGoal then
+                                                        -- Next goal is the same, just extend it to today
+                                                        oldFrequenciesArray
+                                                            |> Array.set nextIndex { nextFcr | startDate = selectedYmd }
+                                                            |> Array.slice nextIndex arrayLength
+
+                                                    else
+                                                        -- Next goal is different. Create a new one starting today.
+                                                        Array.append
+                                                            (Array.fromList
+                                                                [ { startDate = selectedYmd
+                                                                  , endDate = Just <| YmdDate.addDays -1 nextFcr.startDate
+                                                                  , newFrequency = newGoal
+                                                                  }
+                                                                ]
+                                                            )
+                                                            (Array.slice nextIndex arrayLength oldFrequenciesArray)
+
+                                                Nothing ->
+                                                    -- There are no goals at all. Create a new one starting today.
+                                                    Array.fromList [ { startDate = selectedYmd, endDate = Nothing, newFrequency = newGoal } ]
+
+                        newFrequenciesList =
+                            Array.toList newFrequenciesArray
+
+                        alreadyCurrentGoalMessage =
+                            "This is already the current goal."
+
+                        newGoalConfirmationMessage =
+                            "The new goal "
+                                ++ Habit.prettyPrintFrequency newGoal habitRecord.unitNameSingular habitRecord.unitNamePlural
+                                ++ " will officially start today ("
+                                ++ YmdDate.prettyPrintWithWeekday selectedYmd
+                                ++ ")."
+
+                        confirmationMessage =
+                            case model.editGoalDialogHabitCurrentFcrWithIndex of
+                                Just ( currentIndex, currentFcr ) ->
+                                    if currentFcr.newFrequency == newGoal then
+                                        Just alreadyCurrentGoalMessage
+
+                                    else
+                                        Just <|
+                                            "The previous goal for "
+                                                ++ habitRecord.name
+                                                ++ " was "
+                                                ++ Habit.prettyPrintFrequency currentFcr.newFrequency habitRecord.unitNameSingular habitRecord.unitNamePlural
+                                                ++ ". "
+                                                ++ newGoalConfirmationMessage
+
+                                Nothing ->
+                                    Just <|
+                                        habitRecord.name
+                                            ++ " does not currently have a goal. "
+                                            ++ newGoalConfirmationMessage
+
+                        newEditGoalNewFrequenciesList =
+                            if confirmationMessage == Just alreadyCurrentGoalMessage then
+                                Nothing
+
+                            else
+                                Just newFrequenciesList
+                    in
+                    ( { model
+                        | editGoalConfirmationMessage = confirmationMessage
+                        , editGoalNewFrequenciesList = newEditGoalNewFrequenciesList
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( { model | editGoalConfirmationMessage = Nothing, editGoalNewFrequenciesList = Nothing }
+                    , Cmd.none
+                    )
 
         OnEditGoalFailure apiError ->
             ( { model | errorMessage = Just <| "Error editing habit goal: " ++ ApiError.toString apiError }
@@ -841,46 +1223,64 @@ update msg model =
             )
 
         OnEditGoalSuccess habit ->
+            let
+                replaceHabitInList habitList =
+                    Util.replaceOrAdd
+                        habitList
+                        (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
+                        habit
+
+                replaceHabitInArray habitArray =
+                    habitArray |> Array.toList |> replaceHabitInList |> Array.fromList
+            in
             ( { model
                 | allHabits =
                     RemoteData.map
-                        (\allHabits ->
-                            Util.replaceOrAdd
-                                allHabits
-                                (\oldHabit -> (oldHabit |> Habit.getCommonFields |> .id) == (habit |> Habit.getCommonFields |> .id))
-                                habit
-                        )
+                        replaceHabitInList
                         model.allHabits
+                , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
+                , editGoalHabitSelectionFilteredHabits = replaceHabitInArray model.editGoalHabitSelectionFilteredHabits
+                , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
+                , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
                 , editGoal = Habit.initEditGoalData
-                , activeDialogScreen = Nothing
               }
             , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
             )
 
         OnEditGoalSubmit ->
-            -- case (model.editGoalDialogHabit, Habit.extractNewGoal model.editGoal) of
-            --     (Just habit, Just newGoal) ->
-            --         let
-            --             oldFrequencies : List Habit.FrequencyChangeRecord
-            --             oldFrequencies =
-            --                 case habit of
-            --                     Habit.GoodHabit gh ->
-            --                         gh.targetFrequencies
-            --
-            --                     Habit.BadHabit bh ->
-            --                         bh.thresholdFrequencies
-            --         in
-            --
-            --
-            --     Nothing ->
-            -- TODO
-            ( model, Cmd.none )
+            case ( model.editGoalDialogHabit, model.editGoalNewFrequenciesList ) of
+                ( Just habit, Just newFrequenciesList ) ->
+                    let
+                        ( habitId, habitType ) =
+                            case habit of
+                                Habit.GoodHabit gh ->
+                                    ( gh.id, "good_habit" )
 
-        -- ( { model
-        --     | activeDialogScreen = Nothing
-        --   }
-        -- , Api.mutationEditHabitGoalFrequencies habitId newFrequencies habitType model.apiBaseUrl OnEditGoalFailure OnEditGoalSuccess
-        -- )
+                                Habit.BadHabit bh ->
+                                    ( bh.id, "bad_habit" )
+                    in
+                    ( { model
+                        | activeDialogScreen = Nothing
+                      }
+                    , Api.mutationEditHabitGoalFrequencies
+                        habitId
+                        newFrequenciesList
+                        habitType
+                        model.apiBaseUrl
+                        OnEditGoalFailure
+                        OnEditGoalSuccess
+                    )
+
+                ( Nothing, _ ) ->
+                    ( { model | errorMessage = Just "Error editing habit goal: no habit selected." }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( { model | errorMessage = Just "Error editing habit goal: could not generate new list of goals." }
+                    , Cmd.none
+                    )
+
         -- Error Messages
         OpenErrorMessageDialogScreen ->
             ( { model | activeDialogScreen = Just DialogScreen.ErrorMessageScreen }

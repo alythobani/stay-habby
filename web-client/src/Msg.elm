@@ -105,6 +105,7 @@ type Msg
     | OnEditGoalSpecificDaySundayInput String
     | OnEditGoalTimesInput String
     | OnEditGoalDaysInput String
+    | RefreshEditGoalConfirmationMessageAndNewSuspensions
     | OnEditGoalFailure ApiError
     | OnEditGoalSuccess Habit.Habit
     | OnEditGoalSubmit

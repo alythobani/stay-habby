@@ -1,6 +1,7 @@
 module Api exposing
     ( AllRemoteData
     , QueriedFrequencyStats
+    , QueriedHabitGoalIntervalLists
     , frequencyToGraphQLString
     , graphQLRequest
     , mutationAddHabit
@@ -10,6 +11,7 @@ module Api exposing
     , mutationSetHabitDayNote
     , queryAllRemoteData
     , queryFrequencyStats
+    , queryHabitGoalIntervalLists
     )
 
 import DefaultServices.Http exposing (post)
@@ -23,6 +25,7 @@ import Models.FrequencyStats as FrequencyStats
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
+import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.YmdDate as YmdDate
 
 
@@ -76,6 +79,53 @@ queryAllRemoteData ymd =
             |> required "habitData" (Decode.list HabitData.decodeHabitData)
             |> required "frequencyStatsList" (Decode.list FrequencyStats.decodeFrequencyStats)
             |> required "habitDayNotes" (Decode.list HabitDayNote.decodeHabitDayNote)
+            |> Decode.at [ "data" ]
+        )
+
+
+type alias QueriedHabitGoalIntervalLists =
+    { habitGoalIntervalLists : List HabitGoalIntervalList.HabitGoalIntervalList }
+
+
+{-| Query for goal intervals for the given habits.
+An empty habit list means we will query for all habits.
+-}
+queryHabitGoalIntervalLists :
+    Maybe YmdDate.YmdDate
+    -> YmdDate.YmdDate
+    -> List String
+    -> String
+    -> (ApiError -> b)
+    -> (QueriedHabitGoalIntervalLists -> b)
+    -> Cmd b
+queryHabitGoalIntervalLists maybeStartYmd endYmd habitIds =
+    let
+        templateDict =
+            Dict.fromList
+                [ ( "start_date", Util.encodeMaybe maybeStartYmd YmdDate.encodeYmdDate )
+                , ( "end_date", YmdDate.encodeYmdDate endYmd )
+                , ( "habit_ids_input"
+                  , if List.isEmpty habitIds then
+                        ""
+
+                    else
+                        ", habit_ids: " ++ Util.encodeListOfStrings habitIds
+                  )
+                , ( "goal_interval_list_output", HabitGoalIntervalList.graphQLOutputString )
+                ]
+
+        queryString =
+            """{habitGoalIntervalLists: get_frequency_stats(
+                  start_date: {{start_date}}
+                  end_date: {{end_date}}
+                  {{habit_ids_input}}) {{goal_interval_list_output}}
+            }"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest
+        queryString
+        (Decode.succeed QueriedHabitGoalIntervalLists
+            |> required "habitGoalIntervalLists" (Decode.list HabitGoalIntervalList.decodeHabitGoalIntervalList)
             |> Decode.at [ "data" ]
         )
 

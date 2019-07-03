@@ -14,6 +14,7 @@ import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
 import Models.Graph as Graph
 import Models.Habit as Habit
+import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData

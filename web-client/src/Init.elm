@@ -104,6 +104,14 @@ init { apiBaseUrl, currentTime } url key =
       , suspendOrResumeHabit = Nothing
       , suspendOrResumeHabitConfirmationMessage = ""
       , suspendOrResumeHabitNewSuspensions = Nothing
+
+      -- Graph Habit Selection
+      , graphHabitSelectionFilterText = ""
+      , graphHabitSelectionFilteredHabits = Array.empty
+      , graphHabitSelectionSelectedHabitIndex = 0
+
+      -- Graph Dialog
+      , graphHabit = Nothing
       }
     , Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
     )

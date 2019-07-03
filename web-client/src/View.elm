@@ -101,6 +101,15 @@ view model =
                 model.selectedYmd
                 model.suspendOrResumeHabitConfirmationMessage
                 model.suspendOrResumeHabitNewSuspensions
+            , renderGraphHabitSelectionScreen
+                model.activeDialogScreen
+                model.graphHabitSelectionFilterText
+                model.graphHabitSelectionFilteredHabits
+                model.graphHabitSelectionSelectedHabitIndex
+            , renderGraphDialogScreen
+                model.activeDialogScreen
+                model.graphHabit
+                model.selectedYmd
             ]
         ]
     }
@@ -1599,6 +1608,63 @@ renderSuspendOrResumeConfirmationScreen activeDialogScreen maybeHabit maybeSelec
                             ]
                             [ text "Cancel" ]
                         ]
+                    ]
+                ]
+
+            _ ->
+                []
+        )
+
+
+renderGraphHabitSelectionScreen :
+    Maybe DialogScreen.DialogScreen
+    -> String
+    -> Array.Array Habit.Habit
+    -> Int
+    -> Html Msg
+renderGraphHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen =
+            activeDialogScreen == Just DialogScreen.GraphHabitSelectionScreen
+    in
+    renderHabitSelectionScreen
+        showScreen
+        "Graph Habit"
+        "graph-habit-selection-filter-text-input"
+        OnGraphHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        OnGraphHabitSelectionSelectPreviousHabit
+        OnGraphHabitSelectionSelectNextHabit
+        OpenGraphDialogScreen
+        selectedHabitIndex
+
+
+renderGraphDialogScreen :
+    Maybe DialogScreen.DialogScreen
+    -> Maybe Habit.Habit
+    -> Maybe YmdDate.YmdDate
+    -> Html Msg
+renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd =
+    div
+        [ classList
+            [ ( "graph-screen", True )
+            , ( "display-none", activeDialogScreen /= Just DialogScreen.GraphDialogScreen )
+            ]
+        ]
+        (case ( maybeHabit, maybeSelectedYmd ) of
+            ( Just habit, Just selectedYmd ) ->
+                let
+                    habitRecord =
+                        Habit.getCommonFields habit
+                in
+                [ div
+                    [ class "graph-screen-dialog" ]
+                    [ div [ class "graph-screen-dialog-header-habit-name" ] [ text habitRecord.name ]
+                    , div
+                        [ class "graph-screen-dialog-header-date" ]
+                        [ text <| YmdDate.prettyPrintWithWeekday selectedYmd ]
+                    , div [ class "graph-screen-dialog-header-line-break" ] []
                     ]
                 ]
 

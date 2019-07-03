@@ -16,3 +16,5 @@ type DialogScreen
     | ChooseDateDialogScreen
     | SuspendOrResumeHabitSelectionScreen
     | SuspendOrResumeConfirmationScreen
+    | GraphHabitSelectionScreen
+    | GraphDialogScreen

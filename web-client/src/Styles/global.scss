@@ -1055,6 +1055,28 @@ body {
       }
     }
 
+    .graph-screen {
+      @extend .full-screen-centered-flex-container;
+      .graph-screen-dialog {
+        @extend .dialog-form-1;
+        min-height: 400px;
+        min-width: 700px;
+        .graph-screen-dialog-header-habit-name {
+          font-size: 24px;
+          font-weight: 400;
+        }
+        .graph-screen-dialog-header-date {
+          font-style: italic;
+          margin-top: 15px;
+        }
+        .graph-screen-dialog-header-line-break {
+          @extend .dialog-form-line-break;
+          margin-top: 30px;
+          width: 80%;
+        }
+      }
+    }
+
 
     .add-note-dialog {
       @extend .full-screen-centered-flex-container;

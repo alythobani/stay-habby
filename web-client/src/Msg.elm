@@ -138,3 +138,10 @@ type Msg
     | OnResumeOrSuspendSubmitClick String (List Habit.SuspendedInterval)
     | OnResumeOrSuspendHabitFailure ApiError
     | OnResumeOrSuspendHabitSuccess Habit.Habit
+      -- Graph Habit Selection Screen
+    | OpenGraphHabitSelectionScreen
+    | OnGraphHabitSelectionFilterTextInput String
+    | OnGraphHabitSelectionSelectNextHabit
+    | OnGraphHabitSelectionSelectPreviousHabit
+      -- Graph Dialog Screen
+    | OpenGraphDialogScreen Habit.Habit

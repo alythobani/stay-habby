@@ -338,15 +338,20 @@ update msg model =
             )
 
         OnGetAllRemoteDataSuccess { habits, habitData, frequencyStatsList, habitDayNotes } ->
+            let
+                habitsArray =
+                    Array.fromList habits
+            in
             ( { model
                 | allHabits = RemoteData.Success habits
                 , allHabitData = RemoteData.Success habitData
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
                 , allHabitDayNotes = RemoteData.Success habitDayNotes
-                , setHabitDataShortcutFilteredHabits = Array.fromList habits
-                , editGoalHabitSelectionFilteredHabits = Array.fromList habits
-                , addNoteHabitSelectionFilteredHabits = Array.fromList habits
-                , suspendOrResumeHabitSelectionFilteredHabits = Array.fromList habits
+                , setHabitDataShortcutFilteredHabits = habitsArray
+                , editGoalHabitSelectionFilteredHabits = habitsArray
+                , addNoteHabitSelectionFilteredHabits = habitsArray
+                , suspendOrResumeHabitSelectionFilteredHabits = habitsArray
+                , graphHabitSelectionFilteredHabits = habitsArray
               }
             , Cmd.none
             )
@@ -634,6 +639,9 @@ update msg model =
 
             else if key == Keyboard.KeyE then
                 update OpenEditGoalHabitSelectionScreen model
+
+            else if key == Keyboard.KeyG then
+                update OpenGraphHabitSelectionScreen model
 
             else if key == Keyboard.KeyH then
                 update OpenAddHabitForm model
@@ -1735,6 +1743,48 @@ update msg model =
             in
             ( updatedHabitListsModel
             , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
+            )
+
+        -- Graph Habit Selection Screen
+        OpenGraphHabitSelectionScreen ->
+            ( { model | activeDialogScreen = Just DialogScreen.GraphHabitSelectionScreen }
+            , Dom.focus "graph-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnGraphHabitSelectionFilterTextInput newFilterText ->
+            updateHabitSelectionFilterTextInput
+                newFilterText
+                model.graphHabitSelectionSelectedHabitIndex
+                model.graphHabitSelectionFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | graphHabitSelectionFilterText = newFilterText
+                        , graphHabitSelectionFilteredHabits = newFilteredHabitsArray
+                        , graphHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
+
+        OnGraphHabitSelectionSelectNextHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.graphHabitSelectionFilteredHabits
+                (model.graphHabitSelectionSelectedHabitIndex + 1)
+                (\newIndex -> { model | graphHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnGraphHabitSelectionSelectPreviousHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.graphHabitSelectionFilteredHabits
+                (model.graphHabitSelectionSelectedHabitIndex - 1)
+                (\newIndex -> { model | graphHabitSelectionSelectedHabitIndex = newIndex })
+
+        -- Graph Dialog Screen
+        OpenGraphDialogScreen habit ->
+            ( { model
+                | activeDialogScreen = Just DialogScreen.GraphDialogScreen
+                , graphHabit = Just habit
+                , habitActionsDropdown = Nothing
+              }
+            , Cmd.none
             )
 
 

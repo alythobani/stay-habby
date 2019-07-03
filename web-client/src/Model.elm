@@ -95,4 +95,12 @@ type alias Model =
     , suspendOrResumeHabit : Maybe Habit.Habit
     , suspendOrResumeHabitConfirmationMessage : String
     , suspendOrResumeHabitNewSuspensions : Maybe (List Habit.SuspendedInterval)
+
+    -- Graph Habit Selection
+    , graphHabitSelectionFilterText : String
+    , graphHabitSelectionFilteredHabits : Array.Array Habit.Habit
+    , graphHabitSelectionSelectedHabitIndex : Int
+
+    -- Graph Dialog
+    , graphHabit : Maybe Habit.Habit
     }

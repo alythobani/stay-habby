@@ -1632,7 +1632,7 @@ renderSuspendOrResumeConfirmationScreen activeDialogScreen maybeHabit maybeSelec
                         [ class "suspend-or-resume-confirmation-screen-dialog-form-buttons" ]
                         [ button
                             [ class "suspend-or-resume-confirmation-screen-dialog-form-buttons-submit"
-                            , onClick <| OnResumeOrSuspendSubmitClick habitRecord.id newSuspensions
+                            , onClick OnResumeOrSuspendSubmitClick
                             ]
                             [ text "Confirm" ]
                         , button

@@ -1651,6 +1651,7 @@ update msg model =
                     in
                     ( { model
                         | activeDialogScreen = Just DialogScreen.SuspendOrResumeConfirmationScreen
+                        , keyboardShortcutsList = KeyboardShortcut.suspendOrResumeConfirmationScreenShortcuts
                         , habitActionsDropdown = Nothing
                         , suspendOrResumeHabit = Just habit
                         , suspendOrResumeHabitConfirmationMessage = confirmationMessage
@@ -1662,39 +1663,30 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
-        OnSuspendOrResumeConfirmationScreenKeydown key ->
-            if key == Keyboard.Enter then
-                case ( model.suspendOrResumeHabit, model.suspendOrResumeHabitNewSuspensions ) of
-                    ( Just habit, Just newSuspensions ) ->
-                        let
-                            habitRecord =
-                                Habit.getCommonFields habit
-                        in
-                        update (OnResumeOrSuspendSubmitClick habitRecord.id newSuspensions) model
+        OnResumeOrSuspendSubmitClick ->
+            case ( model.suspendOrResumeHabit, model.suspendOrResumeHabitNewSuspensions ) of
+                ( Just habit, Just newSuspensions ) ->
+                    let
+                        habitRecord =
+                            Habit.getCommonFields habit
+                    in
+                    ( { model
+                        | activeDialogScreen = Nothing
+                        , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+                        , suspendOrResumeHabit = Nothing
+                        , suspendOrResumeHabitConfirmationMessage = ""
+                        , suspendOrResumeHabitNewSuspensions = Nothing
+                      }
+                    , Api.mutationEditHabitSuspensions
+                        habitRecord.id
+                        newSuspensions
+                        model.apiBaseUrl
+                        OnResumeOrSuspendHabitFailure
+                        OnResumeOrSuspendHabitSuccess
+                    )
 
-                    _ ->
-                        ( model, Cmd.none )
-
-            else if key == Keyboard.Escape then
-                update OnExitDialogScreen model
-
-            else
-                ( model, Cmd.none )
-
-        OnResumeOrSuspendSubmitClick habitId newSuspensionsList ->
-            ( { model
-                | activeDialogScreen = Nothing
-                , suspendOrResumeHabit = Nothing
-                , suspendOrResumeHabitConfirmationMessage = ""
-                , suspendOrResumeHabitNewSuspensions = Nothing
-              }
-            , Api.mutationEditHabitSuspensions
-                habitId
-                newSuspensionsList
-                model.apiBaseUrl
-                OnResumeOrSuspendHabitFailure
-                OnResumeOrSuspendHabitSuccess
-            )
+                _ ->
+                    ( model, Cmd.none )
 
         OnResumeOrSuspendHabitFailure apiError ->
             ( { model | errorMessage = Just <| "Error suspending/resuming habit: " ++ ApiError.toString apiError }

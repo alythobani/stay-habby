@@ -3,6 +3,7 @@ module Models.KeyboardShortcut exposing
     , addNoteScreenShortcuts
     , editGoalScreenShortcuts
     , mainScreenShortcuts
+    , suspendOrResumeConfirmationScreenShortcuts
     )
 
 import DefaultServices.Keyboard as Keyboard
@@ -80,5 +81,13 @@ addNoteScreenShortcuts : List KeyboardShortcut
 addNoteScreenShortcuts =
     [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnAddNoteSubmit "Submit Note"
     , closeFormShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
+    ]
+
+
+suspendOrResumeConfirmationScreenShortcuts : List KeyboardShortcut
+suspendOrResumeConfirmationScreenShortcuts =
+    [ singleKeyShortcut Keyboard.Enter OnResumeOrSuspendSubmitClick "Confirm"
+    , singleKeyShortcut Keyboard.Escape OnExitDialogScreen "Cancel"
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]

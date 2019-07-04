@@ -134,8 +134,7 @@ type Msg
     | OnSuspendOrResumeHabitSelectionSelectPreviousHabit
       -- Suspend Or Resume Confirmation Screen
     | OpenSuspendOrResumeConfirmationScreen Habit.Habit
-    | OnSuspendOrResumeConfirmationScreenKeydown Keyboard.Key
-    | OnResumeOrSuspendSubmitClick String (List Habit.SuspendedInterval)
+    | OnResumeOrSuspendSubmitClick
     | OnResumeOrSuspendHabitFailure ApiError
     | OnResumeOrSuspendHabitSuccess Habit.Habit
       -- Graph Habit Selection Screen

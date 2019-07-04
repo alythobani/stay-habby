@@ -1712,7 +1712,7 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                             div
                                 [ class "graph-screen-dialog-graph-container" ]
                                 [ LineChart.viewCustom
-                                    Graph.customConfig
+                                    (Graph.customConfig habitGoalIntervals)
                                     [ Graph.makeGraphDataLine <| Graph.getGraphData habitGoalIntervals ]
                                 ]
 

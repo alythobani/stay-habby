@@ -66,9 +66,13 @@ type NumberOfDaysToShow
 -- Line Chart Configuration
 
 
-customConfig : LineChart.Config Point msg
-customConfig =
-    { x = dateAxisConfig
+customConfig : List HabitGoalIntervalList.HabitGoalInterval -> LineChart.Config Point msg
+customConfig goalIntervals =
+    let
+        maybeStartYmd =
+            List.head goalIntervals |> Maybe.map .startDate
+    in
+    { x = dateAxisConfig maybeStartYmd
     , y = amountAxisConfig
     , container = Container.default "graph-container-id"
     , interpolation = Interpolation.monotone
@@ -83,20 +87,29 @@ customConfig =
     }
 
 
-dateAxisConfig : Axis.Config Point msg
-dateAxisConfig =
+dateAxisConfig : Maybe YmdDate.YmdDate -> Axis.Config Point msg
+dateAxisConfig maybeStartYmd =
     Axis.custom
         { title = Title.default ""
         , variable = Just << .dateFloat
         , pixels = 700
         , range = Range.padded 20 20
         , axisLine = AxisLine.none
-        , ticks = Ticks.intCustom 7 dateIntToTickConfig
+        , ticks = Ticks.intCustom 3 (dateIntToTickConfig maybeStartYmd)
         }
 
 
-dateIntToTickConfig : Int -> Tick.Config msg
-dateIntToTickConfig numDaysToAdd =
+dateIntToTickConfig : Maybe YmdDate.YmdDate -> Int -> Tick.Config msg
+dateIntToTickConfig maybeStartYmd numDaysToAdd =
+    let
+        labelStr =
+            case maybeStartYmd of
+                Just startYmd ->
+                    startYmd |> YmdDate.addDays numDaysToAdd |> YmdDate.prettyPrintShortForm
+
+                Nothing ->
+                    String.fromInt numDaysToAdd
+    in
     Tick.custom
         { position = toFloat numDaysToAdd
         , color = Colors.transparent
@@ -104,7 +117,7 @@ dateIntToTickConfig numDaysToAdd =
         , length = 2
         , grid = False
         , direction = Tick.negative
-        , label = Just <| Junk.label Color.white (String.fromInt numDaysToAdd)
+        , label = Just <| Junk.label Color.white labelStr
         }
 
 

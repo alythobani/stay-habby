@@ -42,7 +42,6 @@ view model =
                     model.openTopPanelDateDropdown
                 , renderHabitsPanel
                     model.selectedYmd
-                    model.actualYmd
                     model.allHabits
                     model.allHabitData
                     model.allFrequencyStats
@@ -247,18 +246,17 @@ renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateD
 
 renderHabitsPanel :
     Maybe YmdDate.YmdDate
-    -> Maybe YmdDate.YmdDate
     -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
     -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     -> Dict.Dict String Int
     -> Maybe String
     -> Html Msg
-renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequencyStatsList editingHabitAmountDict habitActionsDropdown =
+renderHabitsPanel maybeSelectedYmd rdHabits rdHabitData rdFrequencyStatsList editingHabitAmountDict habitActionsDropdown =
     div
         [ class "habits-panel" ]
-        (case ( rdHabits, rdHabitData, ( maybeSelectedYmd, maybeActualYmd ) ) of
-            ( RemoteData.Success habits, RemoteData.Success habitData, ( Just selectedYmd, Just actualYmd ) ) ->
+        (case ( rdHabits, rdHabitData, maybeSelectedYmd ) of
+            ( RemoteData.Success habits, RemoteData.Success habitData, Just selectedYmd ) ->
                 let
                     ( goodHabits, badHabits ) =
                         Habit.splitHabits habits
@@ -294,7 +292,6 @@ renderHabitsPanel maybeSelectedYmd maybeActualYmd rdHabits rdHabitData rdFrequen
                                     Nothing
                             )
                             selectedYmd
-                            actualYmd
                             habitData
                             editingHabitAmountDict
                             habitActionsDropdown
@@ -555,16 +552,11 @@ renderAddHabitForm activeDialogScreen addHabit =
 habitActionsDropdownDiv :
     Bool
     -> YmdDate.YmdDate
-    -> YmdDate.YmdDate
     -> Habit.Habit
     -> List Habit.SuspendedInterval
     -> Html Msg
-habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
+habitActionsDropdownDiv dropdown selectedYmd habit suspensions =
     let
-        onToday : Bool
-        onToday =
-            selectedYmd == actualYmd
-
         suspensionsArray =
             Array.fromList suspensions
 
@@ -609,12 +601,7 @@ habitActionsDropdownDiv dropdown selectedYmd actualYmd habit suspensions =
                         "Suspend"
                 ]
             , button
-                [ classList
-                    [ ( "action-button", True )
-
-                    -- Don't allow user to edit a habit's goal unless they're looking at today
-                    , ( "display-none", not onToday )
-                    ]
+                [ class "action-button"
                 , onClick <| OpenEditGoalScreen habit
                 ]
                 [ text "Edit Goal" ]
@@ -636,14 +623,13 @@ update the habit data.
 renderHabitBox :
     Maybe FrequencyStats.FrequencyStats
     -> YmdDate.YmdDate
-    -> YmdDate.YmdDate
     -> List HabitData.HabitData
     -> Dict.Dict String Int
     -> Maybe String
     -> Bool
     -> Habit.Habit
     -> Html Msg
-renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict habitActionsDropdown isFirstHabit habit =
+renderHabitBox habitStats selectedYmd habitData editingHabitAmountDict habitActionsDropdown isFirstHabit habit =
     let
         habitRecord =
             Habit.getCommonFields habit
@@ -712,7 +698,7 @@ renderHabitBox habitStats selectedYmd actualYmd habitData editingHabitAmountDict
             )
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
-        , habitActionsDropdownDiv actionsDropdown selectedYmd actualYmd habit habitRecord.suspensions
+        , habitActionsDropdownDiv actionsDropdown selectedYmd habit habitRecord.suspensions
         , case habitStats of
             Nothing ->
                 div

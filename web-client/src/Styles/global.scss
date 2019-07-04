@@ -167,6 +167,7 @@ body {
                 }
               }
               .actions-dropdown {
+                @extend .no-select;
                 .action-buttons {
                   .action-button {
                     background-color: black;

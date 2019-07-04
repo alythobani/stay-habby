@@ -32,6 +32,7 @@ import LineChart.Interpolation as Interpolation
 import LineChart.Junk as Junk
 import LineChart.Legends as Legends
 import LineChart.Line as Line
+import Models.HabitData as HabitData
 import Models.HabitGoalIntervalList exposing (HabitGoalInterval)
 import Models.YmdDate as YmdDate
 
@@ -47,8 +48,8 @@ type alias GraphData =
     List Point
 
 
-getAllGraphData : List HabitGoalInterval -> GraphData
-getAllGraphData goalIntervals =
+getAllGraphData : List HabitGoalInterval -> List HabitData.HabitData -> String -> GraphData
+getAllGraphData goalIntervals allHabitData graphHabitId =
     let
         goalIntervalsArray =
             Array.fromList goalIntervals
@@ -59,8 +60,20 @@ getAllGraphData goalIntervals =
                 YmdDate.numDaysSpanned goalInterval.startDate goalInterval.endDate
                     |> List.range 0
                     |> List.map
-                        (always
-                            { amountFloat = toFloat goalInterval.totalDone
+                        (\numDaysToAdd ->
+                            let
+                                pointDate : YmdDate.YmdDate
+                                pointDate =
+                                    YmdDate.addDays numDaysToAdd goalInterval.startDate
+
+                                habitDatum : Int
+                                habitDatum =
+                                    List.filter (\{ habitId, date } -> habitId == graphHabitId && date == pointDate) allHabitData
+                                        |> List.head
+                                        |> Maybe.map .amount
+                                        |> Maybe.withDefault 0
+                            in
+                            { amountFloat = toFloat habitDatum
                             , goalIntervalIndex = goalIntervalIndex
                             }
                         )
@@ -75,11 +88,17 @@ getAllGraphData goalIntervals =
             )
 
 
-getAllGraphIntervalSeries : List HabitGoalInterval -> Color.Color -> Color.Color -> List (LineChart.Series Point)
-getAllGraphIntervalSeries allGoalIntervals successColor failureColor =
+getAllGraphIntervalSeries :
+    List HabitGoalInterval
+    -> Color.Color
+    -> Color.Color
+    -> List HabitData.HabitData
+    -> String
+    -> List (LineChart.Series Point)
+getAllGraphIntervalSeries allGoalIntervals successColor failureColor allHabitData habitId =
     let
         allPoints =
-            getAllGraphData allGoalIntervals
+            getAllGraphData allGoalIntervals allHabitData habitId
     in
     List.indexedMap
         (\goalIntervalIndex goalInterval ->

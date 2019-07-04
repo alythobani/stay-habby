@@ -115,6 +115,7 @@ view model =
                 model.selectedYmd
                 model.graphNumDaysToShow
                 model.graphData
+                model.allHabitData
             ]
         ]
     }
@@ -1643,16 +1644,17 @@ renderGraphDialogScreen :
     -> Maybe YmdDate.YmdDate
     -> Graph.NumberOfDaysToShow
     -> RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     -> Html Msg
-renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGraphData =
+renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGraphData rdAllHabitData =
     div
         [ classList
             [ ( "graph-screen", True )
             , ( "display-none", activeDialogScreen /= Just DialogScreen.GraphDialogScreen )
             ]
         ]
-        (case ( maybeHabit, maybeSelectedYmd ) of
-            ( Just habit, Just selectedYmd ) ->
+        (case ( maybeHabit, maybeSelectedYmd, rdAllHabitData ) of
+            ( Just habit, Just selectedYmd, RemoteData.Success allHabitData ) ->
                 let
                     habitRecord =
                         Habit.getCommonFields habit
@@ -1713,7 +1715,13 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                                 [ class "graph-screen-dialog-graph-container" ]
                                 [ LineChart.viewCustom
                                     (Graph.customConfig habitGoalIntervals)
-                                    (Graph.getAllGraphIntervalSeries habitGoalIntervals successColor failureColor)
+                                    (Graph.getAllGraphIntervalSeries
+                                        habitGoalIntervals
+                                        successColor
+                                        failureColor
+                                        allHabitData
+                                        habitRecord.id
+                                    )
                                 ]
 
                         _ ->

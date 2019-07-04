@@ -1851,7 +1851,7 @@ update msg model =
                 update (SetGraphNumDaysToShow Graph.AllTime) model
 
             else if key == Keyboard.Escape then
-                update OnExitDialogScreen model
+                update OnExitGraphScreen model
 
             else
                 ( model, Cmd.none )
@@ -1900,6 +1900,16 @@ update msg model =
 
                 _ ->
                     ( { model | errorMessage = Just "Error retrieving graph data: no habit selected" }, Cmd.none )
+
+        OnExitGraphScreen ->
+            let
+                newModel =
+                    { model
+                        | graphHabit = Nothing
+                        , graphData = RemoteData.NotAsked
+                    }
+            in
+            update OnExitDialogScreen newModel
 
 
 extractInt : String -> Maybe Int -> Maybe Int

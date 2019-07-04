@@ -150,3 +150,4 @@ type Msg
     | SetGraphNumDaysToShow Graph.NumberOfDaysToShow
     | OnGetGraphHabitGoalIntervalListFailure ApiError
     | OnGetGraphHabitGoalIntervalListSuccess Api.QueriedHabitGoalIntervalLists
+    | OnExitGraphScreen

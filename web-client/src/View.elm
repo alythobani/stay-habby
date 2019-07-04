@@ -9,6 +9,7 @@ import HabitUtil
 import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
 import Html.Attributes exposing (class, classList, id, placeholder, tabindex, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
+import LineChart
 import Maybe.Extra as Maybe
 import Model exposing (Model)
 import Models.ApiError as ApiError
@@ -1644,31 +1645,6 @@ renderGraphHabitSelectionScreen activeDialogScreen habitSelectionFilterText filt
         selectedHabitIndex
 
 
-renderGoalDates : List HabitGoalIntervalList.HabitGoalInterval -> List (Html Msg)
-renderGoalDates goalIntervals =
-    List.map
-        (\goalInterval ->
-            YmdDate.numDaysSpanned goalInterval.startDate goalInterval.endDate
-                |> List.range 0
-                |> List.map (\numDaysToAdd -> YmdDate.addDays numDaysToAdd goalInterval.startDate)
-                |> List.map (\date -> div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm date ])
-        )
-        goalIntervals
-        |> List.concat
-
-
-renderGoalInterval : HabitGoalIntervalList.HabitGoalInterval -> Html Msg
-renderGoalInterval goalInterval =
-    div
-        [ classList
-            [ ( "goal-interval", True )
-            , ( "doesnt-count", goalInterval.suspended || not goalInterval.valid )
-            , ( "successful", goalInterval.successful )
-            ]
-        ]
-        []
-
-
 renderGraphDialogScreen :
     Maybe DialogScreen.DialogScreen
     -> Maybe Habit.Habit
@@ -1735,10 +1711,7 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                         RemoteData.Success habitGoalIntervals ->
                             div
                                 [ class "graph-screen-dialog-graph-container" ]
-                                [ div
-                                    [ class "graph-screen-dialog-graph-container-dates" ]
-                                    (renderGoalDates habitGoalIntervals)
-                                ]
+                                [ LineChart.view1 .dateFloat .amountFloat (Graph.getGraphData habitGoalIntervals) ]
 
                         _ ->
                             div [ class "graph-screen-dialog-graph-container-empty" ] [ text "Failure..." ]

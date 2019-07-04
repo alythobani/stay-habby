@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Array
 import Browser
+import Color
 import DefaultServices.Keyboard as Keyboard
 import DefaultServices.Util as Util
 import Dict
@@ -1665,6 +1666,14 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                     habitRecord =
                         Habit.getCommonFields habit
 
+                    ( successColor, failureColor ) =
+                        case habit of
+                            Habit.GoodHabit gh ->
+                                ( Color.green, Color.blue )
+
+                            Habit.BadHabit bh ->
+                                ( Color.yellow, Color.red )
+
                     numDaysButtonText numDays =
                         case numDays of
                             Graph.AllTime ->
@@ -1713,7 +1722,7 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                                 [ class "graph-screen-dialog-graph-container" ]
                                 [ LineChart.viewCustom
                                     (Graph.customConfig habitGoalIntervals)
-                                    (Graph.getAllGraphIntervalSeries habitGoalIntervals)
+                                    (Graph.getAllGraphIntervalSeries habitGoalIntervals successColor failureColor)
                                 ]
 
                         _ ->

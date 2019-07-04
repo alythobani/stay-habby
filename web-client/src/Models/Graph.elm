@@ -75,8 +75,8 @@ getAllGraphData goalIntervals =
             )
 
 
-getAllGraphIntervalSeries : List HabitGoalInterval -> List (LineChart.Series Point)
-getAllGraphIntervalSeries allGoalIntervals =
+getAllGraphIntervalSeries : List HabitGoalInterval -> Color.Color -> Color.Color -> List (LineChart.Series Point)
+getAllGraphIntervalSeries allGoalIntervals successColor failureColor =
     let
         allPoints =
             getAllGraphData allGoalIntervals
@@ -90,10 +90,10 @@ getAllGraphIntervalSeries allGoalIntervals =
                         Color.lightGray
 
                     else if goalInterval.successful then
-                        Color.green
+                        successColor
 
                     else
-                        Color.red
+                        failureColor
 
                 goalIntervalPoints =
                     List.filter (\point -> point.goalIntervalIndex == goalIntervalIndex) allPoints

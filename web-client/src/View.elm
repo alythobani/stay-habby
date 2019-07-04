@@ -610,6 +610,11 @@ habitActionsDropdownDiv dropdown selectedYmd habit suspensions =
                 , onClick <| OpenAddNoteDialog habit
                 ]
                 [ text "Add Note" ]
+            , button
+                [ class "action-button"
+                , onClick <| OpenGraphDialogScreen habit
+                ]
+                [ text "View Graph" ]
             ]
         ]
 

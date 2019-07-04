@@ -630,47 +630,25 @@ update msg model =
                         key =
                             Keyboard.fromCode keyCode
                     in
-                    case model.activeDialogScreen of
-                        Just DialogScreen.SuspendOrResumeConfirmationScreen ->
-                            update (OnSuspendOrResumeConfirmationScreenKeydown key) newModel
-
-                        Just DialogScreen.EditGoalScreen ->
-                            update (OnEditGoalScreenKeydown key) newModel
-
-                        Just DialogScreen.AddNewHabitScreen ->
-                            update (OnAddHabitFormKeydown key) newModel
-
-                        Just DialogScreen.ChooseDateDialogScreen ->
-                            update (OnChooseDateDialogScreenKeydown key) newModel
-
-                        Just DialogScreen.AddNoteScreen ->
-                            update (OnAddNoteKeydown key) newModel
-
-                        Just DialogScreen.GraphDialogScreen ->
-                            update (OnGraphDialogScreenKeydown key) newModel
-
-                        Just screen ->
-                            -- A dialog screen is already open
-                            if key == Keyboard.Escape then
-                                update OnExitDialogScreen newModel
-
-                            else
-                                ( newModel, Cmd.none )
-
-                        Nothing ->
-                            -- No dialog screen is open (user is on main screen)
-                            update (OnMainScreenKeydown key) newModel
+                    update (AttemptKeyboardShortcut key) newModel
 
                 _ ->
                     ( newModel, Cmd.none )
 
         AttemptKeyboardShortcut key ->
             let
+                modelKeysDownList : List Keyboard.Key
+                modelKeysDownList =
+                    Set.toList model.keysDown |> List.map Keyboard.fromCode
+
                 maybeKeyShortcutWithIndex : Maybe ( Int, KeyboardShortcut.KeyboardShortcut )
                 maybeKeyShortcutWithIndex =
                     Util.firstInstanceInList
                         model.keyboardShortcutsList
-                        (\shortcut -> key == shortcut.key)
+                        (\shortcut ->
+                            List.all (\shortcutKey -> List.member shortcutKey modelKeysDownList) shortcut.keys
+                                && (Util.lastElementOfList shortcut.keys == Just key)
+                        )
 
                 maybeKeyShortcutMsg : Maybe Msg
                 maybeKeyShortcutMsg =
@@ -684,9 +662,6 @@ update msg model =
 
                 Nothing ->
                     ( model, Cmd.none )
-
-        OnMainScreenKeydown key ->
-            update (AttemptKeyboardShortcut key) model
 
         ToggleAvailableKeyboardShortcutsScreen ->
             ( { model | showAvailableKeyboardShortcutsScreen = not model.showAvailableKeyboardShortcutsScreen }
@@ -876,6 +851,7 @@ update msg model =
                     in
                     ( { newConfirmationMessageModel
                         | activeDialogScreen = Just DialogScreen.EditGoalScreen
+                        , keyboardShortcutsList = KeyboardShortcut.editGoalScreenShortcuts
                         , editGoalDialogHabit = Just habit
                         , habitActionsDropdown = Nothing
                         , editGoalDialogHabitCurrentFcrWithIndex = currentFcrWithIndex
@@ -889,25 +865,6 @@ update msg model =
 
                 Nothing ->
                     ( model, Cmd.none )
-
-        OnEditGoalScreenKeydown key ->
-            if key == Keyboard.Enter then
-                update OnEditGoalSubmit model
-
-            else if key == Keyboard.Escape then
-                update OnExitDialogScreen model
-
-            else if key == Keyboard.KeyX then
-                update (OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind) model
-
-            else if key == Keyboard.KeyS then
-                update (OnEditGoalSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind) model
-
-            else if key == Keyboard.KeyY then
-                update (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind) model
-
-            else
-                ( model, Cmd.none )
 
         OnEditGoalSelectFrequencyKind frequencyKind ->
             let
@@ -1407,7 +1364,10 @@ update msg model =
                         |> RemoteData.map (not << List.isEmpty)
                         |> (==) (RemoteData.Success True)
             in
-            ( { model | activeDialogScreen = Nothing }
+            ( { model
+                | activeDialogScreen = Nothing
+                , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+              }
             , if shouldAttemptFocus then
                 Dom.focus "first-habit-amount-input" |> Task.attempt FocusResult
 

@@ -79,7 +79,6 @@ type Msg
       -- Keyboard Shortcuts
     | KeyboardMsg Keyboard.Msg
     | AttemptKeyboardShortcut Keyboard.Key
-    | OnMainScreenKeydown Keyboard.Key
     | ToggleAvailableKeyboardShortcutsScreen
       -- Dom
     | FocusResult (Result Dom.Error ())
@@ -98,7 +97,6 @@ type Msg
     | OnEditGoalHabitSelectionSelectPreviousHabit
       -- Edit Goal
     | OpenEditGoalScreen Habit.Habit
-    | OnEditGoalScreenKeydown Keyboard.Key
     | OnEditGoalSelectFrequencyKind Habit.FrequencyKind
     | OnEditGoalTimesPerWeekInput String
     | OnEditGoalSpecificDayMondayInput String

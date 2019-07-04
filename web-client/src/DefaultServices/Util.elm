@@ -8,6 +8,7 @@ module DefaultServices.Util exposing
     , firstInstanceInArray
     , firstInstanceInList
     , hiddenDiv
+    , lastElementOfList
     , lastInstanceInArray
     , notEmpty
     , onKeydown
@@ -266,3 +267,10 @@ firstInstanceInList list filterFunction =
             list |> Array.fromList |> Array.toIndexedList
     in
     indexedList |> List.filter (\( index, elem ) -> filterFunction elem) |> List.head
+
+
+{-| Returns `Just` the last element in the list, or `Nothing` if the list is empty.
+-}
+lastElementOfList : List a -> Maybe a
+lastElementOfList list =
+    list |> List.reverse |> List.head

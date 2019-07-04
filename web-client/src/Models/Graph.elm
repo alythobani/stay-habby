@@ -50,10 +50,6 @@ type alias GraphData =
 
 getAllGraphData : List HabitGoalInterval -> List HabitData.HabitData -> String -> GraphData
 getAllGraphData goalIntervals allHabitData graphHabitId =
-    let
-        goalIntervalsArray =
-            Array.fromList goalIntervals
-    in
     goalIntervals
         |> List.indexedMap
             (\goalIntervalIndex goalInterval ->

@@ -10,6 +10,7 @@ module Models.YmdDate exposing
     , fromSimpleString
     , getFirstMondayAfterDate
     , numDaysInMonth
+    , numDaysSpanned
     , prettyPrint
     , prettyPrintDay
     , prettyPrintMonth
@@ -247,6 +248,13 @@ addYears yearDelta ymd =
     toDate ymd
         |> Date.add Date.Years yearDelta
         |> fromDate
+
+
+{-| Returns the number of days spanned from
+-}
+numDaysSpanned : YmdDate -> YmdDate -> Int
+numDaysSpanned startYmd endYmd =
+    Date.diff Date.Days (toDate startYmd) (toDate endYmd)
 
 
 toDate : YmdDate -> Date.Date

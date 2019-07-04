@@ -1648,13 +1648,10 @@ renderGoalDates : List HabitGoalIntervalList.HabitGoalInterval -> List (Html Msg
 renderGoalDates goalIntervals =
     List.map
         (\goalInterval ->
-            if goalInterval.startDate == goalInterval.endDate then
-                [ div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm goalInterval.startDate ] ]
-
-            else
-                [ div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm goalInterval.startDate ]
-                , div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm goalInterval.endDate ]
-                ]
+            YmdDate.numDaysSpanned goalInterval.startDate goalInterval.endDate
+                |> List.range 0
+                |> List.map (\numDaysToAdd -> YmdDate.addDays numDaysToAdd goalInterval.startDate)
+                |> List.map (\date -> div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm date ])
         )
         goalIntervals
         |> List.concat

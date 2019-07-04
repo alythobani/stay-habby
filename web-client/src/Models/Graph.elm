@@ -3,13 +3,17 @@ module Models.Graph exposing
     , NumberOfDaysToShow(..)
     , Point
     , amountAxisConfig
+    , amountIntToTickConfig
     , customConfig
     , dateAxisConfig
-    , getGraphData
-    , makeGraphDataLine
+    , dateIntToTickConfig
+    , getAllGraphData
+    , getAllGraphIntervalSeries
     )
 
+import Array
 import Color
+import DefaultServices.Util as Util
 import LineChart
 import LineChart.Area as Area
 import LineChart.Axis as Axis
@@ -28,13 +32,14 @@ import LineChart.Interpolation as Interpolation
 import LineChart.Junk as Junk
 import LineChart.Legends as Legends
 import LineChart.Line as Line
-import Models.HabitGoalIntervalList as HabitGoalIntervalList
+import Models.HabitGoalIntervalList exposing (HabitGoalInterval)
 import Models.YmdDate as YmdDate
 
 
 type alias Point =
     { dateFloat : Float
     , amountFloat : Float
+    , goalIntervalIndex : Int
     }
 
 
@@ -42,17 +47,75 @@ type alias GraphData =
     List Point
 
 
-getGraphData : List HabitGoalIntervalList.HabitGoalInterval -> GraphData
-getGraphData goalIntervals =
-    List.map
-        (\goalInterval ->
-            YmdDate.numDaysSpanned goalInterval.startDate goalInterval.endDate
-                |> List.range 0
-                |> List.map (always <| toFloat goalInterval.totalDone)
-        )
-        goalIntervals
+getAllGraphData : List HabitGoalInterval -> GraphData
+getAllGraphData goalIntervals =
+    let
+        goalIntervalsArray =
+            Array.fromList goalIntervals
+    in
+    goalIntervals
+        |> List.indexedMap
+            (\goalIntervalIndex goalInterval ->
+                YmdDate.numDaysSpanned goalInterval.startDate goalInterval.endDate
+                    |> List.range 0
+                    |> List.map
+                        (always
+                            { amountFloat = toFloat goalInterval.totalDone
+                            , goalIntervalIndex = goalIntervalIndex
+                            }
+                        )
+            )
         |> List.concat
-        |> List.indexedMap (\index totalDoneFloat -> Point (toFloat index) totalDoneFloat)
+        |> List.indexedMap
+            (\pointIndex point ->
+                { dateFloat = toFloat pointIndex
+                , amountFloat = point.amountFloat
+                , goalIntervalIndex = point.goalIntervalIndex
+                }
+            )
+
+
+getAllGraphIntervalSeries : List HabitGoalInterval -> List (LineChart.Series Point)
+getAllGraphIntervalSeries allGoalIntervals =
+    let
+        allPoints =
+            getAllGraphData allGoalIntervals
+    in
+    List.indexedMap
+        (\goalIntervalIndex goalInterval ->
+            let
+                lineColor : Color.Color
+                lineColor =
+                    if goalInterval.suspended || not goalInterval.valid then
+                        Color.lightGray
+
+                    else if goalInterval.successful then
+                        Color.green
+
+                    else
+                        Color.red
+
+                goalIntervalPoints =
+                    List.filter (\point -> point.goalIntervalIndex == goalIntervalIndex) allPoints
+
+                maybePreviousPointWithIndex =
+                    Util.lastInstanceInArray (Array.fromList allPoints) (\point -> point.goalIntervalIndex == goalIntervalIndex - 1)
+
+                goalIntervalPointsWithConnectorPoint =
+                    case maybePreviousPointWithIndex of
+                        Just ( previousPointIndex, previousPoint ) ->
+                            previousPoint :: goalIntervalPoints
+
+                        Nothing ->
+                            goalIntervalPoints
+            in
+            LineChart.line
+                lineColor
+                Dots.none
+                ("Habit Data " ++ String.fromInt goalIntervalIndex)
+                goalIntervalPointsWithConnectorPoint
+        )
+        allGoalIntervals
 
 
 type NumberOfDaysToShow
@@ -66,7 +129,7 @@ type NumberOfDaysToShow
 -- Line Chart Configuration
 
 
-customConfig : List HabitGoalIntervalList.HabitGoalInterval -> LineChart.Config Point msg
+customConfig : List HabitGoalInterval -> LineChart.Config Point msg
 customConfig goalIntervals =
     let
         maybeStartYmd =
@@ -75,7 +138,7 @@ customConfig goalIntervals =
     { x = dateAxisConfig maybeStartYmd
     , y = amountAxisConfig
     , container = Container.default "graph-container-id"
-    , interpolation = Interpolation.monotone
+    , interpolation = Interpolation.linear
     , intersection = Intersection.at 0 0
     , legends = Legends.none
     , events = Events.default
@@ -144,8 +207,3 @@ amountIntToTickConfig amountInt =
         , direction = Tick.negative
         , label = Just <| Junk.label Color.white (String.fromInt amountInt)
         }
-
-
-makeGraphDataLine : GraphData -> LineChart.Series Point
-makeGraphDataLine graphData =
-    LineChart.line Color.green Dots.none "Habit Data" graphData

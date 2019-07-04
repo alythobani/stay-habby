@@ -344,7 +344,11 @@ renderAddHabitForm activeDialogScreen addHabit =
             activeDialogScreen == Just DialogScreen.AddNewHabitScreen
     in
     div
-        [ class "add-habit-form" ]
+        [ classList
+            [ ( "add-habit-form", True )
+            , ( "form-is-open", showForm )
+            ]
+        ]
         [ div
             [ classList
                 [ ( "add-habit-form-body", True )

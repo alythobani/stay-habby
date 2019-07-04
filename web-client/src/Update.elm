@@ -1520,6 +1520,7 @@ update msg model =
 
                                 _ ->
                                     Array.empty
+                        , addNoteHabitSelectionSelectedHabitIndex = 0
                       }
                     , Api.mutationSetHabitDayNote
                         selectedYmd
@@ -1820,6 +1821,15 @@ update msg model =
                         , habitActionsDropdown = Nothing
                         , graphData = RemoteData.Loading
                         , graphNumDaysToShow = Graph.LastMonth
+                        , graphHabitSelectionFilterText = ""
+                        , graphHabitSelectionFilteredHabits =
+                            case model.allHabits of
+                                RemoteData.Success habits ->
+                                    Array.fromList habits
+
+                                _ ->
+                                    Array.empty
+                        , graphHabitSelectionSelectedHabitIndex = 0
                       }
                     , getGraphHabitGoalIntervalList habit Graph.LastMonth selectedYmd
                     )

@@ -1711,7 +1711,10 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                         RemoteData.Success habitGoalIntervals ->
                             div
                                 [ class "graph-screen-dialog-graph-container" ]
-                                [ LineChart.view1 .dateFloat .amountFloat (Graph.getGraphData habitGoalIntervals) ]
+                                [ LineChart.viewCustom
+                                    Graph.customConfig
+                                    [ Graph.makeGraphDataLine <| Graph.getGraphData habitGoalIntervals ]
+                                ]
 
                         _ ->
                             div [ class "graph-screen-dialog-graph-container-empty" ] [ text "Failure..." ]

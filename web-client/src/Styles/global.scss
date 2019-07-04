@@ -1086,23 +1086,11 @@ body {
         .graph-container {
           margin-top: 15px;
           border: 2px solid white;
-          width: 90%;
-          height: 80%;
-          overflow-x: scroll;
-          white-space: nowrap;
-          position: relative;
+          width: 625px;
+          height: 475px;
         }
         .graph-screen-dialog-graph-container {
           @extend .graph-container;
-          .graph-screen-dialog-graph-container-dates {
-            position: absolute;
-            bottom: 100px;
-            .date {
-              display: inline-block;
-              transform: rotate(-90deg);
-              transform-origin: bottom right;
-            }
-          }
         }
         .graph-screen-dialog-graph-container-empty {
           @extend .graph-container;

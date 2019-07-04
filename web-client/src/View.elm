@@ -21,6 +21,7 @@ import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
+import Models.KeyboardShortcut as KeyboardShortcut
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -52,6 +53,9 @@ view model =
                     model.addHabit
                 ]
             , renderDialogBackgroundScreen model.activeDialogScreen
+            , renderAvailableKeyboardShortcutsScreen
+                model.showAvailableKeyboardShortcutsScreen
+                model.keyboardShortcutsList
             , renderChooseDateDialog
                 model.activeDialogScreen
                 model.chooseDateDialogChosenYmd
@@ -777,6 +781,33 @@ renderDialogBackgroundScreen activeDialogScreen =
         , onClick OnExitDialogScreen
         ]
         []
+
+
+renderAvailableKeyboardShortcutsScreen : Bool -> List KeyboardShortcut.KeyboardShortcut -> Html Msg
+renderAvailableKeyboardShortcutsScreen showScreen shortcutList =
+    let
+        renderKeyboardShortcut : KeyboardShortcut.KeyboardShortcut -> Html Msg
+        renderKeyboardShortcut shortcut =
+            div
+                [ class "shortcut" ]
+                [ div [ class "shortcut-keys" ] [ text shortcut.keysStr ]
+                , div [ class "shortcut-desc" ] [ text shortcut.description ]
+                ]
+    in
+    div
+        [ classList
+            [ ( "available-keyboard-shortcuts-screen", True )
+            , ( "display-none", not showScreen )
+            ]
+        ]
+        [ div
+            [ class "available-keyboard-shortcuts-screen-body" ]
+            [ div [ class "available-keyboard-shortcuts-screen-body-title" ] [ text "Available Keyboard Shortcuts" ]
+            , div
+                [ class "available-keyboard-shortcuts-screen-body-list" ]
+                (List.map renderKeyboardShortcut shortcutList)
+            ]
+        ]
 
 
 renderChooseDateDialog : Maybe DialogScreen.DialogScreen -> Maybe YmdDate.YmdDate -> Maybe YmdDate.YmdDate -> Html Msg

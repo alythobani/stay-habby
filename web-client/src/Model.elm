@@ -12,6 +12,7 @@ import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
+import Models.KeyboardShortcut as KeyboardShortcut
 import Models.YmdDate as YmdDate
 import RemoteData
 import Time
@@ -49,8 +50,10 @@ type alias Model =
     -- Dropdowns
     , habitActionsDropdown : Maybe String
 
-    -- Keyboard
+    -- Keyboard Shortcuts
     , keysDown : Keyboard.Model
+    , keyboardShortcutsList : List KeyboardShortcut.KeyboardShortcut
+    , showAvailableKeyboardShortcutsScreen : Bool
 
     -- Set Habit Data Shortcut Habit Selection
     , setHabitDataShortcutHabitNameFilterText : String

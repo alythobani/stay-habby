@@ -9,6 +9,7 @@ import Flags exposing (Flags)
 import Model exposing (Model)
 import Models.Graph as Graph
 import Models.Habit as Habit
+import Models.KeyboardShortcut as KeyboardShortcut
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -59,6 +60,8 @@ init { apiBaseUrl, currentTime } url key =
 
       -- Keyboard
       , keysDown = Keyboard.init
+      , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+      , showAvailableKeyboardShortcutsScreen = False
 
       -- Set Habit Data Shortcut
       , setHabitDataShortcutHabitNameFilterText = ""

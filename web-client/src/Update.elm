@@ -15,6 +15,7 @@ import Models.FrequencyStats as FrequencyStats
 import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
+import Models.KeyboardShortcut as KeyboardShortcut
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -663,33 +664,34 @@ update msg model =
                 _ ->
                     ( newModel, Cmd.none )
 
+        AttemptKeyboardShortcut key ->
+            let
+                maybeKeyShortcutWithIndex : Maybe ( Int, KeyboardShortcut.KeyboardShortcut )
+                maybeKeyShortcutWithIndex =
+                    Util.firstInstanceInList
+                        model.keyboardShortcutsList
+                        (\shortcut -> key == shortcut.key)
+
+                maybeKeyShortcutMsg : Maybe Msg
+                maybeKeyShortcutMsg =
+                    Maybe.map
+                        (\( index, shortcut ) -> shortcut.msg)
+                        maybeKeyShortcutWithIndex
+            in
+            case maybeKeyShortcutMsg of
+                Just shortcutMsg ->
+                    update shortcutMsg model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
         OnMainScreenKeydown key ->
-            if key == Keyboard.KeyA then
-                update OpenSetHabitDataShortcutHabitSelectionScreen model
+            update (AttemptKeyboardShortcut key) model
 
-            else if key == Keyboard.KeyD then
-                update OnToggleDarkMode model
-
-            else if key == Keyboard.KeyE then
-                update OpenEditGoalHabitSelectionScreen model
-
-            else if key == Keyboard.KeyG then
-                update OpenGraphHabitSelectionScreen model
-
-            else if key == Keyboard.KeyH then
-                update OpenAddHabitForm model
-
-            else if key == Keyboard.KeyN then
-                update OpenAddNoteHabitSelectionDialogScreen model
-
-            else if key == Keyboard.KeyC then
-                update OpenChooseCustomDateDialog model
-
-            else if key == Keyboard.KeyS then
-                update OpenSuspendOrResumeHabitSelectionScreen model
-
-            else
-                ( model, Cmd.none )
+        ToggleAvailableKeyboardShortcutsScreen ->
+            ( { model | showAvailableKeyboardShortcutsScreen = not model.showAvailableKeyboardShortcutsScreen }
+            , Cmd.none
+            )
 
         -- Dom
         FocusResult result ->

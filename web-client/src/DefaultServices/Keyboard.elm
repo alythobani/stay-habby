@@ -1,4 +1,18 @@
-module DefaultServices.Keyboard exposing (Key(..), KeyCode, Model, Msg(..), codeBook, codeDict, decodeKey, decodeKeyCode, fromCode, init, subscriptions, update)
+module DefaultServices.Keyboard exposing
+    ( Key(..)
+    , KeyCode
+    , Model
+    , Msg(..)
+    , codeBook
+    , codeDict
+    , decodeKey
+    , decodeKeyCode
+    , fromCode
+    , init
+    , prettyPrintKey
+    , subscriptions
+    , update
+    )
 
 {- This module got lots of inspiration (and copied code) from ohanhi's Keyboard.Extra module,
    which is, as of the moment I'm writing this, deprecated for Elm 0.19.
@@ -129,6 +143,217 @@ type Key
     | KeyX
     | KeyY
     | KeyZ
+
+
+prettyPrintKey : Key -> String
+prettyPrintKey key =
+    case key of
+        Other ->
+            "Other"
+
+        Escape ->
+            "Escape"
+
+        Backquote ->
+            "`"
+
+        Digit1 ->
+            "1"
+
+        Digit2 ->
+            "2"
+
+        Digit3 ->
+            "3"
+
+        Digit4 ->
+            "4"
+
+        Digit5 ->
+            "5"
+
+        Digit6 ->
+            "6"
+
+        Digit7 ->
+            "7"
+
+        Digit8 ->
+            "8"
+
+        Digit9 ->
+            "9"
+
+        Digit0 ->
+            "0"
+
+        Minus ->
+            "-"
+
+        Equal ->
+            "="
+
+        Backspace ->
+            "Backspace"
+
+        Delete ->
+            "Delete"
+
+        Tab ->
+            "Tab"
+
+        CapsLock ->
+            "CapsLock"
+
+        ShiftLeft ->
+            "Shift (Left)"
+
+        ControlLeft ->
+            "Ctrl (Left)"
+
+        ControlRight ->
+            "Ctrl (Right)"
+
+        AltLeft ->
+            "Alt (Left)"
+
+        MetaLeft ->
+            "Meta (Left)"
+
+        OSLeft ->
+            "OS (Left)"
+
+        Space ->
+            "Space (Left)"
+
+        MetaRight ->
+            "Meta (Right)"
+
+        OSRight ->
+            "OS (Right)"
+
+        AltRight ->
+            "Alt (Right)"
+
+        ArrowLeft ->
+            "Left Arrow"
+
+        ArrowRight ->
+            "Right Arrow"
+
+        ArrowUp ->
+            "Up Arrow"
+
+        ArrowDown ->
+            "Down Arrow"
+
+        ShiftRight ->
+            "Shift (Right)"
+
+        Enter ->
+            "Enter"
+
+        Backslash ->
+            "\\"
+
+        Slash ->
+            "/"
+
+        Period ->
+            "."
+
+        Comma ->
+            ","
+
+        Semicolon ->
+            ";"
+
+        Quote ->
+            "'"
+
+        BracketLeft ->
+            "["
+
+        BracketRight ->
+            "]"
+
+        KeyA ->
+            "A"
+
+        KeyB ->
+            "B"
+
+        KeyC ->
+            "C"
+
+        KeyD ->
+            "D"
+
+        KeyE ->
+            "E"
+
+        KeyF ->
+            "F"
+
+        KeyG ->
+            "G"
+
+        KeyH ->
+            "H"
+
+        KeyI ->
+            "I"
+
+        KeyJ ->
+            "J"
+
+        KeyK ->
+            "K"
+
+        KeyL ->
+            "L"
+
+        KeyM ->
+            "M"
+
+        KeyN ->
+            "N"
+
+        KeyO ->
+            "O"
+
+        KeyP ->
+            "P"
+
+        KeyQ ->
+            "Q"
+
+        KeyR ->
+            "R"
+
+        KeyS ->
+            "S"
+
+        KeyT ->
+            "T"
+
+        KeyU ->
+            "U"
+
+        KeyV ->
+            "V"
+
+        KeyW ->
+            "W"
+
+        KeyX ->
+            "X"
+
+        KeyY ->
+            "Y"
+
+        KeyZ ->
+            "Z"
 
 
 {-| Convert a key code into a `Key`.

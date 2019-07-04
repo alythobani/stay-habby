@@ -707,6 +707,37 @@ body {
       background-color: rgba(101, 101, 101, 0.59);
     }
 
+    .available-keyboard-shortcuts-screen {
+      @extend .full-screen-centered-flex-container;
+      z-index: 4;
+      background-color: rgba(124, 124, 124, 0.88);
+      .available-keyboard-shortcuts-screen-body {
+        .available-keyboard-shortcuts-screen-body-title {
+          z-index: 3;
+          color: white;
+          font-size: 36px;
+        }
+        .available-keyboard-shortcuts-screen-body-list {
+          margin-top: 50px;
+          margin-bottom: 25px;
+          .shortcut {
+            margin-top: 20px;
+            width: 450px;
+            color: rgb(224, 224, 224);
+            font-size: 24px;
+            .shortcut-keys {
+              display: inline-block;
+              margin-right: 10px;
+            }
+            .shortcut-desc {
+              display: inline-block;
+              float: right;
+            }
+          }
+        }
+      }
+    }
+
     .choose-date-dialog {
       @extend .full-screen-centered-flex-container;
       .choose-date-dialog-form {

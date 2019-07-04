@@ -123,7 +123,6 @@ type Msg
     | OnAddNoteHabitSelectionScreenSelectPreviousHabit
       -- Add Note Dialog
     | OpenAddNoteDialog Habit.Habit
-    | OnAddNoteKeydown Keyboard.Key
     | OnAddNoteDialogInput String
     | OnAddNoteSubmit
     | OnAddNoteFailure ApiError

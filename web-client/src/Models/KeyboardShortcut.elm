@@ -1,5 +1,6 @@
 module Models.KeyboardShortcut exposing
     ( KeyboardShortcut
+    , addNoteScreenShortcuts
     , editGoalScreenShortcuts
     , mainScreenShortcuts
     )
@@ -22,6 +23,25 @@ singleKeyShortcut key msg desc =
     { keys = [ key ], msg = msg, keysStr = Keyboard.prettyPrintKey key, description = desc }
 
 
+multiKeyShortcut : List Keyboard.Key -> Msg -> String -> KeyboardShortcut
+multiKeyShortcut keys msg desc =
+    { keys = keys
+    , msg = msg
+    , keysStr = String.join " + " (List.map Keyboard.prettyPrintKey keys)
+    , description = desc
+    }
+
+
+toggleAvailableKeyboardShortcutsScreenShortcut : KeyboardShortcut
+toggleAvailableKeyboardShortcutsScreenShortcut =
+    singleKeyShortcut Keyboard.Slash ToggleAvailableKeyboardShortcutsScreen "Toggle Keyboard Shortcuts Screen"
+
+
+closeFormShortcut : KeyboardShortcut
+closeFormShortcut =
+    singleKeyShortcut Keyboard.Escape OnExitDialogScreen "Close Form"
+
+
 mainScreenShortcuts : List KeyboardShortcut
 mainScreenShortcuts =
     [ singleKeyShortcut Keyboard.KeyA OpenSetHabitDataShortcutHabitSelectionScreen "Set Habit Amount"
@@ -32,14 +52,14 @@ mainScreenShortcuts =
     , singleKeyShortcut Keyboard.KeyH OpenAddHabitForm "Add New Habit"
     , singleKeyShortcut Keyboard.KeyN OpenAddNoteHabitSelectionDialogScreen "Add Note"
     , singleKeyShortcut Keyboard.KeyS OpenSuspendOrResumeHabitSelectionScreen "Suspend or Resume"
-    , singleKeyShortcut Keyboard.Slash ToggleAvailableKeyboardShortcutsScreen "Toggle Keyboard Shortcuts Screen"
+    , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
 
 editGoalScreenShortcuts : List KeyboardShortcut
 editGoalScreenShortcuts =
     [ singleKeyShortcut Keyboard.Enter OnEditGoalSubmit "Submit Form"
-    , singleKeyShortcut Keyboard.Escape OnExitDialogScreen "Cancel and Close Form"
+    , closeFormShortcut
     , singleKeyShortcut
         Keyboard.KeyX
         (OnEditGoalSelectFrequencyKind Habit.TotalWeekFrequencyKind)
@@ -53,4 +73,12 @@ editGoalScreenShortcuts =
         (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind)
         "New Goal: Y Per X Days"
     , singleKeyShortcut Keyboard.Slash ToggleAvailableKeyboardShortcutsScreen "Toggle Keyboard Shortcuts Screen"
+    ]
+
+
+addNoteScreenShortcuts : List KeyboardShortcut
+addNoteScreenShortcuts =
+    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnAddNoteSubmit "Submit Note"
+    , closeFormShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
     ]

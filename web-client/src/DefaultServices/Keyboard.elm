@@ -218,16 +218,16 @@ prettyPrintKey key =
             "Alt (Left)"
 
         MetaLeft ->
-            "Meta (Left)"
+            "Cmd (Left)"
 
         OSLeft ->
             "OS (Left)"
 
         Space ->
-            "Space (Left)"
+            "Space"
 
         MetaRight ->
-            "Meta (Right)"
+            "Cmd (Right)"
 
         OSRight ->
             "OS (Right)"

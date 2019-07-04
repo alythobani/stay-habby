@@ -1426,6 +1426,7 @@ update msg model =
             in
             ( { model
                 | activeDialogScreen = Just DialogScreen.AddNoteScreen
+                , keyboardShortcutsList = KeyboardShortcut.addNoteScreenShortcuts
                 , addNoteDialogHabit = Just habit
                 , addNoteDialogInput = Maybe.withDefault "" existingHabitDayNoteText
                 , habitActionsDropdown = Nothing
@@ -1433,38 +1434,6 @@ update msg model =
             , Dom.focus "add-note-dialog-input-id"
                 |> Task.attempt FocusResult
             )
-
-        OnAddNoteKeydown key ->
-            let
-                modelKeysDownList : List Keyboard.Key
-                modelKeysDownList =
-                    Set.toList model.keysDown |> List.map Keyboard.fromCode
-
-                specialKeys =
-                    [ Keyboard.OSLeft
-                    , Keyboard.OSRight
-                    , Keyboard.MetaLeft
-                    , Keyboard.MetaRight
-                    , Keyboard.ControlLeft
-                    , Keyboard.ControlRight
-                    ]
-
-                specialKeyIsPressed : Bool
-                specialKeyIsPressed =
-                    List.any (\specialKey -> List.member specialKey modelKeysDownList) specialKeys
-            in
-            if key == Keyboard.Enter then
-                if specialKeyIsPressed then
-                    update OnAddNoteSubmit model
-
-                else
-                    ( model, Cmd.none )
-
-            else if key == Keyboard.Escape then
-                update OnExitDialogScreen model
-
-            else
-                ( model, Cmd.none )
 
         OnAddNoteDialogInput newAddNoteInput ->
             ( { model | addNoteDialogInput = newAddNoteInput }, Cmd.none )

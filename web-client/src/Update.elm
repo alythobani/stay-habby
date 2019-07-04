@@ -1849,12 +1849,16 @@ update msg model =
         SetGraphNumDaysToShow numDaysToShow ->
             case ( model.graphHabit, model.selectedYmd ) of
                 ( Just graphHabit, Just selectedYmd ) ->
-                    ( { model
-                        | graphNumDaysToShow = numDaysToShow
-                        , graphData = RemoteData.Loading
-                      }
-                    , getGraphHabitGoalIntervalList graphHabit numDaysToShow selectedYmd
-                    )
+                    if numDaysToShow == model.graphNumDaysToShow then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { model
+                            | graphNumDaysToShow = numDaysToShow
+                            , graphData = RemoteData.Loading
+                          }
+                        , getGraphHabitGoalIntervalList graphHabit numDaysToShow selectedYmd
+                        )
 
                 ( Nothing, _ ) ->
                     ( { model | errorMessage = Just "Error setting graph's number of days to show: no habit selected" }, Cmd.none )

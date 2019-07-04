@@ -1818,9 +1818,10 @@ update msg model =
                         | activeDialogScreen = Just DialogScreen.GraphDialogScreen
                         , graphHabit = Just habit
                         , habitActionsDropdown = Nothing
-                        , graphData = Nothing
+                        , graphData = RemoteData.Loading
+                        , graphNumDaysToShow = Graph.LastMonth
                       }
-                    , getGraphHabitGoalIntervalList habit model.graphNumDaysToShow selectedYmd
+                    , getGraphHabitGoalIntervalList habit Graph.LastMonth selectedYmd
                     )
 
                 Nothing ->
@@ -1850,7 +1851,7 @@ update msg model =
                 ( Just graphHabit, Just selectedYmd ) ->
                     ( { model
                         | graphNumDaysToShow = numDaysToShow
-                        , graphData = Nothing
+                        , graphData = RemoteData.Loading
                       }
                     , getGraphHabitGoalIntervalList graphHabit numDaysToShow selectedYmd
                     )
@@ -1878,7 +1879,7 @@ update msg model =
                         ( { model | errorMessage = Just "Error retrieving graph data: wrong habit" }, Cmd.none )
 
                     else
-                        ( { model | graphData = Just intervalList.goalIntervals }, Cmd.none )
+                        ( { model | graphData = RemoteData.Success intervalList.goalIntervals }, Cmd.none )
 
                 ( Nothing, _ ) ->
                     ( { model | errorMessage = Just "Error retrieving graph data: no data received from server" }, Cmd.none )

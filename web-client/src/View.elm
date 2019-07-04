@@ -18,6 +18,7 @@ import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
+import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -112,6 +113,7 @@ view model =
                 model.graphHabit
                 model.selectedYmd
                 model.graphNumDaysToShow
+                model.graphData
             ]
         ]
     }
@@ -1642,13 +1644,42 @@ renderGraphHabitSelectionScreen activeDialogScreen habitSelectionFilterText filt
         selectedHabitIndex
 
 
+renderGoalDates : List HabitGoalIntervalList.HabitGoalInterval -> List (Html Msg)
+renderGoalDates goalIntervals =
+    List.map
+        (\goalInterval ->
+            if goalInterval.startDate == goalInterval.endDate then
+                [ div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm goalInterval.startDate ] ]
+
+            else
+                [ div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm goalInterval.startDate ]
+                , div [ class "date" ] [ text <| YmdDate.prettyPrintShortForm goalInterval.endDate ]
+                ]
+        )
+        goalIntervals
+        |> List.concat
+
+
+renderGoalInterval : HabitGoalIntervalList.HabitGoalInterval -> Html Msg
+renderGoalInterval goalInterval =
+    div
+        [ classList
+            [ ( "goal-interval", True )
+            , ( "doesnt-count", goalInterval.suspended || not goalInterval.valid )
+            , ( "successful", goalInterval.successful )
+            ]
+        ]
+        []
+
+
 renderGraphDialogScreen :
     Maybe DialogScreen.DialogScreen
     -> Maybe Habit.Habit
     -> Maybe YmdDate.YmdDate
     -> Graph.NumberOfDaysToShow
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
     -> Html Msg
-renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow =
+renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGraphData =
     div
         [ classList
             [ ( "graph-screen", True )
@@ -1700,9 +1731,20 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                         , changeNumDaysToShowButton Graph.LastYear
                         , changeNumDaysToShowButton Graph.AllTime
                         ]
-                    , div
-                        [ class "graph-screen-dialog-graph-container" ]
-                        []
+                    , case rdGraphData of
+                        RemoteData.Loading ->
+                            div [ class "graph-screen-dialog-graph-container-empty" ] [ text "Loading..." ]
+
+                        RemoteData.Success habitGoalIntervals ->
+                            div
+                                [ class "graph-screen-dialog-graph-container" ]
+                                [ div
+                                    [ class "graph-screen-dialog-graph-container-dates" ]
+                                    (renderGoalDates habitGoalIntervals)
+                                ]
+
+                        _ ->
+                            div [ class "graph-screen-dialog-graph-container-empty" ] [ text "Failure..." ]
                     ]
                 ]
 

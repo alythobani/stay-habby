@@ -13,10 +13,10 @@ module Models.YmdDate exposing
     , prettyPrint
     , prettyPrintDay
     , prettyPrintMonth
+    , prettyPrintShortForm
     , prettyPrintWeekday
     , prettyPrintWithWeekday
     , toDate
-    , toSimpleString
     , withinYmdDateInterval
     )
 
@@ -173,6 +173,16 @@ prettyPrint ymd =
     prettyPrintMonth ymd.month ++ " " ++ prettyPrintDay ymd.day ++ ", " ++ String.fromInt ymd.year
 
 
+prettyPrintShortMonth : Int -> String
+prettyPrintShortMonth month =
+    month |> prettyPrintMonth |> String.slice 0 3
+
+
+prettyPrintShortForm : YmdDate -> String
+prettyPrintShortForm ymd =
+    prettyPrintShortMonth ymd.month ++ " " ++ String.fromInt ymd.day ++ " " ++ String.fromInt ymd.year
+
+
 prettyPrintWithWeekday : YmdDate -> String
 prettyPrintWithWeekday ymd =
     ymd |> toDate |> Date.format "EEEE, MMMM ddd, y"
@@ -296,6 +306,28 @@ fromSimpleString date =
 toSimpleString : YmdDate -> String
 toSimpleString { year, month, day } =
     String.fromInt day ++ "/" ++ String.fromInt month ++ "/" ++ (String.dropLeft 2 <| String.fromInt year)
+
+
+{-| To format "dd/mm/yyyy", where dd and mm are zero-padded if needed.
+-}
+toFullSimpleString : YmdDate -> String
+toFullSimpleString { year, month, day } =
+    let
+        dayString =
+            if day < 10 then
+                "0" ++ String.fromInt day
+
+            else
+                String.fromInt day
+
+        monthString =
+            if month < 10 then
+                "0" ++ String.fromInt month
+
+            else
+                String.fromInt month
+    in
+    dayString ++ "/" ++ monthString ++ "/" ++ String.fromInt year
 
 
 {-| Encode a `YmdDate` as JSON that can be inputed into a graphQL query / mutation.

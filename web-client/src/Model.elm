@@ -106,5 +106,5 @@ type alias Model =
     -- Graph Dialog
     , graphHabit : Maybe Habit.Habit
     , graphNumDaysToShow : Graph.NumberOfDaysToShow
-    , graphData : Maybe (List HabitGoalIntervalList.HabitGoalInterval)
+    , graphData : RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
     }

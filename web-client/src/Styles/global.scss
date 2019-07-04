@@ -1059,7 +1059,7 @@ body {
       @extend .full-screen-centered-flex-container;
       .graph-screen-dialog {
         @extend .dialog-form-1;
-        min-height: 400px;
+        min-height: 600px;
         min-width: 700px;
         .graph-screen-dialog-header-habit-name {
           font-size: 24px;
@@ -1071,7 +1071,7 @@ body {
         }
         .graph-screen-dialog-header-line-break {
           @extend .dialog-form-line-break;
-          margin-top: 30px;
+          margin-top: 20px;
           width: 80%;
         }
         .graph-screen-dialog-change-numdays-buttons {
@@ -1083,17 +1083,33 @@ body {
             font-size: 15px;
           }
         }
-        .graph-screen-dialog-graph-container {
+        .graph-container {
           margin-top: 15px;
           border: 2px solid white;
-          min-height: 250px;
           width: 90%;
-          height: 70%;
-          .graph-screen-dialog-graph-container-title {
-            margin-top: 20px;
-            font-size: 18px;
-            font-style: italic;
+          height: 80%;
+          overflow-x: scroll;
+          white-space: nowrap;
+          position: relative;
+        }
+        .graph-screen-dialog-graph-container {
+          @extend .graph-container;
+          .graph-screen-dialog-graph-container-dates {
+            position: absolute;
+            bottom: 100px;
+            .date {
+              display: inline-block;
+              transform: rotate(-90deg);
+              transform-origin: bottom right;
+            }
           }
+        }
+        .graph-screen-dialog-graph-container-empty {
+          @extend .graph-container;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
         }
       }
     }

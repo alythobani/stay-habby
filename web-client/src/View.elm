@@ -1106,9 +1106,6 @@ renderSetHabitDataShortcutAmountScreen activeDialogScreen rdHabitData maybeHabit
                                         Just { amount } ->
                                             amount
                                )
-
-                    readyToEnterAmount =
-                        Maybe.isJust maybeInputtedAmount
                 in
                 [ span
                     [ class "set-habit-data-shortcut-amount-screen-selected-habit-name" ]
@@ -1127,22 +1124,6 @@ renderSetHabitDataShortcutAmountScreen activeDialogScreen rdHabitData maybeHabit
                                )
                     , onInput OnSetHabitDataShortcutAmountScreenInput
                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt maybeInputtedAmount)
-                    , Util.onKeydownStopPropagation
-                        (\key ->
-                            if key == Keyboard.Escape then
-                                Just OpenSetHabitDataShortcutHabitSelectionScreen
-
-                            else if key == Keyboard.Enter then
-                                case maybeInputtedAmount of
-                                    Just amount ->
-                                        Just <| OnSetHabitDataShortcutAmountScreenSubmit selectedYmd habitRecord.id amount
-
-                                    Nothing ->
-                                        Just NoOp
-
-                            else
-                                Just NoOp
-                        )
                     ]
                     []
                 ]

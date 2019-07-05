@@ -150,7 +150,10 @@ setHabitDataHabitSelectionShortcuts =
 
 setHabitDataAmountScreenShortcuts : List KeyboardShortcut
 setHabitDataAmountScreenShortcuts =
-    []
+    [ singleKeyShortcut Keyboard.Enter OnSetHabitDataShortcutAmountScreenSubmit "Submit Amount"
+    , cancelScreenShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
+    ]
 
 
 addNoteHabitSelectionShortcuts : List KeyboardShortcut

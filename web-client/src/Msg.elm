@@ -92,7 +92,7 @@ type Msg
     | OnSetHabitDataShortcutSelectPreviousHabit
     | OpenSetHabitDataShortcutAmountScreen
     | OnSetHabitDataShortcutAmountScreenInput String
-    | OnSetHabitDataShortcutAmountScreenSubmit YmdDate.YmdDate String Int
+    | OnSetHabitDataShortcutAmountScreenSubmit
       -- Edit Goal Habit Selection
     | OpenEditGoalHabitSelectionScreen
     | OnEditGoalHabitSelectionFilterTextInput String

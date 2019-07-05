@@ -830,20 +830,34 @@ update msg model =
             , Cmd.none
             )
 
-        OnSetHabitDataShortcutAmountScreenSubmit ymd habitId newVal ->
-            let
-                newDialogScreenModel =
-                    switchScreen model Nothing
-            in
-            ( newDialogScreenModel
-            , Api.mutationSetHabitData
-                ymd
-                habitId
-                newVal
-                model.apiBaseUrl
-                OnSetHabitDataFailure
-                OnSetHabitDataSuccess
-            )
+        OnSetHabitDataShortcutAmountScreenSubmit ->
+            case ( model.setHabitDataShortcutAmountScreenInputInt, model.selectedYmd, model.setHabitDataShortcutAmountScreenHabit ) of
+                ( Just inputInt, Just selectedYmd, Just selectedHabit ) ->
+                    let
+                        habitId =
+                            selectedHabit |> Habit.getCommonFields |> .id
+
+                        newDialogScreenModel =
+                            switchScreen model Nothing
+                    in
+                    ( newDialogScreenModel
+                    , Api.mutationSetHabitData
+                        selectedYmd
+                        habitId
+                        inputInt
+                        model.apiBaseUrl
+                        OnSetHabitDataFailure
+                        OnSetHabitDataSuccess
+                    )
+
+                ( _, Nothing, _ ) ->
+                    ( { model | errorMessage = Just "Error setting habit data: no selected date" }, Cmd.none )
+
+                ( _, _, Nothing ) ->
+                    ( { model | errorMessage = Just "Error setting habit data: no selected habit" }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         -- Edit Goal Habit Selection
         OpenEditGoalHabitSelectionScreen ->

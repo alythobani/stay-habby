@@ -24,6 +24,83 @@ import Task
 import TimeZone
 
 
+{-| When we switch the active screen, we should reset certain model fields, and update
+the active keyboard shortcuts list.
+-}
+switchScreen : Model -> Maybe DialogScreen.DialogScreen -> Model
+switchScreen m newScreen =
+    let
+        newKeyboardShortcuts =
+            case newScreen of
+                Just DialogScreen.AddNewHabitScreen ->
+                    KeyboardShortcut.addNewHabitScreenShortcuts
+
+                Just DialogScreen.EditGoalHabitSelectionScreen ->
+                    KeyboardShortcut.editGoalHabitSelectionShortcuts
+
+                Just DialogScreen.EditGoalScreen ->
+                    KeyboardShortcut.editGoalScreenShortcuts
+
+                Just DialogScreen.SetHabitDataShortcutHabitSelectionScreen ->
+                    KeyboardShortcut.setHabitDataHabitSelectionShortcuts
+
+                Just DialogScreen.SetHabitDataShortcutAmountScreen ->
+                    KeyboardShortcut.setHabitDataAmountScreenShortcuts
+
+                Just DialogScreen.ErrorMessageScreen ->
+                    KeyboardShortcut.errorMessageScreenShortcuts
+
+                Just DialogScreen.AddNoteHabitSelectionScreen ->
+                    KeyboardShortcut.addNoteHabitSelectionShortcuts
+
+                Just DialogScreen.AddNoteScreen ->
+                    KeyboardShortcut.addNoteScreenShortcuts
+
+                Just DialogScreen.ChooseDateDialogScreen ->
+                    KeyboardShortcut.chooseDateScreenShortcuts
+
+                Just DialogScreen.SuspendOrResumeHabitSelectionScreen ->
+                    KeyboardShortcut.suspendOrResumeHabitSelectionShortcuts
+
+                Just DialogScreen.SuspendOrResumeConfirmationScreen ->
+                    KeyboardShortcut.suspendOrResumeConfirmationScreenShortcuts
+
+                Just DialogScreen.GraphHabitSelectionScreen ->
+                    KeyboardShortcut.graphHabitSelectionShortcuts
+
+                Just DialogScreen.GraphDialogScreen ->
+                    KeyboardShortcut.graphScreenShortcuts
+
+                Nothing ->
+                    KeyboardShortcut.mainScreenShortcuts
+
+        resettedFilteredHabits =
+            case m.allHabits of
+                RemoteData.Success habits ->
+                    Array.fromList habits
+
+                _ ->
+                    Array.empty
+    in
+    { m
+        | activeDialogScreen = newScreen
+        , keyboardShortcutsList = newKeyboardShortcuts
+        , openTopPanelDateDropdown = False
+        , habitActionsDropdown = Nothing
+        , setHabitDataShortcutAmountScreenInputInt = Nothing
+        , setHabitDataShortcutHabitNameFilterText = ""
+        , setHabitDataShortcutFilteredHabits = resettedFilteredHabits
+        , setHabitDataShortcutSelectedHabitIndex = 0
+        , addNoteHabitSelectionFilterText = ""
+        , addNoteHabitSelectionFilteredHabits = resettedFilteredHabits
+        , addNoteHabitSelectionSelectedHabitIndex = 0
+        , graphNumDaysToShow = Graph.LastMonth
+        , graphHabitSelectionFilterText = ""
+        , graphHabitSelectionFilteredHabits = resettedFilteredHabits
+        , graphHabitSelectionSelectedHabitIndex = 0
+    }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -261,48 +338,16 @@ update msg model =
                     ( { newDateDropdownModel | errorMessage = Just "Error setting date: current date not available" }, Cmd.none )
 
         OpenChooseCustomDateDialog ->
-            ( { model
-                | activeDialogScreen = Just DialogScreen.ChooseDateDialogScreen
-                , openTopPanelDateDropdown = False
-                , chooseDateDialogChosenYmd = model.selectedYmd
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.ChooseDateDialogScreen)
+            in
+            ( { newDialogScreenModel
+                | chooseDateDialogChosenYmd = model.selectedYmd
               }
             , Dom.focus "choose-date-dialog-form-id"
                 |> Task.attempt FocusResult
             )
-
-        OnChooseDateDialogScreenKeydown key ->
-            case ( model.actualYmd, model.chooseDateDialogChosenYmd ) of
-                ( Just actualYmd, Just chosenYmd ) ->
-                    if key == Keyboard.KeyT then
-                        update (SetChooseDateDialogChosenYmd actualYmd) model
-
-                    else if key == Keyboard.ArrowDown then
-                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays 7 chosenYmd)) model
-
-                    else if key == Keyboard.ArrowUp then
-                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays -7 chosenYmd)) model
-
-                    else if key == Keyboard.ArrowLeft then
-                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays -1 chosenYmd)) model
-
-                    else if key == Keyboard.ArrowRight then
-                        update (SetChooseDateDialogChosenYmd (YmdDate.addDays 1 chosenYmd)) model
-
-                    else if key == Keyboard.Enter then
-                        update (OnChooseDateDialogSubmitClick chosenYmd) model
-
-                    else if key == Keyboard.Escape then
-                        update OnExitDialogScreen model
-
-                    else
-                        ( model, Cmd.none )
-
-                _ ->
-                    if key == Keyboard.Escape then
-                        update OnExitDialogScreen model
-
-                    else
-                        ( model, Cmd.none )
 
         OnChooseDateDialogPreviousMonthClick chosenYmd ->
             let
@@ -349,12 +394,57 @@ update msg model =
         SetChooseDateDialogChosenYmd newYmd ->
             ( { model | chooseDateDialogChosenYmd = Just newYmd }, Cmd.none )
 
-        OnChooseDateDialogSubmitClick chosenYmd ->
-            let
-                newDialogScreenModel =
-                    { model | activeDialogScreen = Nothing }
-            in
-            update (ChangeSelectedYmd chosenYmd) newDialogScreenModel
+        SetChooseDateDialogChosenYmdToToday ->
+            case model.actualYmd of
+                Just actualYmd ->
+                    update (SetChooseDateDialogChosenYmd actualYmd) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OnChooseDateDialogArrowDown ->
+            case model.chooseDateDialogChosenYmd of
+                Just chosenYmd ->
+                    update (SetChooseDateDialogChosenYmd (YmdDate.addDays 7 chosenYmd)) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OnChooseDateDialogArrowUp ->
+            case model.chooseDateDialogChosenYmd of
+                Just chosenYmd ->
+                    update (SetChooseDateDialogChosenYmd (YmdDate.addDays -7 chosenYmd)) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OnChooseDateDialogArrowLeft ->
+            case model.chooseDateDialogChosenYmd of
+                Just chosenYmd ->
+                    update (SetChooseDateDialogChosenYmd (YmdDate.addDays -1 chosenYmd)) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OnChooseDateDialogArrowRight ->
+            case model.chooseDateDialogChosenYmd of
+                Just chosenYmd ->
+                    update (SetChooseDateDialogChosenYmd (YmdDate.addDays 1 chosenYmd)) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OnChooseDateDialogSubmitClick ->
+            case model.chooseDateDialogChosenYmd of
+                Just chosenYmd ->
+                    let
+                        newDialogScreenModel =
+                            switchScreen model Nothing
+                    in
+                    update (ChangeSelectedYmd chosenYmd) newDialogScreenModel
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         -- All Habit Data
         OnGetAllRemoteDataFailure apiError ->
@@ -389,24 +479,13 @@ update msg model =
 
         -- Add Habit
         OpenAddHabitForm ->
-            ( { model | activeDialogScreen = Just DialogScreen.AddNewHabitScreen }
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.AddNewHabitScreen)
+            in
+            ( newDialogScreenModel
             , Dom.focus "add-habit-form-body-name-input" |> Task.attempt FocusResult
             )
-
-        OnAddHabitFormKeydown key ->
-            if key == Keyboard.Escape then
-                update OnExitDialogScreen model
-
-            else if key == Keyboard.Enter then
-                case Habit.extractCreateHabit model.addHabit of
-                    Just createHabitData ->
-                        update (OnAddHabitSubmit createHabitData) model
-
-                    Nothing ->
-                        ( model, Cmd.none )
-
-            else
-                ( model, Cmd.none )
 
         OnSelectAddHabitKind habitKind ->
             ( updateAddHabit (\addHabit -> { addHabit | kind = habitKind }), Cmd.none )
@@ -479,17 +558,25 @@ update msg model =
             , Cmd.none
             )
 
-        OnAddHabitSubmit createHabitData ->
-            case model.actualYmd of
-                Just actualYmd ->
-                    ( model
+        AddHabitFormSubmit ->
+            case ( model.actualYmd, Habit.extractCreateHabit model.addHabit ) of
+                ( Just actualYmd, Just createHabitData ) ->
+                    let
+                        newDialogScreenModel =
+                            switchScreen model Nothing
+                    in
+                    ( { newDialogScreenModel | addHabit = Habit.initAddHabitData }
                     , Api.mutationAddHabit createHabitData actualYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
                     )
 
-                Nothing ->
+                ( Nothing, _ ) ->
                     ( { model | errorMessage = Just "Error adding habit: current date not available" }
                     , Cmd.none
                     )
+
+                _ ->
+                    -- User hasn't filled out all the fields yet, do nothing
+                    ( model, Cmd.none )
 
         OnAddHabitFailure apiError ->
             ( { model | errorMessage = Just <| "Error adding habit: " ++ ApiError.toString apiError }
@@ -681,7 +768,11 @@ update msg model =
 
         -- Set Habit Data Shortcut
         OpenSetHabitDataShortcutHabitSelectionScreen ->
-            ( { model | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutHabitSelectionScreen }
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.SetHabitDataShortcutHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
             , Dom.focus
                 "set-habit-data-shortcut-habit-selection-filter-text-input"
                 |> Task.attempt FocusResult
@@ -713,9 +804,12 @@ update msg model =
                 (\newIndex -> { model | setHabitDataShortcutSelectedHabitIndex = newIndex })
 
         OpenSetHabitDataShortcutAmountScreen habit ->
-            ( { model
-                | activeDialogScreen = Just DialogScreen.SetHabitDataShortcutAmountScreen
-                , setHabitDataShortcutAmountScreenHabit = Just habit
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.SetHabitDataShortcutAmountScreen)
+            in
+            ( { newDialogScreenModel
+                | setHabitDataShortcutAmountScreenHabit = Just habit
               }
             , Dom.focus
                 "set-habit-data-shortcut-amount-screen-input"
@@ -732,19 +826,11 @@ update msg model =
             )
 
         OnSetHabitDataShortcutAmountScreenSubmit ymd habitId newVal ->
-            ( { model
-                | activeDialogScreen = Nothing
-                , setHabitDataShortcutAmountScreenInputInt = Nothing
-                , setHabitDataShortcutHabitNameFilterText = ""
-                , setHabitDataShortcutFilteredHabits =
-                    case model.allHabits of
-                        RemoteData.Success habits ->
-                            Array.fromList habits
-
-                        _ ->
-                            Array.empty
-                , setHabitDataShortcutSelectedHabitIndex = 0
-              }
+            let
+                newDialogScreenModel =
+                    switchScreen model Nothing
+            in
+            ( newDialogScreenModel
             , Api.mutationSetHabitData
                 ymd
                 habitId
@@ -756,7 +842,11 @@ update msg model =
 
         -- Edit Goal Habit Selection
         OpenEditGoalHabitSelectionScreen ->
-            ( { model | activeDialogScreen = Just DialogScreen.EditGoalHabitSelectionScreen }
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.EditGoalHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
             , Dom.focus "edit-goal-habit-selection-filter-text-input"
                 |> Task.attempt FocusResult
             )
@@ -840,20 +930,18 @@ update msg model =
 
                         newModel =
                             { newEditGoalModel
-                                | activeDialogScreen = Just DialogScreen.EditGoalScreen
-                                , editGoalDialogHabit = Just habit
-                                , habitActionsDropdown = Nothing
+                                | editGoalDialogHabit = Just habit
                                 , editGoalDialogHabitCurrentFcrWithIndex = currentFcrWithIndex
                             }
 
                         ( newConfirmationMessageModel, newCmdMsg ) =
                             update RefreshEditGoalConfirmationMessageAndNewSuspensions newModel
+
+                        newDialogScreenModel =
+                            switchScreen newConfirmationMessageModel (Just DialogScreen.EditGoalScreen)
                     in
-                    ( { newConfirmationMessageModel
-                        | activeDialogScreen = Just DialogScreen.EditGoalScreen
-                        , keyboardShortcutsList = KeyboardShortcut.editGoalScreenShortcuts
-                        , editGoalDialogHabit = Just habit
-                        , habitActionsDropdown = Nothing
+                    ( { newDialogScreenModel
+                        | editGoalDialogHabit = Just habit
                         , editGoalDialogHabitCurrentFcrWithIndex = currentFcrWithIndex
                       }
                     , Cmd.batch
@@ -1326,10 +1414,11 @@ update msg model =
 
                                 Habit.BadHabit bh ->
                                     ( bh.id, "bad_habit" )
+
+                        newDialogScreenModel =
+                            switchScreen model Nothing
                     in
-                    ( { model
-                        | activeDialogScreen = Nothing
-                      }
+                    ( newDialogScreenModel
                     , Api.mutationEditHabitGoalFrequencies
                         habitId
                         newFrequenciesList
@@ -1351,7 +1440,11 @@ update msg model =
 
         -- Error Messages
         OpenErrorMessageDialogScreen ->
-            ( { model | activeDialogScreen = Just DialogScreen.ErrorMessageScreen }
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.ErrorMessageScreen)
+            in
+            ( newDialogScreenModel
             , Cmd.none
             )
 
@@ -1363,11 +1456,11 @@ update msg model =
                     model.allHabits
                         |> RemoteData.map (not << List.isEmpty)
                         |> (==) (RemoteData.Success True)
+
+                newDialogScreenModel =
+                    switchScreen model Nothing
             in
-            ( { model
-                | activeDialogScreen = Nothing
-                , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
-              }
+            ( newDialogScreenModel
             , if shouldAttemptFocus then
                 Dom.focus "first-habit-amount-input" |> Task.attempt FocusResult
 
@@ -1377,7 +1470,11 @@ update msg model =
 
         -- Add Note Habit Selection
         OpenAddNoteHabitSelectionDialogScreen ->
-            ( { model | activeDialogScreen = Just DialogScreen.AddNoteHabitSelectionScreen }
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.AddNoteHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
             , Dom.focus "add-note-habit-selection-filter-text-input"
                 |> Task.attempt FocusResult
             )
@@ -1423,13 +1520,13 @@ update msg model =
 
                         _ ->
                             Nothing
+
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.AddNoteScreen)
             in
-            ( { model
-                | activeDialogScreen = Just DialogScreen.AddNoteScreen
-                , keyboardShortcutsList = KeyboardShortcut.addNoteScreenShortcuts
-                , addNoteDialogHabit = Just habit
+            ( { newDialogScreenModel
+                | addNoteDialogHabit = Just habit
                 , addNoteDialogInput = Maybe.withDefault "" existingHabitDayNoteText
-                , habitActionsDropdown = Nothing
               }
             , Dom.focus "add-note-dialog-input-id"
                 |> Task.attempt FocusResult
@@ -1441,18 +1538,11 @@ update msg model =
         OnAddNoteSubmit ->
             case ( String.isEmpty model.addNoteDialogInput, model.selectedYmd, model.addNoteDialogHabit ) of
                 ( False, Just selectedYmd, Just habit ) ->
-                    ( { model
-                        | activeDialogScreen = Nothing
-                        , addNoteHabitSelectionFilterText = ""
-                        , addNoteHabitSelectionFilteredHabits =
-                            case model.allHabits of
-                                RemoteData.Success habits ->
-                                    Array.fromList habits
-
-                                _ ->
-                                    Array.empty
-                        , addNoteHabitSelectionSelectedHabitIndex = 0
-                      }
+                    let
+                        newDialogScreenModel =
+                            switchScreen model Nothing
+                    in
+                    ( newDialogScreenModel
                     , Api.mutationSetHabitDayNote
                         selectedYmd
                         (habit |> Habit.getCommonFields |> .id)
@@ -1485,7 +1575,11 @@ update msg model =
 
         -- Suspend Or Resume Habit Selection Screen
         OpenSuspendOrResumeHabitSelectionScreen ->
-            ( { model | activeDialogScreen = Just DialogScreen.SuspendOrResumeHabitSelectionScreen }
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.SuspendOrResumeHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
             , Dom.focus "suspend-or-resume-habit-selection-filter-text-input"
                 |> Task.attempt FocusResult
             )
@@ -1648,12 +1742,12 @@ update msg model =
                                                 Nothing ->
                                                     -- There is no previous interval either, we can just start a suspended interval today
                                                     Array.push { startDate = selectedYmd, endDate = Nothing } oldSuspensionsArray
+
+                        newDialogScreenModel =
+                            switchScreen model (Just DialogScreen.SuspendOrResumeConfirmationScreen)
                     in
-                    ( { model
-                        | activeDialogScreen = Just DialogScreen.SuspendOrResumeConfirmationScreen
-                        , keyboardShortcutsList = KeyboardShortcut.suspendOrResumeConfirmationScreenShortcuts
-                        , habitActionsDropdown = Nothing
-                        , suspendOrResumeHabit = Just habit
+                    ( { newDialogScreenModel
+                        | suspendOrResumeHabit = Just habit
                         , suspendOrResumeHabitConfirmationMessage = confirmationMessage
                         , suspendOrResumeHabitNewSuspensions = Just <| Array.toList newSuspensionsArray
                       }
@@ -1669,11 +1763,12 @@ update msg model =
                     let
                         habitRecord =
                             Habit.getCommonFields habit
+
+                        newDialogScreenModel =
+                            switchScreen model Nothing
                     in
                     ( { model
-                        | activeDialogScreen = Nothing
-                        , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
-                        , suspendOrResumeHabit = Nothing
+                        | suspendOrResumeHabit = Nothing
                         , suspendOrResumeHabitConfirmationMessage = ""
                         , suspendOrResumeHabitNewSuspensions = Nothing
                       }
@@ -1704,7 +1799,11 @@ update msg model =
 
         -- Graph Habit Selection Screen
         OpenGraphHabitSelectionScreen ->
-            ( { model | activeDialogScreen = Just DialogScreen.GraphHabitSelectionScreen }
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.GraphHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
             , Dom.focus "graph-habit-selection-filter-text-input"
                 |> Task.attempt FocusResult
             )
@@ -1738,46 +1837,19 @@ update msg model =
         OpenGraphDialogScreen habit ->
             case model.selectedYmd of
                 Just selectedYmd ->
-                    ( { model
-                        | activeDialogScreen = Just DialogScreen.GraphDialogScreen
-                        , graphHabit = Just habit
-                        , habitActionsDropdown = Nothing
+                    let
+                        newDialogScreenModel =
+                            switchScreen model (Just DialogScreen.GraphDialogScreen)
+                    in
+                    ( { newDialogScreenModel
+                        | graphHabit = Just habit
                         , graphData = RemoteData.Loading
-                        , graphNumDaysToShow = Graph.LastMonth
-                        , graphHabitSelectionFilterText = ""
-                        , graphHabitSelectionFilteredHabits =
-                            case model.allHabits of
-                                RemoteData.Success habits ->
-                                    Array.fromList habits
-
-                                _ ->
-                                    Array.empty
-                        , graphHabitSelectionSelectedHabitIndex = 0
                       }
-                    , getGraphHabitGoalIntervalList habit Graph.LastMonth selectedYmd
+                    , getGraphHabitGoalIntervalList habit newDialogScreenModel.graphNumDaysToShow selectedYmd
                     )
 
                 Nothing ->
                     ( { model | errorMessage = Just "Error opening habit graph: no date selected" }, Cmd.none )
-
-        OnGraphDialogScreenKeydown key ->
-            if key == Keyboard.KeyM then
-                update (SetGraphNumDaysToShow Graph.LastMonth) model
-
-            else if key == Keyboard.KeyT then
-                update (SetGraphNumDaysToShow Graph.LastThreeMonths) model
-
-            else if key == Keyboard.KeyY then
-                update (SetGraphNumDaysToShow Graph.LastYear) model
-
-            else if key == Keyboard.KeyA then
-                update (SetGraphNumDaysToShow Graph.AllTime) model
-
-            else if key == Keyboard.Escape then
-                update OnExitGraphScreen model
-
-            else
-                ( model, Cmd.none )
 
         SetGraphNumDaysToShow numDaysToShow ->
             case ( model.graphHabit, model.selectedYmd ) of
@@ -1823,16 +1895,6 @@ update msg model =
 
                 _ ->
                     ( { model | errorMessage = Just "Error retrieving graph data: no habit selected" }, Cmd.none )
-
-        OnExitGraphScreen ->
-            let
-                newModel =
-                    { model
-                        | graphHabit = Nothing
-                        , graphData = RemoteData.NotAsked
-                    }
-            in
-            update OnExitDialogScreen newModel
 
 
 extractInt : String -> Maybe Int -> Maybe Int

@@ -29,7 +29,6 @@ type Msg
     | ChangeSelectedYmd YmdDate.YmdDate
     | SetSelectedDateToXDaysFromToday Int
     | OpenChooseCustomDateDialog
-    | OnChooseDateDialogScreenKeydown Keyboard.Key
     | OnChooseDateDialogPreviousMonthClick YmdDate.YmdDate
     | OnChooseDateDialogNextMonthClick YmdDate.YmdDate
     | OnChooseDateDialogPreviousDayClick YmdDate.YmdDate
@@ -37,13 +36,17 @@ type Msg
     | OnChooseDateDialogPreviousYearClick YmdDate.YmdDate
     | OnChooseDateDialogNextYearClick YmdDate.YmdDate
     | SetChooseDateDialogChosenYmd YmdDate.YmdDate
-    | OnChooseDateDialogSubmitClick YmdDate.YmdDate
+    | SetChooseDateDialogChosenYmdToToday
+    | OnChooseDateDialogArrowDown
+    | OnChooseDateDialogArrowUp
+    | OnChooseDateDialogArrowLeft
+    | OnChooseDateDialogArrowRight
+    | OnChooseDateDialogSubmitClick
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError
     | OnGetAllRemoteDataSuccess Api.AllRemoteData
       -- Add Habit
     | OpenAddHabitForm
-    | OnAddHabitFormKeydown Keyboard.Key
     | OnSelectAddHabitKind Habit.HabitKind
     | OnAddHabitNameInput String
     | OnAddHabitDescriptionInput String
@@ -61,7 +64,7 @@ type Msg
     | OnAddHabitSpecificDaySundayInput String
     | OnAddHabitTimesInput String
     | OnAddHabitDaysInput String
-    | OnAddHabitSubmit Habit.CreateHabit
+    | AddHabitFormSubmit
     | OnAddHabitFailure ApiError
     | OnAddHabitSuccess Habit.Habit
       -- Set Habit Data
@@ -144,8 +147,6 @@ type Msg
     | OnGraphHabitSelectionSelectPreviousHabit
       -- Graph Dialog Screen
     | OpenGraphDialogScreen Habit.Habit
-    | OnGraphDialogScreenKeydown Keyboard.Key
     | SetGraphNumDaysToShow Graph.NumberOfDaysToShow
     | OnGetGraphHabitGoalIntervalListFailure ApiError
     | OnGetGraphHabitGoalIntervalListSuccess Api.QueriedHabitGoalIntervalLists
-    | OnExitGraphScreen

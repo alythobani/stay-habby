@@ -535,7 +535,7 @@ renderAddHabitForm activeDialogScreen addHabit =
                 Just createHabitData ->
                     button
                         [ class "add-habit-form-submit-button"
-                        , onClick <| OnAddHabitSubmit createHabitData
+                        , onClick AddHabitFormSubmit
                         ]
                         [ text "Create Habit" ]
             ]
@@ -969,7 +969,7 @@ renderChooseDateDialog activeDialogScreen maybeChosenYmd maybeActualYmd =
                         [ class "choose-date-dialog-form-submit-buttons" ]
                         [ button
                             [ class "choose-date-dialog-form-submit-buttons-submit"
-                            , onClick <| OnChooseDateDialogSubmitClick chosenYmd
+                            , onClick OnChooseDateDialogSubmitClick
                             ]
                             [ text "Submit" ]
                         , button

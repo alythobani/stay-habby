@@ -201,19 +201,19 @@ graphScreenShortcuts =
     [ singleKeyShortcut
         Keyboard.KeyM
         (SetGraphNumDaysToShow Graph.LastMonth)
-        "Graph Last Month"
+        "Last Month"
     , singleKeyShortcut
         Keyboard.KeyT
         (SetGraphNumDaysToShow Graph.LastThreeMonths)
-        "Graph Last Three Months"
+        "Last Three Months"
     , singleKeyShortcut
         Keyboard.KeyY
         (SetGraphNumDaysToShow Graph.LastYear)
-        "Graph Last Year"
+        "Last Year"
     , singleKeyShortcut
         Keyboard.KeyA
-        (SetGraphNumDaysToShow Graph.LastMonth)
-        "Graph All Time"
+        (SetGraphNumDaysToShow Graph.AllTime)
+        "All Time"
     , singleKeyShortcut Keyboard.Escape OnExitDialogScreen "Close Graph"
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]

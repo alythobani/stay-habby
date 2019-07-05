@@ -1080,6 +1080,8 @@ body {
           color: white;
           z-index: 3;
           width: 300px;
+          max-height: 575px;
+          overflow-y: auto;
           border: 1px solid white;
           .habit-selection-habits-list-option {
             border: 0.5px solid white;

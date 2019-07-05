@@ -60,11 +60,16 @@ cancelScreenShortcut =
     singleKeyShortcut Keyboard.Escape OnExitDialogScreen "Cancel"
 
 
+darkModeShortcut : KeyboardShortcut
+darkModeShortcut =
+    singleKeyShortcut Keyboard.KeyD OnToggleDarkMode "Toggle Dark Mode"
+
+
 mainScreenShortcuts : List KeyboardShortcut
 mainScreenShortcuts =
     [ singleKeyShortcut Keyboard.KeyA OpenSetHabitDataShortcutHabitSelectionScreen "Set Habit Amount"
     , singleKeyShortcut Keyboard.KeyC OpenChooseCustomDateDialog "Change Date"
-    , singleKeyShortcut Keyboard.KeyD OnToggleDarkMode "Toggle Dark Mode"
+    , darkModeShortcut
     , singleKeyShortcut Keyboard.KeyE OpenEditGoalHabitSelectionScreen "Edit Goal"
     , singleKeyShortcut Keyboard.KeyG OpenGraphHabitSelectionScreen "View Graph"
     , singleKeyShortcut Keyboard.KeyH OpenAddHabitForm "Add New Habit"
@@ -98,6 +103,7 @@ chooseDateScreenShortcuts =
     , singleKeyShortcut Keyboard.ArrowRight OnChooseDateDialogArrowRight "Move Right"
     , singleKeyShortcut Keyboard.Enter OnChooseDateDialogSubmitClick "Submit"
     , cancelScreenShortcut
+    , darkModeShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
@@ -136,6 +142,7 @@ editGoalScreenShortcuts =
         Keyboard.KeyY
         (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind)
         "New Goal: Y Per X Days"
+    , darkModeShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
@@ -152,6 +159,7 @@ setHabitDataAmountScreenShortcuts : List KeyboardShortcut
 setHabitDataAmountScreenShortcuts =
     [ singleKeyShortcut Keyboard.Enter OnSetHabitDataShortcutAmountScreenSubmit "Submit Amount"
     , cancelScreenShortcut
+    , darkModeShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
@@ -184,6 +192,7 @@ suspendOrResumeConfirmationScreenShortcuts : List KeyboardShortcut
 suspendOrResumeConfirmationScreenShortcuts =
     [ singleKeyShortcut Keyboard.Enter OnResumeOrSuspendSubmitClick "Confirm"
     , cancelScreenShortcut
+    , darkModeShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
@@ -215,5 +224,6 @@ graphScreenShortcuts =
         (SetGraphNumDaysToShow Graph.AllTime)
         "All Time"
     , singleKeyShortcut Keyboard.Escape OnExitDialogScreen "Close Graph"
+    , darkModeShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]

@@ -1487,7 +1487,10 @@ update msg model =
                 newDialogScreenModel =
                     switchScreen model Nothing
             in
-            ( newDialogScreenModel
+            ( { newDialogScreenModel
+                | graphGoalIntervals = RemoteData.NotAsked
+                , graphIntervalsData = RemoteData.NotAsked
+              }
             , if shouldAttemptFocus then
                 Dom.focus "first-habit-amount-input" |> Task.attempt FocusResult
 

@@ -208,6 +208,35 @@ body {
       .dialog-background-screen {
         background-color: rgba(133, 133, 133, 0.44);
       }
+
+      .choose-date-dialog {
+        .choose-date-dialog-form {
+          .choose-date-dialog-form-calendar {
+            border-color: white;
+            .choose-date-dialog-form-calendar-rows {
+              .choose-date-dialog-form-calendar-row {
+                .choose-date-dialog-form-calendar-day-box {
+                  border-color: white;
+                  &:hover {
+                    border-width: 2px;
+                    border-color: white;
+                  }
+                  &.choose-date-dialog-form-calendar-day-box-chosen {
+                    border-color: blue;
+                    &.choose-date-dialog-form-calendar-day-box-today {
+                      outline-color: blue;
+                      border-color: $forest-green;
+                    }
+                  }
+                  &.choose-date-dialog-form-calendar-day-box-today {
+                    border-color: $forest-green;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     // LIGHT MODE
@@ -749,6 +778,7 @@ body {
       .choose-date-dialog-form {
         @extend .dialog-form-1;
         @extend .no-select;
+        width: 475px;
         padding: 40px 20px 40px 20px;
         .choose-date-dialog-form-chosen-ymd-text {
           font-size: 18px;
@@ -765,9 +795,9 @@ body {
         }
         .choose-date-dialog-form-calendar {
           margin-top: 20px;
-          border: 2px solid white;
+          border: 2px solid $cape-cod;
           min-height: 250px;
-          width: 400px;
+          width: 350px;
           .choose-date-dialog-form-calendar-month-or-day-or-year {
             margin: 15px 7px 0px 7px;
             display: inline-block;
@@ -790,17 +820,21 @@ body {
             .choose-date-dialog-form-calendar-row {
               .choose-date-dialog-form-calendar-day-box {
                 @extend .calendar-day-box;
-                outline: 1px solid white;
+                border: 1px solid $silver-chalice;
                 box-sizing: border-box;
                 cursor: pointer;
                 &:hover {
-                  outline-width: 2px;
+                  border-color: $cape-cod;
                 }
                 &.choose-date-dialog-form-calendar-day-box-chosen {
-                  outline: 2px solid blue;
+                  border: 2px solid black;
+                  &.choose-date-dialog-form-calendar-day-box-today {
+                    border: 2px solid $de-york;
+                    outline: 1px solid black;
+                  }
                 }
                 &.choose-date-dialog-form-calendar-day-box-today {
-                  outline: 2px solid green;
+                  border: 2px solid $de-york;
                 }
                 &.choose-date-dialog-form-calendar-day-box-empty-placeholder {
                   visibility: hidden;

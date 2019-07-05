@@ -40,7 +40,6 @@ body {
 
       .button-style-2 {
         background-color: black;
-        border-width: 2px;
         color: $gallery;
         &:hover {
           background-color: green;
@@ -187,9 +186,6 @@ body {
 
         .add-habit-form {
           background-color: inherit;
-          &.form-is-open {
-            z-index: 3;
-          }
           .add-habit-form-button {
             background-color: black;
             box-shadow: 0 0 1px $gallery;
@@ -555,7 +551,10 @@ body {
         bottom: 0px;
         width: 100%;
         padding: 10px;
-        background-color: white;
+        background-color: transparent;
+        &.form-is-open {
+          z-index: 3;
+        }
         .add-habit-form-button {
           @extend .box-shadow-4;
           border: none;

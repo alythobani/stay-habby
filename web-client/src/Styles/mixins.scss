@@ -32,7 +32,7 @@
   }
 
   &.selected {
-    border: 1px solid $gunsmoke;
+    border: 1px solid $cape-cod;
     background-color: $alto;
   }
 }
@@ -42,7 +42,7 @@
   display: block;
   cursor: pointer;
   background-color: $apple;
-  border: 1px solid green;
+  border: 2px solid green;
 
   &:hover {
     background-color: green;

@@ -1,5 +1,6 @@
 module Models.Graph exposing
     ( GraphData
+    , IntervalSuccessStatus
     , NumberOfDaysToShow(..)
     , Point
     , amountAxisConfig
@@ -8,7 +9,8 @@ module Models.Graph exposing
     , dateAxisConfig
     , dateIntToTickConfig
     , getAllGraphData
-    , getAllGraphIntervalSeries
+    , getAllGraphIntervalData
+    , intervalGraphDataToLine
     )
 
 import Array
@@ -85,38 +87,36 @@ getAllGraphData goalIntervals allHabitData graphHabitId =
             )
 
 
-getAllGraphIntervalSeries :
+type IntervalSuccessStatus
+    = Successful
+    | Failed
+    | SuspendedOrIncomplete
+
+
+getAllGraphIntervalData :
     List HabitGoalInterval
     -> Habit.Habit
     -> List HabitData.HabitData
     -> String
-    -> List (LineChart.Series Point)
-getAllGraphIntervalSeries allGoalIntervals graphHabit allHabitData habitId =
+    -> List ( IntervalSuccessStatus, GraphData )
+getAllGraphIntervalData allGoalIntervals graphHabit allHabitData habitId =
     let
         allPoints =
             getAllGraphData allGoalIntervals allHabitData habitId
-
-        ( successColor, failureColor ) =
-            case graphHabit of
-                Habit.GoodHabit _ ->
-                    ( Color.green, Color.blue )
-
-                Habit.BadHabit _ ->
-                    ( Color.yellow, Color.red )
     in
     List.indexedMap
         (\goalIntervalIndex goalInterval ->
             let
-                lineColor : Color.Color
-                lineColor =
+                successStatus : IntervalSuccessStatus
+                successStatus =
                     if goalInterval.suspended || not goalInterval.valid then
-                        Color.lightGray
+                        SuspendedOrIncomplete
 
                     else if goalInterval.successful then
-                        successColor
+                        Successful
 
                     else
-                        failureColor
+                        Failed
 
                 goalIntervalPoints =
                     List.filter (\point -> point.goalIntervalIndex == goalIntervalIndex) allPoints
@@ -124,6 +124,7 @@ getAllGraphIntervalSeries allGoalIntervals graphHabit allHabitData habitId =
                 maybePreviousPointWithIndex =
                     Util.lastInstanceInArray (Array.fromList allPoints) (\point -> point.goalIntervalIndex == goalIntervalIndex - 1)
 
+                goalIntervalPointsWithConnectorPoint : List Point
                 goalIntervalPointsWithConnectorPoint =
                     case maybePreviousPointWithIndex of
                         Just ( previousPointIndex, previousPoint ) ->
@@ -132,13 +133,53 @@ getAllGraphIntervalSeries allGoalIntervals graphHabit allHabitData habitId =
                         Nothing ->
                             goalIntervalPoints
             in
-            LineChart.line
-                lineColor
-                Dots.none
-                ("Habit Data " ++ String.fromInt goalIntervalIndex)
-                goalIntervalPointsWithConnectorPoint
+            ( successStatus, goalIntervalPointsWithConnectorPoint )
         )
         allGoalIntervals
+
+
+intervalGraphDataToLine : Habit.Habit -> Bool -> ( IntervalSuccessStatus, GraphData ) -> LineChart.Series Point
+intervalGraphDataToLine graphHabit darkModeOn ( successStatus, goalIntervalData ) =
+    let
+        ( successColor, failureColor ) =
+            case graphHabit of
+                Habit.GoodHabit _ ->
+                    if darkModeOn then
+                        ( Color.green, Color.blue )
+
+                    else
+                        ( Color.darkGreen, Color.darkBlue )
+
+                Habit.BadHabit _ ->
+                    if darkModeOn then
+                        ( Color.yellow, Color.red )
+
+                    else
+                        ( Color.darkYellow, Color.red )
+
+        suspendedColor =
+            if darkModeOn then
+                Color.lightGray
+
+            else
+                Color.gray
+
+        lineColor =
+            case successStatus of
+                Successful ->
+                    successColor
+
+                Failed ->
+                    failureColor
+
+                SuspendedOrIncomplete ->
+                    suspendedColor
+    in
+    LineChart.line
+        lineColor
+        Dots.none
+        "Goal Interval"
+        goalIntervalData
 
 
 type NumberOfDaysToShow
@@ -152,8 +193,8 @@ type NumberOfDaysToShow
 -- Line Chart Configuration
 
 
-customConfig : List HabitGoalInterval -> LineChart.Config Point msg
-customConfig goalIntervals =
+customConfig : List HabitGoalInterval -> Bool -> LineChart.Config Point msg
+customConfig goalIntervals darkModeOn =
     let
         maybeStartYmd =
             List.head goalIntervals |> Maybe.map .startDate

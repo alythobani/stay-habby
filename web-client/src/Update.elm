@@ -1894,8 +1894,8 @@ update msg model =
                     in
                     ( { newDialogScreenModel
                         | graphHabit = Just habit
-                        , graphLineSeriesList = RemoteData.Loading
-                        , graphCustomConfig = RemoteData.Loading
+                        , graphIntervalsData = RemoteData.Loading
+                        , graphGoalIntervals = RemoteData.Loading
                       }
                     , getGraphHabitGoalIntervalList habit newDialogScreenModel.graphNumDaysToShow selectedYmd
                     )
@@ -1912,8 +1912,8 @@ update msg model =
                     else
                         ( { model
                             | graphNumDaysToShow = numDaysToShow
-                            , graphLineSeriesList = RemoteData.Loading
-                            , graphCustomConfig = RemoteData.Loading
+                            , graphIntervalsData = RemoteData.Loading
+                            , graphGoalIntervals = RemoteData.Loading
                           }
                         , getGraphHabitGoalIntervalList graphHabit numDaysToShow selectedYmd
                         )
@@ -1927,8 +1927,8 @@ update msg model =
         OnGetGraphHabitGoalIntervalListFailure apiError ->
             ( { model
                 | errorMessage = Just <| "Error retrieving graph data: " ++ ApiError.toString apiError
-                , graphLineSeriesList = RemoteData.Failure apiError
-                , graphCustomConfig = RemoteData.Failure apiError
+                , graphIntervalsData = RemoteData.Failure apiError
+                , graphGoalIntervals = RemoteData.Failure apiError
               }
             , Cmd.none
             )
@@ -1950,15 +1950,15 @@ update msg model =
 
                     else
                         let
-                            graphLineSeriesList =
-                                Graph.getAllGraphIntervalSeries intervalList.goalIntervals graphHabit allHabitData graphHabitId
+                            graphIntervalsData =
+                                Graph.getAllGraphIntervalData intervalList.goalIntervals graphHabit allHabitData graphHabitId
 
                             graphCustomConfig =
                                 Graph.customConfig intervalList.goalIntervals
                         in
                         ( { model
-                            | graphLineSeriesList = RemoteData.Success graphLineSeriesList
-                            , graphCustomConfig = RemoteData.Success graphCustomConfig
+                            | graphIntervalsData = RemoteData.Success graphIntervalsData
+                            , graphGoalIntervals = RemoteData.Success intervalList.goalIntervals
                           }
                         , Cmd.none
                         )

@@ -111,6 +111,6 @@ type alias Model =
     -- Graph Dialog
     , graphHabit : Maybe Habit.Habit
     , graphNumDaysToShow : Graph.NumberOfDaysToShow
-    , graphCustomConfig : RemoteData.RemoteData ApiError.ApiError (LineChart.Config Graph.Point Msg)
-    , graphLineSeriesList : RemoteData.RemoteData ApiError.ApiError (List (LineChart.Series Graph.Point))
+    , graphGoalIntervals : RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
+    , graphIntervalsData : RemoteData.RemoteData ApiError.ApiError (List ( Graph.IntervalSuccessStatus, Graph.GraphData ))
     }

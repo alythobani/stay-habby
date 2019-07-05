@@ -251,6 +251,13 @@ body {
           }
         }
       }
+      .graph-screen {
+        .graph-screen-dialog {
+          .graph-container {
+            border-color: white;
+          }
+        }
+      }
     }
 
     // LIGHT MODE
@@ -1176,7 +1183,7 @@ body {
         }
         .graph-container {
           margin-top: 15px;
-          border: 2px solid white;
+          border: 2px solid black;
           width: 625px;
           height: 475px;
         }

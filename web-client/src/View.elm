@@ -118,8 +118,9 @@ view model =
                 model.graphHabit
                 model.selectedYmd
                 model.graphNumDaysToShow
-                model.graphCustomConfig
-                model.graphLineSeriesList
+                model.graphGoalIntervals
+                model.graphIntervalsData
+                model.darkModeOn
             ]
         ]
     }
@@ -1616,10 +1617,11 @@ renderGraphDialogScreen :
     -> Maybe Habit.Habit
     -> Maybe YmdDate.YmdDate
     -> Graph.NumberOfDaysToShow
-    -> RemoteData.RemoteData ApiError.ApiError (LineChart.Config Graph.Point Msg)
-    -> RemoteData.RemoteData ApiError.ApiError (List (LineChart.Series Graph.Point))
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
+    -> RemoteData.RemoteData ApiError.ApiError (List ( Graph.IntervalSuccessStatus, Graph.GraphData ))
+    -> Bool
     -> Html Msg
-renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGraphCustomConfig rdGraphLineSeriesList =
+renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGoalIntervals rdGraphIntervalsData darkModeOn =
     div
         [ classList
             [ ( "graph-screen", True )
@@ -1671,16 +1673,23 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                         , changeNumDaysToShowButton Graph.LastYear
                         , changeNumDaysToShowButton Graph.AllTime
                         ]
-                    , case ( rdGraphCustomConfig, rdGraphLineSeriesList ) of
+                    , case ( rdGoalIntervals, rdGraphIntervalsData ) of
                         ( RemoteData.Loading, _ ) ->
                             div [ class "graph-screen-dialog-graph-container-empty" ] [ text "Loading..." ]
 
-                        ( RemoteData.Success graphCustomConfig, RemoteData.Success graphLineSeriesList ) ->
+                        ( RemoteData.Success graphGoalIntervals, RemoteData.Success graphIntervalsData ) ->
+                            let
+                                graphCustomConfig =
+                                    Graph.customConfig graphGoalIntervals darkModeOn
+                            in
                             div
                                 [ class "graph-screen-dialog-graph-container" ]
                                 [ LineChart.viewCustom
                                     graphCustomConfig
-                                    graphLineSeriesList
+                                    (List.map
+                                        (Graph.intervalGraphDataToLine habit darkModeOn)
+                                        graphIntervalsData
+                                    )
                                 ]
 
                         _ ->

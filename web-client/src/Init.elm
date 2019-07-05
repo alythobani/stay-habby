@@ -117,8 +117,8 @@ init { apiBaseUrl, currentTime } url key =
       -- Graph Dialog
       , graphHabit = Nothing
       , graphNumDaysToShow = Graph.LastMonth
-      , graphCustomConfig = RemoteData.NotAsked
-      , graphLineSeriesList = RemoteData.NotAsked
+      , graphGoalIntervals = RemoteData.NotAsked
+      , graphIntervalsData = RemoteData.NotAsked
       }
     , Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
     )

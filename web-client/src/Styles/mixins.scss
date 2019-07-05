@@ -41,11 +41,12 @@
   color: white;
   display: block;
   cursor: pointer;
-  background-color: $apple;
+  background-color: $malachite;
   border: 2px solid green;
 
   &:hover {
-    background-color: green;
+    background-color: $forest-green;
+    border-color: $bilbao;
   }
 }
 

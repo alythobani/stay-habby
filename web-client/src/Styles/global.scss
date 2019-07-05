@@ -237,6 +237,20 @@ body {
           }
         }
       }
+
+      .edit-goal-dialog {
+        .edit-goal-dialog-form {
+          .edit-goal-dialog-form-current-goal-tag {
+            button {
+              border-color: $alto;
+              color: $gallery;
+              &:hover {
+                background-color: black;
+              }
+            }
+          }
+        }
+      }
     }
 
     // LIGHT MODE
@@ -913,8 +927,11 @@ body {
               height: 30px;
               width: 140px;
               cursor: default;
-              border-color: $alto !important;
-              color: $gallery !important;
+              border-color: $alto;
+              color: $star-dust;
+              &:hover {
+                background-color: $gallery;
+              }
           }
         }
 

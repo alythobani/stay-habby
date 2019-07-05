@@ -123,6 +123,7 @@ body {
             &.good-habits {
                 .habit-success {
                     border-color: $christi;
+                    background-color: inherit;
                     .frequency-statistic {
                         color: $la-palma;
                     }
@@ -132,6 +133,7 @@ body {
                 }
                 .habit-failure {
                     border-color: $blue-gem;
+                    background-color: inherit;
                     .frequency-statistic {
                         color: $jacksons-purple;
                     }
@@ -144,6 +146,7 @@ body {
             &.bad-habits {
                 .habit-success {
                     border-color: $fire-bush;
+                    background-color: inherit;
                     .frequency-statistic {
                         color: $tussock;
                     }
@@ -153,6 +156,7 @@ body {
                 }
                 .habit-failure {
                     border-color: $guardsman-red;
+                    background-color: inherit;
                     .frequency-statistic {
                       color: $stiletto;
                     }
@@ -162,9 +166,19 @@ body {
                 }
             }
 
+            &.suspended-habits {
+              .habit-success, .habit-failure {
+                border-color: $boulder;
+              }
+              .frequency-statistic {
+                  color: $cape-cod;
+              }
+              .current-progress {
+                  color: $tuatara;
+              }
+            }
+
             .habit {
-              border-width: 2px;
-              background-color: inherit !important;
               color: $cloud;
               .habit-amount-complete {
                 input {
@@ -419,61 +433,29 @@ body {
 
             &.good-habits {
                 .habit-success {
-                    background-color: $screamin-green;
+                    background-color: rgb(154, 255, 180);
                     border-color:  $de-york;
-                    .frequency-statistic {
-                        color: $forest-green;
-                    }
-                    .current-progress {
-                        color: $bilbao;
-                    }
                 }
                 .habit-failure {
-                    background-color: $chetwode-blue;
+                    background-color: rgb(166, 166, 255);
                     border-color:  $blue-ribbon;
-                    .frequency-statistic {
-                        color: $fuscous-grey;
-                    }
-                    .current-progress {
-                        color: $cape-cod;
-                    }
                 }
             }
 
             &.bad-habits {
                 .habit-success {
-                    background-color: $koromiko;
+                    background-color: rgb(255, 206, 128);
                     border-color:  $casablanca;
-                    .frequency-statistic {
-                        color: $himalaya;
-                    }
-                    .current-progress {
-                        color: $spicy-mustard;
-                    }
                 }
                 .habit-failure {
-                    background-color: $well-read;
+                    background-color: rgb(199, 109, 109);
                     border-color: $red-berry;
-                    .frequency-statistic {
-                      color: $kilamanjaro;
-                    }
-                    .current-progress {
-                        color: $chocolate;
-                        font-weight: 700;
-                    }
                 }
             }
 
             &.suspended-habits {
               .habit-success, .habit-failure {
-                background-color: $star-dust;
-                border-color: $boulder;
-              }
-              .frequency-statistic {
-                  color: $cape-cod;
-              }
-              .current-progress {
-                  color: $tuatara;
+                border-color: black;
               }
             }
 
@@ -486,8 +468,8 @@ body {
                 width: 325px;
                 height: 120px;
                 box-sizing: border-box;
-                color: white;
-                border-width: 1px;
+                color: black;
+                border-width: 2px;
                 border-style: solid;
 
                 &:hover {
@@ -563,6 +545,7 @@ body {
                     input  {
                         box-sizing: border-box;
                         border: none;
+                        background-color: $gallery;
                         border-radius: 1px;
                         height: 25px;
                         padding: 5px;

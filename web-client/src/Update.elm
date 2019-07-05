@@ -803,18 +803,23 @@ update msg model =
                 (model.setHabitDataShortcutSelectedHabitIndex - 1)
                 (\newIndex -> { model | setHabitDataShortcutSelectedHabitIndex = newIndex })
 
-        OpenSetHabitDataShortcutAmountScreen habit ->
-            let
-                newDialogScreenModel =
-                    switchScreen model (Just DialogScreen.SetHabitDataShortcutAmountScreen)
-            in
-            ( { newDialogScreenModel
-                | setHabitDataShortcutAmountScreenHabit = Just habit
-              }
-            , Dom.focus
-                "set-habit-data-shortcut-amount-screen-input"
-                |> Task.attempt FocusResult
-            )
+        OpenSetHabitDataShortcutAmountScreen ->
+            case Array.get model.setHabitDataShortcutSelectedHabitIndex model.setHabitDataShortcutFilteredHabits of
+                Just selectedHabit ->
+                    let
+                        newDialogScreenModel =
+                            switchScreen model (Just DialogScreen.SetHabitDataShortcutAmountScreen)
+                    in
+                    ( { newDialogScreenModel
+                        | setHabitDataShortcutAmountScreenHabit = Just selectedHabit
+                      }
+                    , Dom.focus
+                        "set-habit-data-shortcut-amount-screen-input"
+                        |> Task.attempt FocusResult
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         OnSetHabitDataShortcutAmountScreenInput newInput ->
             let
@@ -875,6 +880,14 @@ update msg model =
                 model.editGoalHabitSelectionFilteredHabits
                 (model.editGoalHabitSelectionSelectedHabitIndex - 1)
                 (\newIndex -> { model | editGoalHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnEditGoalHabitSelectionEnterKeydown ->
+            case Array.get model.editGoalHabitSelectionSelectedHabitIndex model.editGoalHabitSelectionFilteredHabits of
+                Just selectedHabit ->
+                    update (OpenEditGoalScreen selectedHabit) model
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         -- Edit Goal
         OpenEditGoalScreen habit ->
@@ -1504,6 +1517,14 @@ update msg model =
                 (model.addNoteHabitSelectionSelectedHabitIndex - 1)
                 (\newIndex -> { model | addNoteHabitSelectionSelectedHabitIndex = newIndex })
 
+        OnAddNoteHabitSelectionEnterKeydown ->
+            case Array.get model.addNoteHabitSelectionSelectedHabitIndex model.addNoteHabitSelectionFilteredHabits of
+                Just selectedHabit ->
+                    update (OpenAddNoteDialog selectedHabit) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
         -- Add Note Dialog
         OpenAddNoteDialog habit ->
             let
@@ -1608,6 +1629,14 @@ update msg model =
                 model.suspendOrResumeHabitSelectionFilteredHabits
                 (model.suspendOrResumeHabitSelectionSelectedHabitIndex - 1)
                 (\newIndex -> { model | suspendOrResumeHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnSuspendOrResumeHabitSelectionEnterKeydown ->
+            case Array.get model.suspendOrResumeHabitSelectionSelectedHabitIndex model.suspendOrResumeHabitSelectionFilteredHabits of
+                Just selectedHabit ->
+                    update (OpenSuspendOrResumeConfirmationScreen selectedHabit) model
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         -- Suspend Or Resume Confirmation Screen
         OpenSuspendOrResumeConfirmationScreen habit ->
@@ -1832,6 +1861,14 @@ update msg model =
                 model.graphHabitSelectionFilteredHabits
                 (model.graphHabitSelectionSelectedHabitIndex - 1)
                 (\newIndex -> { model | graphHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnGraphHabitSelectionEnterKeydown ->
+            case Array.get model.graphHabitSelectionSelectedHabitIndex model.graphHabitSelectionFilteredHabits of
+                Just selectedHabit ->
+                    update (OpenGraphDialogScreen selectedHabit) model
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         -- Graph Dialog Screen
         OpenGraphDialogScreen habit ->

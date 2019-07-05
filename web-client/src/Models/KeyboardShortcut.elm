@@ -102,9 +102,22 @@ chooseDateScreenShortcuts =
     ]
 
 
+habitSelectionShortcuts : Msg -> Msg -> Msg -> List KeyboardShortcut
+habitSelectionShortcuts onArrowUp onArrowDown onChooseHabit =
+    [ singleKeyShortcut Keyboard.ArrowDown onArrowDown "Select Next Habit"
+    , singleKeyShortcut Keyboard.ArrowUp onArrowUp "Select Previous Habit"
+    , singleKeyShortcut Keyboard.Enter onChooseHabit "Confirm Selected Habit"
+    , cancelScreenShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
+    ]
+
+
 editGoalHabitSelectionShortcuts : List KeyboardShortcut
 editGoalHabitSelectionShortcuts =
-    []
+    habitSelectionShortcuts
+        OnEditGoalHabitSelectionSelectPreviousHabit
+        OnEditGoalHabitSelectionSelectNextHabit
+        OnEditGoalHabitSelectionEnterKeydown
 
 
 editGoalScreenShortcuts : List KeyboardShortcut
@@ -129,7 +142,10 @@ editGoalScreenShortcuts =
 
 setHabitDataHabitSelectionShortcuts : List KeyboardShortcut
 setHabitDataHabitSelectionShortcuts =
-    []
+    habitSelectionShortcuts
+        OnSetHabitDataShortcutSelectPreviousHabit
+        OnSetHabitDataShortcutSelectNextHabit
+        OpenSetHabitDataShortcutAmountScreen
 
 
 setHabitDataAmountScreenShortcuts : List KeyboardShortcut
@@ -139,7 +155,10 @@ setHabitDataAmountScreenShortcuts =
 
 addNoteHabitSelectionShortcuts : List KeyboardShortcut
 addNoteHabitSelectionShortcuts =
-    []
+    habitSelectionShortcuts
+        OnAddNoteHabitSelectionScreenSelectPreviousHabit
+        OnAddNoteHabitSelectionScreenSelectNextHabit
+        OnAddNoteHabitSelectionEnterKeydown
 
 
 addNoteScreenShortcuts : List KeyboardShortcut
@@ -152,7 +171,10 @@ addNoteScreenShortcuts =
 
 suspendOrResumeHabitSelectionShortcuts : List KeyboardShortcut
 suspendOrResumeHabitSelectionShortcuts =
-    []
+    habitSelectionShortcuts
+        OnSuspendOrResumeHabitSelectionSelectPreviousHabit
+        OnSuspendOrResumeHabitSelectionSelectNextHabit
+        OnSuspendOrResumeHabitSelectionEnterKeydown
 
 
 suspendOrResumeConfirmationScreenShortcuts : List KeyboardShortcut
@@ -165,7 +187,10 @@ suspendOrResumeConfirmationScreenShortcuts =
 
 graphHabitSelectionShortcuts : List KeyboardShortcut
 graphHabitSelectionShortcuts =
-    []
+    habitSelectionShortcuts
+        OnGraphHabitSelectionSelectPreviousHabit
+        OnGraphHabitSelectionSelectNextHabit
+        OnGraphHabitSelectionEnterKeydown
 
 
 graphScreenShortcuts : List KeyboardShortcut

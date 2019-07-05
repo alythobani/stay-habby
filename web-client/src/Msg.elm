@@ -90,7 +90,7 @@ type Msg
     | OnSetHabitDataShortcutHabitSelectionFilterTextInput String
     | OnSetHabitDataShortcutSelectNextHabit
     | OnSetHabitDataShortcutSelectPreviousHabit
-    | OpenSetHabitDataShortcutAmountScreen Habit.Habit
+    | OpenSetHabitDataShortcutAmountScreen
     | OnSetHabitDataShortcutAmountScreenInput String
     | OnSetHabitDataShortcutAmountScreenSubmit YmdDate.YmdDate String Int
       -- Edit Goal Habit Selection
@@ -98,6 +98,7 @@ type Msg
     | OnEditGoalHabitSelectionFilterTextInput String
     | OnEditGoalHabitSelectionSelectNextHabit
     | OnEditGoalHabitSelectionSelectPreviousHabit
+    | OnEditGoalHabitSelectionEnterKeydown
       -- Edit Goal
     | OpenEditGoalScreen Habit.Habit
     | OnEditGoalSelectFrequencyKind Habit.FrequencyKind
@@ -124,6 +125,7 @@ type Msg
     | OnAddNoteHabitSelectionFilterTextInput String
     | OnAddNoteHabitSelectionScreenSelectNextHabit
     | OnAddNoteHabitSelectionScreenSelectPreviousHabit
+    | OnAddNoteHabitSelectionEnterKeydown
       -- Add Note Dialog
     | OpenAddNoteDialog Habit.Habit
     | OnAddNoteDialogInput String
@@ -135,6 +137,7 @@ type Msg
     | OnSuspendOrResumeHabitSelectionFilterTextInput String
     | OnSuspendOrResumeHabitSelectionSelectNextHabit
     | OnSuspendOrResumeHabitSelectionSelectPreviousHabit
+    | OnSuspendOrResumeHabitSelectionEnterKeydown
       -- Suspend Or Resume Confirmation Screen
     | OpenSuspendOrResumeConfirmationScreen Habit.Habit
     | OnResumeOrSuspendSubmitClick
@@ -145,6 +148,7 @@ type Msg
     | OnGraphHabitSelectionFilterTextInput String
     | OnGraphHabitSelectionSelectNextHabit
     | OnGraphHabitSelectionSelectPreviousHabit
+    | OnGraphHabitSelectionEnterKeydown
       -- Graph Dialog Screen
     | OpenGraphDialogScreen Habit.Habit
     | SetGraphNumDaysToShow Graph.NumberOfDaysToShow

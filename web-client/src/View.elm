@@ -1004,18 +1004,12 @@ renderHabitSelectionScreen :
     -> (String -> Msg)
     -> String
     -> Array.Array Habit.Habit
-    -> Msg
-    -> Msg
-    -> (Habit.Habit -> Msg)
     -> Int
     -> Html Msg
-renderHabitSelectionScreen showScreen headerText inputId onInputMsg filterText filteredHabits onArrowUp onArrowDown onChooseHabit selectedHabitIndex =
+renderHabitSelectionScreen showScreen headerText inputId onInputMsg filterText filteredHabits selectedHabitIndex =
     let
         selectedHabit =
             Array.get selectedHabitIndex filteredHabits
-
-        readyToEnterHabit =
-            Maybe.isJust selectedHabit
 
         renderHabitOption habit =
             div
@@ -1048,28 +1042,6 @@ renderHabitSelectionScreen showScreen headerText inputId onInputMsg filterText f
             , placeholder "Enter a habit's name..."
             , onInput onInputMsg
             , value filterText
-            , Util.onKeydownStopPropagation
-                (\key ->
-                    if key == Keyboard.ArrowDown then
-                        Just onArrowDown
-
-                    else if key == Keyboard.ArrowUp then
-                        Just onArrowUp
-
-                    else if key == Keyboard.Enter && readyToEnterHabit then
-                        case selectedHabit of
-                            Just h ->
-                                Just <| onChooseHabit h
-
-                            _ ->
-                                Just NoOp
-
-                    else if key == Keyboard.Escape then
-                        Just OnExitDialogScreen
-
-                    else
-                        Just NoOp
-                )
             ]
             []
         , div
@@ -1100,9 +1072,6 @@ renderSetHabitDataShortcutHabitSelectionScreen activeDialogScreen habitSelection
         OnSetHabitDataShortcutHabitSelectionFilterTextInput
         habitSelectionFilterText
         filteredHabits
-        OnSetHabitDataShortcutSelectPreviousHabit
-        OnSetHabitDataShortcutSelectNextHabit
-        OpenSetHabitDataShortcutAmountScreen
         selectedHabitIndex
 
 
@@ -1201,9 +1170,6 @@ renderEditGoalHabitSelectionScreen activeDialogScreen habitSelectionFilterText f
         OnEditGoalHabitSelectionFilterTextInput
         habitSelectionFilterText
         filteredHabits
-        OnEditGoalHabitSelectionSelectPreviousHabit
-        OnEditGoalHabitSelectionSelectNextHabit
-        OpenEditGoalScreen
         selectedHabitIndex
 
 
@@ -1497,9 +1463,6 @@ renderAddNoteHabitSelectionScreen activeDialogScreen habitSelectionFilterText fi
         OnAddNoteHabitSelectionFilterTextInput
         habitSelectionFilterText
         filteredHabits
-        OnAddNoteHabitSelectionScreenSelectPreviousHabit
-        OnAddNoteHabitSelectionScreenSelectNextHabit
-        OpenAddNoteDialog
         selectedHabitIndex
 
 
@@ -1594,9 +1557,6 @@ renderSuspendOrResumeHabitSelectionScreen activeDialogScreen habitSelectionFilte
         OnSuspendOrResumeHabitSelectionFilterTextInput
         habitSelectionFilterText
         filteredHabits
-        OnSuspendOrResumeHabitSelectionSelectPreviousHabit
-        OnSuspendOrResumeHabitSelectionSelectNextHabit
-        OpenSuspendOrResumeConfirmationScreen
         selectedHabitIndex
 
 
@@ -1667,9 +1627,6 @@ renderGraphHabitSelectionScreen activeDialogScreen habitSelectionFilterText filt
         OnGraphHabitSelectionFilterTextInput
         habitSelectionFilterText
         filteredHabits
-        OnGraphHabitSelectionSelectPreviousHabit
-        OnGraphHabitSelectionSelectNextHabit
-        OpenGraphDialogScreen
         selectedHabitIndex
 
 

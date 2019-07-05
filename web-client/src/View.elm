@@ -118,8 +118,8 @@ view model =
                 model.graphHabit
                 model.selectedYmd
                 model.graphNumDaysToShow
-                model.graphData
-                model.allHabitData
+                model.graphCustomConfig
+                model.graphLineSeriesList
             ]
         ]
     }
@@ -1616,29 +1616,21 @@ renderGraphDialogScreen :
     -> Maybe Habit.Habit
     -> Maybe YmdDate.YmdDate
     -> Graph.NumberOfDaysToShow
-    -> RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
-    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
+    -> RemoteData.RemoteData ApiError.ApiError (LineChart.Config Graph.Point Msg)
+    -> RemoteData.RemoteData ApiError.ApiError (List (LineChart.Series Graph.Point))
     -> Html Msg
-renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGraphData rdAllHabitData =
+renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGraphCustomConfig rdGraphLineSeriesList =
     div
         [ classList
             [ ( "graph-screen", True )
             , ( "display-none", activeDialogScreen /= Just DialogScreen.GraphDialogScreen )
             ]
         ]
-        (case ( maybeHabit, maybeSelectedYmd, rdAllHabitData ) of
-            ( Just habit, Just selectedYmd, RemoteData.Success allHabitData ) ->
+        (case ( maybeHabit, maybeSelectedYmd ) of
+            ( Just habit, Just selectedYmd ) ->
                 let
                     habitRecord =
                         Habit.getCommonFields habit
-
-                    ( successColor, failureColor ) =
-                        case habit of
-                            Habit.GoodHabit gh ->
-                                ( Color.green, Color.blue )
-
-                            Habit.BadHabit bh ->
-                                ( Color.yellow, Color.red )
 
                     numDaysButtonText numDays =
                         case numDays of
@@ -1679,22 +1671,16 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                         , changeNumDaysToShowButton Graph.LastYear
                         , changeNumDaysToShowButton Graph.AllTime
                         ]
-                    , case rdGraphData of
-                        RemoteData.Loading ->
+                    , case ( rdGraphCustomConfig, rdGraphLineSeriesList ) of
+                        ( RemoteData.Loading, _ ) ->
                             div [ class "graph-screen-dialog-graph-container-empty" ] [ text "Loading..." ]
 
-                        RemoteData.Success habitGoalIntervals ->
+                        ( RemoteData.Success graphCustomConfig, RemoteData.Success graphLineSeriesList ) ->
                             div
                                 [ class "graph-screen-dialog-graph-container" ]
                                 [ LineChart.viewCustom
-                                    (Graph.customConfig habitGoalIntervals)
-                                    (Graph.getAllGraphIntervalSeries
-                                        habitGoalIntervals
-                                        successColor
-                                        failureColor
-                                        allHabitData
-                                        habitRecord.id
-                                    )
+                                    graphCustomConfig
+                                    graphLineSeriesList
                                 ]
 
                         _ ->

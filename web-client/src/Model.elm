@@ -4,6 +4,7 @@ import Array
 import Browser.Navigation as Navigation
 import DefaultServices.Keyboard as Keyboard
 import Dict
+import LineChart
 import Models.ApiError as ApiError
 import Models.DialogScreen as DialogScreen
 import Models.FrequencyStats as FrequencyStats
@@ -14,6 +15,7 @@ import Models.HabitDayNote as HabitDayNote
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.KeyboardShortcut as KeyboardShortcut
 import Models.YmdDate as YmdDate
+import Msg exposing (Msg)
 import RemoteData
 import Time
 import Url
@@ -109,5 +111,6 @@ type alias Model =
     -- Graph Dialog
     , graphHabit : Maybe Habit.Habit
     , graphNumDaysToShow : Graph.NumberOfDaysToShow
-    , graphData : RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
+    , graphCustomConfig : RemoteData.RemoteData ApiError.ApiError (LineChart.Config Graph.Point Msg)
+    , graphLineSeriesList : RemoteData.RemoteData ApiError.ApiError (List (LineChart.Series Graph.Point))
     }

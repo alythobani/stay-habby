@@ -1894,7 +1894,8 @@ update msg model =
                     in
                     ( { newDialogScreenModel
                         | graphHabit = Just habit
-                        , graphData = RemoteData.Loading
+                        , graphLineSeriesList = RemoteData.Loading
+                        , graphCustomConfig = RemoteData.Loading
                       }
                     , getGraphHabitGoalIntervalList habit newDialogScreenModel.graphNumDaysToShow selectedYmd
                     )
@@ -1911,7 +1912,8 @@ update msg model =
                     else
                         ( { model
                             | graphNumDaysToShow = numDaysToShow
-                            , graphData = RemoteData.Loading
+                            , graphLineSeriesList = RemoteData.Loading
+                            , graphCustomConfig = RemoteData.Loading
                           }
                         , getGraphHabitGoalIntervalList graphHabit numDaysToShow selectedYmd
                         )
@@ -1923,7 +1925,11 @@ update msg model =
                     ( { model | errorMessage = Just "Error setting graph's number of days to show: no date selected" }, Cmd.none )
 
         OnGetGraphHabitGoalIntervalListFailure apiError ->
-            ( { model | errorMessage = Just <| "Error retrieving graph data: " ++ ApiError.toString apiError }
+            ( { model
+                | errorMessage = Just <| "Error retrieving graph data: " ++ ApiError.toString apiError
+                , graphLineSeriesList = RemoteData.Failure apiError
+                , graphCustomConfig = RemoteData.Failure apiError
+              }
             , Cmd.none
             )
 
@@ -1933,19 +1939,38 @@ update msg model =
                 habitGoalIntervalList =
                     List.head habitGoalIntervalLists
             in
-            case ( habitGoalIntervalList, model.graphHabit ) of
-                ( Just intervalList, Just graphHabit ) ->
-                    if intervalList.habitId /= (graphHabit |> Habit.getCommonFields |> .id) then
+            case ( habitGoalIntervalList, model.graphHabit, model.allHabitData ) of
+                ( Just intervalList, Just graphHabit, RemoteData.Success allHabitData ) ->
+                    let
+                        graphHabitId =
+                            graphHabit |> Habit.getCommonFields |> .id
+                    in
+                    if intervalList.habitId /= graphHabitId then
                         ( { model | errorMessage = Just "Error retrieving graph data: wrong habit" }, Cmd.none )
 
                     else
-                        ( { model | graphData = RemoteData.Success intervalList.goalIntervals }, Cmd.none )
+                        let
+                            graphLineSeriesList =
+                                Graph.getAllGraphIntervalSeries intervalList.goalIntervals graphHabit allHabitData graphHabitId
 
-                ( Nothing, _ ) ->
+                            graphCustomConfig =
+                                Graph.customConfig intervalList.goalIntervals
+                        in
+                        ( { model
+                            | graphLineSeriesList = RemoteData.Success graphLineSeriesList
+                            , graphCustomConfig = RemoteData.Success graphCustomConfig
+                          }
+                        , Cmd.none
+                        )
+
+                ( Nothing, _, _ ) ->
                     ( { model | errorMessage = Just "Error retrieving graph data: no data received from server" }, Cmd.none )
 
-                _ ->
+                ( _, Nothing, _ ) ->
                     ( { model | errorMessage = Just "Error retrieving graph data: no habit selected" }, Cmd.none )
+
+                _ ->
+                    ( { model | errorMessage = Just "Error generating graph data: habit data not available" }, Cmd.none )
 
 
 extractInt : String -> Maybe Int -> Maybe Int

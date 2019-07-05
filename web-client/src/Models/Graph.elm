@@ -32,6 +32,7 @@ import LineChart.Interpolation as Interpolation
 import LineChart.Junk as Junk
 import LineChart.Legends as Legends
 import LineChart.Line as Line
+import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitGoalIntervalList exposing (HabitGoalInterval)
 import Models.YmdDate as YmdDate
@@ -86,15 +87,22 @@ getAllGraphData goalIntervals allHabitData graphHabitId =
 
 getAllGraphIntervalSeries :
     List HabitGoalInterval
-    -> Color.Color
-    -> Color.Color
+    -> Habit.Habit
     -> List HabitData.HabitData
     -> String
     -> List (LineChart.Series Point)
-getAllGraphIntervalSeries allGoalIntervals successColor failureColor allHabitData habitId =
+getAllGraphIntervalSeries allGoalIntervals graphHabit allHabitData habitId =
     let
         allPoints =
             getAllGraphData allGoalIntervals allHabitData habitId
+
+        ( successColor, failureColor ) =
+            case graphHabit of
+                Habit.GoodHabit _ ->
+                    ( Color.green, Color.blue )
+
+                Habit.BadHabit _ ->
+                    ( Color.yellow, Color.red )
     in
     List.indexedMap
         (\goalIntervalIndex goalInterval ->

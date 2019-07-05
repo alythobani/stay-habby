@@ -83,7 +83,7 @@ errorMessageScreenShortcuts =
 
 addNewHabitScreenShortcuts : List KeyboardShortcut
 addNewHabitScreenShortcuts =
-    [ singleKeyShortcut Keyboard.Enter AddHabitFormSubmit "Submit Form"
+    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] AddHabitFormSubmit "Submit Form"
     , closeFormShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]

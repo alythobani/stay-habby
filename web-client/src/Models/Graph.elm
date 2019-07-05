@@ -162,7 +162,7 @@ intervalGraphDataToLine graphHabit darkModeOn ( successStatus, goalIntervalData 
                 Color.lightGray
 
             else
-                Color.gray
+                Color.darkGray
 
         lineColor =
             case successStatus of
@@ -199,8 +199,8 @@ customConfig goalIntervals darkModeOn =
         maybeStartYmd =
             List.head goalIntervals |> Maybe.map .startDate
     in
-    { x = dateAxisConfig maybeStartYmd
-    , y = amountAxisConfig
+    { x = dateAxisConfig maybeStartYmd darkModeOn
+    , y = amountAxisConfig darkModeOn
     , container = Container.default "graph-container-id"
     , interpolation = Interpolation.linear
     , intersection = Intersection.at 0 0
@@ -208,26 +208,26 @@ customConfig goalIntervals darkModeOn =
     , events = Events.default
     , junk = Junk.default
     , grid = Grid.default
-    , area = Area.default
+    , area = Area.normal 0.5
     , line = Line.default
     , dots = Dots.custom <| Dots.aura 1 1 0.5
     }
 
 
-dateAxisConfig : Maybe YmdDate.YmdDate -> Axis.Config Point msg
-dateAxisConfig maybeStartYmd =
+dateAxisConfig : Maybe YmdDate.YmdDate -> Bool -> Axis.Config Point msg
+dateAxisConfig maybeStartYmd darkModeOn =
     Axis.custom
         { title = Title.default ""
         , variable = Just << .dateFloat
         , pixels = 700
         , range = Range.padded 20 20
         , axisLine = AxisLine.none
-        , ticks = Ticks.intCustom 3 (dateIntToTickConfig maybeStartYmd)
+        , ticks = Ticks.intCustom 3 (dateIntToTickConfig maybeStartYmd darkModeOn)
         }
 
 
-dateIntToTickConfig : Maybe YmdDate.YmdDate -> Int -> Tick.Config msg
-dateIntToTickConfig maybeStartYmd numDaysToAdd =
+dateIntToTickConfig : Maybe YmdDate.YmdDate -> Bool -> Int -> Tick.Config msg
+dateIntToTickConfig maybeStartYmd darkModeOn numDaysToAdd =
     let
         labelStr =
             case maybeStartYmd of
@@ -236,6 +236,13 @@ dateIntToTickConfig maybeStartYmd numDaysToAdd =
 
                 Nothing ->
                     String.fromInt numDaysToAdd
+
+        labelColor =
+            if darkModeOn then
+                Color.white
+
+            else
+                Color.black
     in
     Tick.custom
         { position = toFloat numDaysToAdd
@@ -244,24 +251,40 @@ dateIntToTickConfig maybeStartYmd numDaysToAdd =
         , length = 2
         , grid = False
         , direction = Tick.negative
-        , label = Just <| Junk.label Color.white labelStr
+        , label = Just <| Junk.label labelColor labelStr
         }
 
 
-amountAxisConfig : Axis.Config Point msg
-amountAxisConfig =
+amountAxisConfig : Bool -> Axis.Config Point msg
+amountAxisConfig darkModeOn =
+    let
+        axisColor =
+            if darkModeOn then
+                Color.white
+
+            else
+                Color.black
+    in
     Axis.custom
         { title = Title.default ""
         , variable = Just << .amountFloat
         , pixels = 500
         , range = Range.padded 20 20
-        , axisLine = AxisLine.full Color.white
-        , ticks = Ticks.intCustom 7 amountIntToTickConfig
+        , axisLine = AxisLine.full axisColor
+        , ticks = Ticks.intCustom 7 (amountIntToTickConfig darkModeOn)
         }
 
 
-amountIntToTickConfig : Int -> Tick.Config msg
-amountIntToTickConfig amountInt =
+amountIntToTickConfig : Bool -> Int -> Tick.Config msg
+amountIntToTickConfig darkModeOn amountInt =
+    let
+        labelColor =
+            if darkModeOn then
+                Color.white
+
+            else
+                Color.black
+    in
     Tick.custom
         { position = toFloat amountInt
         , color = Colors.transparent
@@ -269,5 +292,5 @@ amountIntToTickConfig amountInt =
         , length = 2
         , grid = False
         , direction = Tick.negative
-        , label = Just <| Junk.label Color.white (String.fromInt amountInt)
+        , label = Just <| Junk.label labelColor (String.fromInt amountInt)
         }

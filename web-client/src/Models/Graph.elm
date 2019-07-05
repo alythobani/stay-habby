@@ -269,7 +269,13 @@ amountAxisConfig darkModeOn =
         { title = Title.default ""
         , variable = Just << .amountFloat
         , pixels = 500
-        , range = Range.padded 20 20
+        , range =
+            Range.custom
+                (\range ->
+                    { min = min 0 range.min
+                    , max = range.max + (range.max - range.min) * 0.05
+                    }
+                )
         , axisLine = AxisLine.full axisColor
         , ticks = Ticks.intCustom 7 (amountIntToTickConfig darkModeOn)
         }

@@ -1810,7 +1810,7 @@ update msg model =
                         newDialogScreenModel =
                             switchScreen model Nothing
                     in
-                    ( { model
+                    ( { newDialogScreenModel
                         | suspendOrResumeHabit = Nothing
                         , suspendOrResumeHabitConfirmationMessage = ""
                         , suspendOrResumeHabitNewSuspensions = Nothing

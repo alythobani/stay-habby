@@ -102,6 +102,39 @@ compareHabitsByDaysLeft ( habitOne, statsOne ) ( habitTwo, statsTwo ) =
     compare statsOne.currentFragmentDaysLeft statsTwo.currentFragmentDaysLeft
 
 
+{-| Compares two habits by their `timeOfDay` fields. Prioritizes `Morning` over `Anytime` over
+`Evening` habits. If they're not both good habits, just returns `EQ`.
+-}
+compareHabitsByTimeOfDay : Comparator HabitStatsPair
+compareHabitsByTimeOfDay ( habitOne, statsOne ) ( habitTwo, statsTwo ) =
+    case ( habitOne, habitTwo ) of
+        ( Habit.GoodHabit goodHabitOne, Habit.GoodHabit goodHabitTwo ) ->
+            if goodHabitOne.timeOfDay == goodHabitTwo.timeOfDay then
+                EQ
+
+            else
+                -- They are different times of day
+                case goodHabitOne.timeOfDay of
+                    Habit.Morning ->
+                        -- `goodHabitTwo.timeOfDay` must be `Anytime` or `Evening`
+                        LT
+
+                    Habit.Anytime ->
+                        if goodHabitTwo.timeOfDay == Habit.Morning then
+                            GT
+
+                        else
+                            -- `goodHabitTwo.timeOfDay` must be `Evening`
+                            LT
+
+                    Habit.Evening ->
+                        -- `goodHabitTwo.timeOfDay` must be `Morning` or `Anytime`
+                        GT
+
+        _ ->
+            EQ
+
+
 {-| Compares habits by progress proportional to the current fragment goal. Prioritizes further-behind habits.
 -}
 compareHabitsByCurrentGoalProgress : Comparator HabitStatsPair
@@ -165,8 +198,9 @@ compareHabitsByCurrentGoalRemaining ( habitOne, statsOne ) ( habitTwo, statsTwo 
 
 
 {-| Returns the habits sorted by their progress in the current fragment.
-Sorts first by completion, then by urgency, then by progress proportional to the current goal,
-and then by how much (absolute, not proportional) of the current goal remains to be done.
+Sorts first by completion, then by urgency, then by if it's a morning/anytime/evening habit,
+then by progress proportional to the current goal, and finally by how much (absolute, not
+proportional) of the current goal remains to be done.
 -}
 sortHabitsByCurrentFragment : List FrequencyStats.FrequencyStats -> List Habit.Habit -> List Habit.Habit
 sortHabitsByCurrentFragment frequencyStatsList habits =
@@ -195,6 +229,7 @@ sortHabitsByCurrentFragment frequencyStatsList habits =
                         [ compareHabitsByHabitHasStarted
                         , compareHabitsByCompletion
                         , compareHabitsByDaysLeft
+                        , compareHabitsByTimeOfDay
                         , compareHabitsByCurrentGoalProgress
                         , compareHabitsByCurrentGoalRemaining
                         ]

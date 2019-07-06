@@ -1478,14 +1478,14 @@ update msg model =
                     )
 
                 ( Nothing, _ ) ->
+                    -- User shouldn't be able to call `OnEditGoalSubmit` unless the Edit Goal dialog is open
                     ( { model | errorMessage = Just "Error editing habit goal: no habit selected" }
                     , Cmd.none
                     )
 
-                _ ->
-                    ( { model | errorMessage = Just "Error editing habit goal: could not generate new list of goals" }
-                    , Cmd.none
-                    )
+                ( _, Nothing ) ->
+                    -- If the user hasn't filled out all new goal fields properly yet, just do nothing
+                    ( model, Cmd.none )
 
         -- Error Messages
         OpenErrorMessageDialogScreen ->

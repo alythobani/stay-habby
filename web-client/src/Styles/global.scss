@@ -598,6 +598,15 @@ body {
         &.form-is-open {
           z-index: 3;
         }
+        .add-habit-duplicate-habit-name-message {
+          color: red;
+          text-align: center;
+          margin-bottom: 50px;
+          background-color: black;
+          text {
+            background-color: blue;
+          }
+        }
         .add-habit-form-button {
           @extend .box-shadow-4;
           border: none;

@@ -483,9 +483,15 @@ update msg model =
                 newDialogScreenModel =
                     switchScreen model (Just DialogScreen.AddNewHabitScreen)
             in
-            ( newDialogScreenModel
-            , Dom.focus "add-habit-form-body-name-input" |> Task.attempt FocusResult
-            )
+            case model.allHabits of
+                -- Only open form if we have a list of habits to double check the new habit's name against (no duplicates allowed)
+                RemoteData.Success _ ->
+                    ( newDialogScreenModel
+                    , Dom.focus "add-habit-form-body-name-input" |> Task.attempt FocusResult
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
         OnSelectAddHabitKind habitKind ->
             ( updateAddHabit (\addHabit -> { addHabit | kind = habitKind }), Cmd.none )
@@ -559,23 +565,39 @@ update msg model =
             )
 
         AddHabitFormSubmit ->
-            case ( model.actualYmd, Habit.extractCreateHabit model.addHabit ) of
-                ( Just actualYmd, Just createHabitData ) ->
+            case ( model.actualYmd, Habit.extractCreateHabit model.addHabit, model.allHabits ) of
+                ( Just actualYmd, Just createHabitData, RemoteData.Success allHabits ) ->
                     let
                         newDialogScreenModel =
                             switchScreen model Nothing
-                    in
-                    ( { newDialogScreenModel | addHabit = Habit.initAddHabitData }
-                    , Api.mutationAddHabit createHabitData actualYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
-                    )
 
-                ( Nothing, _ ) ->
+                        isDuplicateHabitName =
+                            List.any
+                                (\otherHabit ->
+                                    (otherHabit |> Habit.getCommonFields |> .name)
+                                        == (createHabitData |> Habit.getCommonCreateFields |> .name)
+                                )
+                                allHabits
+                    in
+                    if isDuplicateHabitName then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { newDialogScreenModel | addHabit = Habit.initAddHabitData }
+                        , Api.mutationAddHabit createHabitData actualYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+                        )
+
+                ( Nothing, _, _ ) ->
                     ( { model | errorMessage = Just "Error adding habit: current date not available" }
                     , Cmd.none
                     )
 
-                _ ->
+                ( Just _, Nothing, _ ) ->
                     -- User hasn't filled out all the fields yet, do nothing
+                    ( model, Cmd.none )
+
+                _ ->
+                    -- Can't check habits list for duplicate name, do nothing
                     ( model, Cmd.none )
 
         OnAddHabitFailure apiError ->

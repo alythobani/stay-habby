@@ -203,6 +203,10 @@ body {
 
         .add-habit-form {
           background-color: inherit;
+          .add-habit-duplicate-habit-name-message {
+            background-color: black;
+            color: red;
+          }
           .add-habit-form-button {
             background-color: black;
             box-shadow: 0 0 1px $gallery;
@@ -599,10 +603,10 @@ body {
           z-index: 3;
         }
         .add-habit-duplicate-habit-name-message {
-          color: red;
+          color: black;
           text-align: center;
           margin-bottom: 50px;
-          background-color: black;
+          background-color: white;
           text {
             background-color: blue;
           }

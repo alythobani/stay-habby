@@ -270,7 +270,11 @@ customConfig goalIntervals darkModeOn allHabitData allNotes graphHabitId maybeHo
             , individual =
                 \point ->
                     if List.member point allGraphDataWithNotes then
-                        Dots.aura 5 5 0.5
+                        if maybeHoveredPoint == Just point then
+                            Dots.aura 10 10 0.5
+
+                        else
+                            Dots.aura 5 5 0.5
 
                     else
                         Dots.full 0

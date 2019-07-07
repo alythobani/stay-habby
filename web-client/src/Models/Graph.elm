@@ -253,7 +253,23 @@ customConfig goalIntervals darkModeOn allHabitData allNotes graphHabitId maybeHo
                                 [ div
                                     [ class "graph-note-box-date" ]
                                     [ text <| YmdDate.prettyPrintWithWeekday <| YmdDate.addDays (round point.dateFloat) startYmd ]
-                                , div [ class "graph-note-box-note" ] [ text <| Maybe.withDefault "" point.note ]
+                                , div [ class "graph-note-box-date-line" ] []
+                                , div
+                                    [ class "graph-note-box-note" ]
+                                    (List.map
+                                        (\noteLine ->
+                                            div
+                                                [ class "graph-note-box-note-line" ]
+                                                [ text <|
+                                                    if noteLine == "" then
+                                                        "--"
+
+                                                    else
+                                                        noteLine
+                                                ]
+                                        )
+                                        (String.split "\n" (Maybe.withDefault "" point.note))
+                                    )
                                 ]
                             ]
 

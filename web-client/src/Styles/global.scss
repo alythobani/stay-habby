@@ -269,6 +269,10 @@ body {
         .graph-screen-dialog {
           .graph-container {
             border-color: white;
+            .graph-note-box {
+              border-color: white;
+              background-color: black;
+            }
           }
         }
       }
@@ -1187,6 +1191,15 @@ body {
           border: 2px solid black;
           width: 625px;
           height: 475px;
+          .graph-note-box {
+            border-bottom: 2px solid black;
+            box-sizing: border-box;
+            background-color: white;
+            padding: 10px;
+            position: absolute;
+            top: 0px;
+            width: 625px;
+          }
         }
         .graph-screen-dialog-graph-container {
           @extend .graph-container;

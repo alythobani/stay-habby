@@ -119,9 +119,12 @@ view model =
                 model.graphHabit
                 model.selectedYmd
                 model.graphNumDaysToShow
+                model.allHabitData
+                model.allHabitDayNotes
                 model.graphGoalIntervals
                 model.graphIntervalsData
                 model.darkModeOn
+                model.graphHoveredPoint
             ]
         ]
     }
@@ -1634,11 +1637,14 @@ renderGraphDialogScreen :
     -> Maybe Habit.Habit
     -> Maybe YmdDate.YmdDate
     -> Graph.NumberOfDaysToShow
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
+    -> RemoteData.RemoteData ApiError.ApiError (List HabitDayNote.HabitDayNote)
     -> RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
     -> RemoteData.RemoteData ApiError.ApiError (List ( Graph.IntervalSuccessStatus, Graph.GraphData ))
     -> Bool
+    -> Maybe Graph.Point
     -> Html Msg
-renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdGoalIntervals rdGraphIntervalsData darkModeOn =
+renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysToShow rdHabitData rdNotes rdGoalIntervals rdGraphIntervalsData darkModeOn maybeHoveredPoint =
     div
         [ classList
             [ ( "graph-screen", True )
@@ -1690,14 +1696,14 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
                         , changeNumDaysToShowButton Graph.LastYear
                         , changeNumDaysToShowButton Graph.AllTime
                         ]
-                    , case ( rdGoalIntervals, rdGraphIntervalsData ) of
-                        ( RemoteData.Loading, _ ) ->
+                    , case ( rdGoalIntervals, rdGraphIntervalsData, ( rdHabitData, rdNotes ) ) of
+                        ( RemoteData.Loading, _, _ ) ->
                             div [ class "graph-screen-dialog-graph-container-empty" ] [ text "Loading..." ]
 
-                        ( RemoteData.Success graphGoalIntervals, RemoteData.Success graphIntervalsData ) ->
+                        ( RemoteData.Success graphGoalIntervals, RemoteData.Success graphIntervalsData, ( RemoteData.Success allData, RemoteData.Success allNotes ) ) ->
                             let
                                 graphCustomConfig =
-                                    Graph.customConfig graphGoalIntervals darkModeOn
+                                    Graph.customConfig graphGoalIntervals darkModeOn allData allNotes habitRecord.id maybeHoveredPoint OnGraphPointHover
                             in
                             div
                                 [ class "graph-screen-dialog-graph-container" ]

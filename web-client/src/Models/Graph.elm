@@ -7,7 +7,6 @@ module Models.Graph exposing
     , amountIntToTickConfig
     , customConfig
     , dateAxisConfig
-    , dateIntToTickConfig
     , getAllGraphData
     , getAllGraphIntervalData
     , intervalGraphDataToLine
@@ -16,6 +15,8 @@ module Models.Graph exposing
 import Array
 import Color
 import DefaultServices.Util as Util
+import Html exposing (div, text)
+import Html.Attributes exposing (class)
 import LineChart
 import LineChart.Area as Area
 import LineChart.Axis as Axis
@@ -34,8 +35,10 @@ import LineChart.Interpolation as Interpolation
 import LineChart.Junk as Junk
 import LineChart.Legends as Legends
 import LineChart.Line as Line
+import Maybe.Extra as Maybe
 import Models.Habit as Habit
-import Models.HabitData as HabitData
+import Models.HabitData exposing (HabitData)
+import Models.HabitDayNote exposing (HabitDayNote)
 import Models.HabitGoalIntervalList exposing (HabitGoalInterval)
 import Models.YmdDate as YmdDate
 
@@ -44,6 +47,7 @@ type alias Point =
     { dateFloat : Float
     , amountFloat : Float
     , goalIntervalIndex : Int
+    , note : Maybe String
     }
 
 
@@ -51,8 +55,8 @@ type alias GraphData =
     List Point
 
 
-getAllGraphData : List HabitGoalInterval -> List HabitData.HabitData -> String -> GraphData
-getAllGraphData goalIntervals allHabitData graphHabitId =
+getAllGraphData : List HabitGoalInterval -> List HabitData -> List HabitDayNote -> String -> GraphData
+getAllGraphData goalIntervals allHabitData allNotes graphHabitId =
     goalIntervals
         |> List.indexedMap
             (\goalIntervalIndex goalInterval ->
@@ -71,9 +75,16 @@ getAllGraphData goalIntervals allHabitData graphHabitId =
                                         |> List.head
                                         |> Maybe.map .amount
                                         |> Maybe.withDefault 0
+
+                                note : Maybe String
+                                note =
+                                    List.filter (\{ habitId, date } -> habitId == graphHabitId && date == pointDate) allNotes
+                                        |> List.head
+                                        |> Maybe.map .note
                             in
                             { amountFloat = toFloat habitDatum
                             , goalIntervalIndex = goalIntervalIndex
+                            , note = note
                             }
                         )
             )
@@ -83,6 +94,7 @@ getAllGraphData goalIntervals allHabitData graphHabitId =
                 { dateFloat = toFloat pointIndex
                 , amountFloat = point.amountFloat
                 , goalIntervalIndex = point.goalIntervalIndex
+                , note = point.note
                 }
             )
 
@@ -96,13 +108,14 @@ type IntervalSuccessStatus
 getAllGraphIntervalData :
     List HabitGoalInterval
     -> Habit.Habit
-    -> List HabitData.HabitData
+    -> List HabitData
+    -> List HabitDayNote
     -> String
     -> List ( IntervalSuccessStatus, GraphData )
-getAllGraphIntervalData allGoalIntervals graphHabit allHabitData habitId =
+getAllGraphIntervalData allGoalIntervals graphHabit allHabitData allNotes habitId =
     let
         allPoints =
-            getAllGraphData allGoalIntervals allHabitData habitId
+            getAllGraphData allGoalIntervals allHabitData allNotes habitId
     in
     List.indexedMap
         (\goalIntervalIndex goalInterval ->
@@ -177,7 +190,7 @@ intervalGraphDataToLine graphHabit darkModeOn ( successStatus, goalIntervalData 
     in
     LineChart.line
         lineColor
-        Dots.none
+        Dots.circle
         "Goal Interval"
         goalIntervalData
 
@@ -193,11 +206,32 @@ type NumberOfDaysToShow
 -- Line Chart Configuration
 
 
-customConfig : List HabitGoalInterval -> Bool -> LineChart.Config Point msg
-customConfig goalIntervals darkModeOn =
+customConfig : List HabitGoalInterval -> Bool -> List HabitData -> List HabitDayNote -> String -> Maybe Point -> (Maybe Point -> msg) -> LineChart.Config Point msg
+customConfig goalIntervals darkModeOn allHabitData allNotes graphHabitId maybeHoveredPoint onGraphPointHover =
     let
         maybeStartYmd =
             List.head goalIntervals |> Maybe.map .startDate
+
+        allGraphData : GraphData
+        allGraphData =
+            getAllGraphData goalIntervals allHabitData allNotes graphHabitId
+
+        allGraphDataWithNotes : GraphData
+        allGraphDataWithNotes =
+            List.filter (\point -> Maybe.isJust point.note) allGraphData
+
+        maybeHoveredPointWithNote : Maybe Point
+        maybeHoveredPointWithNote =
+            case maybeHoveredPoint of
+                Just hoveredPoint ->
+                    if List.member hoveredPoint allGraphDataWithNotes then
+                        Just hoveredPoint
+
+                    else
+                        Nothing
+
+                Nothing ->
+                    Nothing
     in
     { x = dateAxisConfig maybeStartYmd darkModeOn
     , y = amountAxisConfig darkModeOn
@@ -205,12 +239,42 @@ customConfig goalIntervals darkModeOn =
     , interpolation = Interpolation.linear
     , intersection = Intersection.at 0 0
     , legends = Legends.none
-    , events = Events.default
-    , junk = Junk.default
+    , events = Events.hoverOne onGraphPointHover
+    , junk =
+        Junk.custom
+            (\system ->
+                { below = []
+                , above = []
+                , html =
+                    case ( maybeHoveredPointWithNote, maybeStartYmd ) of
+                        ( Just point, Just startYmd ) ->
+                            [ div
+                                [ class "graph-note-box" ]
+                                [ div
+                                    [ class "graph-note-box-date" ]
+                                    [ text <| YmdDate.prettyPrintWithWeekday <| YmdDate.addDays (round point.dateFloat) startYmd ]
+                                , div [ class "graph-note-box-note" ] [ text <| Maybe.withDefault "" point.note ]
+                                ]
+                            ]
+
+                        _ ->
+                            []
+                }
+            )
     , grid = Grid.default
     , area = Area.normal 0.5
     , line = Line.default
-    , dots = Dots.custom <| Dots.aura 1 1 0.5
+    , dots =
+        Dots.customAny
+            { legend = always <| Dots.full 0
+            , individual =
+                \point ->
+                    if List.member point allGraphDataWithNotes then
+                        Dots.aura 5 5 0.5
+
+                    else
+                        Dots.full 0
+            }
     }
 
 

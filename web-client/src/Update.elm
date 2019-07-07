@@ -1964,8 +1964,8 @@ update msg model =
                 habitGoalIntervalList =
                     List.head habitGoalIntervalLists
             in
-            case ( habitGoalIntervalList, model.graphHabit, model.allHabitData ) of
-                ( Just intervalList, Just graphHabit, RemoteData.Success allHabitData ) ->
+            case ( habitGoalIntervalList, model.graphHabit, ( model.allHabitData, model.allHabitDayNotes ) ) of
+                ( Just intervalList, Just graphHabit, ( RemoteData.Success allHabitData, RemoteData.Success allNotes ) ) ->
                     let
                         graphHabitId =
                             graphHabit |> Habit.getCommonFields |> .id
@@ -1976,10 +1976,7 @@ update msg model =
                     else
                         let
                             graphIntervalsData =
-                                Graph.getAllGraphIntervalData intervalList.goalIntervals graphHabit allHabitData graphHabitId
-
-                            graphCustomConfig =
-                                Graph.customConfig intervalList.goalIntervals
+                                Graph.getAllGraphIntervalData intervalList.goalIntervals graphHabit allHabitData allNotes graphHabitId
                         in
                         ( { model
                             | graphIntervalsData = RemoteData.Success graphIntervalsData
@@ -1988,14 +1985,17 @@ update msg model =
                         , Cmd.none
                         )
 
-                ( Nothing, _, _ ) ->
+                ( Nothing, _, ( _, _ ) ) ->
                     ( { model | errorMessage = Just "Error retrieving graph data: no data received from server" }, Cmd.none )
 
-                ( _, Nothing, _ ) ->
+                ( _, Nothing, ( _, _ ) ) ->
                     ( { model | errorMessage = Just "Error retrieving graph data: no habit selected" }, Cmd.none )
 
                 _ ->
-                    ( { model | errorMessage = Just "Error generating graph data: habit data not available" }, Cmd.none )
+                    ( { model | errorMessage = Just "Error generating graph data: habit data or notes not available" }, Cmd.none )
+
+        OnGraphPointHover maybeHoveredPoint ->
+            ( { model | graphHoveredPoint = maybeHoveredPoint }, Cmd.none )
 
 
 extractInt : String -> Maybe Int -> Maybe Int

@@ -113,4 +113,5 @@ type alias Model =
     , graphNumDaysToShow : Graph.NumberOfDaysToShow
     , graphGoalIntervals : RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
     , graphIntervalsData : RemoteData.RemoteData ApiError.ApiError (List ( Graph.IntervalSuccessStatus, Graph.GraphData ))
+    , graphHoveredPoint : Maybe Graph.Point
     }

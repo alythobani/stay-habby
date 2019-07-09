@@ -50,6 +50,11 @@ toggleAvailableKeyboardShortcutsScreenShortcut =
     singleKeyShortcut Keyboard.Slash ToggleAvailableKeyboardShortcutsScreen "Toggle Shortcuts Screen"
 
 
+toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut : KeyboardShortcut
+toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut =
+    multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Slash ] ToggleAvailableKeyboardShortcutsScreen "Toggle Shortcuts Screen"
+
+
 closeFormShortcut : KeyboardShortcut
 closeFormShortcut =
     singleKeyShortcut Keyboard.Escape OnExitDialogScreen "Close Form"
@@ -90,7 +95,7 @@ addNewHabitScreenShortcuts : List KeyboardShortcut
 addNewHabitScreenShortcuts =
     [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] AddHabitFormSubmit "Submit Form"
     , closeFormShortcut
-    , toggleAvailableKeyboardShortcutsScreenShortcut
+    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
     ]
 
 
@@ -114,7 +119,7 @@ habitSelectionShortcuts onArrowUp onArrowDown onChooseHabit =
     , singleKeyShortcut Keyboard.ArrowUp onArrowUp "Select Previous Habit"
     , singleKeyShortcut Keyboard.Enter onChooseHabit "Confirm Selected Habit"
     , cancelScreenShortcut
-    , toggleAvailableKeyboardShortcutsScreenShortcut
+    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
     ]
 
 
@@ -176,7 +181,7 @@ addNoteScreenShortcuts : List KeyboardShortcut
 addNoteScreenShortcuts =
     [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnAddNoteSubmit "Submit Note"
     , closeFormShortcut
-    , toggleAvailableKeyboardShortcutsScreenShortcut
+    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
     ]
 
 

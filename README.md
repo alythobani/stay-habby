@@ -32,11 +32,11 @@ Sometimes your priorities change. You can suspend and resume habits as you wish.
 
 ![](demos/suspending-and-resuming.gif)
 
-### Keyboard Shortcut for Entering Habit Data
+### Keyboard Shortcuts
 
-If you're too lazy to click the habit's box... just do a keyboard search for it.
+The modern habit-tracking human is too efficient to use a mouse. Every function in Stay Habby, from toggling dark mode to graphing habits, has a simple keyboard shortcut. You can also press `/` to view the available shortcuts on that page.
 
-![](demos/set-habit-data-shortcut.gif)
+![](demos/keyboard-shortcuts.gif)
 
 ### Track your Journey with Notes
 

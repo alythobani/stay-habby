@@ -565,8 +565,8 @@ update msg model =
             )
 
         AddHabitFormSubmit ->
-            case ( model.actualYmd, Habit.extractCreateHabit model.addHabit, model.allHabits ) of
-                ( Just actualYmd, Just createHabitData, RemoteData.Success allHabits ) ->
+            case ( model.selectedYmd, Habit.extractCreateHabit model.addHabit, model.allHabits ) of
+                ( Just selectedYmd, Just createHabitData, RemoteData.Success allHabits ) ->
                     let
                         newDialogScreenModel =
                             switchScreen model Nothing
@@ -584,7 +584,7 @@ update msg model =
 
                     else
                         ( { newDialogScreenModel | addHabit = Habit.initAddHabitData }
-                        , Api.mutationAddHabit createHabitData actualYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+                        , Api.mutationAddHabit createHabitData selectedYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
                         )
 
                 ( Nothing, _, _ ) ->

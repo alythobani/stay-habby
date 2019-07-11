@@ -34,7 +34,7 @@ Sometimes your priorities change. You can suspend and resume habits as you wish.
 
 ### Keyboard Shortcuts
 
-The modern habit-tracking human is too efficient to use a mouse. Every function in Stay Habby, from toggling dark mode to graphing habits, has a simple keyboard shortcut. You can also press `/` to view the available shortcuts on any page.
+The modern habit-tracking human is too efficient to use a mouse. Every single feature in Stay Habby, from toggling dark mode to graphing habits, has a simple keyboard shortcut. You can also press `/` to view the available shortcuts on any page.
 
 ![](demos/keyboard-shortcuts.gif)
 

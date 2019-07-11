@@ -50,6 +50,12 @@ Note down a lag measure, or even just a diary entry, by adding a Note to a habit
 
 ![](demos/add-note-workout.gif)
 
+### Graphs
+
+Here you can view a habit's progress over time, including any Notes you've added for the habit, failed goal intervals, successful goal intervals, and periods during which the habit was suspended.
+
+![](demos/graphs.gif)
+
 ---
 
 Keep Calm and Stay Habby!

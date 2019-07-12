@@ -357,7 +357,7 @@ amountAxisConfig darkModeOn =
             Range.custom
                 (\range ->
                     { min = min 0 range.min
-                    , max = range.max + (range.max - range.min) * 0.05
+                    , max = range.max * 1.5
                     }
                 )
         , axisLine = AxisLine.full axisColor

@@ -316,27 +316,90 @@ update msg model =
             )
 
         OnCreateUserFormUsernameInput newUsernameInput ->
-            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormUsername = newUsernameInput })
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields
+                        | createUserFormUsername = newUsernameInput
+                        , doesCreateUserFormUsernameHaveAtLeast1Character = not <| String.isEmpty newUsernameInput
+                    }
+                )
             , Cmd.none
             )
 
         OnCreateUserFormDisplayNameInput newDisplayNameInput ->
-            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormDisplayName = newDisplayNameInput })
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields
+                        | createUserFormDisplayName = newDisplayNameInput
+                        , doesCreateUserFormDisplayNameHaveAtLeast1Character = not <| String.isEmpty newDisplayNameInput
+                    }
+                )
             , Cmd.none
             )
 
         OnCreateUserFormEmailAddressInput newEmailAddressInput ->
-            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormEmailAddress = newEmailAddressInput })
-            , Cmd.none
-            )
+            -- https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Input_Validation_Cheat_Sheet.md#Email_Address_Validation
+            -- https://emailregex.com/email-validation-summary/ also informative
+            let
+                lastIndexOfAtSymbolAppearance : Maybe Int
+                lastIndexOfAtSymbolAppearance =
+                    Util.lastElementOfList <| String.indexes "@" newEmailAddressInput
+
+                ( localPortionOfAddress, domainPortionOfAddress ) =
+                    case lastIndexOfAtSymbolAppearance of
+                        Just lastIndex ->
+                            ( String.left lastIndex newEmailAddressInput
+                            , String.right (String.length newEmailAddressInput - lastIndex) newEmailAddressInput
+                            )
+
+                        Nothing ->
+                            -- Doesn't matter at this point since the email is invalid anyway
+                            ( "", "" )
+
+                isNewEmailAddressValid =
+                    Maybe.isJust lastIndexOfAtSymbolAppearance
+                        && (String.length localPortionOfAddress <= 64)
+                        && (String.length domainPortionOfAddress <= 256)
+            in
+            if String.length newEmailAddressInput > 320 || String.contains "<script" newEmailAddressInput then
+                -- Don't allow user to increase length of input past maximum length. And avoid a sketchy email.
+                ( model, Cmd.none )
+
+            else
+                ( updateLoginPageFields
+                    (\loginPageFields ->
+                        { loginPageFields
+                            | createUserFormEmailAddress = newEmailAddressInput
+                            , isCreateUserFormEmailAddressValid = isNewEmailAddressValid
+                        }
+                    )
+                , Cmd.none
+                )
 
         OnCreateUserFormPasswordInput newPasswordInput ->
-            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormPassword = newPasswordInput })
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields
+                        | createUserFormPassword = newPasswordInput
+                        , doesCreateUserFormPasswordHaveAtLeast10Characters = String.length newPasswordInput >= 10
+                        , doesCreateUserFormPasswordHaveAtMost128Characters = String.length newPasswordInput <= 128
+                        , doesCreateUserFormPasswordHaveALowerCaseCharacter = String.any Char.isLower newPasswordInput
+                        , doesCreateUserFormPasswordHaveAnUpperCaseCharacter = String.any Char.isUpper newPasswordInput
+                        , doesCreateUserFormPasswordHaveADigit = String.any Char.isDigit newPasswordInput
+                        , doesCreateUserFormRepeatPasswordMatch = newPasswordInput == model.loginPageFields.createUserFormRepeatPassword
+                    }
+                )
             , Cmd.none
             )
 
         OnCreateUserFormRepeatPasswordInput newRepeatPasswordInput ->
-            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormRepeatPassword = newRepeatPasswordInput })
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields
+                        | createUserFormRepeatPassword = newRepeatPasswordInput
+                        , doesCreateUserFormRepeatPasswordMatch = newRepeatPasswordInput == model.loginPageFields.createUserFormPassword
+                    }
+                )
             , Cmd.none
             )
 

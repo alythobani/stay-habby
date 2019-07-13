@@ -12,6 +12,7 @@ module Api exposing
     , queryAllRemoteData
     , queryFrequencyStats
     , queryHabitGoalIntervalLists
+    , queryLoginUser
     )
 
 import DefaultServices.Http exposing (post)
@@ -26,6 +27,8 @@ import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
+import Models.Login as Login
+import Models.User as User
 import Models.YmdDate as YmdDate
 
 
@@ -34,6 +37,43 @@ import Models.YmdDate as YmdDate
 graphQLRequest : String -> Decode.Decoder a -> String -> (ApiError -> b) -> (a -> b) -> Cmd b
 graphQLRequest query decoder url handleError handleSuccess =
     post url decoder (Encode.object [ ( "query", Encode.string query ) ]) handleError handleSuccess
+
+
+type alias QueriedUser =
+    { maybeUser : Maybe User.User
+    }
+
+
+queryLoginUser :
+    String
+    -> String
+    -> String
+    -> (ApiError -> b)
+    -> (QueriedUser -> b)
+    -> Cmd b
+queryLoginUser loginFormUsername loginFormPassword =
+    let
+        templateDict =
+            Dict.fromList
+                [ ( "user_name_input", Util.encodeString loginFormUsername )
+                , ( "user_password_input", Util.encodeString loginFormPassword )
+                , ( "maybe_user_output", User.graphQLOutputString )
+                ]
+
+        queryString =
+            """{
+        maybeUser: login_user(
+          user_name_input: {{user_name_input}},
+          user_password_input: {{user_password_input}}
+        ) {{maybe_user_output}}
+        }""" |> Util.templater templateDict
+    in
+    graphQLRequest
+        queryString
+        (Decode.succeed QueriedUser
+            |> required "maybeUser" (Decode.maybe User.decodeUser)
+            |> Decode.at [ "data" ]
+        )
 
 
 type alias AllRemoteData =
@@ -246,6 +286,31 @@ mutationAddHabit createHabit ymd =
                 |> Util.templater templateDict
     in
     graphQLRequest queryString <| Decode.at [ "data", "add_habit" ] Habit.decodeHabit
+
+
+mutationAddUser : Login.CreateUserFields -> String -> (ApiError -> b) -> (Maybe User.User -> b) -> Cmd b
+mutationAddUser createUserFields =
+    let
+        templateDict =
+            Dict.fromList
+                [ ( "new_username", Util.encodeString createUserFields.newUsername )
+                , ( "new_display_name", Util.encodeString createUserFields.newDisplayName )
+                , ( "new_email_address", Util.encodeMaybe createUserFields.newEmailAddress Util.encodeString )
+                , ( "user_output", User.graphQLOutputString )
+                ]
+
+        queryString =
+            """mutation {
+              add_user(
+                new_username: {{new_username}},
+                new_display_name: {{new_display_name}},
+                new_email_address: {{new_email_address}},
+                new_password: {{new_password}}
+              ) {{user_output}}
+          }"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest queryString <| Decode.at [ "data", "add_user" ] (Decode.maybe User.decodeUser)
 
 
 frequencyToGraphQLString : Habit.Frequency -> String

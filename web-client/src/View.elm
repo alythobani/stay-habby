@@ -138,6 +138,11 @@ view model =
 
 renderLoggedOutView : Login.LoginPageFields -> Html Msg
 renderLoggedOutView loginPageFields =
+    let
+        createUserFormErrorMessageDiv : String -> Html Msg
+        createUserFormErrorMessageDiv errorMessageStr =
+            div [ class "create-user-form-error-message" ] [ text errorMessageStr ]
+    in
     div
         [ class "logged-out-view" ]
         [ div [ class "welcome-message" ] [ text "Welcome to Habby!" ]
@@ -192,18 +197,33 @@ renderLoggedOutView loginPageFields =
                 , value loginPageFields.createUserFormUsername
                 ]
                 []
+            , if loginPageFields.doesCreateUserFormUsernameHaveAtLeast1Character then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Username needs at least one character."
             , input
                 [ placeholder "Display name..."
                 , onInput OnCreateUserFormDisplayNameInput
                 , value loginPageFields.createUserFormDisplayName
                 ]
                 []
+            , if loginPageFields.doesCreateUserFormDisplayNameHaveAtLeast1Character then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Display name needs at least one character."
             , input
-                [ placeholder "Email address..."
+                [ placeholder "Email address (optional)..."
                 , onInput OnCreateUserFormEmailAddressInput
                 , value loginPageFields.createUserFormEmailAddress
                 ]
                 []
+            , if loginPageFields.isCreateUserFormEmailAddressValid || loginPageFields.createUserFormEmailAddress == "" then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Invalid email address."
             , input
                 [ placeholder "Password..."
                 , type_ "password"
@@ -211,6 +231,31 @@ renderLoggedOutView loginPageFields =
                 , value loginPageFields.createUserFormPassword
                 ]
                 []
+            , if loginPageFields.doesCreateUserFormPasswordHaveAtLeast10Characters then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Password needs at least 10 characters."
+            , if loginPageFields.doesCreateUserFormPasswordHaveAtMost128Characters then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Password must be at most 128 characters long."
+            , if loginPageFields.doesCreateUserFormPasswordHaveALowerCaseCharacter then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Password needs at least one lowercase character (a-z)."
+            , if loginPageFields.doesCreateUserFormPasswordHaveAnUpperCaseCharacter then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Password needs at least one uppercase character (A-Z)."
+            , if loginPageFields.doesCreateUserFormPasswordHaveADigit then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Password needs at least one digit (0-9)."
             , input
                 [ placeholder "Repeat password..."
                 , type_ "password"
@@ -218,6 +263,11 @@ renderLoggedOutView loginPageFields =
                 , value loginPageFields.createUserFormRepeatPassword
                 ]
                 []
+            , if loginPageFields.doesCreateUserFormRepeatPasswordMatch then
+                Util.hiddenDiv
+
+              else
+                createUserFormErrorMessageDiv "Passwords do not match."
             ]
         ]
 

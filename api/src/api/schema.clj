@@ -137,7 +137,8 @@
 (defn resolve-query-get-frequency-stats
   "@refer `db/get-frequency-stats`."
   [context {:keys [current_client_date] :as all} value]
-  (map tag-type (db/get-frequency-stats (assoc all :current_client_date (date-from-y-m-d-map current_client_date)))))
+  (map tag-type (db/get-frequency-stats (assoc (dissoc all :current_client_date)
+                                               :current-client-date-time (date-from-y-m-d-map current_client_date)))))
 
 (defn resolve-mutation-edit-habit-suspensions
   "@refer `db/edit-habit-suspensions`."

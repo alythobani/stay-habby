@@ -191,17 +191,17 @@
 (defn get-frequency-stats
   "Returns performance statistics for a user's habits, or optionally only for specific habits of theirs.
   Retrieves habits and habit data from database `db`.
-  Analyzes user performance based on habit data from `current_client_date` or earlier.
+  Analyzes user performance based on habit data from `current-client-date-time` or earlier.
   Generates a list of `habit_frequency_stats` maps, one for each ID in `habit_ids`."
-  [{:keys [db user_id habit_ids current_client_date] :or {db habby_db, current_client_date (t/today-at 0 0)}}]
+  [{:keys [db user_id habit_ids current-client-date-time] :or {db habby_db, current-client-date-time (t/today-at 0 0)}}]
   (let [all-habits (get-habits {:db db,
                                 :user_id user_id,
                                 :habit_ids habit_ids})
         all-habit-data-until-current-date (get-habit-data {:db db,
                                                            :user_id user_id,
-                                                           :before_date (date-to-y-m-d-map current_client_date),
+                                                           :before_date (date-to-y-m-d-map current-client-date-time),
                                                            :habit_ids habit_ids})]
     (map #(get-freq-stats-for-habit %
                                     all-habit-data-until-current-date
-                                    current_client_date)
+                                    current-client-date-time)
          all-habits)))

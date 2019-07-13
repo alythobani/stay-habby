@@ -200,6 +200,26 @@
        (or (nil? (:end_date suspended-interval))
            (date-leq? datetime (:end_date suspended-interval)))))
 
+(defn get-freq-stats-based-on-intervals
+  "Computes a `habit_frequency_stats` for `habit` based on `intervals`.
+  `intervals` might be `nil`."
+  [habit intervals current-date]
+  (let [suspensions (:suspensions habit)]
+    (as-> (assoc default-frequency-stats :habit_id (:_id habit)) freq-stats
+          (if (seq suspensions)
+            ; The habit has been suspended before, check if it's currently suspended
+            (assoc freq-stats
+                   :currently_suspended (some? (some #(datetime-falls-within-suspended-interval? current-date %)
+                                                     suspensions)))
+            ; The habit has never been suspended before, so it's not currently suspended
+            freq-stats)
+          (if (nil? intervals)
+            freq-stats
+            (-> (update-freq-stats-with-habit-goal-fragments freq-stats
+                                                             intervals
+                                                             habit)
+                (assoc :habit_has_started true))))))
+
 (defn get-freq-stats-for-habit
   "Computes a `habit_frequency_stats` for `habit` based on habit data from `current-date` or earlier.
   `all-habit-data-until-current-date` may include data from other habits.
@@ -218,16 +238,4 @@
                                                        (:type_name habit)
                                                        relevant-freq-change-records
                                                        suspensions)]
-    (as-> (assoc default-frequency-stats :habit_id (:_id habit)) freq-stats
-          (if (seq suspensions)
-            ; The habit has been suspended before, check if it's currently suspended
-            (assoc freq-stats
-                   :currently_suspended (some? (some #(datetime-falls-within-suspended-interval? current-date %) suspensions)))
-            ; The habit has never been suspended before, so it's not currently suspended
-            freq-stats)
-          (if (nil? habit-goal-fragments)
-            freq-stats
-            (-> (update-freq-stats-with-habit-goal-fragments freq-stats
-                                                             habit-goal-fragments
-                                                             habit)
-                (assoc :habit_has_started true))))))
+    (get-freq-stats-based-on-intervals habit habit-goal-fragments current-date)))

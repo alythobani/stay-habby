@@ -14,6 +14,8 @@ import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.KeyboardShortcut as KeyboardShortcut
+import Models.Login as Login
+import Models.User as User
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg)
 import RemoteData
@@ -24,6 +26,10 @@ import Url
 type alias Model =
     { key : Navigation.Key
     , url : Url.Url
+
+    -- Authentication
+    , user : Maybe User.User
+    , loginPageFields : Login.LoginPageFields
 
     -- Time / Date
     , currentPosix : Time.Posix

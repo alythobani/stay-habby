@@ -21,6 +21,16 @@ type Msg
     | OnInitialTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
     | OnUrlChange Url.Url
     | OnUrlRequest Browser.UrlRequest
+      -- Authentication
+    | OnClickChooseLoginFormButton
+    | OnClickChooseCreateUserFormButton
+    | OnLoginFormUsernameInput String
+    | OnCreateUserFormDisplayNameInput String
+    | OnCreateUserFormEmailAddressInput String
+    | OnLoginFormPasswordInput String
+    | OnCreateUserFormUsernameInput String
+    | OnCreateUserFormPasswordInput String
+    | OnCreateUserFormRepeatPasswordInput String
       -- Time / Date
     | TickMinute Time.Posix
     | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))

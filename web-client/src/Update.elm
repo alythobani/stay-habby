@@ -16,6 +16,7 @@ import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.KeyboardShortcut as KeyboardShortcut
+import Models.Login as Login
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -112,6 +113,9 @@ update msg model =
 
         updateEditGoal updater =
             { model | editGoal = updater model.editGoal }
+
+        updateLoginPageFields updater =
+            { model | loginPageFields = updater model.loginPageFields }
 
         updateHabitListsWithNewHabit : Habit.Habit -> Model
         updateHabitListsWithNewHabit habit =
@@ -281,6 +285,60 @@ update msg model =
         OnUrlRequest urlRequest ->
             -- TODO
             ( model, Cmd.none )
+
+        -- Authentication
+        OnClickChooseLoginFormButton ->
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields | loginOrCreateUserForm = Login.LoginForm }
+                )
+            , Dom.focus "login-form-username-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnClickChooseCreateUserFormButton ->
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields | loginOrCreateUserForm = Login.CreateUserForm }
+                )
+            , Dom.focus "create-user-form-username-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnLoginFormUsernameInput newUsernameInput ->
+            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | loginFormUsername = newUsernameInput })
+            , Cmd.none
+            )
+
+        OnLoginFormPasswordInput newPasswordInput ->
+            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | loginFormPassword = newPasswordInput })
+            , Cmd.none
+            )
+
+        OnCreateUserFormUsernameInput newUsernameInput ->
+            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormUsername = newUsernameInput })
+            , Cmd.none
+            )
+
+        OnCreateUserFormDisplayNameInput newDisplayNameInput ->
+            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormDisplayName = newDisplayNameInput })
+            , Cmd.none
+            )
+
+        OnCreateUserFormEmailAddressInput newEmailAddressInput ->
+            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormEmailAddress = newEmailAddressInput })
+            , Cmd.none
+            )
+
+        OnCreateUserFormPasswordInput newPasswordInput ->
+            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormPassword = newPasswordInput })
+            , Cmd.none
+            )
+
+        OnCreateUserFormRepeatPasswordInput newRepeatPasswordInput ->
+            ( updateLoginPageFields (\loginPageFields -> { loginPageFields | createUserFormRepeatPassword = newRepeatPasswordInput })
+            , Cmd.none
+            )
 
         -- Time / Date
         TickMinute posix ->
@@ -725,7 +783,7 @@ update msg model =
         OnToggleDarkMode ->
             ( { model | darkModeOn = not model.darkModeOn }, Cmd.none )
 
-        -- Keyboard
+        -- Keyboard Shortcuts
         KeyboardMsg keyMsg ->
             let
                 newKeysDown =

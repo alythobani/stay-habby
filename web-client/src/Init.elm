@@ -2,6 +2,7 @@ module Init exposing (init)
 
 import Api
 import Array
+import Browser.Dom as Dom
 import Browser.Navigation as Navigation
 import DefaultServices.Keyboard as Keyboard
 import Dict
@@ -10,6 +11,7 @@ import Model exposing (Model)
 import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.KeyboardShortcut as KeyboardShortcut
+import Models.Login as Login
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -28,6 +30,10 @@ init { apiBaseUrl, currentTime } url key =
     in
     ( { key = key
       , url = url
+
+      -- Authentication
+      , user = Nothing
+      , loginPageFields = Login.initLoginPageFields
 
       -- Time / Date
       , currentPosix = currentPosix
@@ -60,7 +66,7 @@ init { apiBaseUrl, currentTime } url key =
 
       -- Keyboard
       , keysDown = Keyboard.init
-      , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+      , keyboardShortcutsList = KeyboardShortcut.loginPageShortcuts
       , showAvailableKeyboardShortcutsScreen = False
 
       -- Set Habit Data Shortcut
@@ -121,5 +127,8 @@ init { apiBaseUrl, currentTime } url key =
       , graphIntervalsData = RemoteData.NotAsked
       , graphHoveredPoint = Nothing
       }
-    , Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
+    , Cmd.batch
+        [ Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone
+        , Dom.focus "login-form-username-input" |> Task.attempt (always NoOp)
+        ]
     )

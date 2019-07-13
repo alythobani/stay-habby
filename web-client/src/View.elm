@@ -22,6 +22,7 @@ import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.KeyboardShortcut as KeyboardShortcut
+import Models.Login as Login
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -31,103 +32,194 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Stay Habby"
     , body =
-        [ div
-            [ classList [ ( "view", True ), ( "dark-mode", model.darkModeOn ) ] ]
-            [ div
-                [ class "panels-container" ]
-                [ renderTopPanel
-                    model.selectedYmd
-                    model.actualYmd
-                    model.darkModeOn
-                    model.errorMessage
-                    model.openTopPanelDateDropdown
-                , renderHabitsPanel
-                    model.selectedYmd
-                    model.allHabits
-                    model.allHabitData
-                    model.allFrequencyStats
-                    model.editingHabitAmountDict
-                    model.habitActionsDropdown
-                , renderAddHabitForm
-                    model.activeDialogScreen
-                    model.addHabit
-                    model.allHabits
+        case model.user of
+            Just user ->
+                [ div
+                    [ classList [ ( "logged-in-view", True ), ( "dark-mode", model.darkModeOn ) ] ]
+                    [ div
+                        [ class "panels-container" ]
+                        [ renderTopPanel
+                            model.selectedYmd
+                            model.actualYmd
+                            model.darkModeOn
+                            model.errorMessage
+                            model.openTopPanelDateDropdown
+                        , renderHabitsPanel
+                            model.selectedYmd
+                            model.allHabits
+                            model.allHabitData
+                            model.allFrequencyStats
+                            model.editingHabitAmountDict
+                            model.habitActionsDropdown
+                        , renderAddHabitForm
+                            model.activeDialogScreen
+                            model.addHabit
+                            model.allHabits
+                        ]
+                    , renderDialogBackgroundScreen model.activeDialogScreen
+                    , renderAvailableKeyboardShortcutsScreen
+                        model.showAvailableKeyboardShortcutsScreen
+                        model.keyboardShortcutsList
+                    , renderChooseDateDialog
+                        model.activeDialogScreen
+                        model.chooseDateDialogChosenYmd
+                        model.actualYmd
+                    , renderSetHabitDataShortcutHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.setHabitDataShortcutHabitNameFilterText
+                        model.setHabitDataShortcutFilteredHabits
+                        model.setHabitDataShortcutSelectedHabitIndex
+                    , renderSetHabitDataShortcutAmountScreen
+                        model.activeDialogScreen
+                        model.allHabitData
+                        model.setHabitDataShortcutAmountScreenHabit
+                        model.setHabitDataShortcutAmountScreenInputInt
+                        model.selectedYmd
+                    , renderEditGoalHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.editGoalHabitSelectionFilterText
+                        model.editGoalHabitSelectionFilteredHabits
+                        model.editGoalHabitSelectionSelectedHabitIndex
+                    , renderEditGoalDialog
+                        model.activeDialogScreen
+                        model.editGoalDialogHabit
+                        model.editGoalDialogHabitCurrentFcrWithIndex
+                        model.editGoalConfirmationMessage
+                        model.editGoalNewFrequenciesList
+                        model.editGoal
+                    , renderErrorMessage
+                        model.errorMessage
+                        model.activeDialogScreen
+                    , renderAddNoteHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.addNoteHabitSelectionFilterText
+                        model.addNoteHabitSelectionFilteredHabits
+                        model.addNoteHabitSelectionSelectedHabitIndex
+                    , renderAddNoteDialog
+                        model.activeDialogScreen
+                        model.addNoteDialogHabit
+                        model.addNoteDialogInput
+                        model.selectedYmd
+                        model.allHabitDayNotes
+                    , renderSuspendOrResumeHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.suspendOrResumeHabitSelectionFilterText
+                        model.suspendOrResumeHabitSelectionFilteredHabits
+                        model.suspendOrResumeHabitSelectionSelectedHabitIndex
+                    , renderSuspendOrResumeConfirmationScreen
+                        model.activeDialogScreen
+                        model.suspendOrResumeHabit
+                        model.selectedYmd
+                        model.suspendOrResumeHabitConfirmationMessage
+                        model.suspendOrResumeHabitNewSuspensions
+                    , renderGraphHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.graphHabitSelectionFilterText
+                        model.graphHabitSelectionFilteredHabits
+                        model.graphHabitSelectionSelectedHabitIndex
+                    , renderGraphDialogScreen
+                        model.activeDialogScreen
+                        model.graphHabit
+                        model.selectedYmd
+                        model.graphNumDaysToShow
+                        model.allHabitData
+                        model.allHabitDayNotes
+                        model.graphGoalIntervals
+                        model.graphIntervalsData
+                        model.darkModeOn
+                        model.graphHoveredPoint
+                    ]
                 ]
-            , renderDialogBackgroundScreen model.activeDialogScreen
-            , renderAvailableKeyboardShortcutsScreen
-                model.showAvailableKeyboardShortcutsScreen
-                model.keyboardShortcutsList
-            , renderChooseDateDialog
-                model.activeDialogScreen
-                model.chooseDateDialogChosenYmd
-                model.actualYmd
-            , renderSetHabitDataShortcutHabitSelectionScreen
-                model.activeDialogScreen
-                model.setHabitDataShortcutHabitNameFilterText
-                model.setHabitDataShortcutFilteredHabits
-                model.setHabitDataShortcutSelectedHabitIndex
-            , renderSetHabitDataShortcutAmountScreen
-                model.activeDialogScreen
-                model.allHabitData
-                model.setHabitDataShortcutAmountScreenHabit
-                model.setHabitDataShortcutAmountScreenInputInt
-                model.selectedYmd
-            , renderEditGoalHabitSelectionScreen
-                model.activeDialogScreen
-                model.editGoalHabitSelectionFilterText
-                model.editGoalHabitSelectionFilteredHabits
-                model.editGoalHabitSelectionSelectedHabitIndex
-            , renderEditGoalDialog
-                model.activeDialogScreen
-                model.editGoalDialogHabit
-                model.editGoalDialogHabitCurrentFcrWithIndex
-                model.editGoalConfirmationMessage
-                model.editGoalNewFrequenciesList
-                model.editGoal
-            , renderErrorMessage
-                model.errorMessage
-                model.activeDialogScreen
-            , renderAddNoteHabitSelectionScreen
-                model.activeDialogScreen
-                model.addNoteHabitSelectionFilterText
-                model.addNoteHabitSelectionFilteredHabits
-                model.addNoteHabitSelectionSelectedHabitIndex
-            , renderAddNoteDialog
-                model.activeDialogScreen
-                model.addNoteDialogHabit
-                model.addNoteDialogInput
-                model.selectedYmd
-                model.allHabitDayNotes
-            , renderSuspendOrResumeHabitSelectionScreen
-                model.activeDialogScreen
-                model.suspendOrResumeHabitSelectionFilterText
-                model.suspendOrResumeHabitSelectionFilteredHabits
-                model.suspendOrResumeHabitSelectionSelectedHabitIndex
-            , renderSuspendOrResumeConfirmationScreen
-                model.activeDialogScreen
-                model.suspendOrResumeHabit
-                model.selectedYmd
-                model.suspendOrResumeHabitConfirmationMessage
-                model.suspendOrResumeHabitNewSuspensions
-            , renderGraphHabitSelectionScreen
-                model.activeDialogScreen
-                model.graphHabitSelectionFilterText
-                model.graphHabitSelectionFilteredHabits
-                model.graphHabitSelectionSelectedHabitIndex
-            , renderGraphDialogScreen
-                model.activeDialogScreen
-                model.graphHabit
-                model.selectedYmd
-                model.graphNumDaysToShow
-                model.allHabitData
-                model.allHabitDayNotes
-                model.graphGoalIntervals
-                model.graphIntervalsData
-                model.darkModeOn
-                model.graphHoveredPoint
+
+            Nothing ->
+                [ renderLoggedOutView model.loginPageFields ]
+    }
+
+
+renderLoggedOutView : Login.LoginPageFields -> Html Msg
+renderLoggedOutView loginPageFields =
+    div
+        [ class "logged-out-view" ]
+        [ div [ class "welcome-message" ] [ text "Welcome to Habby!" ]
+        , div
+            [ class "choose-login-form-or-create-user-form-buttons" ]
+            [ button
+                [ classList
+                    [ ( "selected", loginPageFields.loginOrCreateUserForm == Login.LoginForm )
+                    ]
+                , onClick OnClickChooseLoginFormButton
+                ]
+                [ text "Log In" ]
+            , button
+                [ classList
+                    [ ( "selected", loginPageFields.loginOrCreateUserForm == Login.CreateUserForm )
+                    ]
+                , onClick OnClickChooseCreateUserFormButton
+                ]
+                [ text "Create New User" ]
+            ]
+        , div
+            [ classList
+                [ ( "login-form", True )
+                , ( "display-none", loginPageFields.loginOrCreateUserForm /= Login.LoginForm )
+                ]
+            ]
+            [ input
+                [ id "login-form-username-input"
+                , placeholder "Username..."
+                , onInput OnLoginFormUsernameInput
+                , value loginPageFields.loginFormUsername
+                ]
+                []
+            , input
+                [ placeholder "Password..."
+                , type_ "password"
+                , onInput OnLoginFormPasswordInput
+                , value loginPageFields.loginFormPassword
+                ]
+                []
+            ]
+        , div
+            [ classList
+                [ ( "create-user-form", True )
+                , ( "display-none", loginPageFields.loginOrCreateUserForm /= Login.CreateUserForm )
+                ]
+            ]
+            [ input
+                [ id "create-user-form-username-input"
+                , placeholder "Username..."
+                , onInput OnCreateUserFormUsernameInput
+                , value loginPageFields.createUserFormUsername
+                ]
+                []
+            , input
+                [ placeholder "Display name..."
+                , onInput OnCreateUserFormDisplayNameInput
+                , value loginPageFields.createUserFormDisplayName
+                ]
+                []
+            , input
+                [ placeholder "Email address..."
+                , onInput OnCreateUserFormEmailAddressInput
+                , value loginPageFields.createUserFormEmailAddress
+                ]
+                []
+            , input
+                [ placeholder "Password..."
+                , type_ "password"
+                , onInput OnCreateUserFormPasswordInput
+                , value loginPageFields.createUserFormPassword
+                ]
+                []
+            , input
+                [ placeholder "Repeat password..."
+                , type_ "password"
+                , onInput OnCreateUserFormRepeatPasswordInput
+                , value loginPageFields.createUserFormRepeatPassword
+                ]
+                []
             ]
         ]
-    }
 
 
 renderTopPanel :

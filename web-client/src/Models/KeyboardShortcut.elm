@@ -9,6 +9,7 @@ module Models.KeyboardShortcut exposing
     , errorMessageScreenShortcuts
     , graphHabitSelectionShortcuts
     , graphScreenShortcuts
+    , loginPageShortcuts
     , mainScreenShortcuts
     , setHabitDataAmountScreenShortcuts
     , setHabitDataHabitSelectionShortcuts
@@ -68,6 +69,11 @@ cancelScreenShortcut =
 darkModeShortcut : KeyboardShortcut
 darkModeShortcut =
     singleKeyShortcut Keyboard.KeyD OnToggleDarkMode "Toggle Dark Mode"
+
+
+loginPageShortcuts : List KeyboardShortcut
+loginPageShortcuts =
+    []
 
 
 mainScreenShortcuts : List KeyboardShortcut

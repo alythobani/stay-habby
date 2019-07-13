@@ -5,7 +5,64 @@ body {
   margin: 0px;
 }
 
-.view {
+.input-style-1-dark {
+  @extend .input-style-1;
+  background-color: black;
+  border-color: $mine-shaft;
+  color: $gallery;
+  &::placeholder {
+    color: $chicago;
+  }
+}
+
+.button-style-1-dark {
+  @extend .button-style-1;
+  background-color: black;
+  border-color: $gunsmoke;
+  color: $gunsmoke;
+  &.selected {
+    border-color: $alto;
+    color: $gallery;
+    background-color: inherit;
+  }
+  &:hover {
+    background-color: inherit;
+    color: $alto;
+  }
+}
+
+.logged-out-view {
+  @extend .full-screen-centered-flex-container;
+  font-family: "Raleway", sans-serif;
+  background-color: black;
+  color: white;
+
+  .welcome-message {
+    font-size: 30px;
+    margin-bottom: 20px;
+  }
+
+  .choose-login-form-or-create-user-form-buttons {
+    display: inline-block;
+    button {
+        @extend .button-style-1-dark;
+        display: inline-block;
+        margin: 20px 20px 0px 20px;
+        height: 30px;
+        width: 140px;
+    }
+  }
+
+  .login-form, .create-user-form {
+    input {
+      display: block;
+      @extend .input-style-1-dark;
+      margin: 20px 20px 0px 20px;
+    }
+  }
+}
+
+.logged-in-view {
     font-family: 'Raleway', sans-serif;
     position: absolute;
     box-sizing: border-box;
@@ -20,22 +77,11 @@ body {
       background-color: black;
 
       .input-style-1 {
-        background-color: black;
-        border-color: $mine-shaft;
-        color: $gallery;
-        &::placeholder {
-          color: $chicago;
-        }
+        @extend .input-style-1-dark;
       }
 
       .button-style-1 {
-        background-color: black;
-        border-color: $gunsmoke;
-        color: $gunsmoke;
-        &.selected {
-          border-color: $alto;
-          color: $gallery;
-        }
+        @extend .button-style-1-dark;
       }
 
       .button-style-2 {

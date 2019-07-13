@@ -8,7 +8,9 @@
             [api.freq-stats-util :refer [get-freq-stats-for-habit]]
             [api.goal-intervals-util :refer [get-habit-goal-interval-list]]
             [clj-time.core :as t])
-  (:import org.bson.types.ObjectId org.joda.time.DateTimeZone))
+  (:import org.bson.types.ObjectId
+           org.joda.time.DateTimeZone
+           org.jasypt.util.password.StrongPasswordEncryptor))
 
 (DateTimeZone/setDefault DateTimeZone/UTC)
 
@@ -16,14 +18,15 @@
   "The names of all the collections in the database."
   {:habits "habits"
    :habit_data "habit_data"
-   :habit_day_notes "habit_day_notes"})
+   :habit_day_notes "habit_day_notes"
+   :users "users"})
 
 (defonce connection (mg/connect))
 
 (defonce habby_db (mg/get-db connection "habby"))
 
 (defn add-habit
-  "Add a habit to the database and returns that habit including the ID.
+  "Add a habit to the db for a user, and returns that habit including the ID.
   Will create an ID if the habit passed doesn't have an ID.
   Converts the habit's `target_frequency` or `threshold_frequency` into an array of `frequency_change_record`s.
   Initializes the habit's `suspensions` array to empty."
@@ -43,7 +46,29 @@
                                           :new_frequency (:initial_threshold_frequency final_habit)}])
           final_habit)
         (assoc final_habit :suspensions [])
+        (update final_habit :user_id #(ObjectId. %))
         (mc/insert-and-return db (:habits collection-names) final_habit)))
+
+(defn add-user
+  "Attempts to add a user to the database, encrypting the inputted password along the way.
+  Returns `nil` if username or email address is already taken, else returns the new user's safe fields.
+  `new_email_address` could be `nil`."
+  [{:keys [db new_username new_display_name new_email_address new_password] :or {db habby_db}}]
+  (if (and (empty? (mc/find-maps db
+                                 (:users collection-names)
+                                 {:username new_username}))
+           (or (nil? new_email_address)
+               (empty? (mc/find-maps db
+                                   (:users collection-names)
+                                   {:email_address new_email_address}))))
+    (let [new-encrypted-password (.encryptPassword (StrongPasswordEncryptor.) new_password),
+          new-user {:_id (ObjectId.),
+                    :username new_username,
+                    :display_name new_display_name,
+                    :email_address new_email_address,
+                    :encrypted_password new-encrypted-password}]
+      (dissoc (mc/insert-and-return db (:users collection-names) new-user)
+              :encrypted_password))))
 
 (defn edit-habit-suspensions
   "Changes a habit's `:suspensions` field."
@@ -73,16 +98,28 @@
   (= 1 (.getN (mc/remove-by-id db (:habits collection-names) (ObjectId. habit_id)))))
 
 (defn get-habits
-  "Retrieves all habits sync from the database as clojure maps."
-  [{:keys [db habit_ids] :or {db habby_db}}]
-  (mc/find-maps db
-                (:habits collection-names)
-                (if (nil? habit_ids) nil {:_id {$in (map #(ObjectId. %) habit_ids)}})))
+  "Retrieves all the user's habits from the db as clojure maps."
+  [{:keys [db user_id habit_ids] :or {db habby_db}}]
+  (as-> {:user_id (ObjectId. user_id)} find-query-filter
+        (if (nil? habit_ids) find-query-filter (assoc find-query-filter :_id {$in (map #(ObjectId. %) habit_ids)}))
+        (mc/find-maps db
+                      (:habits collection-names)
+                      find-query-filter)))
+
+(defn login-user
+  "Returns a `:user_safe_fields` map of the authenticated user if authentication succeeded, else `nil`."
+  [{:keys [db user_name_input user_password_input] :or {db habby_db}}]
+  (as-> (mc/find-maps db (:users collection-names) {:username user_name_input}) matching-users
+        (filter #(.checkPassword (StrongPasswordEncryptor.) user_password_input (:encrypted_password %))
+                matching-users)
+        (if-not (nil? (first matching-users))
+          (dissoc (first matching-users)
+                  :encrypted_password))))
 
 (defn get-habit-data
-  "Gets habit data from the db, optionally after/before a specific date or for specific habits."
-  [{:keys [db after_date before_date habit_ids] :or {db habby_db}}]
-  (as-> {} find-query-filter
+  "Gets a user's habit data from the db, optionally after/before a specific date or for specific habits."
+  [{:keys [db user_id after_date before_date habit_ids] :or {db habby_db}}]
+  (as-> {:user_id (ObjectId. user_id)} find-query-filter
         (if (nil? habit_ids) find-query-filter (assoc find-query-filter :habit_id {$in (map #(ObjectId. %) habit_ids)}))
         (if (nil? after_date) find-query-filter (assoc find-query-filter :date {$gte (date-from-y-m-d-map after_date)}))
         (if (nil? before_date)
@@ -93,9 +130,9 @@
         (mc/find-maps db (:habit_data collection-names) find-query-filter)))
 
 (defn get-habit-day-notes
-  "Gets habit day notes from the db, optionally after/before a specific date or for specific habits."
-  [{:keys [db after_date before_date habit_ids] :or {db habby_db}}]
-  (as-> {} find-query-filter
+  "Gets a user's habit day notes from the db, optionally after/before a specific date or for specific habits."
+  [{:keys [db user_id after_date before_date habit_ids] :or {db habby_db}}]
+  (as-> {:user_id (ObjectId. user_id)} find-query-filter
         (if (nil? habit_ids) find-query-filter (assoc find-query-filter :habit_id {$in (map #(ObjectId. %) habit_ids)}))
         (if (nil? after_date) find-query-filter (assoc find-query-filter :date {$gte (date-from-y-m-d-map after_date)}))
         (if (nil? before_date)
@@ -106,34 +143,43 @@
         (mc/find-maps db (:habit_day_notes collection-names) find-query-filter)))
 
 (defn set-habit-data
-  "Set the `amount` for a habit on a specfic day."
-  [{:keys [db habit_id amount date-time] :or {db habby_db}}]
+  "Set the `amount` for a user's habit on a specfic day."
+  [{:keys [db user_id habit_id amount date-time] :or {db habby_db}}]
   (mc/find-and-modify db
                       (:habit_data collection-names)
-                      {:date date-time, :habit_id (ObjectId. habit_id)}
+                      {:date date-time, :habit_id (ObjectId. habit_id), :user_id (ObjectId. user_id)}
                       {$set {:amount amount}
-                       $setOnInsert {:date date-time, :habit_id (ObjectId. habit_id), :_id (ObjectId.)}}
+                       $setOnInsert {:_id (ObjectId.),
+                                     :user_id (ObjectId. user_id),
+                                     :habit_id (ObjectId. habit_id),
+                                     :date date-time}}
                       {:upsert true, :return-new true}))
 
 (defn set-habit-day-note
   "Add a `note` for a habit on a given day."
-  [{:keys [db habit_id note date-time] :or {db habby_db}}]
+  [{:keys [db user_id habit_id note date-time] :or {db habby_db}}]
   (mc/find-and-modify db
                       (:habit_day_notes collection-names)
-                      {:date date-time, :habit_id (ObjectId. habit_id)}
+                      {:date date-time, :habit_id (ObjectId. habit_id), :user_id (ObjectId. user_id)}
                       {$set {:note note}
-                       $setOnInsert {:date date-time, :habit_id (ObjectId. habit_id), :_id (ObjectId.)}}
+                       $setOnInsert {:_id (ObjectId.),
+                                     :user_id (ObjectId. user_id),
+                                     :habit_id (ObjectId. habit_id),
+                                     :date date-time}}
                       {:upsert true, :return-new true}))
 
 (defn get-habit-goal-interval-lists
-  "Returns a list of `habit_goal_interval_list`s, one for each ID in `habit_ids`.
+  "Returns a list of `habit_goal_interval_list`s for the user's specified habits, one `habit_goal_interval_list` for each.
   Retrieves habits and habit data from database `db`.
   Only returns `habit_goal_interval`s that started after `start-date-time`, and cuts them off at `end-date-time`."
-  [{:keys [db habit_ids start-date-time end-date-time], :or {db habby_db}}]
-  (let [all-habits (get-habits {:db db, :habit_ids habit_ids}),
+  [{:keys [db user_id habit_ids start-date-time end-date-time], :or {db habby_db}}]
+  (let [all-habits (get-habits {:db db,
+                                :user_id user_id,
+                                :habit_ids habit_ids}),
         start-date (if (nil? start-date-time) nil (date-to-y-m-d-map start-date-time))
         all-relevant-habits-data (get-habit-data {:db db,
-                                                  :after_date start-date
+                                                  :user_id user_id,
+                                                  :after_date start-date,
                                                   :before_date (date-to-y-m-d-map end-date-time),
                                                   :habit_ids habit_ids})]
     (map #(get-habit-goal-interval-list %
@@ -143,14 +189,16 @@
          all-habits)))
 
 (defn get-frequency-stats
-  "Returns performance statistics for the requested habits.
+  "Returns performance statistics for a user's habits, or optionally only for specific habits of theirs.
   Retrieves habits and habit data from database `db`.
   Analyzes user performance based on habit data from `current_client_date` or earlier.
   Generates a list of `habit_frequency_stats` maps, one for each ID in `habit_ids`."
-  [{:keys [db habit_ids current_client_date] :or {db habby_db, current_client_date (t/today-at 0 0)}}]
+  [{:keys [db user_id habit_ids current_client_date] :or {db habby_db, current_client_date (t/today-at 0 0)}}]
   (let [all-habits (get-habits {:db db,
-                                :habit_ids habit_ids}),
+                                :user_id user_id,
+                                :habit_ids habit_ids})
         all-habit-data-until-current-date (get-habit-data {:db db,
+                                                           :user_id user_id,
                                                            :before_date (date-to-y-m-d-map current_client_date),
                                                            :habit_ids habit_ids})]
     (map #(get-freq-stats-for-habit %

@@ -14,6 +14,19 @@
                            :month {:type (non-null Int)}
                            :day {:type (non-null Int)}}}
 
+           :user {:description "A user."
+                  :fields {:_id {:type (non-null ID)}
+                           :username {:type (non-null String)}
+                           :display_name {:type (non-null String)}
+                           :email_address {:type String}
+                           :encrypted_password {:type (non-null String)}}}
+
+           :user_safe_fields {:description "All fields of a user that are safe to send to the client (i.e. not the password)."
+                              :fields {:_id {:type (non-null ID)}
+                                       :username {:type (non-null String)}
+                                       :display_name {:type (non-null String)}
+                                       :email_address {:type String}}}
+
            :specific_day_of_week_frequency {:description "A frequency that happens on specific days of the week."
                                             :fields {:monday {:type Int}
                                                      :tuesday {:type Int}
@@ -44,8 +57,9 @@
                                          :end_date {:type :date
                                                     :resolve :query/suspended-end-date-to-y-m-d-format}}}
 
-           :good_habit {:description "A good habit that we are trying to maintain."
+           :good_habit {:description "A good habit that a user is trying to maintain."
                         :fields {:_id {:type (non-null ID)}
+                                 :user_id {:type (non-null ID)}
                                  :name {:type (non-null String)}
                                  :description {:type String}
                                  :unit_name_singular {:type (non-null String)}
@@ -54,8 +68,9 @@
                                  :target_frequencies {:type (non-null (list (non-null :frequency_change_record)))}
                                  :suspensions {:type (non-null (list (non-null :suspended_interval)))}}}
 
-           :bad_habit {:description "A bad habit we are trying to reduce."
+           :bad_habit {:description "A bad habit a user is trying to reduce."
                        :fields {:_id {:type (non-null ID)}
+                                :user_id {:type (non-null ID)}
                                 :name {:type (non-null String)}
                                 :description {:type String}
                                 :unit_name_singular {:type (non-null String)}
@@ -63,8 +78,9 @@
                                 :threshold_frequencies {:type (non-null (list (non-null :frequency_change_record)))}
                                 :suspensions {:type (non-null (list (non-null :suspended_interval)))}}}
 
-           :habit_day_record {:description "A record of how much a habit was performed on a specific day."
+           :habit_day_record {:description "A record of how much a user's habit was performed on a specific day."
                               :fields {:_id {:type (non-null ID)}
+                                       :user_id {:type (non-null ID)}
                                        :habit_id {:type (non-null ID)}
                                        :date {:type (non-null :date)
                                               :resolve :query/date-to-y-m-d-format}
@@ -100,39 +116,51 @@
 
            :habit_day_note {:description "A note related to a habit on a given day."
                             :fields {:_id {:type (non-null ID)}
+                                     :user_id {:type (non-null ID)}
                                      :habit_id {:type (non-null ID)}
                                      :date {:type (non-null :date)
                                             :resolve :query/habit-day-note-date-to-y-m-d-format}
                                      :note {:type (non-null String)}}}}
 
  :queries {:get_habits {:type (non-null (list (non-null :habit)))
-                        :description "Get all habits."
-                        :args {:habit_ids {:type (list (non-null ID))}}
+                        :description "Get all a user's habits, or optionally only some of them."
+                        :args {:user_id {:type (non-null ID)}
+                               :habit_ids {:type (list (non-null ID))}}
                         :resolve :query/get-habits}
 
+           :login_user {:type :user_safe_fields
+                        :description "Attempt to authenticate a user. Returns the user's safe fields if successful, else null."
+                        :args {:user_name_input {:type (non-null String)}
+                               :user_password_input {:type (non-null String)}}
+                        :resolve :query/login-user}
+
            :get_habit_data {:type (non-null (list (non-null :habit_day_record)))
-                            :description "Get all the habit data that matches the request specifications."
-                            :args {:after_date {:type :date_data},
+                            :description "Get all a user's habit data, optionally only belonging to specific habits."
+                            :args {:user_id {:type (non-null ID)}
+                                   :after_date {:type :date_data},
                                    :before_date {:type :date_data},
                                    :habit_ids {:type (list (non-null ID))}}
                             :resolve :query/get-habit-data}
 
            :get_habit_goal_interval_lists {:type (non-null (list (non-null :habit_goal_interval_list)))
                                            :description "Get a list of evaluated goal intervals for each habit requested."
-                                           :args {:habit_ids {:type (list (non-null ID))}
+                                           :args {:user_id {:type (non-null ID)}
+                                                  :habit_ids {:type (list (non-null ID))}
                                                   :start_date {:type :date_data}
                                                   :end_date {:type (non-null :date_data)}}
                                            :resolve :query/get-habit-goal-interval-lists}
 
            :get_frequency_stats {:type (non-null (list (non-null :habit_frequency_stats)))
-                                 :description "Get a success percentage for each habit requested."
-                                 :args {:habit_ids {:type (list (non-null ID))}
+                                 :description "Get frequency stats for all of a user's habits, or optionally only for some of them."
+                                 :args {:user_id {:type (non-null ID)}
+                                        :habit_ids {:type (list (non-null ID))}
                                         :current_client_date {:type (non-null :date_data)}}
                                  :resolve :query/get-frequency-stats}
 
            :get_habit_day_notes {:type (non-null (list (non-null :habit_day_note)))
-                                 :description "Get all the habit day notes that match the request specifications."
-                                 :args {:after_date {:type :date_data},
+                                 :description "Get all a user's habit day notes, or optionally only for some of their habits."
+                                 :args {:user_id {:type (non-null ID)}
+                                        :after_date {:type :date_data},
                                         :before_date {:type :date_data},
                                         :habit_ids {:type (list (non-null ID))}}
                                  :resolve :query/get-habit-day-notes}}
@@ -165,7 +193,8 @@
                                                   :specific_day_of_week_frequency {:type :create_specific_day_of_week_frequency_data}}}
 
                  :create_good_habit_data {:description "The data required to create a new good habit."
-                                          :fields {:name {:type (non-null String)}
+                                          :fields {:user_id {:type (non-null ID)}
+                                                   :name {:type (non-null String)}
                                                    :description {:type String}
                                                    :time_of_day {:type (non-null :habit_time)}
                                                    :unit_name_singular {:type (non-null String)}
@@ -173,7 +202,8 @@
                                                    :initial_target_frequency {:type (non-null :create_frequency_data)}}}
 
                  :create_bad_habit_data {:description "The data required to create a new bad habit."
-                                         :fields {:name {:type (non-null String)}
+                                         :fields {:user_id {:type (non-null ID)}
+                                                  :name {:type (non-null String)}
                                                   :description {:type String}
                                                   :unit_name_singular {:type (non-null String)}
                                                   :unit_name_plural {:type (non-null String)}
@@ -194,21 +224,31 @@
                                                                 :new_frequency {:type (non-null :create_frequency_data)}}}}
 
  :mutations {:add_habit {:type (non-null :habit)
-                         :description "Add a habit to your list of habits, returns the new habit."
+                         :description "Add a user's habit to the db, returns the new habit."
                          :args {:create_habit_data {:type (non-null :create_habit_data)}
                                 :frequency_start_date {:type (non-null :date_data)}}
                          :resolve :query/resolve-mutation-add-habit}
 
+             :add_user {:type :user_safe_fields
+                        :description "Attempts to add a user to the db, returns the new user's safe fields if successful."
+                        :args {:new_username {:type (non-null String)}
+                               :new_display_name {:type (non-null String)}
+                               :new_email_address {:type String}
+                               :new_password {:type (non-null String)}}
+                        :resolve :query/resolve-mutation-add-user}
+
              :set_habit_data {:type (non-null :habit_day_record)
-                              :description "Add a record of how much a habit was performed on a specific day."
-                              :args {:habit_id {:type (non-null ID)}
+                              :description "Add a record of how much a user's habit was performed on a specific day."
+                              :args {:user_id {:type (non-null ID)}
+                                     :habit_id {:type (non-null ID)}
                                      :amount {:type (non-null Int)}
                                      :date {:type (non-null :date_data)}}
                               :resolve :query/resolve-mutation-set-habit-data}
 
              :set_habit_day_note {:type (non-null :habit_day_note)
-                                  :description "Add a note for a habit on a given day."
-                                  :args {:habit_id {:type (non-null ID)}
+                                  :description "Add a note for a user's habit on a given day."
+                                  :args {:user_id {:type (non-null ID)}
+                                         :habit_id {:type (non-null ID)}
                                          :note {:type (non-null String)}
                                          :date {:type (non-null :date_data)}}
                                   :resolve :query/resolve-mutation-set-habit-day-note}

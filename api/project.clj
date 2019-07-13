@@ -10,6 +10,7 @@
                  [com.novemberain/monger "3.1.0"]
                  [slingshot "0.12.2"]
                  [clj-time "0.14.2"]
+                 [org.jasypt/jasypt "1.9.3"]
                  [proto-repl "0.3.1"]
                  [org.clojure/test.check "0.9.0"]]
   :main ^:skip-aot api.core

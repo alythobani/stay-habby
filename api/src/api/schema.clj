@@ -82,6 +82,11 @@
   [context args value]
   (map tag-type (db/get-habits args)))
 
+(defn resolve-login-user
+  "@refer `db/login-user`."
+  [context args value]
+  (db/login-user args))
+
 (defn resolve-mutation-add-habit
   "@refer `db/add-habit`."
   [context {:keys [create_habit_data frequency_start_date] :as all} value]
@@ -89,6 +94,11 @@
         (assoc (dissoc $ :create_habit_data) :habit (unnest-tagged-unions-on-input-object create_habit_data))
         (assoc (dissoc $ :frequency_start_date) :frequency-start-datetime (date-from-y-m-d-map frequency_start_date))
         (tag-type (db/add-habit $))))
+
+(defn resolve-mutation-add-user
+  "@refer `db/add-user`."
+  [context args value]
+  (db/add-user args))
 
 (defn resolve-mutation-set-habit-data
   "@refer `db/set-habit-data`."
@@ -162,8 +172,10 @@
 (defn resolver-map
   []
   {:query/get-habits (create-async-resolver resolve-get-habits)
+   :query/login-user (create-async-resolver resolve-login-user)
    :query/tag-type-for-new-frequency (create-tag-type-resolver :new_frequency)
    :query/resolve-mutation-add-habit (create-async-resolver resolve-mutation-add-habit)
+   :query/resolve-mutation-add-user (create-async-resolver resolve-mutation-add-user)
    :query/resolve-mutation-set-habit-data (create-async-resolver resolve-mutation-set-habit-data)
    :query/resolve-mutation-set-habit-day-note (create-async-resolver resolve-mutation-set-habit-day-note)
    :query/get-habit-data (create-async-resolver resolve-get-habit-data)

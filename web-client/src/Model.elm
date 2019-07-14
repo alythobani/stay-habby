@@ -41,7 +41,10 @@ type alias Model =
 
     --
     , apiBaseUrl : String
+
+    -- Top right corner
     , darkModeOn : Bool
+    , openUserActionsDropdown : Bool
 
     -- User-Inputted Habit Amounts
     , editingHabitAmountDict : Dict.Dict String Int

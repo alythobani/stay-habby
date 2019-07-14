@@ -698,6 +698,19 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
+        -- Top Panel User Actions Dropdown
+        ToggleTopPanelUserActionsDropdown ->
+            ( { model | openUserActionsDropdown = not model.openUserActionsDropdown }, Cmd.none )
+
+        OnLogoutUserClick ->
+            ( { model
+                | user = Nothing
+                , openUserActionsDropdown = False
+                , keyboardShortcutsList = KeyboardShortcut.loginPageShortcuts
+              }
+            , Dom.focus "login-form-username-input" |> Task.attempt FocusResult
+            )
+
         -- All Habit Data
         OnGetAllRemoteDataFailure apiError ->
             ( { model

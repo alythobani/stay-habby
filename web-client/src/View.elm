@@ -45,6 +45,7 @@ view model =
                             model.darkModeOn
                             model.errorMessage
                             model.openTopPanelDateDropdown
+                            model.openUserActionsDropdown
                         , renderHabitsPanel
                             model.selectedYmd
                             model.allHabits
@@ -310,8 +311,9 @@ renderTopPanel :
     -> Bool
     -> Maybe String
     -> Bool
+    -> Bool
     -> Html Msg
-renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateDropdown =
+renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateDropdown openUserActionsDropdown =
     let
         topPanelTitleText : String
         topPanelTitleText =
@@ -369,6 +371,31 @@ renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateD
 
                     else
                         "Light Mode"
+                ]
+            ]
+        , div
+            [ class "user-actions-dropdown" ]
+            [ div
+                [ class <|
+                    if openUserActionsDropdown then
+                        "top-panel-user-actions-dropdown-toggler-full"
+
+                    else
+                        "top-panel-user-actions-dropdown-toggler-default"
+                , onClick ToggleTopPanelUserActionsDropdown
+                ]
+                [ text "" ]
+            , div
+                [ classList
+                    [ ( "top-panel-user-actions-dropdown-buttons", True )
+                    , ( "display-none", not openUserActionsDropdown )
+                    ]
+                ]
+                [ button
+                    [ class "top-panel-user-actions-dropdown-button"
+                    , onClick <| OnLogoutUserClick
+                    ]
+                    [ text "Log Out" ]
                 ]
             ]
         , div

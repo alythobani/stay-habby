@@ -46,8 +46,9 @@ init { apiBaseUrl, currentTime } url key =
       --
       , apiBaseUrl = apiBaseUrl
 
-      --
+      -- Top right corner
       , darkModeOn = True
+      , openUserActionsDropdown = False
 
       -- User-Inputted Habit Amounts
       , editingHabitAmountDict = Dict.empty

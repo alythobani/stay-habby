@@ -60,6 +60,9 @@ type Msg
     | OnChooseDateDialogArrowLeft
     | OnChooseDateDialogArrowRight
     | OnChooseDateDialogSubmitClick
+      -- Top Panel User Actions Dropdown
+    | ToggleTopPanelUserActionsDropdown
+    | OnLogoutUserClick
       -- All Habit Data
     | OnGetAllRemoteDataFailure ApiError
     | OnGetAllRemoteDataSuccess Api.AllRemoteData

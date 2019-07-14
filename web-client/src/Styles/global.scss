@@ -40,6 +40,17 @@ body {
   }
 }
 
+.dropdown-button-dark {
+  background-color: black;
+  color: $cloud;
+  border: none;
+  box-shadow: 0 0 1px $gallery;
+  &:hover {
+    border: 1px solid $boulder;
+    color: $gallery;
+  }
+}
+
 .logged-out-view {
   @extend .full-screen-centered-flex-container;
   font-family: "Raleway", sans-serif;
@@ -173,20 +184,22 @@ body {
             }
           }
 
+          .user-actions-dropdown {
+            color: $alto;
+            .top-panel-user-actions-dropdown-buttons {
+              .top-panel-user-actions-dropdown-button {
+                @extend .dropdown-button-dark;
+              }
+            }
+          }
+
           .top-panel-date {
             color: $silver-chalice;
             .top-panel-date-dropdown {
                 color: $alto;
                 .top-panel-date-dropdown-buttons {
                   .top-panel-date-dropdown-button {
-                    background-color: black;
-                    color: $cloud;
-                    border: none;
-                    box-shadow: 0 0 1px $gallery;
-                    &:hover {
-                      border: 1px solid $boulder;
-                      color: $gallery;
-                    }
+                    @extend .dropdown-button-dark;
                   }
                 }
 
@@ -276,14 +289,7 @@ body {
                 @extend .no-select;
                 .action-buttons {
                   .action-button {
-                    background-color: black;
-                    color: $cloud;
-                    border: none;
-                    box-shadow: 0 0 1px $gallery;
-                    &:hover {
-                      border: 1px solid $boulder;
-                      color: $gallery;
-                    }
+                    @extend .dropdown-button-dark;
                   }
                 }
               }
@@ -397,6 +403,11 @@ body {
               }
             }
           }
+          .user-actions-dropdown {
+            .top-panel-user-actions-dropdown-toggler-default {
+              visibility: visible;
+            }
+          }
         }
 
         .top-panel-title {
@@ -430,7 +441,7 @@ body {
         .top-panel-dark-mode-switch {
           position: absolute;
           top: 25px;
-          right: 80px;
+          right: 60px;
           .top-panel-dark-mode-switch-toggler {
             position: relative;
             border-radius: 20px;
@@ -469,6 +480,30 @@ body {
           &:hover {
             color: black;
             cursor: pointer;
+          }
+        }
+
+        .user-actions-dropdown {
+          color: $mine-shaft;
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          .top-panel-user-actions-dropdown-toggler-default {
+            @extend .dropdown-toggler-default;
+            font-size: 40px;
+            visibility: hidden;
+          }
+          .top-panel-user-actions-dropdown-toggler-full {
+            @extend .dropdown-toggler-full;
+            font-size: 40px;
+          }
+          .top-panel-user-actions-dropdown-buttons {
+            @extend .dropdown-buttons;
+            top: 25px;
+            right: 0px;
+            .top-panel-user-actions-dropdown-button {
+              @extend .dropdown-button;
+            }
           }
         }
 

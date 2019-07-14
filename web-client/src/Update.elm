@@ -302,19 +302,27 @@ update msg model =
 
         -- Authentication
         OnClickChooseLoginFormButton ->
-            ( updateLoginPageFields
-                (\loginPageFields ->
-                    { loginPageFields | loginOrCreateUserForm = Login.LoginForm }
-                )
+            let
+                newFormModel =
+                    updateLoginPageFields
+                        (\loginPageFields ->
+                            { loginPageFields | loginOrCreateUserForm = Login.LoginForm }
+                        )
+            in
+            ( { newFormModel | keyboardShortcutsList = KeyboardShortcut.loginFormShortcuts }
             , Dom.focus "login-form-username-input"
                 |> Task.attempt FocusResult
             )
 
         OnClickChooseCreateUserFormButton ->
-            ( updateLoginPageFields
-                (\loginPageFields ->
-                    { loginPageFields | loginOrCreateUserForm = Login.CreateUserForm }
-                )
+            let
+                newFormModel =
+                    updateLoginPageFields
+                        (\loginPageFields ->
+                            { loginPageFields | loginOrCreateUserForm = Login.CreateUserForm }
+                        )
+            in
+            ( { newFormModel | keyboardShortcutsList = KeyboardShortcut.createUserFormShortcuts }
             , Dom.focus "create-user-form-username-input"
                 |> Task.attempt FocusResult
             )
@@ -328,6 +336,20 @@ update msg model =
             ( updateLoginPageFields (\loginPageFields -> { loginPageFields | loginFormPassword = newPasswordInput })
             , Cmd.none
             )
+
+        OnLoginFormEnterKeydown ->
+            case ( model.loginPageFields.loginFormUsername, model.loginPageFields.loginFormPassword ) of
+                ( "", _ ) ->
+                    -- No username entered, do nothing
+                    ( model, Cmd.none )
+
+                ( _, "" ) ->
+                    -- No password entered, do nothing
+                    ( model, Cmd.none )
+
+                _ ->
+                    -- Attempt to login
+                    update OnLoginUserClick model
 
         OnLoginUserClick ->
             ( model
@@ -471,6 +493,15 @@ update msg model =
                 )
             , Cmd.none
             )
+
+        OnCreateUserFormEnterKeydown ->
+            case Login.extractCreateUserFields model.loginPageFields of
+                Just createUserFields ->
+                    update (OnSignUpUserClick createUserFields) model
+
+                _ ->
+                    -- User hasn't filled out fields properly yet, do nothing
+                    ( model, Cmd.none )
 
         OnSignUpUserClick createUserFields ->
             ( model
@@ -719,7 +750,7 @@ update msg model =
             ( { model
                 | user = Nothing
                 , openUserActionsDropdown = False
-                , keyboardShortcutsList = KeyboardShortcut.loginPageShortcuts
+                , keyboardShortcutsList = KeyboardShortcut.loginFormShortcuts
               }
             , Dom.focus "login-form-username-input" |> Task.attempt FocusResult
             )

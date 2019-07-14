@@ -28,6 +28,7 @@ type Msg
     | OnClickChooseCreateUserFormButton
     | OnLoginFormUsernameInput String
     | OnLoginFormPasswordInput String
+    | OnLoginFormEnterKeydown
     | OnLoginUserClick
     | OnLoginUserGraphqlFailure ApiError
     | OnLoginUserGraphqlSuccess Api.QueriedUser
@@ -36,6 +37,7 @@ type Msg
     | OnCreateUserFormUsernameInput String
     | OnCreateUserFormPasswordInput String
     | OnCreateUserFormRepeatPasswordInput String
+    | OnCreateUserFormEnterKeydown
     | OnSignUpUserClick Login.CreateUserFields
     | OnSignUpUserGraphqlFailure ApiError
     | OnSignUpUserGraphqlSuccess (Maybe User.User)

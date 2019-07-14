@@ -4,12 +4,13 @@ module Models.KeyboardShortcut exposing
     , addNoteHabitSelectionShortcuts
     , addNoteScreenShortcuts
     , chooseDateScreenShortcuts
+    , createUserFormShortcuts
     , editGoalHabitSelectionShortcuts
     , editGoalScreenShortcuts
     , errorMessageScreenShortcuts
     , graphHabitSelectionShortcuts
     , graphScreenShortcuts
-    , loginPageShortcuts
+    , loginFormShortcuts
     , mainScreenShortcuts
     , setHabitDataAmountScreenShortcuts
     , setHabitDataHabitSelectionShortcuts
@@ -71,9 +72,18 @@ darkModeShortcut =
     singleKeyShortcut Keyboard.KeyD OnToggleDarkMode "Toggle Dark Mode"
 
 
-loginPageShortcuts : List KeyboardShortcut
-loginPageShortcuts =
-    []
+loginFormShortcuts : List KeyboardShortcut
+loginFormShortcuts =
+    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnLoginFormEnterKeydown "Log In"
+    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
+    ]
+
+
+createUserFormShortcuts : List KeyboardShortcut
+createUserFormShortcuts =
+    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnCreateUserFormEnterKeydown "Create User"
+    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
+    ]
 
 
 mainScreenShortcuts : List KeyboardShortcut

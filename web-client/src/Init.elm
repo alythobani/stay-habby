@@ -67,7 +67,7 @@ init { apiBaseUrl, currentTime } url key =
 
       -- Keyboard
       , keysDown = Keyboard.init
-      , keyboardShortcutsList = KeyboardShortcut.loginPageShortcuts
+      , keyboardShortcutsList = KeyboardShortcut.loginFormShortcuts
       , showAvailableKeyboardShortcutsScreen = False
 
       -- Set Habit Data Shortcut

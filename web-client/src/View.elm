@@ -135,7 +135,11 @@ view model =
                 ]
 
             Nothing ->
-                [ renderLoggedOutView model.loginPageFields ]
+                [ renderLoggedOutView model.loginPageFields
+                , renderAvailableKeyboardShortcutsScreen
+                    model.showAvailableKeyboardShortcutsScreen
+                    model.keyboardShortcutsList
+                ]
     }
 
 

@@ -88,6 +88,7 @@ switchScreen m newScreen =
         | activeDialogScreen = newScreen
         , keyboardShortcutsList = newKeyboardShortcuts
         , openTopPanelDateDropdown = False
+        , openUserActionsDropdown = False
         , habitActionsDropdown = Nothing
         , setHabitDataShortcutAmountScreenInputInt = Nothing
         , setHabitDataShortcutHabitNameFilterText = ""
@@ -551,7 +552,13 @@ update msg model =
 
         -- Top Panel Date
         ToggleTopPanelDateDropdown ->
-            ( { model | openTopPanelDateDropdown = not model.openTopPanelDateDropdown }, Cmd.none )
+            ( { model
+                | openTopPanelDateDropdown = not model.openTopPanelDateDropdown
+                , openUserActionsDropdown = False
+                , habitActionsDropdown = Nothing
+              }
+            , Cmd.none
+            )
 
         ChangeSelectedYmd newYmd ->
             if model.selectedYmd == Just newYmd then
@@ -700,7 +707,13 @@ update msg model =
 
         -- Top Panel User Actions Dropdown
         ToggleTopPanelUserActionsDropdown ->
-            ( { model | openUserActionsDropdown = not model.openUserActionsDropdown }, Cmd.none )
+            ( { model
+                | openUserActionsDropdown = not model.openUserActionsDropdown
+                , openTopPanelDateDropdown = False
+                , habitActionsDropdown = Nothing
+              }
+            , Cmd.none
+            )
 
         OnLogoutUserClick ->
             ( { model
@@ -992,7 +1005,13 @@ update msg model =
                     else
                         Just habitId
             in
-            ( { model | habitActionsDropdown = updatedHabitActionsDropdown }, Cmd.none )
+            ( { model
+                | habitActionsDropdown = updatedHabitActionsDropdown
+                , openTopPanelDateDropdown = False
+                , openUserActionsDropdown = False
+              }
+            , Cmd.none
+            )
 
         -- Dark Mode
         OnToggleDarkMode ->

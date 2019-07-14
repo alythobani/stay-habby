@@ -259,14 +259,16 @@
                             :resolve :query/resolve-mutation-delete-habit}
 
              :edit_habit_suspensions {:type (non-null :habit)
-                                      :description "Change a habit's `suspensions` field, returns the habit."
-                                      :args {:habit_id {:type (non-null ID)}
+                                      :description "Change a user's habit's `suspensions` field, returns the habit."
+                                      :args {:user_id {:type (non-null ID)}
+                                             :habit_id {:type (non-null ID)}
                                              :new_suspensions {:type (non-null (list (non-null :create_suspended_interval_data)))}}
                                       :resolve :query/resolve-mutation-edit-habit-suspensions}
 
              :edit_habit_goal_frequencies {:type (non-null :habit)
-                                           :description "Change a habit's `target_frequencies` or `threshold_frequencies`, returns the habit."
-                                           :args {:habit_id {:type (non-null ID)}
+                                           :description "Change a user's habit's goal array, returns the habit."
+                                           :args {:user_id {:type (non-null ID)}
+                                                  :habit_id {:type (non-null ID)}
                                                   :new_frequencies {:type (non-null (list (non-null :create_frequency_change_record_data)))}
                                                   :habit_type {:type (non-null String)}}
                                            :resolve :query/resolve-mutation-edit-habit-goal-frequencies}}}

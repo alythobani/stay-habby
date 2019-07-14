@@ -9,3 +9,4 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+/migrations/4-attach-user-to-stuff-in-db.migration.js

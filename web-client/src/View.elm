@@ -994,6 +994,7 @@ renderAvailableKeyboardShortcutsScreen showScreen shortcutList =
             [ ( "available-keyboard-shortcuts-screen", True )
             , ( "display-none", not showScreen )
             ]
+        , onClick ToggleAvailableKeyboardShortcutsScreen
         ]
         [ div
             [ class "available-keyboard-shortcuts-screen-body" ]

@@ -403,6 +403,46 @@ update msg model =
             , Cmd.none
             )
 
+        OnSignUpUserClick createUserFields ->
+            ( model
+            , Api.mutationAddUser
+                createUserFields
+                model.apiBaseUrl
+                OnSignUpUserGraphqlFailure
+                OnSignUpUserGraphqlSuccess
+            )
+
+        OnSignUpUserGraphqlFailure apiError ->
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields
+                        | signUpErrorMessage =
+                            Just <|
+                                "Error signing up: "
+                                    ++ ApiError.toString apiError
+                                    ++ ". You may want to refresh the page."
+                    }
+                )
+            , Cmd.none
+            )
+
+        OnSignUpUserGraphqlSuccess maybeUser ->
+            case maybeUser of
+                Just user ->
+                    ( { model | user = Just user, loginPageFields = Login.initLoginPageFields }
+                      -- TODO: query remote data for user
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    -- Didn't pass validation on server side; username or email was already taken.
+                    ( updateLoginPageFields
+                        (\loginPageFields ->
+                            { loginPageFields | signUpErrorMessage = Just "Error signing up: username or email was already taken." }
+                        )
+                    , Cmd.none
+                    )
+
         -- Time / Date
         TickMinute posix ->
             ( { model | currentPosix = posix }

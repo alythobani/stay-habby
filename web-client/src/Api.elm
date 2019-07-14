@@ -5,6 +5,7 @@ module Api exposing
     , frequencyToGraphQLString
     , graphQLRequest
     , mutationAddHabit
+    , mutationAddUser
     , mutationEditHabitGoalFrequencies
     , mutationEditHabitSuspensions
     , mutationSetHabitData
@@ -296,6 +297,7 @@ mutationAddUser createUserFields =
                 [ ( "new_username", Util.encodeString createUserFields.newUsername )
                 , ( "new_display_name", Util.encodeString createUserFields.newDisplayName )
                 , ( "new_email_address", Util.encodeMaybe createUserFields.newEmailAddress Util.encodeString )
+                , ( "new_password", Util.encodeString createUserFields.newPassword )
                 , ( "user_output", User.graphQLOutputString )
                 ]
 

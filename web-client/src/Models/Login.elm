@@ -30,6 +30,7 @@ type alias LoginPageFields =
     , doesCreateUserFormPasswordHaveADigit : Bool
     , createUserFormRepeatPassword : String
     , doesCreateUserFormRepeatPasswordMatch : Bool
+    , signUpErrorMessage : Maybe String
     }
 
 
@@ -39,19 +40,20 @@ initLoginPageFields =
     , loginFormUsername = ""
     , loginFormPassword = ""
     , createUserFormUsername = ""
-    , doesCreateUserFormUsernameHaveAtLeast1Character = True
+    , doesCreateUserFormUsernameHaveAtLeast1Character = False
     , createUserFormDisplayName = ""
-    , doesCreateUserFormDisplayNameHaveAtLeast1Character = True
+    , doesCreateUserFormDisplayNameHaveAtLeast1Character = False
     , createUserFormEmailAddress = ""
-    , isCreateUserFormEmailAddressValid = True
+    , isCreateUserFormEmailAddressValid = False
     , createUserFormPassword = ""
-    , doesCreateUserFormPasswordHaveAtLeast10Characters = True
+    , doesCreateUserFormPasswordHaveAtLeast10Characters = False
     , doesCreateUserFormPasswordHaveAtMost128Characters = True
-    , doesCreateUserFormPasswordHaveALowerCaseCharacter = True
-    , doesCreateUserFormPasswordHaveAnUpperCaseCharacter = True
-    , doesCreateUserFormPasswordHaveADigit = True
+    , doesCreateUserFormPasswordHaveALowerCaseCharacter = False
+    , doesCreateUserFormPasswordHaveAnUpperCaseCharacter = False
+    , doesCreateUserFormPasswordHaveADigit = False
     , createUserFormRepeatPassword = ""
     , doesCreateUserFormRepeatPasswordMatch = True
+    , signUpErrorMessage = Nothing
     }
 
 
@@ -80,23 +82,22 @@ extractCreateUserFields loginPageFields =
         Nothing
 
     else
-        case ( loginPageFields.createUserFormEmailAddress, loginPageFields.isCreateUserFormEmailAddressValid ) of
-            ( validEmailAddress, True ) ->
-                Just
-                    { newUsername = loginPageFields.createUserFormUsername
-                    , newDisplayName = loginPageFields.createUserFormDisplayName
-                    , newEmailAddress = Just validEmailAddress
-                    , newPassword = loginPageFields.createUserFormPassword
-                    }
+        let
+            createUserFields =
+                { newUsername = loginPageFields.createUserFormUsername
+                , newDisplayName = loginPageFields.createUserFormDisplayName
+                , newPassword = loginPageFields.createUserFormPassword
+                , newEmailAddress = Nothing
+                }
+        in
+        if loginPageFields.createUserFormEmailAddress == "" then
+            -- Email is empty, it's optional so that's okay
+            Just createUserFields
 
-            ( "", False ) ->
-                -- Email is optional
-                Just
-                    { newUsername = loginPageFields.createUserFormUsername
-                    , newDisplayName = loginPageFields.createUserFormDisplayName
-                    , newEmailAddress = Nothing
-                    , newPassword = loginPageFields.createUserFormPassword
-                    }
+        else if loginPageFields.isCreateUserFormEmailAddressValid then
+            -- Email is nonempty and valid
+            Just { createUserFields | newEmailAddress = Just loginPageFields.createUserFormEmailAddress }
 
-            _ ->
-                Nothing
+        else
+            -- Email address is invalid and nonempty
+            Nothing

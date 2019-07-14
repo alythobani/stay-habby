@@ -268,6 +268,20 @@ renderLoggedOutView loginPageFields =
 
               else
                 createUserFormErrorMessageDiv "Passwords do not match."
+            , case Login.extractCreateUserFields loginPageFields of
+                Just createUserFields ->
+                    button
+                        [ onClick <| OnSignUpUserClick createUserFields ]
+                        [ text "Sign Up" ]
+
+                Nothing ->
+                    Util.hiddenDiv
+            , case loginPageFields.signUpErrorMessage of
+                Just signUpErrorMessage ->
+                    createUserFormErrorMessageDiv signUpErrorMessage
+
+                Nothing ->
+                    Util.hiddenDiv
             ]
         ]
 
@@ -1584,7 +1598,7 @@ renderErrorMessage errorMessage activeDialogScreen =
             [ text <|
                 Maybe.withDefault
                     "No errors"
-                    (Maybe.map (\em -> em ++ ". You may want to refresh the page.") errorMessage)
+                    (Maybe.map (\em -> em ++ "\n\nYou may want to refresh the page.") errorMessage)
             ]
         ]
 

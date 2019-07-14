@@ -10,6 +10,8 @@ import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.HabitData as HabitData
 import Models.HabitDayNote as HabitDayNote
+import Models.Login as Login
+import Models.User as User
 import Models.YmdDate as YmdDate
 import Time
 import TimeZone
@@ -31,6 +33,9 @@ type Msg
     | OnCreateUserFormUsernameInput String
     | OnCreateUserFormPasswordInput String
     | OnCreateUserFormRepeatPasswordInput String
+    | OnSignUpUserClick Login.CreateUserFields
+    | OnSignUpUserGraphqlFailure ApiError
+    | OnSignUpUserGraphqlSuccess (Maybe User.User)
       -- Time / Date
     | TickMinute Time.Posix
     | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))

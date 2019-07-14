@@ -31,6 +31,15 @@ body {
   }
 }
 
+.button-style-2-dark {
+  @extend .button-style-2;
+  background-color: black;
+  color: $gallery;
+  &:hover {
+    background-color: green;
+  }
+}
+
 .logged-out-view {
   @extend .full-screen-centered-flex-container;
   font-family: "Raleway", sans-serif;
@@ -60,12 +69,22 @@ body {
       margin: 20px 20px 0px 20px;
       width: 300px;
     }
+  }
+  .create-user-form {
+    text-align: center;
     .create-user-form-error-message {
       color: red;
       font-size: 12px;
-      // border: 1px solid blue;
       margin-top: 15px;
       text-align: center;
+    }
+    button {
+      @extend .button-style-2-dark;
+      width: 100%;
+      margin-top: 20px;
+      height: 40px;
+      font-size: 15px;
+      font-weight: 600;
     }
   }
 }
@@ -93,11 +112,7 @@ body {
       }
 
       .button-style-2 {
-        background-color: black;
-        color: $gallery;
-        &:hover {
-          background-color: green;
-        }
+        @extend .button-style-2-dark;
       }
 
       .dialog-form-1 {
@@ -1111,6 +1126,7 @@ body {
       .error-message-text {
         display: flex;
         flex-direction: column;
+        padding: 30px;
         justify-content: center;
         text-align: center;
         z-index: 3;

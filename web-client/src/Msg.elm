@@ -27,9 +27,12 @@ type Msg
     | OnClickChooseLoginFormButton
     | OnClickChooseCreateUserFormButton
     | OnLoginFormUsernameInput String
+    | OnLoginFormPasswordInput String
+    | OnLoginUserClick
+    | OnLoginUserGraphqlFailure ApiError
+    | OnLoginUserGraphqlSuccess Api.QueriedUser
     | OnCreateUserFormDisplayNameInput String
     | OnCreateUserFormEmailAddressInput String
-    | OnLoginFormPasswordInput String
     | OnCreateUserFormUsernameInput String
     | OnCreateUserFormPasswordInput String
     | OnCreateUserFormRepeatPasswordInput String

@@ -315,6 +315,52 @@ update msg model =
             , Cmd.none
             )
 
+        OnLoginUserClick ->
+            ( model
+            , Api.queryLoginUser
+                model.loginPageFields.loginFormUsername
+                model.loginPageFields.loginFormPassword
+                model.apiBaseUrl
+                OnLoginUserGraphqlFailure
+                OnLoginUserGraphqlSuccess
+            )
+
+        OnLoginUserGraphqlFailure apiError ->
+            ( updateLoginPageFields
+                (\loginPageFields ->
+                    { loginPageFields
+                        | loginErrorMessage =
+                            Just <|
+                                "Error logging in: "
+                                    ++ ApiError.toString apiError
+                                    ++ ". You may want to refresh the page."
+                    }
+                )
+            , Cmd.none
+            )
+
+        OnLoginUserGraphqlSuccess queriedUser ->
+            case queriedUser.maybeUser of
+                Just user ->
+                    -- Successful login
+                    ( { model
+                        | user = Just user
+                        , loginPageFields = Login.initLoginPageFields
+                        , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+                      }
+                      -- TODO: query remote data for user
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    -- Didn't pass validation on server side; username or password was incorrect.
+                    ( updateLoginPageFields
+                        (\loginPageFields ->
+                            { loginPageFields | loginErrorMessage = Just "Invalid username or password." }
+                        )
+                    , Cmd.none
+                    )
+
         OnCreateUserFormUsernameInput newUsernameInput ->
             ( updateLoginPageFields
                 (\loginPageFields ->
@@ -429,7 +475,12 @@ update msg model =
         OnSignUpUserGraphqlSuccess maybeUser ->
             case maybeUser of
                 Just user ->
-                    ( { model | user = Just user, loginPageFields = Login.initLoginPageFields }
+                    -- Successful sign up
+                    ( { model
+                        | user = Just user
+                        , loginPageFields = Login.initLoginPageFields
+                        , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+                      }
                       -- TODO: query remote data for user
                     , Cmd.none
                     )

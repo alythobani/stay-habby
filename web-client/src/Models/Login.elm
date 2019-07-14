@@ -16,6 +16,7 @@ type alias LoginPageFields =
     { loginOrCreateUserForm : LoginOrCreateUserForm
     , loginFormUsername : String
     , loginFormPassword : String
+    , loginErrorMessage : Maybe String
     , createUserFormUsername : String
     , doesCreateUserFormUsernameHaveAtLeast1Character : Bool
     , createUserFormDisplayName : String
@@ -39,6 +40,7 @@ initLoginPageFields =
     { loginOrCreateUserForm = LoginForm
     , loginFormUsername = ""
     , loginFormPassword = ""
+    , loginErrorMessage = Nothing
     , createUserFormUsername = ""
     , doesCreateUserFormUsernameHaveAtLeast1Character = False
     , createUserFormDisplayName = ""

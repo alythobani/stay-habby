@@ -2,6 +2,7 @@ module Api exposing
     ( AllRemoteData
     , QueriedFrequencyStats
     , QueriedHabitGoalIntervalLists
+    , QueriedUser
     , frequencyToGraphQLString
     , graphQLRequest
     , mutationAddHabit

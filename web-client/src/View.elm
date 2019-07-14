@@ -139,9 +139,9 @@ view model =
 renderLoggedOutView : Login.LoginPageFields -> Html Msg
 renderLoggedOutView loginPageFields =
     let
-        createUserFormErrorMessageDiv : String -> Html Msg
-        createUserFormErrorMessageDiv errorMessageStr =
-            div [ class "create-user-form-error-message" ] [ text errorMessageStr ]
+        formErrorMessageDiv : String -> Html Msg
+        formErrorMessageDiv errorMessageStr =
+            div [ class "form-error-message" ] [ text errorMessageStr ]
     in
     div
         [ class "logged-out-view" ]
@@ -154,14 +154,14 @@ renderLoggedOutView loginPageFields =
                     ]
                 , onClick OnClickChooseLoginFormButton
                 ]
-                [ text "Log In" ]
+                [ text "Existing User" ]
             , button
                 [ classList
                     [ ( "selected", loginPageFields.loginOrCreateUserForm == Login.CreateUserForm )
                     ]
                 , onClick OnClickChooseCreateUserFormButton
                 ]
-                [ text "Create New User" ]
+                [ text "New User" ]
             ]
         , div
             [ classList
@@ -183,6 +183,17 @@ renderLoggedOutView loginPageFields =
                 , value loginPageFields.loginFormPassword
                 ]
                 []
+            , if loginPageFields.loginFormUsername == "" || loginPageFields.loginFormPassword == "" then
+                Util.hiddenDiv
+
+              else
+                button [ onClick OnLoginUserClick ] [ text "Log In" ]
+            , case loginPageFields.loginErrorMessage of
+                Just loginErrorMessage ->
+                    formErrorMessageDiv loginErrorMessage
+
+                Nothing ->
+                    Util.hiddenDiv
             ]
         , div
             [ classList
@@ -201,7 +212,7 @@ renderLoggedOutView loginPageFields =
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Username needs at least one character."
+                formErrorMessageDiv "Username needs at least one character."
             , input
                 [ placeholder "Display name..."
                 , onInput OnCreateUserFormDisplayNameInput
@@ -212,7 +223,7 @@ renderLoggedOutView loginPageFields =
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Display name needs at least one character."
+                formErrorMessageDiv "Display name needs at least one character."
             , input
                 [ placeholder "Email address (optional)..."
                 , onInput OnCreateUserFormEmailAddressInput
@@ -223,7 +234,7 @@ renderLoggedOutView loginPageFields =
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Invalid email address."
+                formErrorMessageDiv "Invalid email address."
             , input
                 [ placeholder "Password..."
                 , type_ "password"
@@ -235,27 +246,27 @@ renderLoggedOutView loginPageFields =
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Password needs at least 10 characters."
+                formErrorMessageDiv "Password needs at least 10 characters."
             , if loginPageFields.doesCreateUserFormPasswordHaveAtMost128Characters then
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Password must be at most 128 characters long."
+                formErrorMessageDiv "Password must be at most 128 characters long."
             , if loginPageFields.doesCreateUserFormPasswordHaveALowerCaseCharacter then
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Password needs at least one lowercase character (a-z)."
+                formErrorMessageDiv "Password needs at least one lowercase character (a-z)."
             , if loginPageFields.doesCreateUserFormPasswordHaveAnUpperCaseCharacter then
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Password needs at least one uppercase character (A-Z)."
+                formErrorMessageDiv "Password needs at least one uppercase character (A-Z)."
             , if loginPageFields.doesCreateUserFormPasswordHaveADigit then
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Password needs at least one digit (0-9)."
+                formErrorMessageDiv "Password needs at least one digit (0-9)."
             , input
                 [ placeholder "Repeat password..."
                 , type_ "password"
@@ -267,7 +278,7 @@ renderLoggedOutView loginPageFields =
                 Util.hiddenDiv
 
               else
-                createUserFormErrorMessageDiv "Passwords do not match."
+                formErrorMessageDiv "Passwords do not match."
             , case Login.extractCreateUserFields loginPageFields of
                 Just createUserFields ->
                     button
@@ -278,7 +289,7 @@ renderLoggedOutView loginPageFields =
                     Util.hiddenDiv
             , case loginPageFields.signUpErrorMessage of
                 Just signUpErrorMessage ->
-                    createUserFormErrorMessageDiv signUpErrorMessage
+                    formErrorMessageDiv signUpErrorMessage
 
                 Nothing ->
                     Util.hiddenDiv

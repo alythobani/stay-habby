@@ -69,10 +69,7 @@ body {
       margin: 20px 20px 0px 20px;
       width: 300px;
     }
-  }
-  .create-user-form {
-    text-align: center;
-    .create-user-form-error-message {
+    .form-error-message {
       color: red;
       font-size: 12px;
       margin-top: 15px;
@@ -104,15 +101,35 @@ body {
       background-color: black;
 
       .input-style-1 {
-        @extend .input-style-1-dark;
+        background-color: black;
+        border-color: $mine-shaft;
+        color: $gallery;
+        &::placeholder {
+          color: $chicago;
+        }
       }
 
       .button-style-1 {
-        @extend .button-style-1-dark;
+        background-color: black;
+        border-color: $gunsmoke;
+        color: $gunsmoke;
+        &.selected {
+          border-color: $alto;
+          color: $gallery;
+          background-color: inherit;
+        }
+        &:hover {
+          background-color: inherit;
+          color: $alto;
+        }
       }
 
       .button-style-2 {
-        @extend .button-style-2-dark;
+        background-color: black;
+        color: $gallery;
+        &:hover {
+          background-color: green;
+        }
       }
 
       .dialog-form-1 {

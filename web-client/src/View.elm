@@ -7,8 +7,8 @@ import DefaultServices.Keyboard as Keyboard
 import DefaultServices.Util as Util
 import Dict
 import HabitUtil
-import Html exposing (Html, button, div, hr, i, input, span, text, textarea)
-import Html.Attributes exposing (class, classList, id, placeholder, tabindex, type_, value)
+import Html exposing (Html, button, div, hr, i, img, input, span, text, textarea)
+import Html.Attributes exposing (class, classList, id, placeholder, src, tabindex, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import LineChart
 import Maybe.Extra as Maybe
@@ -148,6 +148,11 @@ renderLoggedOutView loginPageFields =
     div
         [ class "logged-out-view" ]
         [ div [ class "welcome-message" ] [ text "Welcome to Habby!" ]
+        , img
+            [ class "laughing-buddha-picture"
+            , src "assets/laughing_buddha_white.png"
+            ]
+            []
         , div
             [ class "choose-login-form-or-create-user-form-buttons" ]
             [ button

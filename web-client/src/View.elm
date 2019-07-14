@@ -23,6 +23,7 @@ import Models.HabitDayNote as HabitDayNote
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.KeyboardShortcut as KeyboardShortcut
 import Models.Login as Login
+import Models.User as User
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -53,6 +54,7 @@ view model =
                             model.habitActionsDropdown
                         , renderAddHabitForm
                             model.activeDialogScreen
+                            user
                             model.addHabit
                             model.allHabits
                         ]
@@ -510,11 +512,11 @@ renderHabitsPanel maybeSelectedYmd rdHabits rdHabitData rdFrequencyStatsList edi
         )
 
 
-renderAddHabitForm : Maybe DialogScreen.DialogScreen -> Habit.AddHabitInputData -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit) -> Html Msg
-renderAddHabitForm activeDialogScreen addHabit rdAllHabits =
+renderAddHabitForm : Maybe DialogScreen.DialogScreen -> User.User -> Habit.AddHabitInputData -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit) -> Html Msg
+renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
     let
         maybeCreateHabitData =
-            Habit.extractCreateHabit addHabit
+            Habit.extractCreateHabit (Just user) addHabit
 
         showForm =
             activeDialogScreen == Just DialogScreen.AddNewHabitScreen

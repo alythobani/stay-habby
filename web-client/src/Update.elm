@@ -17,6 +17,7 @@ import Models.Habit as Habit
 import Models.HabitGoalIntervalList as HabitGoalIntervalList
 import Models.KeyboardShortcut as KeyboardShortcut
 import Models.Login as Login
+import Models.User as User
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
@@ -140,26 +141,27 @@ update msg model =
                 , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
             }
 
-        getFrequencyStatsOnDate : YmdDate.YmdDate -> List String -> Cmd Msg
-        getFrequencyStatsOnDate ymd habitIds =
+        getFrequencyStatsOnDate : User.User -> YmdDate.YmdDate -> List String -> Cmd Msg
+        getFrequencyStatsOnDate user ymd habitIds =
             Api.queryFrequencyStats
+                user
                 ymd
                 habitIds
                 model.apiBaseUrl
                 OnGetFrequencyStatsFailure
                 OnGetFrequencyStatsSuccess
 
-        getFrequencyStats : List String -> Cmd Msg
-        getFrequencyStats habitIds =
+        getFrequencyStats : User.User -> List String -> Cmd Msg
+        getFrequencyStats user habitIds =
             case model.selectedYmd of
                 Just ymd ->
-                    getFrequencyStatsOnDate ymd habitIds
+                    getFrequencyStatsOnDate user ymd habitIds
 
                 Nothing ->
                     Cmd.none
 
-        getGraphHabitGoalIntervalList : Habit.Habit -> Graph.NumberOfDaysToShow -> YmdDate.YmdDate -> Cmd Msg
-        getGraphHabitGoalIntervalList graphHabit numDaysToShow endYmd =
+        getGraphHabitGoalIntervalList : User.User -> Habit.Habit -> Graph.NumberOfDaysToShow -> YmdDate.YmdDate -> Cmd Msg
+        getGraphHabitGoalIntervalList user graphHabit numDaysToShow endYmd =
             let
                 habitIds =
                     [ graphHabit |> Habit.getCommonFields |> .id ]
@@ -179,6 +181,7 @@ update msg model =
                             Just <| YmdDate.addYears -1 endYmd
             in
             Api.queryHabitGoalIntervalLists
+                user
                 maybeStartYmd
                 endYmd
                 habitIds
@@ -260,23 +263,33 @@ update msg model =
                         currentYmd : YmdDate.YmdDate
                         currentYmd =
                             YmdDate.fromDate currentDate
+
+                        newModel =
+                            { model
+                                | currentTimeZone = Just timeZone
+                                , selectedYmd = Just currentYmd
+                                , actualYmd = Just currentYmd
+                                , chooseDateDialogChosenYmd = Just currentYmd
+                            }
                     in
-                    ( { model
-                        | currentTimeZone = Just timeZone
-                        , selectedYmd = Just currentYmd
-                        , actualYmd = Just currentYmd
-                        , chooseDateDialogChosenYmd = Just currentYmd
-                        , allHabits = RemoteData.Loading
-                        , allHabitData = RemoteData.Loading
-                        , allFrequencyStats = RemoteData.Loading
-                        , allHabitDayNotes = RemoteData.Loading
-                      }
-                    , Api.queryAllRemoteData
-                        currentYmd
-                        model.apiBaseUrl
-                        OnGetAllRemoteDataFailure
-                        OnGetAllRemoteDataSuccess
-                    )
+                    case model.user of
+                        Just user ->
+                            ( { newModel
+                                | allHabits = RemoteData.Loading
+                                , allHabitData = RemoteData.Loading
+                                , allFrequencyStats = RemoteData.Loading
+                                , allHabitDayNotes = RemoteData.Loading
+                              }
+                            , Api.queryAllRemoteData
+                                user
+                                currentYmd
+                                model.apiBaseUrl
+                                OnGetAllRemoteDataFailure
+                                OnGetAllRemoteDataSuccess
+                            )
+
+                        Nothing ->
+                            ( newModel, Cmd.none )
 
         OnUrlChange url ->
             -- TODO
@@ -348,8 +361,17 @@ update msg model =
                         , loginPageFields = Login.initLoginPageFields
                         , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
                       }
-                      -- TODO: query remote data for user
-                    , Cmd.none
+                    , case model.selectedYmd of
+                        Just selectedYmd ->
+                            Api.queryAllRemoteData
+                                user
+                                selectedYmd
+                                model.apiBaseUrl
+                                OnGetAllRemoteDataFailure
+                                OnGetAllRemoteDataSuccess
+
+                        Nothing ->
+                            Cmd.none
                     )
 
                 Nothing ->
@@ -481,8 +503,17 @@ update msg model =
                         , loginPageFields = Login.initLoginPageFields
                         , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
                       }
-                      -- TODO: query remote data for user
-                    , Cmd.none
+                    , case model.selectedYmd of
+                        Just selectedYmd ->
+                            Api.queryAllRemoteData
+                                user
+                                selectedYmd
+                                model.apiBaseUrl
+                                OnGetAllRemoteDataFailure
+                                OnGetAllRemoteDataSuccess
+
+                        Nothing ->
+                            Cmd.none
                     )
 
                 Nothing ->
@@ -528,12 +559,18 @@ update msg model =
                 ( model, Cmd.none )
 
             else
-                ( { model
-                    | selectedYmd = Just newYmd
-                    , allFrequencyStats = RemoteData.Loading
-                  }
-                , getFrequencyStatsOnDate newYmd []
-                )
+                let
+                    newModel =
+                        { model | selectedYmd = Just newYmd }
+                in
+                case model.user of
+                    Just user ->
+                        ( { newModel | allFrequencyStats = RemoteData.Loading }
+                        , getFrequencyStatsOnDate user newYmd []
+                        )
+
+                    Nothing ->
+                        ( newModel, Cmd.none )
 
         SetSelectedDateToXDaysFromToday numDaysToAdd ->
             let
@@ -780,7 +817,7 @@ update msg model =
             )
 
         AddHabitFormSubmit ->
-            case ( model.selectedYmd, Habit.extractCreateHabit model.addHabit, model.allHabits ) of
+            case ( model.selectedYmd, Habit.extractCreateHabit model.user model.addHabit, model.allHabits ) of
                 ( Just selectedYmd, Just createHabitData, RemoteData.Success allHabits ) ->
                     let
                         newDialogScreenModel =
@@ -831,7 +868,12 @@ update msg model =
             ( { updatedHabitListsModel
                 | addHabit = Habit.initAddHabitData
               }
-            , getFrequencyStats [ habitRecord.id ]
+            , case model.user of
+                Just user ->
+                    getFrequencyStats user [ habitRecord.id ]
+
+                Nothing ->
+                    Cmd.none
             )
 
         -- Set Habit Data
@@ -853,13 +895,11 @@ update msg model =
                         ( { model | editingHabitAmountDict = newEditingHabitAmountDict <| Just newInt }, Cmd.none )
 
         SetHabitData selectedYmd habitId maybeNewVal ->
-            case maybeNewVal of
-                Nothing ->
-                    ( model, Cmd.none )
-
-                Just newVal ->
+            case ( maybeNewVal, model.user ) of
+                ( Just newVal, Just user ) ->
                     ( model
                     , Api.mutationSetHabitData
+                        user
                         selectedYmd
                         habitId
                         newVal
@@ -867,6 +907,9 @@ update msg model =
                         OnSetHabitDataFailure
                         OnSetHabitDataSuccess
                     )
+
+                _ ->
+                    ( model, Cmd.none )
 
         OnSetHabitDataFailure apiError ->
             ( { model | errorMessage = Just <| "Error setting habit data: " ++ ApiError.toString apiError }
@@ -888,7 +931,12 @@ update msg model =
                     }
             in
             ( newModel
-            , getFrequencyStats [ updatedHabitDatum.habitId ]
+            , case model.user of
+                Just user ->
+                    getFrequencyStats user [ updatedHabitDatum.habitId ]
+
+                Nothing ->
+                    Cmd.none
             )
 
         OnGetFrequencyStatsFailure apiError ->
@@ -1068,8 +1116,13 @@ update msg model =
             )
 
         OnSetHabitDataShortcutAmountScreenSubmit ->
-            case ( model.setHabitDataShortcutAmountScreenInputInt, model.selectedYmd, model.setHabitDataShortcutAmountScreenHabit ) of
-                ( Just inputInt, Just selectedYmd, Just selectedHabit ) ->
+            case
+                ( model.setHabitDataShortcutAmountScreenInputInt
+                , model.selectedYmd
+                , ( model.setHabitDataShortcutAmountScreenHabit, model.user )
+                )
+            of
+                ( Just inputInt, Just selectedYmd, ( Just selectedHabit, Just user ) ) ->
                     let
                         habitId =
                             selectedHabit |> Habit.getCommonFields |> .id
@@ -1079,6 +1132,7 @@ update msg model =
                     in
                     ( newDialogScreenModel
                     , Api.mutationSetHabitData
+                        user
                         selectedYmd
                         habitId
                         inputInt
@@ -1090,10 +1144,14 @@ update msg model =
                 ( _, Nothing, _ ) ->
                     ( { model | errorMessage = Just "Error setting habit data: no selected date" }, Cmd.none )
 
-                ( _, _, Nothing ) ->
+                ( _, _, ( Nothing, _ ) ) ->
                     ( { model | errorMessage = Just "Error setting habit data: no selected habit" }, Cmd.none )
 
+                ( _, _, ( _, Nothing ) ) ->
+                    ( { model | errorMessage = Just "Error setting habit data: not logged in" }, Cmd.none )
+
                 _ ->
+                    -- User just hasn't entered a new amount, it's fine, do nothing
                     ( model, Cmd.none )
 
         -- Edit Goal Habit Selection
@@ -1664,12 +1722,17 @@ update msg model =
             ( { updatedHabitListsModel
                 | editGoal = Habit.initEditGoalData
               }
-            , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
+            , case model.user of
+                Just user ->
+                    getFrequencyStats user [ habit |> Habit.getCommonFields |> .id ]
+
+                Nothing ->
+                    Cmd.none
             )
 
         OnEditGoalSubmit ->
-            case ( model.editGoalDialogHabit, model.editGoalNewFrequenciesList ) of
-                ( Just habit, Just newFrequenciesList ) ->
+            case ( model.editGoalDialogHabit, model.editGoalNewFrequenciesList, model.user ) of
+                ( Just habit, Just newFrequenciesList, Just user ) ->
                     let
                         ( habitId, habitType ) =
                             case habit of
@@ -1684,6 +1747,7 @@ update msg model =
                     in
                     ( newDialogScreenModel
                     , Api.mutationEditHabitGoalFrequencies
+                        user
                         habitId
                         newFrequenciesList
                         habitType
@@ -1692,14 +1756,19 @@ update msg model =
                         OnEditGoalSuccess
                     )
 
-                ( Nothing, _ ) ->
+                ( Nothing, _, _ ) ->
                     -- User shouldn't be able to call `OnEditGoalSubmit` unless the Edit Goal dialog is open
                     ( { model | errorMessage = Just "Error editing habit goal: no habit selected" }
                     , Cmd.none
                     )
 
-                ( _, Nothing ) ->
-                    -- If the user hasn't filled out all new goal fields properly yet, just do nothing
+                ( _, _, Nothing ) ->
+                    ( { model | errorMessage = Just "Error editing habit goal: not logged in" }
+                    , Cmd.none
+                    )
+
+                ( _, Nothing, _ ) ->
+                    -- If the user hasn't filled out all new goal fields properly yet, it's fine, just do nothing
                     ( model, Cmd.none )
 
         -- Error Messages
@@ -1811,14 +1880,15 @@ update msg model =
             ( { model | addNoteDialogInput = newAddNoteInput }, Cmd.none )
 
         OnAddNoteSubmit ->
-            case ( String.isEmpty model.addNoteDialogInput, model.selectedYmd, model.addNoteDialogHabit ) of
-                ( False, Just selectedYmd, Just habit ) ->
+            case ( String.isEmpty model.addNoteDialogInput, model.selectedYmd, ( model.addNoteDialogHabit, model.user ) ) of
+                ( False, Just selectedYmd, ( Just habit, Just user ) ) ->
                     let
                         newDialogScreenModel =
                             switchScreen model Nothing
                     in
                     ( newDialogScreenModel
                     , Api.mutationSetHabitDayNote
+                        user
                         selectedYmd
                         (habit |> Habit.getCommonFields |> .id)
                         model.addNoteDialogInput
@@ -2041,8 +2111,8 @@ update msg model =
                     ( model, Cmd.none )
 
         OnResumeOrSuspendSubmitClick ->
-            case ( model.suspendOrResumeHabit, model.suspendOrResumeHabitNewSuspensions ) of
-                ( Just habit, Just newSuspensions ) ->
+            case ( model.suspendOrResumeHabit, model.suspendOrResumeHabitNewSuspensions, model.user ) of
+                ( Just habit, Just newSuspensions, Just user ) ->
                     let
                         habitRecord =
                             Habit.getCommonFields habit
@@ -2056,12 +2126,16 @@ update msg model =
                         , suspendOrResumeHabitNewSuspensions = Nothing
                       }
                     , Api.mutationEditHabitSuspensions
+                        user
                         habitRecord.id
                         newSuspensions
                         model.apiBaseUrl
                         OnResumeOrSuspendHabitFailure
                         OnResumeOrSuspendHabitSuccess
                     )
+
+                ( _, _, Nothing ) ->
+                    ( { model | errorMessage = Just "Error suspending/resuming habit: not logged in" }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -2077,7 +2151,12 @@ update msg model =
                     updateHabitListsWithNewHabit habit
             in
             ( updatedHabitListsModel
-            , getFrequencyStats [ habit |> Habit.getCommonFields |> .id ]
+            , case model.user of
+                Just user ->
+                    getFrequencyStats user [ habit |> Habit.getCommonFields |> .id ]
+
+                Nothing ->
+                    Cmd.none
             )
 
         -- Graph Habit Selection Screen
@@ -2126,8 +2205,8 @@ update msg model =
 
         -- Graph Dialog Screen
         OpenGraphDialogScreen habit ->
-            case model.selectedYmd of
-                Just selectedYmd ->
+            case ( model.selectedYmd, model.user ) of
+                ( Just selectedYmd, Just user ) ->
                     let
                         newDialogScreenModel =
                             switchScreen model (Just DialogScreen.GraphDialogScreen)
@@ -2137,15 +2216,18 @@ update msg model =
                         , graphIntervalsData = RemoteData.Loading
                         , graphGoalIntervals = RemoteData.Loading
                       }
-                    , getGraphHabitGoalIntervalList habit newDialogScreenModel.graphNumDaysToShow selectedYmd
+                    , getGraphHabitGoalIntervalList user habit newDialogScreenModel.graphNumDaysToShow selectedYmd
                     )
 
-                Nothing ->
+                ( Nothing, _ ) ->
                     ( { model | errorMessage = Just "Error opening habit graph: no date selected" }, Cmd.none )
 
+                ( _, Nothing ) ->
+                    ( { model | errorMessage = Just "Error opening habit graph: not logged in" }, Cmd.none )
+
         SetGraphNumDaysToShow numDaysToShow ->
-            case ( model.graphHabit, model.selectedYmd ) of
-                ( Just graphHabit, Just selectedYmd ) ->
+            case ( model.graphHabit, model.selectedYmd, model.user ) of
+                ( Just graphHabit, Just selectedYmd, Just user ) ->
                     if numDaysToShow == model.graphNumDaysToShow then
                         ( model, Cmd.none )
 
@@ -2155,14 +2237,17 @@ update msg model =
                             , graphIntervalsData = RemoteData.Loading
                             , graphGoalIntervals = RemoteData.Loading
                           }
-                        , getGraphHabitGoalIntervalList graphHabit numDaysToShow selectedYmd
+                        , getGraphHabitGoalIntervalList user graphHabit numDaysToShow selectedYmd
                         )
 
-                ( Nothing, _ ) ->
+                ( Nothing, _, _ ) ->
                     ( { model | errorMessage = Just "Error setting graph's number of days to show: no habit selected" }, Cmd.none )
 
-                _ ->
+                ( _, Nothing, _ ) ->
                     ( { model | errorMessage = Just "Error setting graph's number of days to show: no date selected" }, Cmd.none )
+
+                ( _, _, Nothing ) ->
+                    ( { model | errorMessage = Just "Error setting graph's number of days to show: not logged in" }, Cmd.none )
 
         OnGetGraphHabitGoalIntervalListFailure apiError ->
             ( { model

@@ -89,16 +89,18 @@ type alias AllRemoteData =
 {-| Query for all fields on all habits and habit data, plus their frequency stats.
 -}
 queryAllRemoteData :
-    YmdDate.YmdDate
+    User.User
+    -> YmdDate.YmdDate
     -> String
     -> (ApiError -> b)
     -> (AllRemoteData -> b)
     -> Cmd b
-queryAllRemoteData ymd =
+queryAllRemoteData user ymd =
     let
         templateDict =
             Dict.fromList
-                [ ( "habit_output", Habit.graphQLOutputString )
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "habit_output", Habit.graphQLOutputString )
                 , ( "habit_data_output", HabitData.graphQLOutputString )
                 , ( "current_client_date", YmdDate.encodeYmdDate ymd )
                 , ( "frequency_stats_output", FrequencyStats.graphQLOutputString )
@@ -107,10 +109,12 @@ queryAllRemoteData ymd =
 
         queryString =
             """{
-  habits: get_habits {{habit_output}}
-  habitData: get_habit_data {{habit_data_output}}
-  frequencyStatsList: get_frequency_stats(current_client_date: {{current_client_date}}) {{frequency_stats_output}}
-  habitDayNotes: get_habit_day_notes {{habit_day_note_output}}
+  habits: get_habits(user_id: {{user_id}}) {{habit_output}}
+  habitData: get_habit_data(user_id: {{user_id}}) {{habit_data_output}}
+  frequencyStatsList: get_frequency_stats(
+    user_id: {{user_id}},
+    current_client_date: {{current_client_date}}) {{frequency_stats_output}}
+  habitDayNotes: get_habit_day_notes(user_id: {{user_id}}) {{habit_day_note_output}}
 }"""
                 |> Util.templater templateDict
     in
@@ -133,18 +137,20 @@ type alias QueriedHabitGoalIntervalLists =
 An empty habit list means we will query for all habits.
 -}
 queryHabitGoalIntervalLists :
-    Maybe YmdDate.YmdDate
+    User.User
+    -> Maybe YmdDate.YmdDate
     -> YmdDate.YmdDate
     -> List String
     -> String
     -> (ApiError -> b)
     -> (QueriedHabitGoalIntervalLists -> b)
     -> Cmd b
-queryHabitGoalIntervalLists maybeStartYmd endYmd habitIds =
+queryHabitGoalIntervalLists user maybeStartYmd endYmd habitIds =
     let
         templateDict =
             Dict.fromList
-                [ ( "start_date", Util.encodeMaybe maybeStartYmd YmdDate.encodeYmdDate )
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "start_date", Util.encodeMaybe maybeStartYmd YmdDate.encodeYmdDate )
                 , ( "end_date", YmdDate.encodeYmdDate endYmd )
                 , ( "habit_ids_input"
                   , if List.isEmpty habitIds then
@@ -158,6 +164,7 @@ queryHabitGoalIntervalLists maybeStartYmd endYmd habitIds =
 
         queryString =
             """{habitGoalIntervalLists: get_habit_goal_interval_lists(
+                  user_id: {{user_id}}
                   start_date: {{start_date}}
                   end_date: {{end_date}}
                   {{habit_ids_input}}) {{goal_interval_list_output}}
@@ -180,17 +187,19 @@ type alias QueriedFrequencyStats =
 An empty habit list means we will query for all habits.
 -}
 queryFrequencyStats :
-    YmdDate.YmdDate
+    User.User
+    -> YmdDate.YmdDate
     -> List String
     -> String
     -> (ApiError -> b)
     -> (QueriedFrequencyStats -> b)
     -> Cmd b
-queryFrequencyStats ymd habitIds =
+queryFrequencyStats user ymd habitIds =
     let
         templateDict =
             Dict.fromList
-                [ ( "current_client_date", YmdDate.encodeYmdDate ymd )
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "current_client_date", YmdDate.encodeYmdDate ymd )
                 , ( "habit_ids_input"
                   , if List.isEmpty habitIds then
                         ""
@@ -203,6 +212,7 @@ queryFrequencyStats ymd habitIds =
 
         queryString =
             """{frequencyStatsList: get_frequency_stats(
+                  user_id: {{user_id}},
                   current_client_date: {{current_client_date}}
                   {{habit_ids_input}}) {{frequency_stats_output}}
             }"""
@@ -239,6 +249,7 @@ mutationAddHabit createHabit ymd =
                     else
                         "bad_habit"
                   )
+                , ( "user_id", Util.encodeString commonFields.userId )
                 , ( "name", Util.encodeString commonFields.name )
                 , ( "description", Util.encodeString commonFields.description )
                 , ( "time_of_day"
@@ -276,6 +287,7 @@ mutationAddHabit createHabit ymd =
               add_habit(create_habit_data: {
                 type_name: "{{type_name}}",
                 {{type_name}}: {
+                  user_id: {{user_id}},
                   name: {{name}},
                   description: {{description}},
                   {{time_of_day}}
@@ -366,27 +378,29 @@ frequencyToGraphQLString frequency =
                   }"""
 
 
-mutationEditHabitGoalFrequencies : String -> List Habit.FrequencyChangeRecord -> String -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
-mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
+mutationEditHabitGoalFrequencies :
+    User.User
+    -> String
+    -> List Habit.FrequencyChangeRecord
+    -> String
+    -> String
+    -> (ApiError -> b)
+    -> (Habit.Habit -> b)
+    -> Cmd b
+mutationEditHabitGoalFrequencies user habitId newFrequencies habitType =
     let
         frequencyChangeRecordToGraphQLString : Habit.FrequencyChangeRecord -> String
         frequencyChangeRecordToGraphQLString fcr =
             let
                 fcrTemplateDict =
                     Dict.fromList
-                        [ ( "start_date_day", String.fromInt fcr.startDate.day )
-                        , ( "start_date_month", String.fromInt fcr.startDate.month )
-                        , ( "start_date_year", String.fromInt fcr.startDate.year )
+                        [ ( "start_date", YmdDate.encodeYmdDate fcr.startDate )
                         , ( "end_date", Util.encodeMaybe fcr.endDate YmdDate.encodeYmdDate )
                         , ( "new_frequency", frequencyToGraphQLString fcr.newFrequency )
                         ]
             in
             """{
-          start_date: {
-            day: {{start_date_day}},
-            month: {{start_date_month}},
-            year: {{start_date_year}}
-          },
+          start_date: {{start_date}},
           end_date: {{end_date}},
           new_frequency: {{new_frequency}}
           }"""
@@ -394,7 +408,8 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
 
         templateDict =
             Dict.fromList
-                [ ( "habit_type"
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "habit_type"
                   , if isGoodHabit then
                         "good_habit"
 
@@ -421,6 +436,7 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
         queryString =
             """mutation {
             edit_habit_goal_frequencies(
+              user_id: {{user_id}},
               habit_id: {{habit_id}},
               habit_type: "{{habit_type}}",
               new_frequencies: [{{new_frequencies}}]
@@ -431,12 +447,21 @@ mutationEditHabitGoalFrequencies habitId newFrequencies habitType =
     graphQLRequest queryString <| Decode.at [ "data", "edit_habit_goal_frequencies" ] Habit.decodeHabit
 
 
-mutationSetHabitData : YmdDate.YmdDate -> String -> Int -> String -> (ApiError -> b) -> (HabitData.HabitData -> b) -> Cmd b
-mutationSetHabitData ymd habitId amount =
+mutationSetHabitData :
+    User.User
+    -> YmdDate.YmdDate
+    -> String
+    -> Int
+    -> String
+    -> (ApiError -> b)
+    -> (HabitData.HabitData -> b)
+    -> Cmd b
+mutationSetHabitData user ymd habitId amount =
     let
         templateDict =
             Dict.fromList <|
-                [ ( "date", YmdDate.encodeYmdDate ymd )
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "date", YmdDate.encodeYmdDate ymd )
                 , ( "amount", Util.encodeInt amount )
                 , ( "habit_id", Util.encodeString habitId )
                 , ( "habit_data_output", HabitData.graphQLOutputString )
@@ -445,6 +470,7 @@ mutationSetHabitData ymd habitId amount =
         query =
             """mutation {
               set_habit_data(
+                user_id: {{user_id}},
                 date: {{date}},
                 amount: {{amount}},
                 habit_id: {{habit_id}}
@@ -455,12 +481,21 @@ mutationSetHabitData ymd habitId amount =
     graphQLRequest query (Decode.at [ "data", "set_habit_data" ] HabitData.decodeHabitData)
 
 
-mutationSetHabitDayNote : YmdDate.YmdDate -> String -> String -> String -> (ApiError -> b) -> (HabitDayNote.HabitDayNote -> b) -> Cmd b
-mutationSetHabitDayNote ymd habitId note =
+mutationSetHabitDayNote :
+    User.User
+    -> YmdDate.YmdDate
+    -> String
+    -> String
+    -> String
+    -> (ApiError -> b)
+    -> (HabitDayNote.HabitDayNote -> b)
+    -> Cmd b
+mutationSetHabitDayNote user ymd habitId note =
     let
         templateDict =
             Dict.fromList <|
-                [ ( "date", YmdDate.encodeYmdDate ymd )
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "date", YmdDate.encodeYmdDate ymd )
                 , ( "note", Util.encodeString note )
                 , ( "habit_id", Util.encodeString habitId )
                 , ( "habit_day_note_output", HabitDayNote.graphQLOutputString )
@@ -469,6 +504,7 @@ mutationSetHabitDayNote ymd habitId note =
         query =
             """mutation {
               set_habit_day_note(
+                user_id: {{user_id}},
                 date: {{date}},
                 note: {{note}},
                 habit_id: {{habit_id}}
@@ -479,8 +515,15 @@ mutationSetHabitDayNote ymd habitId note =
     graphQLRequest query (Decode.at [ "data", "set_habit_day_note" ] HabitDayNote.decodeHabitDayNote)
 
 
-mutationEditHabitSuspensions : String -> List Habit.SuspendedInterval -> String -> (ApiError -> b) -> (Habit.Habit -> b) -> Cmd b
-mutationEditHabitSuspensions habitId newSuspensions =
+mutationEditHabitSuspensions :
+    User.User
+    -> String
+    -> List Habit.SuspendedInterval
+    -> String
+    -> (ApiError -> b)
+    -> (Habit.Habit -> b)
+    -> Cmd b
+mutationEditHabitSuspensions user habitId newSuspensions =
     let
         encodeSuspendedInterval : Habit.SuspendedInterval -> String
         encodeSuspendedInterval suspendedInterval =
@@ -499,7 +542,8 @@ mutationEditHabitSuspensions habitId newSuspensions =
 
         templateDict =
             Dict.fromList
-                [ ( "habit_id", Util.encodeString habitId )
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "habit_id", Util.encodeString habitId )
                 , ( "new_suspensions"
                   , newSuspensions
                         |> List.map encodeSuspendedInterval
@@ -511,6 +555,7 @@ mutationEditHabitSuspensions habitId newSuspensions =
         queryString =
             """mutation {
             edit_habit_suspensions(
+              user_id: {{user_id}},
               habit_id: {{habit_id}},
               new_suspensions: [{{new_suspensions}}]
             ) {{habit_output}}

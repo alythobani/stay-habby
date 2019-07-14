@@ -3,6 +3,7 @@ module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitR
 import DefaultServices.Util as Util
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (hardcoded, optional, required)
+import Models.User as User
 import Models.YmdDate exposing (YmdDate, decodeYmdDate)
 
 
@@ -18,6 +19,7 @@ type HabitKind
 
 type alias GoodHabitRecord =
     { id : String
+    , userId : String
     , name : String
     , description : Maybe String
     , unitNameSingular : String
@@ -30,6 +32,7 @@ type alias GoodHabitRecord =
 
 type alias BadHabitRecord =
     { id : String
+    , userId : String
     , name : String
     , description : Maybe String
     , unitNameSingular : String
@@ -97,7 +100,8 @@ type CreateHabit
 
 
 type alias CreateGoodHabitRecord =
-    { name : String
+    { userId : String
+    , name : String
     , description : String
     , timeOfDay : HabitTime
     , unitNameSingular : String
@@ -107,7 +111,8 @@ type alias CreateGoodHabitRecord =
 
 
 type alias CreateBadHabitRecord =
-    { name : String
+    { userId : String
+    , name : String
     , description : String
     , unitNameSingular : String
     , unitNamePlural : String
@@ -221,6 +226,7 @@ getCommonFields :
     Habit
     ->
         { id : String
+        , userId : String
         , name : String
         , description : Maybe String
         , unitNameSingular : String
@@ -229,8 +235,9 @@ getCommonFields :
         }
 getCommonFields habit =
     case habit of
-        GoodHabit { id, name, description, unitNameSingular, unitNamePlural, suspensions } ->
+        GoodHabit { id, userId, name, description, unitNameSingular, unitNamePlural, suspensions } ->
             { id = id
+            , userId = userId
             , name = name
             , description = description
             , unitNameSingular = unitNameSingular
@@ -238,8 +245,9 @@ getCommonFields habit =
             , suspensions = suspensions
             }
 
-        BadHabit { id, name, description, unitNameSingular, unitNamePlural, suspensions } ->
+        BadHabit { id, userId, name, description, unitNameSingular, unitNamePlural, suspensions } ->
             { id = id
+            , userId = userId
             , name = name
             , description = description
             , unitNameSingular = unitNameSingular
@@ -251,7 +259,8 @@ getCommonFields habit =
 getCommonCreateFields :
     CreateHabit
     ->
-        { name : String
+        { userId : String
+        , name : String
         , description : String
         , unitNameSingular : String
         , unitNamePlural : String
@@ -259,16 +268,18 @@ getCommonCreateFields :
         }
 getCommonCreateFields createHabit =
     case createHabit of
-        CreateGoodHabit { name, description, unitNameSingular, unitNamePlural, initialTargetFrequency } ->
-            { name = name
+        CreateGoodHabit { userId, name, description, unitNameSingular, unitNamePlural, initialTargetFrequency } ->
+            { userId = userId
+            , name = name
             , description = description
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
             , initialFrequency = initialTargetFrequency
             }
 
-        CreateBadHabit { name, description, unitNameSingular, unitNamePlural, initialThresholdFrequency } ->
-            { name = name
+        CreateBadHabit { userId, name, description, unitNameSingular, unitNamePlural, initialThresholdFrequency } ->
+            { userId = userId
+            , name = name
             , description = description
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
@@ -276,89 +287,97 @@ getCommonCreateFields createHabit =
             }
 
 
-extractCreateHabit : AddHabitInputData -> Maybe CreateHabit
-extractCreateHabit addHabitInputData =
-    let
-        extractedName =
-            Util.notEmpty addHabitInputData.name
+extractCreateHabit : Maybe User.User -> AddHabitInputData -> Maybe CreateHabit
+extractCreateHabit maybeUser addHabitInputData =
+    case maybeUser of
+        Just user ->
+            let
+                userId =
+                    user.id
 
-        extractedDesc =
-            Util.notEmpty addHabitInputData.description
+                extractedName =
+                    Util.notEmpty addHabitInputData.name
 
-        goodHabitTime =
-            addHabitInputData.goodHabitTime
+                extractedDesc =
+                    Util.notEmpty addHabitInputData.description
 
-        extractedUnitNameSingular =
-            Util.notEmpty addHabitInputData.unitNameSingular
+                goodHabitTime =
+                    addHabitInputData.goodHabitTime
 
-        extractedUnitNamePlural =
-            Util.notEmpty addHabitInputData.unitNamePlural
+                extractedUnitNameSingular =
+                    Util.notEmpty addHabitInputData.unitNameSingular
 
-        extractedFrequency =
-            case addHabitInputData.frequencyKind of
-                EveryXDayFrequencyKind ->
-                    case ( addHabitInputData.days, addHabitInputData.times ) of
-                        ( Just days, Just times ) ->
-                            Just <| EveryXDayFrequency { times = times, days = days }
+                extractedUnitNamePlural =
+                    Util.notEmpty addHabitInputData.unitNamePlural
 
-                        _ ->
-                            Nothing
+                extractedFrequency =
+                    case addHabitInputData.frequencyKind of
+                        EveryXDayFrequencyKind ->
+                            case ( addHabitInputData.days, addHabitInputData.times ) of
+                                ( Just days, Just times ) ->
+                                    Just <| EveryXDayFrequency { times = times, days = days }
 
-                TotalWeekFrequencyKind ->
-                    Maybe.map TotalWeekFrequency addHabitInputData.timesPerWeek
+                                _ ->
+                                    Nothing
 
-                SpecificDayOfWeekFrequencyKind ->
+                        TotalWeekFrequencyKind ->
+                            Maybe.map TotalWeekFrequency addHabitInputData.timesPerWeek
+
+                        SpecificDayOfWeekFrequencyKind ->
+                            case
+                                [ addHabitInputData.mondayTimes
+                                , addHabitInputData.tuesdayTimes
+                                , addHabitInputData.wednesdayTimes
+                                , addHabitInputData.thursdayTimes
+                                , addHabitInputData.fridayTimes
+                                , addHabitInputData.saturdayTimes
+                                , addHabitInputData.sundayTimes
+                                ]
+                            of
+                                [ Just monday, Just tuesday, Just wednesday, Just thursday, Just friday, Just saturday, Just sunday ] ->
+                                    Just <|
+                                        SpecificDayOfWeekFrequency
+                                            { monday = monday
+                                            , tuesday = tuesday
+                                            , wednesday = wednesday
+                                            , thursday = thursday
+                                            , friday = friday
+                                            , saturday = saturday
+                                            , sunday = sunday
+                                            }
+
+                                _ ->
+                                    Nothing
+            in
+            case addHabitInputData.kind of
+                GoodHabitKind ->
                     case
-                        [ addHabitInputData.mondayTimes
-                        , addHabitInputData.tuesdayTimes
-                        , addHabitInputData.wednesdayTimes
-                        , addHabitInputData.thursdayTimes
-                        , addHabitInputData.fridayTimes
-                        , addHabitInputData.saturdayTimes
-                        , addHabitInputData.sundayTimes
-                        ]
+                        ( ( extractedName, extractedDesc )
+                        , ( extractedUnitNameSingular, extractedUnitNamePlural )
+                        , extractedFrequency
+                        )
                     of
-                        [ Just monday, Just tuesday, Just wednesday, Just thursday, Just friday, Just saturday, Just sunday ] ->
-                            Just <|
-                                SpecificDayOfWeekFrequency
-                                    { monday = monday
-                                    , tuesday = tuesday
-                                    , wednesday = wednesday
-                                    , thursday = thursday
-                                    , friday = friday
-                                    , saturday = saturday
-                                    , sunday = sunday
-                                    }
+                        ( ( Just name, Just description ), ( Just unitNameSingular, Just unitNamePlural ), Just frequency ) ->
+                            Just <| CreateGoodHabit <| CreateGoodHabitRecord userId name description goodHabitTime unitNameSingular unitNamePlural frequency
 
                         _ ->
                             Nothing
-    in
-    case addHabitInputData.kind of
-        GoodHabitKind ->
-            case
-                ( ( extractedName, extractedDesc )
-                , ( extractedUnitNameSingular, extractedUnitNamePlural )
-                , extractedFrequency
-                )
-            of
-                ( ( Just name, Just description ), ( Just unitNameSingular, Just unitNamePlural ), Just frequency ) ->
-                    Just <| CreateGoodHabit <| CreateGoodHabitRecord name description goodHabitTime unitNameSingular unitNamePlural frequency
 
-                _ ->
-                    Nothing
+                BadHabitKind ->
+                    case
+                        ( ( extractedName, extractedDesc )
+                        , ( extractedUnitNameSingular, extractedUnitNamePlural )
+                        , extractedFrequency
+                        )
+                    of
+                        ( ( Just name, Just description ), ( Just unitNameSingular, Just unitNamePlural ), Just frequency ) ->
+                            Just <| CreateBadHabit <| CreateBadHabitRecord userId name description unitNameSingular unitNamePlural frequency
 
-        BadHabitKind ->
-            case
-                ( ( extractedName, extractedDesc )
-                , ( extractedUnitNameSingular, extractedUnitNamePlural )
-                , extractedFrequency
-                )
-            of
-                ( ( Just name, Just description ), ( Just unitNameSingular, Just unitNamePlural ), Just frequency ) ->
-                    Just <| CreateBadHabit <| CreateBadHabitRecord name description unitNameSingular unitNamePlural frequency
+                        _ ->
+                            Nothing
 
-                _ ->
-                    Nothing
+        Nothing ->
+            Nothing
 
 
 extractNewGoal : EditGoalInputData -> Maybe Frequency
@@ -476,6 +495,7 @@ graphQLOutputString =
       __typename
       ... on good_habit {
         _id
+        user_id
         description
         name
         unit_name_singular
@@ -527,6 +547,7 @@ graphQLOutputString =
       }
       ... on bad_habit {
         _id
+        user_id
         description
         name
         unit_name_singular
@@ -584,6 +605,7 @@ decodeHabit =
         decodeGoodHabitRecord =
             Decode.succeed GoodHabitRecord
                 |> required "_id" Decode.string
+                |> required "user_id" Decode.string
                 |> required "name" Decode.string
                 |> optional "description" (Decode.maybe Decode.string) Nothing
                 |> required "unit_name_singular" Decode.string
@@ -595,6 +617,7 @@ decodeHabit =
         decodeBadHabitRecord =
             Decode.succeed BadHabitRecord
                 |> required "_id" Decode.string
+                |> required "user_id" Decode.string
                 |> required "name" Decode.string
                 |> optional "description" (Decode.maybe Decode.string) Nothing
                 |> required "unit_name_singular" Decode.string

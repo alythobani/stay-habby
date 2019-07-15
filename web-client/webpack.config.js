@@ -57,7 +57,7 @@ var commonConfig = {
       }
     }),
     new webpack.DefinePlugin({
-      __WEBPACK_CONSTANT_API_BASE_URL__: JSON.stringify("http://54.148.139.7:8888/graphql")
+      __WEBPACK_CONSTANT_API_BASE_URL__: JSON.stringify("https://stayhabbyserver.xyz/graphql")
     }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',

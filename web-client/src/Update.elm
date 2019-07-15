@@ -369,7 +369,7 @@ update msg model =
                             Just <|
                                 "Error logging in: "
                                     ++ ApiError.toString apiError
-                                    ++ ". You may want to refresh the page."
+                                    ++ ". Habby may be offline, but the Buddha is still within you."
                     }
                 )
             , Cmd.none

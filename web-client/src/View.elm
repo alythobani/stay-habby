@@ -1645,11 +1645,15 @@ renderErrorMessage errorMessage activeDialogScreen =
         ]
         [ div
             [ class "error-message-text" ]
-            [ text <|
-                Maybe.withDefault
-                    "No errors"
-                    (Maybe.map (\em -> em ++ "\n\nYou may want to refresh the page.") errorMessage)
-            ]
+            (case errorMessage of
+                Just errorMessageStr ->
+                    [ div [ class "error-message-text-line" ] [ text errorMessageStr ]
+                    , div [ class "error-message-text-line" ] [ text "You may want to refresh the page." ]
+                    ]
+
+                Nothing ->
+                    [ div [ class "error-message-text-line" ] [ text "No errors" ] ]
+            )
         ]
 
 

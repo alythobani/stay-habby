@@ -27,7 +27,6 @@ import Models.User as User
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
-import String.Extra
 
 
 view : Model -> Browser.Document Msg
@@ -640,14 +639,14 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                         [ class "add-habit-form-body-unit-name" ]
                         [ input
                             [ class "habit-unit-name-singular"
-                            , placeholder "Unit name singular..."
+                            , placeholder "unit name singular..."
                             , onInput OnAddHabitUnitNameSingularInput
                             , value addHabit.unitNameSingular
                             ]
                             []
                         , input
                             [ class "habit-unit-name-plural"
-                            , placeholder "Unit name plural..."
+                            , placeholder "unit name plural..."
                             , onInput OnAddHabitUnitNamePluralInput
                             , value addHabit.unitNamePlural
                             ]
@@ -678,7 +677,12 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                             ]
                         ]
                         [ input
-                            [ placeholder "X"
+                            [ placeholder <|
+                                if addHabit.unitNamePlural == "" then
+                                    "units"
+
+                                else
+                                    addHabit.unitNamePlural
                             , onInput OnAddHabitTimesPerWeekInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.timesPerWeek)
                             ]
@@ -691,43 +695,43 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                             ]
                         ]
                         [ input
-                            [ placeholder "Monday"
+                            [ placeholder "monday"
                             , onInput OnAddHabitSpecificDayMondayInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.mondayTimes)
                             ]
                             []
                         , input
-                            [ placeholder "Tuesday"
+                            [ placeholder "tuesday"
                             , onInput OnAddHabitSpecificDayTuesdayInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.tuesdayTimes)
                             ]
                             []
                         , input
-                            [ placeholder "Wednesday"
+                            [ placeholder "wednesday"
                             , onInput OnAddHabitSpecificDayWednesdayInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.wednesdayTimes)
                             ]
                             []
                         , input
-                            [ placeholder "Thursday"
+                            [ placeholder "thursday"
                             , onInput OnAddHabitSpecificDayThursdayInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.thursdayTimes)
                             ]
                             []
                         , input
-                            [ placeholder "Friday"
+                            [ placeholder "friday"
                             , onInput OnAddHabitSpecificDayFridayInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.fridayTimes)
                             ]
                             []
                         , input
-                            [ placeholder "Saturday"
+                            [ placeholder "saturday"
                             , onInput OnAddHabitSpecificDaySaturdayInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.saturdayTimes)
                             ]
                             []
                         , input
-                            [ placeholder "Sunday"
+                            [ placeholder "sunday"
                             , onInput OnAddHabitSpecificDaySundayInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.sundayTimes)
                             ]
@@ -742,16 +746,16 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                         [ input
                             [ placeholder <|
                                 if addHabit.unitNamePlural == "" then
-                                    "Times"
+                                    "units"
 
                                 else
-                                    String.Extra.toSentenceCase addHabit.unitNamePlural
+                                    addHabit.unitNamePlural
                             , onInput OnAddHabitTimesInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.times)
                             ]
                             []
                         , input
-                            [ placeholder "Days"
+                            [ placeholder "days"
                             , onInput OnAddHabitDaysInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.days)
                             ]
@@ -1525,7 +1529,12 @@ renderEditGoalDialog activeDialogScreen maybeHabit currentFcrWithIndex confirmat
                                 ]
                             ]
                             [ input
-                                [ placeholder "X"
+                                [ placeholder <|
+                                    if habitRecord.unitNamePlural == "" then
+                                        "units"
+
+                                    else
+                                        habitRecord.unitNamePlural
                                 , id "edit-goal-dialog-x-per-week-input"
                                 , onInput OnEditGoalTimesPerWeekInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.timesPerWeek)
@@ -1539,44 +1548,44 @@ renderEditGoalDialog activeDialogScreen maybeHabit currentFcrWithIndex confirmat
                                 ]
                             ]
                             [ input
-                                [ placeholder "Monday"
+                                [ placeholder "monday"
                                 , id "edit-goal-dialog-monday-input"
                                 , onInput OnEditGoalSpecificDayMondayInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.mondayTimes)
                                 ]
                                 []
                             , input
-                                [ placeholder "Tuesday"
+                                [ placeholder "tuesday"
                                 , onInput OnEditGoalSpecificDayTuesdayInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.tuesdayTimes)
                                 ]
                                 []
                             , input
-                                [ placeholder "Wednesday"
+                                [ placeholder "wednesday"
                                 , onInput OnEditGoalSpecificDayWednesdayInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.wednesdayTimes)
                                 ]
                                 []
                             , input
-                                [ placeholder "Thursday"
+                                [ placeholder "thursday"
                                 , onInput OnEditGoalSpecificDayThursdayInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.thursdayTimes)
                                 ]
                                 []
                             , input
-                                [ placeholder "Friday"
+                                [ placeholder "friday"
                                 , onInput OnEditGoalSpecificDayFridayInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.fridayTimes)
                                 ]
                                 []
                             , input
-                                [ placeholder "Saturday"
+                                [ placeholder "saturday"
                                 , onInput OnEditGoalSpecificDaySaturdayInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.saturdayTimes)
                                 ]
                                 []
                             , input
-                                [ placeholder "Sunday"
+                                [ placeholder "sunday"
                                 , onInput OnEditGoalSpecificDaySundayInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.sundayTimes)
                                 ]
@@ -1591,17 +1600,17 @@ renderEditGoalDialog activeDialogScreen maybeHabit currentFcrWithIndex confirmat
                             [ input
                                 [ placeholder <|
                                     if habitRecord.unitNamePlural == "" then
-                                        "Times"
+                                        "units"
 
                                     else
-                                        String.Extra.toSentenceCase habitRecord.unitNamePlural
+                                        habitRecord.unitNamePlural
                                 , id "edit-goal-dialog-every-x-days-times-input"
                                 , onInput OnEditGoalTimesInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.times)
                                 ]
                                 []
                             , input
-                                [ placeholder "Days"
+                                [ placeholder "days"
                                 , onInput OnEditGoalDaysInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.days)
                                 ]

@@ -945,6 +945,7 @@ renderHabitBox habitStats selectedYmd habitData editingHabitAmountDict habitActi
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
         , habitActionsDropdownDiv actionsDropdown selectedYmd habit habitRecord.suspensions
+        , div [ class "habit-description" ] [ text <| Maybe.withDefault "" habitRecord.description ]
         , case habitStats of
             Nothing ->
                 div

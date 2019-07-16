@@ -634,6 +634,9 @@ body {
                       visibility: visible;
                     }
                   }
+                  .habit-description {
+                    visibility: visible;
+                  }
                 }
 
                 .habit-name {
@@ -663,6 +666,14 @@ body {
                       @extend .dropdown-button;
                     }
                   }
+                }
+
+                .habit-description {
+                  position: absolute;
+                  top: 30px;
+                  font-size: 12px;
+                  width: 180px;
+                  visibility: hidden;
                 }
 
                 .frequency-stats-list {

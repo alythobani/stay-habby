@@ -27,6 +27,7 @@ import Models.User as User
 import Models.YmdDate as YmdDate
 import Msg exposing (Msg(..))
 import RemoteData
+import String.Extra
 
 
 view : Model -> Browser.Document Msg
@@ -739,7 +740,12 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                             ]
                         ]
                         [ input
-                            [ placeholder "Times"
+                            [ placeholder <|
+                                if addHabit.unitNamePlural == "" then
+                                    "Times"
+
+                                else
+                                    String.Extra.toSentenceCase addHabit.unitNamePlural
                             , onInput OnAddHabitTimesInput
                             , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.times)
                             ]
@@ -1582,7 +1588,12 @@ renderEditGoalDialog activeDialogScreen maybeHabit currentFcrWithIndex confirmat
                                 ]
                             ]
                             [ input
-                                [ placeholder "Times"
+                                [ placeholder <|
+                                    if habitRecord.unitNamePlural == "" then
+                                        "Times"
+
+                                    else
+                                        String.Extra.toSentenceCase habitRecord.unitNamePlural
                                 , id "edit-goal-dialog-every-x-days-times-input"
                                 , onInput OnEditGoalTimesInput
                                 , value <| Maybe.withDefault "" (Maybe.map String.fromInt editGoal.times)

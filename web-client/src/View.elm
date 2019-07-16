@@ -656,6 +656,11 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                     , div
                         [ class "add-habit-form-body-frequency-tag-name" ]
                         [ button
+                            [ classList [ ( "selected", addHabit.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
+                            , onClick <| OnAddHabitSelectFrequencyKind Habit.EveryXDayFrequencyKind
+                            ]
+                            [ text "Y Per X Days" ]
+                        , button
                             [ classList [ ( "selected", addHabit.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
                             , onClick <| OnAddHabitSelectFrequencyKind Habit.TotalWeekFrequencyKind
                             ]
@@ -665,11 +670,6 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                             , onClick <| OnAddHabitSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind
                             ]
                             [ text "Specific Days of Week" ]
-                        , button
-                            [ classList [ ( "selected", addHabit.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
-                            , onClick <| OnAddHabitSelectFrequencyKind Habit.EveryXDayFrequencyKind
-                            ]
-                            [ text "Y Per X Days" ]
                         ]
                     , div
                         [ classList

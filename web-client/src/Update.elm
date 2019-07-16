@@ -1318,8 +1318,8 @@ update msg model =
 
                                 Nothing ->
                                     -- No current goal
-                                    ( Habit.TotalWeekFrequencyKind
-                                    , "edit-goal-dialog-x-per-week-input"
+                                    ( Habit.EveryXDayFrequencyKind
+                                    , "edit-goal-dialog-every-x-days-times-input"
                                     )
 
                         newEditGoalModel =

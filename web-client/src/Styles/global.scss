@@ -616,6 +616,7 @@ body {
             }
 
             .habit {
+                @extend .no-select;
                 float: left;
                 display: inline-block;
                 position: relative;

@@ -306,7 +306,15 @@ dateAxisConfig maybeStartYmd darkModeOn =
         , pixels = 700
         , range = Range.padded 20 20
         , axisLine = AxisLine.none
-        , ticks = Ticks.intCustom 3 (dateIntToTickConfig maybeStartYmd darkModeOn)
+        , ticks =
+            Ticks.custom <|
+                \dateIntRange amountRange ->
+                    List.map
+                        (ceiling >> dateIntToTickConfig maybeStartYmd darkModeOn)
+                        [ dateIntRange.min
+                        , (dateIntRange.min + dateIntRange.max) / 2
+                        , dateIntRange.max
+                        ]
         }
 
 

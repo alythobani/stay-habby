@@ -82,22 +82,33 @@ body {
 }
 
 .logged-out-view {
-  @extend .full-screen-centered-flex-container;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
   font-family: "Raleway", sans-serif;
   background-color: black;
   color: white;
+  overflow: scroll;
 
   .welcome-message {
     font-size: 30px;
-    margin-bottom: 20px;
+    padding: 20px;
+    margin-top: auto;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .laughing-buddha-picture {
     width: 200px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .choose-login-form-or-create-user-form-buttons {
     display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
     button {
         @extend .button-style-1;
         @extend .button-style-1-dark;
@@ -109,10 +120,14 @@ body {
   }
 
   .login-form, .create-user-form {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: auto;
     input {
       display: block;
       @extend .input-style-1-dark;
-      margin: 20px 20px 0px 20px;
+      margin: auto;
+      margin-top: 20px;
       width: 300px;
     }
     .form-error-message {
@@ -123,8 +138,10 @@ body {
     }
     button {
       @extend .button-style-2-dark;
-      width: 100%;
+      width: 400px;
       margin-top: 20px;
+      margin-left: auto;
+      margin-right: auto;
       height: 40px;
       font-size: 15px;
       font-weight: 600;

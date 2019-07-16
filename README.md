@@ -1,8 +1,8 @@
 # Stay Habby
 
-A habit tracker app, originally started by [Arie Milner](https://github.com/amilner42/habby) (Nov—Dec 2017) and currently only further developed by me (Dec 2017—present).
+A habit tracking web application, originally started by [Arie Milner](https://github.com/amilner42/habby) (Nov—Dec 2017) and currently only further developed by me (Dec 2017—present).
 
-Much more flexible, user-friendly, and effective than any other habit tracker we've tried... but that's just my opinion ;)
+Way more flexible, user-friendly, and useful than any other habit tracker we've tried... but that's just my opinion ;). Check it out for yourself at https://www.stayhabby.com/
 
 ---
 

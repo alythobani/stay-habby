@@ -383,6 +383,10 @@ update msg model =
                         | user = Just user
                         , loginPageFields = Login.initLoginPageFields
                         , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+                        , allHabits = RemoteData.Loading
+                        , allHabitData = RemoteData.Loading
+                        , allFrequencyStats = RemoteData.Loading
+                        , allHabitDayNotes = RemoteData.Loading
                       }
                     , case model.selectedYmd of
                         Just selectedYmd ->
@@ -534,6 +538,10 @@ update msg model =
                         | user = Just user
                         , loginPageFields = Login.initLoginPageFields
                         , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
+                        , allHabits = RemoteData.Loading
+                        , allHabitData = RemoteData.Loading
+                        , allFrequencyStats = RemoteData.Loading
+                        , allHabitDayNotes = RemoteData.Loading
                       }
                     , case model.selectedYmd of
                         Just selectedYmd ->
@@ -751,6 +759,10 @@ update msg model =
                 | user = Nothing
                 , openUserActionsDropdown = False
                 , keyboardShortcutsList = KeyboardShortcut.loginFormShortcuts
+                , allHabits = RemoteData.NotAsked
+                , allHabitData = RemoteData.NotAsked
+                , allFrequencyStats = RemoteData.NotAsked
+                , allHabitDayNotes = RemoteData.NotAsked
               }
             , Dom.focus "login-form-username-input" |> Task.attempt FocusResult
             )

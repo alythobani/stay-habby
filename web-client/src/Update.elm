@@ -1918,8 +1918,29 @@ update msg model =
             let
                 newDialogScreenModel =
                     switchScreen model (Just DialogScreen.EditInfoScreen)
+
+                newEditInfo =
+                    case habit of
+                        Habit.GoodHabit gh ->
+                            { name = gh.name
+                            , description = Maybe.withDefault "" gh.description
+                            , goodHabitTime = gh.timeOfDay
+                            , unitNameSingular = gh.unitNameSingular
+                            , unitNamePlural = gh.unitNamePlural
+                            }
+
+                        Habit.BadHabit bh ->
+                            { name = bh.name
+                            , description = Maybe.withDefault "" bh.description
+                            , goodHabitTime = Habit.Anytime
+                            , unitNameSingular = bh.unitNameSingular
+                            , unitNamePlural = bh.unitNamePlural
+                            }
             in
-            ( { newDialogScreenModel | editInfoDialogHabit = Just habit }
+            ( { newDialogScreenModel
+                | editInfoDialogHabit = Just habit
+                , editInfo = newEditInfo
+              }
             , Dom.focus "edit-info-dialog-form-name-input" |> Task.attempt FocusResult
             )
 

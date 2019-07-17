@@ -87,6 +87,10 @@ type alias Model =
     , editGoalNewFrequenciesList : Maybe (List Habit.FrequencyChangeRecord)
     , editGoal : Habit.EditGoalInputData
 
+    -- Edit Info
+    , editInfoDialogHabit : Maybe Habit.Habit
+    , editInfo : Habit.EditInfoInputData
+
     -- Error messages
     , errorMessage : Maybe String
 

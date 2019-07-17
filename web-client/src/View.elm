@@ -90,6 +90,10 @@ view model =
                         model.editGoalConfirmationMessage
                         model.editGoalNewFrequenciesList
                         model.editGoal
+                    , renderEditInfoDialog
+                        model.activeDialogScreen
+                        model.editInfoDialogHabit
+                        model.editInfo
                     , renderErrorMessage
                         model.errorMessage
                         model.activeDialogScreen
@@ -1041,11 +1045,8 @@ habitActionsDropdownDiv dropdown selectedYmd habit suspensions =
                     else
                         "Suspend"
                 ]
-            , button
-                [ class "action-button"
-                , onClick <| OpenEditGoalScreen habit
-                ]
-                [ text "Edit Goal" ]
+            , button [ class "action-button", onClick <| OpenEditGoalScreen habit ] [ text "Edit Goal" ]
+            , button [ class "action-button", onClick <| OpenEditInfoScreen habit ] [ text "Edit Info" ]
             , button
                 [ class "action-button"
                 , onClick <| OpenAddNoteDialog habit
@@ -1853,6 +1854,119 @@ renderEditGoalDialog activeDialogScreen maybeHabit currentFcrWithIndex confirmat
 
         Nothing ->
             div [] []
+
+
+renderEditInfoDialog :
+    Maybe DialogScreen.DialogScreen
+    -> Maybe Habit.Habit
+    -> Habit.EditInfoInputData
+    -> Html Msg
+renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
+    case maybeHabit of
+        Just habit ->
+            let
+                habitRecord =
+                    Habit.getCommonFields habit
+
+                isValidEditInfo =
+                    Habit.isValidEditInfo editInfo
+            in
+            div
+                [ classList
+                    [ ( "edit-info-dialog", True )
+                    , ( "display-none", activeDialogScreen /= Just DialogScreen.EditInfoScreen )
+                    ]
+                ]
+                [ div
+                    [ class "edit-info-dialog-form" ]
+                    [ div [ class "edit-info-dialog-form-header" ] [ text habitRecord.name ]
+                    , div [ class "edit-info-dialog-form-line-break" ] []
+                    , div
+                        [ class "edit-info-dialog-form-name" ]
+                        [ text "Name: "
+                        , input
+                            [ id "edit-info-dialog-form-name-input"
+                            , placeholder habitRecord.name
+                            , value editInfo.name
+                            , onInput OnEditInfoNameInput
+                            ]
+                            []
+                        ]
+                    , div
+                        [ class "edit-info-dialog-form-description" ]
+                        [ text "Description: "
+                        , input
+                            [ placeholder habitRecord.name
+                            , value editInfo.name
+                            , onInput OnEditInfoDescriptionInput
+                            ]
+                            []
+                        ]
+                    , div
+                        [ classList
+                            [ ( "edit-info-dialog-form-time-of-day-tags", True )
+                            , ( "display-none", not <| Habit.isGoodHabit habit )
+                            ]
+                        ]
+                        [ button
+                            [ classList [ ( "habit-time-of-day", True ), ( "selected", editInfo.goodHabitTime == Habit.Anytime ) ]
+                            , onClick <| OnSelectEditInfoTimeOfDay Habit.Anytime
+                            ]
+                            [ text "ANYTIME" ]
+                        , button
+                            [ classList [ ( "habit-time-of-day", True ), ( "selected", editInfo.goodHabitTime == Habit.Morning ) ]
+                            , onClick <| OnSelectEditInfoTimeOfDay Habit.Morning
+                            ]
+                            [ text "MORNING" ]
+                        , button
+                            [ classList [ ( "habit-time-of-day", True ), ( "selected", editInfo.goodHabitTime == Habit.Evening ) ]
+                            , onClick <| OnSelectEditInfoTimeOfDay Habit.Evening
+                            ]
+                            [ text "EVENING" ]
+                        ]
+                    , div
+                        [ class "edit-info-dialog-form-unit-name-singular" ]
+                        [ text "Unit Name (Singular): "
+                        , input
+                            [ placeholder habitRecord.unitNameSingular
+                            , value editInfo.unitNameSingular
+                            , onInput OnEditInfoUnitNameSingularInput
+                            ]
+                            []
+                        ]
+                    , div
+                        [ class "edit-info-dialog-form-unit-name-plural" ]
+                        [ text "Unit Name (Plural): "
+                        , input
+                            [ placeholder habitRecord.unitNamePlural
+                            , value editInfo.unitNamePlural
+                            , onInput OnEditInfoUnitNamePluralInput
+                            ]
+                            []
+                        ]
+                    , div [ classList [ ( "edit-info-dialog-form-buttons-line-break", True ), ( "display-none", not isValidEditInfo ) ] ] []
+                    , div
+                        [ classList
+                            [ ( "edit-info-dialog-form-buttons", True )
+                            , ( "display-none", not isValidEditInfo )
+                            ]
+                        ]
+                        [ button
+                            [ class "edit-info-dialog-form-buttons-submit"
+                            , onClick NoOp
+                            ]
+                            [ text "Submit" ]
+                        , button
+                            [ class "edit-info-dialog-form-buttons-cancel"
+                            , onClick OnExitDialogScreen
+                            ]
+                            [ text "Cancel" ]
+                        ]
+                    ]
+                ]
+
+        Nothing ->
+            Util.hiddenDiv
 
 
 renderErrorMessage : Maybe String -> Maybe DialogScreen.DialogScreen -> Html Msg

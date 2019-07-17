@@ -1,4 +1,42 @@
-module Models.Habit exposing (AddHabitInputData, BadHabitRecord, CreateBadHabitRecord, CreateGoodHabitRecord, CreateHabit(..), EditGoalInputData, EveryXDayFrequencyRecord, Frequency(..), FrequencyChangeRecord, FrequencyKind(..), GoodHabitRecord, Habit(..), HabitKind(..), HabitTime(..), SpecificDayOfWeekFrequencyRecord, SuspendedInterval, decodeFrequency, decodeFrequencyChangeRecord, decodeHabit, decodeHabitTime, decodeSuspendedInterval, extractCreateHabit, extractNewGoal, getCommonCreateFields, getCommonFields, graphQLOutputString, initAddHabitData, initEditGoalData, prettyPrintEveryXDayFrequency, prettyPrintFrequency, prettyPrintSpecificDayOfWeekFrequency, prettyPrintTotalWeekFrequency, splitHabits)
+module Models.Habit exposing
+    ( AddHabitInputData
+    , BadHabitRecord
+    , CreateBadHabitRecord
+    , CreateGoodHabitRecord
+    , CreateHabit(..)
+    , EditGoalInputData
+    , EditInfoInputData
+    , EveryXDayFrequencyRecord
+    , Frequency(..)
+    , FrequencyChangeRecord
+    , FrequencyKind(..)
+    , GoodHabitRecord
+    , Habit(..)
+    , HabitKind(..)
+    , HabitTime(..)
+    , SpecificDayOfWeekFrequencyRecord
+    , SuspendedInterval
+    , decodeFrequency
+    , decodeFrequencyChangeRecord
+    , decodeHabit
+    , decodeHabitTime
+    , decodeSuspendedInterval
+    , extractCreateHabit
+    , extractNewGoal
+    , getCommonCreateFields
+    , getCommonFields
+    , graphQLOutputString
+    , initAddHabitData
+    , initEditGoalData
+    , initEditInfoData
+    , isGoodHabit
+    , isValidEditInfo
+    , prettyPrintEveryXDayFrequency
+    , prettyPrintFrequency
+    , prettyPrintSpecificDayOfWeekFrequency
+    , prettyPrintTotalWeekFrequency
+    , splitHabits
+    )
 
 import DefaultServices.Util as Util
 import Json.Decode as Decode
@@ -15,6 +53,16 @@ type Habit
 type HabitKind
     = GoodHabitKind
     | BadHabitKind
+
+
+isGoodHabit : Habit -> Bool
+isGoodHabit habit =
+    case habit of
+        GoodHabit _ ->
+            True
+
+        BadHabit _ ->
+            False
 
 
 type alias GoodHabitRecord =
@@ -92,6 +140,27 @@ initEditGoalData =
     , times = Nothing
     , days = Nothing
     }
+
+
+type alias EditInfoInputData =
+    { name : String
+    , description : String
+    , goodHabitTime : HabitTime
+    , unitNameSingular : String
+    , unitNamePlural : String
+    }
+
+
+initEditInfoData : EditInfoInputData
+initEditInfoData =
+    { name = "", description = "", goodHabitTime = Anytime, unitNameSingular = "", unitNamePlural = "" }
+
+
+{-| Returns True iff this data can be used appropriately in `Api.mutationEditHabitInfo`. I.e. no empty strings.
+-}
+isValidEditInfo : EditInfoInputData -> Bool
+isValidEditInfo editInfo =
+    editInfo.name /= "" && editInfo.description /= "" && editInfo.unitNameSingular /= "" && editInfo.unitNamePlural /= ""
 
 
 type CreateHabit

@@ -140,6 +140,13 @@ type Msg
     | OnEditGoalFailure ApiError
     | OnEditGoalSuccess Habit.Habit
     | OnEditGoalSubmit
+      -- Edit Info
+    | OpenEditInfoScreen Habit.Habit
+    | OnEditInfoNameInput String
+    | OnEditInfoDescriptionInput String
+    | OnSelectEditInfoTimeOfDay Habit.HabitTime
+    | OnEditInfoUnitNameSingularInput String
+    | OnEditInfoUnitNamePluralInput String
       -- Error messages
     | OpenErrorMessageDialogScreen
       -- Full screen dialogs

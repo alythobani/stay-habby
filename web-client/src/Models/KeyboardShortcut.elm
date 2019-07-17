@@ -7,6 +7,7 @@ module Models.KeyboardShortcut exposing
     , createUserFormShortcuts
     , editGoalHabitSelectionShortcuts
     , editGoalScreenShortcuts
+    , editInfoScreenShortcuts
     , errorMessageScreenShortcuts
     , graphHabitSelectionShortcuts
     , graphScreenShortcuts
@@ -179,6 +180,13 @@ editGoalScreenShortcuts =
         (OnEditGoalSelectFrequencyKind Habit.EveryXDayFrequencyKind)
         "New Goal: Y Per X Days"
     , darkModeShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
+    ]
+
+
+editInfoScreenShortcuts : List KeyboardShortcut
+editInfoScreenShortcuts =
+    [ closeFormShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 

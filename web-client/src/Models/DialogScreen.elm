@@ -8,6 +8,7 @@ type DialogScreen
     = AddNewHabitScreen
     | EditGoalHabitSelectionScreen
     | EditGoalScreen
+    | EditInfoScreen
     | SetHabitDataShortcutHabitSelectionScreen
     | SetHabitDataShortcutAmountScreen
     | ErrorMessageScreen

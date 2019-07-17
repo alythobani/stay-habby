@@ -1353,6 +1353,78 @@ body {
         }
       }
     }
+    .edit-info-dialog {
+      @extend .full-screen-centered-flex-container;
+      .edit-info-dialog-form {
+        @extend .dialog-form-1;
+        min-height: 500px;
+
+        .edit-info-dialog-form-header {
+          font-size: 24px;
+          font-weight: 400;
+        }
+
+        .edit-info-dialog-form-line-break {
+          @extend .dialog-form-line-break;
+          margin-top: 20px;
+        }
+
+        .edit-info-dialog-form-name {
+          margin-top: 10px;
+          font-size: 14px;
+        }
+
+        .edit-info-dialog-form-description {
+          @extend .dialog-form-line-break;
+          margin-top: 20px;
+          width: 400px;
+          left: 50px;
+        }
+
+        .edit-info-dialog-form-time-of-day-tags {
+          margin-top: 5px;
+          display: flex;
+          justify-content: center;
+          .habit-time-of-day {
+              @extend .button-style-1;
+
+              position: relative;
+              height: 30px;
+              width: 140px;
+              margin: 5px;
+          }
+        }
+
+        .edit-info-dialog-form-unit-name-singular {
+          margin-top: 5px;
+        }
+
+        .edit-info-dialog-form-unit-name-plural {
+          margin-top: 5px;
+        }
+
+        .edit-info-dialog-form-buttons {
+          .edit-info-dialog-form-buttons-line-break {
+            @extend .dialog-form-line-break;
+            margin-top: 20px;
+            width: 400px;
+          }
+          .edit-info-dialog-form-buttons-cancel {
+            @extend .button-style-1;
+            height: 30px;
+            width: 100px;
+            margin-top: 20px;
+          }
+          .edit-info-dialog-form-buttons-submit {
+            @extend .button-style-2;
+            float: right;
+            height: 30px;
+            width: 100px;
+            margin-top: 20px;
+          }
+        }
+      }
+    }
     .error-message {
       @extend .full-screen-centered-flex-container;
       .error-message-text {

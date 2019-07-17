@@ -43,6 +43,9 @@ switchScreen m newScreen =
                 Just DialogScreen.EditGoalScreen ->
                     KeyboardShortcut.editGoalScreenShortcuts
 
+                Just DialogScreen.EditInfoScreen ->
+                    KeyboardShortcut.editInfoScreenShortcuts
+
                 Just DialogScreen.SetHabitDataShortcutHabitSelectionScreen ->
                     KeyboardShortcut.setHabitDataHabitSelectionShortcuts
 
@@ -115,6 +118,9 @@ update msg model =
 
         updateEditGoal updater =
             { model | editGoal = updater model.editGoal }
+
+        updateEditInfo updater =
+            { model | editInfo = updater model.editInfo }
 
         updateLoginPageFields updater =
             { model | loginPageFields = updater model.loginPageFields }
@@ -1856,6 +1862,31 @@ update msg model =
                 ( _, Nothing, _ ) ->
                     -- If the user hasn't filled out all new goal fields properly yet, it's fine, just do nothing
                     ( model, Cmd.none )
+
+        -- Edit Info
+        OpenEditInfoScreen habit ->
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.EditInfoScreen)
+            in
+            ( { newDialogScreenModel | editInfoDialogHabit = Just habit }
+            , Dom.focus "edit-info-dialog-form-name-input" |> Task.attempt FocusResult
+            )
+
+        OnEditInfoNameInput newName ->
+            ( updateEditInfo (\editInfo -> { editInfo | name = newName }), Cmd.none )
+
+        OnEditInfoDescriptionInput newDesc ->
+            ( updateEditInfo (\editInfo -> { editInfo | description = newDesc }), Cmd.none )
+
+        OnSelectEditInfoTimeOfDay newHabitTime ->
+            ( updateEditInfo (\editInfo -> { editInfo | goodHabitTime = newHabitTime }), Cmd.none )
+
+        OnEditInfoUnitNameSingularInput newUnitNameSingular ->
+            ( updateEditInfo (\editInfo -> { editInfo | unitNameSingular = newUnitNameSingular }), Cmd.none )
+
+        OnEditInfoUnitNamePluralInput newUnitNamePlural ->
+            ( updateEditInfo (\editInfo -> { editInfo | unitNamePlural = newUnitNamePlural }), Cmd.none )
 
         -- Error Messages
         OpenErrorMessageDialogScreen ->

@@ -7,6 +7,7 @@ module Models.KeyboardShortcut exposing
     , createUserFormShortcuts
     , editGoalHabitSelectionShortcuts
     , editGoalScreenShortcuts
+    , editInfoHabitSelectionShortcuts
     , editInfoScreenShortcuts
     , errorMessageScreenShortcuts
     , graphHabitSelectionShortcuts
@@ -110,6 +111,7 @@ mainScreenShortcuts =
     , singleKeyShortcut Keyboard.KeyE OpenEditGoalHabitSelectionScreen "Edit Goal"
     , singleKeyShortcut Keyboard.KeyG OpenGraphHabitSelectionScreen "View Graph"
     , singleKeyShortcut Keyboard.KeyH OpenAddHabitForm "Add New Habit"
+    , singleKeyShortcut Keyboard.KeyI OpenEditInfoHabitSelectionScreen "Edit Info"
     , singleKeyShortcut Keyboard.KeyN OpenAddNoteHabitSelectionDialogScreen "Add Note"
     , singleKeyShortcut Keyboard.KeyS OpenSuspendOrResumeHabitSelectionScreen "Suspend or Resume"
     , toggleAvailableKeyboardShortcutsScreenShortcut
@@ -182,6 +184,14 @@ editGoalScreenShortcuts =
     , darkModeShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
+
+
+editInfoHabitSelectionShortcuts : List KeyboardShortcut
+editInfoHabitSelectionShortcuts =
+    habitSelectionShortcuts
+        OnEditInfoHabitSelectionSelectPreviousHabit
+        OnEditInfoHabitSelectionSelectNextHabit
+        OnEditInfoHabitSelectionEnterKeydown
 
 
 editInfoScreenShortcuts : List KeyboardShortcut

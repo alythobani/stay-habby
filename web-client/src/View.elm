@@ -90,6 +90,11 @@ view model =
                         model.editGoalConfirmationMessage
                         model.editGoalNewFrequenciesList
                         model.editGoal
+                    , renderEditInfoHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.editInfoHabitSelectionFilterText
+                        model.editInfoHabitSelectionFilteredHabits
+                        model.editInfoHabitSelectionSelectedHabitIndex
                     , renderEditInfoDialog
                         model.activeDialogScreen
                         model.editInfoDialogHabit
@@ -1854,6 +1859,27 @@ renderEditGoalDialog activeDialogScreen maybeHabit currentFcrWithIndex confirmat
 
         Nothing ->
             div [] []
+
+
+renderEditInfoHabitSelectionScreen :
+    Maybe DialogScreen.DialogScreen
+    -> String
+    -> Array.Array Habit.Habit
+    -> Int
+    -> Html Msg
+renderEditInfoHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen =
+            activeDialogScreen == Just DialogScreen.EditInfoHabitSelectionScreen
+    in
+    renderHabitSelectionScreen
+        showScreen
+        "Edit Info"
+        "edit-info-habit-selection-filter-text-input"
+        OnEditInfoHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        selectedHabitIndex
 
 
 renderEditInfoDialog :

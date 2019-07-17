@@ -43,6 +43,9 @@ switchScreen m newScreen =
                 Just DialogScreen.EditGoalScreen ->
                     KeyboardShortcut.editGoalScreenShortcuts
 
+                Just DialogScreen.EditInfoHabitSelectionScreen ->
+                    KeyboardShortcut.editInfoHabitSelectionShortcuts
+
                 Just DialogScreen.EditInfoScreen ->
                     KeyboardShortcut.editInfoScreenShortcuts
 
@@ -103,6 +106,9 @@ switchScreen m newScreen =
         , editGoalHabitSelectionFilterText = ""
         , editGoalHabitSelectionFilteredHabits = resettedFilteredHabits
         , editGoalHabitSelectionSelectedHabitIndex = 0
+        , editInfoHabitSelectionFilterText = ""
+        , editInfoHabitSelectionFilteredHabits = resettedFilteredHabits
+        , editInfoHabitSelectionSelectedHabitIndex = 0
         , graphNumDaysToShow = Graph.LastMonth
         , graphHabitSelectionFilterText = ""
         , graphHabitSelectionFilteredHabits = resettedFilteredHabits
@@ -1861,6 +1867,50 @@ update msg model =
 
                 ( _, Nothing, _ ) ->
                     -- If the user hasn't filled out all new goal fields properly yet, it's fine, just do nothing
+                    ( model, Cmd.none )
+
+        -- Edit Info Habit Selection
+        OpenEditInfoHabitSelectionScreen ->
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.EditInfoHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
+            , Dom.focus "edit-info-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnEditInfoHabitSelectionFilterTextInput newFilterText ->
+            updateHabitSelectionFilterTextInput
+                newFilterText
+                model.editInfoHabitSelectionSelectedHabitIndex
+                model.editInfoHabitSelectionFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | editInfoHabitSelectionFilterText = newFilterText
+                        , editInfoHabitSelectionFilteredHabits = newFilteredHabitsArray
+                        , editInfoHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
+
+        OnEditInfoHabitSelectionSelectNextHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.editInfoHabitSelectionFilteredHabits
+                (model.editInfoHabitSelectionSelectedHabitIndex + 1)
+                (\newIndex -> { model | editInfoHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnEditInfoHabitSelectionSelectPreviousHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.editInfoHabitSelectionFilteredHabits
+                (model.editInfoHabitSelectionSelectedHabitIndex - 1)
+                (\newIndex -> { model | editInfoHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnEditInfoHabitSelectionEnterKeydown ->
+            case Array.get model.editInfoHabitSelectionSelectedHabitIndex model.editInfoHabitSelectionFilteredHabits of
+                Just selectedHabit ->
+                    update (OpenEditInfoScreen selectedHabit) model
+
+                Nothing ->
                     ( model, Cmd.none )
 
         -- Edit Info

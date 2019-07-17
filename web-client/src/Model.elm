@@ -87,6 +87,11 @@ type alias Model =
     , editGoalNewFrequenciesList : Maybe (List Habit.FrequencyChangeRecord)
     , editGoal : Habit.EditGoalInputData
 
+    -- Edit Info Habit Selection
+    , editInfoHabitSelectionFilterText : String
+    , editInfoHabitSelectionFilteredHabits : Array.Array Habit.Habit
+    , editInfoHabitSelectionSelectedHabitIndex : Int
+
     -- Edit Info
     , editInfoDialogHabit : Maybe Habit.Habit
     , editInfo : Habit.EditInfoInputData

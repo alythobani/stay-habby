@@ -91,6 +91,11 @@ init { apiBaseUrl, currentTime } url key =
       , editGoalNewFrequenciesList = Nothing
       , editGoal = Habit.initEditGoalData
 
+      -- Edit Info Habit Selection
+      , editInfoHabitSelectionFilterText = ""
+      , editInfoHabitSelectionFilteredHabits = Array.empty
+      , editInfoHabitSelectionSelectedHabitIndex = 0
+
       -- Edit Info
       , editInfoDialogHabit = Nothing
       , editInfo = Habit.initEditInfoData

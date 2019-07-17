@@ -140,6 +140,12 @@ type Msg
     | OnEditGoalFailure ApiError
     | OnEditGoalSuccess Habit.Habit
     | OnEditGoalSubmit
+      -- Edit Info Habit Selection
+    | OpenEditInfoHabitSelectionScreen
+    | OnEditInfoHabitSelectionFilterTextInput String
+    | OnEditInfoHabitSelectionSelectNextHabit
+    | OnEditInfoHabitSelectionSelectPreviousHabit
+    | OnEditInfoHabitSelectionEnterKeydown
       -- Edit Info
     | OpenEditInfoScreen Habit.Habit
     | OnEditInfoNameInput String

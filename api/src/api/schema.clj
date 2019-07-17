@@ -170,6 +170,11 @@
         new_frequencies (map convert-frequency-y-m-d-maps-to-dates new_frequencies)]
     (tag-type (db/edit-habit-goal-frequencies (assoc all :new_frequencies new_frequencies)))))
 
+(defn resolve-mutation-edit-habit-info
+  "@refer `db/add-habit`."
+  [context args value]
+  (tag-type (db/edit-habit-info args)))
+
 (defn resolver-map
   []
   {:query/get-habits (create-async-resolver resolve-get-habits)
@@ -193,6 +198,7 @@
    :query/get-frequency-stats (create-async-resolver resolve-query-get-frequency-stats)
    :query/resolve-mutation-edit-habit-suspensions (create-async-resolver resolve-mutation-edit-habit-suspensions)
    :query/resolve-mutation-edit-habit-goal-frequencies (create-async-resolver resolve-mutation-edit-habit-goal-frequencies)
+   :query/resolve-mutation-edit-habit-info (create-async-resolver resolve-mutation-edit-habit-info)
    :query/get-habit-day-notes (create-async-resolver resolve-get-habit-day-notes)})
 
 (defn load-schema

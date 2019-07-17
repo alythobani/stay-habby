@@ -221,7 +221,13 @@
                  :create_frequency_change_record_data {:description "The data required to create a frequency change record."
                                                        :fields {:start_date {:type (non-null :date_data)}
                                                                 :end_date {:type :date_data}
-                                                                :new_frequency {:type (non-null :create_frequency_data)}}}}
+                                                                :new_frequency {:type (non-null :create_frequency_data)}}}
+                 :edit_info_data {:description "The habit fields required for the `edit_habit_info` mutation."
+                                  :fields {:name {:type (non-null String)}
+                                           :description {:type (non-null String)}
+                                           :time_of_day {:type (non-null :habit_time)}
+                                           :unit_name_singular {:type (non-null String)}
+                                           :unit_name_plural {:type (non-null String)}}}}
 
  :mutations {:add_habit {:type (non-null :habit)
                          :description "Add a user's habit to the db, returns the new habit."
@@ -271,4 +277,11 @@
                                                   :habit_id {:type (non-null ID)}
                                                   :new_frequencies {:type (non-null (list (non-null :create_frequency_change_record_data)))}
                                                   :habit_type {:type (non-null String)}}
-                                           :resolve :query/resolve-mutation-edit-habit-goal-frequencies}}}
+                                           :resolve :query/resolve-mutation-edit-habit-goal-frequencies}
+             :edit_habit_info {:type (non-null :habit)
+                               :description "Change a user's habit's fields other than its goals/suspensions."
+                               :args {:user_id {:type (non-null ID)}
+                                      :habit_id {:type (non-null ID)}
+                                      :habit_type {:type (non-null String)}
+                                      :new_info {:type (non-null :edit_info_data)}}
+                               :resolve :query/resolve-mutation-edit-habit-info}}}

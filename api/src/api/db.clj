@@ -92,6 +92,19 @@
                              new_frequencies}}
                       {:return-new true}))
 
+(defn edit-habit-info
+  "Changes a user's habit's info fields.
+  `new_info` contains a `time_of_day` field but this should only be mutated for good habits."
+  [{:keys [db user_id habit_id habit_type new_info] :or {db habby_db}}]
+  (let [modifiers (if (= habit_type "good_habit")
+                    new_info
+                    (dissoc new_info :time_of_day))]
+    (mc/find-and-modify db
+                        (:habits collection-names)
+                        {:_id (ObjectId. habit_id) :user_id (ObjectId. user_id)}
+                        {$set modifiers}
+                        {:return-new true})))
+
 (defn delete-habit
   "Deletes a habit from the database, returns true if the habit was deleted."
   [{:keys [db habit_id] :or {db habby_db}}]

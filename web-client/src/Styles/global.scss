@@ -8,7 +8,7 @@ body {
 .available-keyboard-shortcuts-screen {
   @extend .full-screen-centered-flex-container;
   z-index: 4;
-  background-color: rgba(124, 124, 124, 0.88);
+  background-color: $concord;
   .available-keyboard-shortcuts-screen-body {
     .available-keyboard-shortcuts-screen-body-title {
       z-index: 3;
@@ -335,46 +335,47 @@ body {
         }
 
         .add-habit {
-          .add-habit-template-habits {
-            .add-habit-template-habits-title {
-              color: white;
-            }
-            .add-habit-template-habits-list {
-              .add-habit-template-habits-list-habit-box {
-                color: $cloud;
-                .habit-amount-complete {
-                  input {
-                    background-color: $shark;
-                    color: $gallery;
+          .add-habit-main-section {
+            .add-habit-template-habits {
+              .add-habit-template-habits-title {
+                color: white;
+              }
+              .add-habit-template-habits-list {
+                .add-habit-template-habits-list-habit-box {
+                  color: $cloud;
+                  .habit-amount-complete {
+                    input {
+                      background-color: $shark;
+                      color: $gallery;
+                    }
                   }
-                }
 
-                // Template bad habit (dark mode)
-                outline-color: $fire-bush;
-                background-color: black;
-                .frequency-statistic, .current-progress {
-                    color: $tussock;
-                }
-                // Template good habit (dark mode)
-                &.good-habit {
-                  outline-color: $christi;
+                  // Template bad habit (dark mode)
+                  outline-color: $fire-bush;
                   background-color: black;
                   .frequency-statistic, .current-progress {
-                      color: $la-palma;
+                      color: $tussock;
+                  }
+                  // Template good habit (dark mode)
+                  &.good-habit {
+                    outline-color: $christi;
+                    background-color: black;
+                    .frequency-statistic, .current-progress {
+                        color: $la-palma;
+                    }
                   }
                 }
               }
             }
+            .add-habit-form {
+              background-color: inherit;
+              .add-habit-duplicate-habit-name-message {
+                background-color: black;
+                color: red;
+              }
+            }
           }
-        }
-
-        .add-habit-form {
-          background-color: inherit;
-          .add-habit-duplicate-habit-name-message {
-            background-color: black;
-            color: red;
-          }
-          .add-habit-form-button {
+          .add-habit-open-form-button {
             background-color: black;
             box-shadow: 0 0 1px $gallery;
             color: $silver-chalice;
@@ -806,139 +807,270 @@ body {
 
       .add-habit {
         .add-habit-background {
-          width: 100%;
           height: 100%;
-          // background-color: rgba(101, 101, 101, 0.59);
-          cursor: pointer;
-        }
-        .add-habit-template-habits {
-          z-index: 3;
-          display: flex;
-          flex-direction: column;
-          position: absolute;
-          top: 5vh;
           width: 100%;
-          .add-habit-template-habits-title {
-            color: black;
-            font-size: 30px;
-            margin: 30px auto 30px auto;
-          }
-          .add-habit-template-habits-list {
-            .add-habit-template-habits-list-habit-box {
-                @extend .no-select;
-                float: left;
-                display: inline-block;
-                position: relative;
-                padding: 7px;
-                margin: 15px;
-                width: 325px;
-                height: 120px;
-                box-sizing: border-box;
-                color: black;
-                outline-width: 2px;
-                outline-style: solid;
+          position: absolute;
+          top: 0px;
+          background-color: $concord;
+          z-index: 3;
+        }
+        .add-habit-main-section {
+          .add-habit-template-habits {
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 8vh;
+            width: 100%;
+            .add-habit-template-habits-title {
+              color: black;
+              font-size: 30px;
+              margin: 30px auto 30px auto;
+            }
+            .add-habit-template-habits-list {
+              .add-habit-template-habits-list-habit-box {
+                  @extend .no-select;
+                  float: left;
+                  display: inline-block;
+                  position: relative;
+                  padding: 7px;
+                  margin: 15px;
+                  width: 325px;
+                  height: 120px;
+                  box-sizing: border-box;
+                  color: black;
+                  outline-width: 2px;
+                  outline-style: solid;
 
-                // Template bad habit (light mode)
-                background-color: $grandis;
-                outline-color:  $casablanca;
-                // Template good habit (light mode)
-                &.good-habit {
-                  background-color: $granny-smith-apple;
-                  outline-color:  $de-york;
-                }
-
-                &:hover {
-                  cursor: pointer;
-                  outline-width: 4px;
-                  .description {
-                    visibility: visible;
+                  // Template bad habit (light mode)
+                  background-color: $grandis;
+                  outline-color:  $casablanca;
+                  // Template good habit (light mode)
+                  &.good-habit {
+                    background-color: $granny-smith-apple;
+                    outline-color:  $de-york;
                   }
-                }
 
-                .name {
-                    font-weight: 600;
-                    max-width: 130px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    float: left;
-                }
-
-                .description {
-                  position: absolute;
-                  top: 30px;
-                  font-size: 12px;
-                  width: 180px;
-                  visibility: hidden;
-                }
-
-                .frequency-stats-list {
-                    float: right;
-                }
-
-                .frequency-statistic {
-                    margin-left: 10px;
-                    height: 17px;
-                    width: 130px;
-                    font-weight: 200;
-                    font-size: 12px;
-                    text-align: right;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-
-                .current-progress {
-                    @extend .frequency-statistic;
-                    font-weight: 600;
-                }
-
-                .habit-amount-complete {
-                    box-sizing: border-box;
-                    position: absolute;
-                    bottom: 7px;
-                    border: none;
-                    width: 160px;
-
-                    input  {
-                        box-sizing: border-box;
-                        border: none;
-                        background-color: $gallery;
-                        border-radius: 1px;
-                        height: 25px;
-                        padding: 5px;
-                        width: 100%;
+                  &:hover {
+                    cursor: pointer;
+                    outline-width: 4px;
+                    .description {
+                      visibility: visible;
                     }
+                  }
+
+                  .name {
+                      font-weight: 600;
+                      max-width: 130px;
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      float: left;
+                  }
+
+                  .description {
+                    position: absolute;
+                    top: 30px;
+                    font-size: 12px;
+                    width: 180px;
+                    visibility: hidden;
+                  }
+
+                  .frequency-stats-list {
+                      float: right;
+                  }
+
+                  .frequency-statistic {
+                      margin-left: 10px;
+                      height: 17px;
+                      width: 130px;
+                      font-weight: 200;
+                      font-size: 12px;
+                      text-align: right;
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                  }
+
+                  .current-progress {
+                      @extend .frequency-statistic;
+                      font-weight: 600;
+                  }
+
+                  .habit-amount-complete {
+                      box-sizing: border-box;
+                      position: absolute;
+                      bottom: 7px;
+                      border: none;
+                      width: 160px;
+
+                      input  {
+                          box-sizing: border-box;
+                          border: none;
+                          background-color: $gallery;
+                          border-radius: 1px;
+                          height: 25px;
+                          padding: 5px;
+                          width: 100%;
+                      }
+                  }
+              }
+            }
+          }
+          .add-habit-form {
+            &.form-is-open {
+              z-index: 3;
+            }
+            position: absolute;
+            box-sizing: border-box;
+            bottom: 60px;
+            width: 100%;
+            padding: 10px;
+            background-color: transparent;
+            .add-habit-duplicate-habit-name-message {
+              color: black;
+              text-align: center;
+              margin-bottom: 20px;
+              background-color: white;
+              text {
+                background-color: blue;
+              }
+            }
+
+            .add-habit-form-body {
+
+              .add-habit-form-body-habit-tag-name {
+                  display: inline-block;
+                  width: 100px;
+                  float: left;
+                  button {
+                      @extend .button-style-1;
+                      width: 90px;
+                      height: 40px;
+                      margin: 0 0 10px 0;
+                  }
+              }
+
+              .add-habit-form-body-name-and-description, .add-habit-form-body-unit-name {
+                box-sizing: border-box;
+                display: inline-block;
+                float: left;
+                width: 250px;
+                .add-habit-form-body-name {
+                    @extend .input-style-1;
+
+                    height: 40px;
+                    width: 100%;
                 }
+                .add-habit-form-body-description {
+                    @extend .input-style-1;
+
+                    height: 100px;
+                    width: 100%;
+                }
+                .habit-unit-name-singular, .habit-unit-name-plural {
+                    @extend .input-style-1;
+
+                    height: 40px;
+                    margin-bottom: 10px;
+                    width: 200px;
+                }
+              }
+
+              .add-habit-form-body-unit-name {
+                  width: 200px;
+                  margin-left: 10px;
+              }
+
+              .add-habit-form-body-time-of-day {
+                  display: inline-block;
+                  width: 100px;
+                  float: left;
+
+                  .habit-time-of-day {
+                      @extend .button-style-1;
+
+                      height: 40px;
+                      margin: 0 0 10px 10px;
+                      width: 90px;
+                  }
+              }
+
+              .add-habit-form-body-frequency-tag-name {
+                  display: inline-block;
+                  width: 170px;
+                  float: left;
+
+                  button {
+                      @extend .button-style-1;
+
+                      margin: 0 0 10px 10px;
+                      height: 40px;
+                      width: 150px;
+                  }
+              }
+
+              .add-habit-form-body-x-times-per-week {
+                float: left;
+                  input {
+                      @extend .input-style-1;
+                      margin: 0 10px 10px 0;
+                      width: 100px;
+                      height: 40px;
+                  }
+              }
+
+              .add-habit-form-body-specific-days-of-week {
+                  display: block;
+                  float: left;
+                  width: 330px;
+
+                  input {
+                      @extend .input-style-1;
+
+                      height: 40px;
+                      width: 100px;
+                      display: inline-block;
+                      margin: 0 10px 10px 0;
+                      float: left;
+                  }
+              }
+
+              .add-habit-form-body-x-times-per-y-days {
+                  display: block;
+                  float: left;
+                  width: 110px;
+
+                  input {
+                      @extend .input-style-1;
+
+                      height: 40px;
+                      width: 100px;
+                      display: inline-block;
+                      margin: 0 10px 10px 0;
+                      float: left;
+                      text-overflow: ellipsis;
+                  }
+              }
+
+              .add-habit-form-submit-button {
+                  @extend .button-style-2;
+                  height: 40px;
+                  width: 160px;
+                  border-radius: 5px;
+                  font-size: 20px;
+              }
             }
           }
         }
-      }
-
-      .add-habit-form {
-        position: absolute;
-        box-sizing: border-box;
-        bottom: 0px;
-        width: 100%;
-        padding: 10px;
-        background-color: transparent;
-        &.form-is-open {
-          z-index: 3;
-        }
-        .add-habit-duplicate-habit-name-message {
-          color: black;
-          text-align: center;
-          margin-bottom: 50px;
-          background-color: white;
-          text {
-            background-color: blue;
-          }
-        }
-        .add-habit-form-button {
+        .add-habit-open-form-button {
           @extend .box-shadow-4;
+          position: absolute;
+          bottom: 10px;
           border: none;
           display: block;
-          width: 100%;
+          width: 99%;
+          left: 10px;
           background-color: white;
           vertical-align: middle;
           text-align: center;
@@ -946,131 +1078,9 @@ body {
           font-weight: 600;
           cursor: pointer;
           height: 60px;
-          margin-top: 15px;
-        }
-
-        .add-habit-form-body {
-
-          .add-habit-form-body-habit-tag-name {
-              display: inline-block;
-              width: 100px;
-              float: left;
-              button {
-                  @extend .button-style-1;
-                  width: 90px;
-                  height: 40px;
-                  margin: 0 0 10px 0;
-              }
-          }
-
-          .add-habit-form-body-name-and-description, .add-habit-form-body-unit-name {
-            box-sizing: border-box;
-            display: inline-block;
-            float: left;
-            width: 250px;
-            .add-habit-form-body-name {
-                @extend .input-style-1;
-
-                height: 40px;
-                width: 100%;
-            }
-            .add-habit-form-body-description {
-                @extend .input-style-1;
-
-                height: 100px;
-                width: 100%;
-            }
-            .habit-unit-name-singular, .habit-unit-name-plural {
-                @extend .input-style-1;
-
-                height: 40px;
-                margin-bottom: 10px;
-                width: 200px;
-            }
-          }
-
-          .add-habit-form-body-unit-name {
-              width: 200px;
-              margin-left: 10px;
-          }
-
-          .add-habit-form-body-time-of-day {
-              display: inline-block;
-              width: 100px;
-              float: left;
-
-              .habit-time-of-day {
-                  @extend .button-style-1;
-
-                  height: 40px;
-                  margin: 0 0 10px 10px;
-                  width: 90px;
-              }
-          }
-
-          .add-habit-form-body-frequency-tag-name {
-              display: inline-block;
-              width: 170px;
-              float: left;
-
-              button {
-                  @extend .button-style-1;
-
-                  margin: 0 0 10px 10px;
-                  height: 40px;
-                  width: 150px;
-              }
-          }
-
-          .add-habit-form-body-x-times-per-week {
-            float: left;
-              input {
-                  @extend .input-style-1;
-                  margin: 0 10px 10px 0;
-                  width: 100px;
-                  height: 40px;
-              }
-          }
-
-          .add-habit-form-body-specific-days-of-week {
-              display: block;
-              float: left;
-              width: 330px;
-
-              input {
-                  @extend .input-style-1;
-
-                  height: 40px;
-                  width: 100px;
-                  display: inline-block;
-                  margin: 0 10px 10px 0;
-                  float: left;
-              }
-          }
-
-          .add-habit-form-body-x-times-per-y-days {
-              display: block;
-              float: left;
-              width: 110px;
-
-              input {
-                  @extend .input-style-1;
-
-                  height: 40px;
-                  width: 100px;
-                  display: inline-block;
-                  margin: 0 10px 10px 0;
-                  float: left;
-                  text-overflow: ellipsis;
-              }
-          }
-
-          .add-habit-form-submit-button {
-              @extend .button-style-2;
-              height: 40px;
-              width: 160px;
-              border-radius: 5px;
-              font-size: 20px;
+          // margin-top: 15px;
+          &.form-is-open {
+            z-index: 3;
           }
         }
       }

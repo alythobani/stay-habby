@@ -51,12 +51,17 @@ update msg model =
         Up code ->
             Set.remove code model
 
+        OnVisibilityChange _ ->
+            -- Whether the user is exiting the screen or entering it, reset our list of their pressed keys
+            init
+
 
 {-| The message type `DefaultServices.Keyboard` uses.
 -}
 type Msg
     = Down KeyCode
     | Up KeyCode
+    | OnVisibilityChange Events.Visibility
 
 
 {-| You will need to add this to your program's subscriptions.
@@ -66,6 +71,7 @@ subscriptions =
     Sub.batch
         [ Events.onKeyDown (Decode.map Down decodeKeyCode)
         , Events.onKeyUp (Decode.map Up decodeKeyCode)
+        , Events.onVisibilityChange OnVisibilityChange
         ]
 
 

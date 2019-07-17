@@ -815,10 +815,14 @@ update msg model =
                     ( model, Cmd.none )
 
         OnAddHabitTemplateClick newAddHabit ->
-            ( { model | addHabit = newAddHabit }, Cmd.none )
+            ( { model | addHabit = newAddHabit }
+            , Dom.focus "add-habit-form-body-name-input" |> Task.attempt FocusResult
+            )
 
         OnSelectAddHabitKind habitKind ->
-            ( updateAddHabit (\addHabit -> { addHabit | kind = habitKind }), Cmd.none )
+            ( updateAddHabit (\addHabit -> { addHabit | kind = habitKind })
+            , Dom.focus "add-habit-form-body-name-input" |> Task.attempt FocusResult
+            )
 
         OnAddHabitNameInput habitName ->
             ( updateAddHabit (\addHabit -> { addHabit | name = habitName }), Cmd.none )
@@ -827,7 +831,9 @@ update msg model =
             ( updateAddHabit (\addHabit -> { addHabit | description = habitDescription }), Cmd.none )
 
         OnSelectAddGoodHabitTime goodHabitTime ->
-            ( updateAddHabit (\addHabit -> { addHabit | goodHabitTime = goodHabitTime }), Cmd.none )
+            ( updateAddHabit (\addHabit -> { addHabit | goodHabitTime = goodHabitTime })
+            , Dom.focus "add-habit-form-body-unit-name-singular-input" |> Task.attempt FocusResult
+            )
 
         OnAddHabitUnitNameSingularInput unitNameSingular ->
             ( updateAddHabit (\addHabit -> { addHabit | unitNameSingular = unitNameSingular }), Cmd.none )
@@ -836,7 +842,20 @@ update msg model =
             ( updateAddHabit (\addHabit -> { addHabit | unitNamePlural = unitNamePlural }), Cmd.none )
 
         OnAddHabitSelectFrequencyKind frequencyKind ->
-            ( updateAddHabit (\addHabit -> { addHabit | frequencyKind = frequencyKind }), Cmd.none )
+            ( updateAddHabit (\addHabit -> { addHabit | frequencyKind = frequencyKind })
+            , (case frequencyKind of
+                Habit.TotalWeekFrequencyKind ->
+                    "add-habit-form-body-times-per-week-input"
+
+                Habit.SpecificDayOfWeekFrequencyKind ->
+                    "add-habit-form-body-monday-input"
+
+                Habit.EveryXDayFrequencyKind ->
+                    "add-habit-form-body-times-input"
+              )
+                |> Dom.focus
+                |> Task.attempt FocusResult
+            )
 
         OnAddHabitTimesPerWeekInput timesPerWeek ->
             ( updateAddHabit (\addHabit -> { addHabit | timesPerWeek = extractInt timesPerWeek addHabit.timesPerWeek })

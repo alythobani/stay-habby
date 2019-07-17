@@ -828,7 +828,8 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                             , div
                                 [ class "add-habit-form-body-unit-name" ]
                                 [ input
-                                    [ class "habit-unit-name-singular"
+                                    [ id "add-habit-form-body-unit-name-singular-input"
+                                    , class "habit-unit-name-singular"
                                     , placeholder "unit name singular..."
                                     , onInput OnAddHabitUnitNameSingularInput
                                     , value addHabit.unitNameSingular
@@ -867,7 +868,8 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                                     ]
                                 ]
                                 [ input
-                                    [ placeholder <|
+                                    [ id "add-habit-form-body-times-per-week-input"
+                                    , placeholder <|
                                         if addHabit.unitNamePlural == "" then
                                             "units"
 
@@ -885,7 +887,8 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                                     ]
                                 ]
                                 [ input
-                                    [ placeholder "monday"
+                                    [ id "add-habit-form-body-monday-input"
+                                    , placeholder "monday"
                                     , onInput OnAddHabitSpecificDayMondayInput
                                     , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.mondayTimes)
                                     ]
@@ -934,7 +937,8 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                                     ]
                                 ]
                                 [ input
-                                    [ placeholder <|
+                                    [ id "add-habit-form-body-times-input"
+                                    , placeholder <|
                                         if addHabit.unitNamePlural == "" then
                                             "units"
 

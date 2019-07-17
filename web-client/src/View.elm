@@ -615,6 +615,42 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                 isDuplicateHabitName =
                     List.any (\otherHabit -> (otherHabit |> Habit.getCommonFields |> .name) == addHabit.name) allHabits
 
+                everyXDayFrequencyTagNameString =
+                    (case addHabit.times of
+                        Just t ->
+                            if t == 1 then
+                                "1 Unit Per "
+
+                            else
+                                String.fromInt t ++ " Units Per "
+
+                        Nothing ->
+                            "X Units Per "
+                    )
+                        ++ (case addHabit.days of
+                                Just days ->
+                                    if days == 1 then
+                                        "Day"
+
+                                    else
+                                        String.fromInt days ++ " Days"
+
+                                Nothing ->
+                                    " X Days"
+                           )
+
+                totalWeekFrequencyTagNameString =
+                    case addHabit.timesPerWeek of
+                        Just t ->
+                            if t == 1 then
+                                "1 Unit Per Week"
+
+                            else
+                                String.fromInt t ++ " Units Per Week"
+
+                        Nothing ->
+                            "X Units Per Week"
+
                 initAddHabit =
                     Habit.initAddHabitData
 
@@ -811,12 +847,12 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                                     [ classList [ ( "selected", addHabit.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
                                     , onClick <| OnAddHabitSelectFrequencyKind Habit.EveryXDayFrequencyKind
                                     ]
-                                    [ text "Y Per X Days" ]
+                                    [ text everyXDayFrequencyTagNameString ]
                                 , button
                                     [ classList [ ( "selected", addHabit.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
                                     , onClick <| OnAddHabitSelectFrequencyKind Habit.TotalWeekFrequencyKind
                                     ]
-                                    [ text "X Per Week" ]
+                                    [ text totalWeekFrequencyTagNameString ]
                                 , button
                                     [ classList [ ( "selected", addHabit.frequencyKind == Habit.SpecificDayOfWeekFrequencyKind ) ]
                                     , onClick <| OnAddHabitSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind

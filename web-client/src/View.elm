@@ -680,7 +680,7 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                       }
                     , { initAddHabit
                         | name = "Water"
-                        , description = "HYDRATE FOR VITALITY"
+                        , description = "hydrate for vitality"
                         , unitNameSingular = "mL"
                         , unitNamePlural = "mL"
                         , frequencyKind = Habit.EveryXDayFrequencyKind
@@ -707,6 +707,7 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                         , unitNamePlural = "showers"
                         , frequencyKind = Habit.EveryXDayFrequencyKind
                         , kind = Habit.GoodHabitKind
+                        , goodHabitTime = Habit.Morning
                         , times = Just 1
                         , days = Just 1
                       }

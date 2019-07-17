@@ -8,6 +8,7 @@ module Api exposing
     , mutationAddHabit
     , mutationAddUser
     , mutationEditHabitGoalFrequencies
+    , mutationEditHabitInfo
     , mutationEditHabitSuspensions
     , mutationSetHabitData
     , mutationSetHabitDayNote
@@ -437,6 +438,50 @@ mutationEditHabitGoalFrequencies user habitId newFrequencies habitType =
                 |> Util.templater templateDict
     in
     graphQLRequest queryString <| Decode.at [ "data", "edit_habit_goal_frequencies" ] Habit.decodeHabit
+
+
+mutationEditHabitInfo :
+    User.User
+    -> String
+    -> String
+    -> Habit.EditInfoInputData
+    -> String
+    -> (ApiError -> b)
+    -> (Habit.Habit -> b)
+    -> Cmd b
+mutationEditHabitInfo user habitId habitType newInfo =
+    let
+        templateDict =
+            Dict.fromList <|
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "habit_id", Util.encodeString habitId )
+                , ( "habit_type", Util.encodeString habitType )
+                , ( "name", Util.encodeString newInfo.name )
+                , ( "description", Util.encodeString newInfo.description )
+                , ( "time_of_day", Debug.toString newInfo.goodHabitTime |> String.toUpper )
+                , ( "unit_name_singular", Util.encodeString newInfo.unitNameSingular )
+                , ( "unit_name_plural", Util.encodeString newInfo.unitNamePlural )
+                , ( "habit_output", Habit.graphQLOutputString )
+                ]
+
+        query =
+            """mutation {
+              edit_habit_info(
+                user_id: {{user_id}},
+                habit_id: {{habit_id}}
+                habit_type: {{habit_type}}
+                new_info: {
+                  name: {{name}}
+                  description: {{description}}
+                  time_of_day: {{time_of_day}}
+                  unit_name_singular: {{unit_name_singular}}
+                  unit_name_plural: {{unit_name_plural}}
+                }
+              ) {{habit_output}}
+            }"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest query (Decode.at [ "data", "edit_habit_info" ] Habit.decodeHabit)
 
 
 mutationSetHabitData :

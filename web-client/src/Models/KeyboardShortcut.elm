@@ -196,7 +196,8 @@ editInfoHabitSelectionShortcuts =
 
 editInfoScreenShortcuts : List KeyboardShortcut
 editInfoScreenShortcuts =
-    [ closeFormShortcut
+    [ specialKeyShortcut Keyboard.Enter OnEditInfoSubmitClick "Submit Form"
+    , closeFormShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 

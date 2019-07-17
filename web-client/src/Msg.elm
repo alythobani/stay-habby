@@ -153,6 +153,9 @@ type Msg
     | OnSelectEditInfoTimeOfDay Habit.HabitTime
     | OnEditInfoUnitNameSingularInput String
     | OnEditInfoUnitNamePluralInput String
+    | OnEditInfoSubmitClick
+    | OnEditInfoFailure ApiError
+    | OnEditInfoSuccess Habit.Habit
       -- Error messages
     | OpenErrorMessageDialogScreen
       -- Full screen dialogs

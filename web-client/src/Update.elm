@@ -1959,6 +1959,63 @@ update msg model =
         OnEditInfoUnitNamePluralInput newUnitNamePlural ->
             ( updateEditInfo (\editInfo -> { editInfo | unitNamePlural = newUnitNamePlural }), Cmd.none )
 
+        OnEditInfoSubmitClick ->
+            case ( model.user, model.editInfoDialogHabit ) of
+                ( Just user, Just habit ) ->
+                    if Habit.isValidEditInfo model.editInfo habit then
+                        let
+                            ( habitId, habitType ) =
+                                case habit of
+                                    Habit.GoodHabit gh ->
+                                        ( gh.id, "good_habit" )
+
+                                    Habit.BadHabit bh ->
+                                        ( bh.id, "bad_habit" )
+
+                            newDialogScreenModel =
+                                switchScreen model Nothing
+                        in
+                        ( newDialogScreenModel
+                        , Api.mutationEditHabitInfo
+                            user
+                            habitId
+                            habitType
+                            model.editInfo
+                            model.apiBaseUrl
+                            OnEditInfoFailure
+                            OnEditInfoSuccess
+                        )
+
+                    else
+                        ( model, Cmd.none )
+
+                ( Nothing, _ ) ->
+                    ( { model | errorMessage = Just "Error editing habit info: not logged in" }, Cmd.none )
+
+                _ ->
+                    ( { model | errorMessage = Just "Error editing habit info: no habit selected" }, Cmd.none )
+
+        OnEditInfoFailure apiError ->
+            ( { model | errorMessage = Just <| "Error editing habit info: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
+
+        OnEditInfoSuccess habit ->
+            let
+                updatedHabitListsModel =
+                    updateHabitListsWithNewHabit habit
+            in
+            ( { updatedHabitListsModel
+                | editInfo = Habit.initEditInfoData
+              }
+            , case model.user of
+                Just user ->
+                    getFrequencyStats user [ habit |> Habit.getCommonFields |> .id ]
+
+                Nothing ->
+                    Cmd.none
+            )
+
         -- Error Messages
         OpenErrorMessageDialogScreen ->
             let

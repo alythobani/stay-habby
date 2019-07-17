@@ -1984,7 +1984,13 @@ renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
                             ]
                             []
                         ]
-                    , div [ classList [ ( "edit-info-dialog-form-buttons-line-break", True ), ( "display-none", not isValidEditInfo ) ] ] []
+                    , div
+                        [ classList
+                            [ ( "edit-info-dialog-form-buttons-line-break", True )
+                            , ( "display-none", not isValidEditInfo )
+                            ]
+                        ]
+                        []
                     , div
                         [ classList
                             [ ( "edit-info-dialog-form-buttons", True )
@@ -1993,7 +1999,7 @@ renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
                         ]
                         [ button
                             [ class "edit-info-dialog-form-buttons-submit"
-                            , onClick NoOp
+                            , onClick OnEditInfoSubmitClick
                             ]
                             [ text "Submit" ]
                         , button

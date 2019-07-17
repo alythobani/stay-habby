@@ -189,9 +189,10 @@
   "Updates a `habit_frequency_stats` based on a non-empty ordered-by-date list of habit goal fragments."
   [freq-stats habit-goal-fragments habit]
   (let [past-fragments (butlast habit-goal-fragments),
-        current-fragment (last habit-goal-fragments),
-        updated-with-past-fragments-freq-stats (reduce update-freq-stats-with-past-fragment freq-stats past-fragments)]
-    (update-freq-stats-with-current-fragment updated-with-past-fragments-freq-stats current-fragment (:type_name habit))))
+        current-fragment (last habit-goal-fragments)]
+    (as-> freq-stats $
+          (if (nil? past-fragments) $ (reduce update-freq-stats-with-past-fragment $ past-fragments))
+          (if (nil? current-fragment) $ (update-freq-stats-with-current-fragment $ current-fragment (:type_name habit))))))
 
 (defn datetime-falls-within-suspended-interval?
   "Returns true iff `datetime` occurs during `suspended-interval`."

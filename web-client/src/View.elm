@@ -972,15 +972,18 @@ renderHabitBox habitStats selectedYmd habitData editingHabitAmountDict habitActi
                                     ++ habitRecord.unitNamePlural
                             ]
                         , frequencyStatisticDiv ("Days left: " ++ String.fromInt stats.currentFragmentDaysLeft)
-                        , frequencyStatisticDiv
-                            ((String.fromInt <|
-                                round <|
-                                    toFloat stats.successfulFragments
-                                        * 100
-                                        / toFloat stats.totalFragments
-                             )
-                                ++ "%"
-                            )
+                        , frequencyStatisticDiv <|
+                            if stats.totalFragments == 0 then
+                                "100%"
+
+                            else
+                                (String.fromInt <|
+                                    round <|
+                                        toFloat stats.successfulFragments
+                                            * 100
+                                            / toFloat stats.totalFragments
+                                )
+                                    ++ "%"
                         , frequencyStatisticDiv ("Streak: " ++ String.fromInt stats.currentFragmentStreak)
                         , frequencyStatisticDiv ("Best streak: " ++ String.fromInt stats.bestFragmentStreak)
                         , frequencyStatisticDiv ("Total done: " ++ String.fromInt stats.totalDone)

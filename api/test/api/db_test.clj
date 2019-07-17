@@ -91,6 +91,14 @@
         (if (nil? current-client-date-time) args (assoc args :current-client-date-time current-client-date-time))
         (get-frequency-stats args)))
 
+(defn edit-testdb-habit-suspensions
+  "Edits the habit suspensions of the test user's habit on the test db."
+  [{:keys [habit_id new_suspensions]}]
+  (edit-habit-suspensions {:db test_db
+                           :user_id test_user_id_str
+                           :habit_id habit_id
+                           :new_suspensions new_suspensions}))
+
 
 
 ; Tests
@@ -174,8 +182,8 @@
                                            :current_fragment_total 3 :current_fragment_goal 2 :current_fragment_days_left 0
                                            :habit_has_started true, :currently_suspended false}])))
             (testing "and tomorrow the user suspended the habit"
-              (let [_ (edit-habit-suspensions {:db test_db :habit_id habit_id_str
-                                               :new_suspensions [{:start_date tomorrow, :end_date nil}]}),
+              (let [_ (edit-testdb-habit-suspensions {:habit_id habit_id_str
+                                                      :new_suspensions [{:start_date tomorrow, :end_date nil}]}),
                     stats-tom (get-testdb-frequency-stats {:habit_ids [habit_id_str]
                                                            :current-client-date-time tomorrow}),
                     stats-day-after-tom (get-testdb-frequency-stats {:habit_ids [habit_id_str]
@@ -191,8 +199,8 @@
                                              :current_fragment_total 3 :current_fragment_goal 2 :current_fragment_days_left 0
                                              :habit_has_started true, :currently_suspended true}])))
               (testing "and then the user resumed the habit the day after tomorrow"
-                (let [_ (edit-habit-suspensions {:db test_db :habit_id habit_id_str
-                                                 :new_suspensions [{:start_date tomorrow, :end_date tomorrow}]}),
+                (let [_ (edit-testdb-habit-suspensions {:habit_id habit_id_str
+                                                        :new_suspensions [{:start_date tomorrow, :end_date tomorrow}]}),
                       stats-tom (get-testdb-frequency-stats {:habit_ids [habit_id_str]
                                                              :current-client-date-time tomorrow}),
                       stats-day-after-tom (get-testdb-frequency-stats {:habit_ids [habit_id_str]
@@ -302,7 +310,7 @@
                                                  :current_fragment_total 4 :current_fragment_goal 3 :current_fragment_days_left 4
                                                  :habit_has_started true, :currently_suspended false}])))
             (testing "but the user also changed the goal 5 days from today, to only 2 per 5 days"
-              (let [_ (edit-habit-goal-frequencies {:db test_db :habit_id habit_id_str
+              (let [_ (edit-habit-goal-frequencies {:db test_db :habit_id habit_id_str :user_id test_user_id_str
                                                     :new_frequencies [{:start_date today
                                                                        :end_date (t/plus today (t/days 4))
                                                                        :new_frequency {:type_name "every_x_days_frequency"

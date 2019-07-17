@@ -806,6 +806,7 @@ body {
       }
 
       .add-habit {
+        @extend .no-select;
         .add-habit-background {
           height: 100%;
           width: 100%;
@@ -1070,7 +1071,7 @@ body {
           bottom: 10px;
           border: none;
           display: block;
-          width: 99%;
+          width: 98.5%;
           left: 10px;
           background-color: white;
           vertical-align: middle;
@@ -1079,7 +1080,6 @@ body {
           font-weight: 600;
           cursor: pointer;
           height: 60px;
-          // margin-top: 15px;
           &.form-is-open {
             z-index: 3;
           }

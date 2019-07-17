@@ -1084,24 +1084,13 @@ update msg model =
 
         AttemptKeyboardShortcut key ->
             let
-                modelKeysDownList : List Keyboard.Key
-                modelKeysDownList =
-                    Set.toList model.keysDown |> List.map Keyboard.fromCode
-
                 maybeKeyShortcutWithIndex : Maybe ( Int, KeyboardShortcut.KeyboardShortcut )
                 maybeKeyShortcutWithIndex =
-                    Util.firstInstanceInList
-                        model.keyboardShortcutsList
-                        (\shortcut ->
-                            List.all (\shortcutKey -> List.member shortcutKey modelKeysDownList) shortcut.keys
-                                && (Util.lastElementOfList shortcut.keys == Just key)
-                        )
+                    Util.firstInstanceInList model.keyboardShortcutsList (\shortcut -> shortcut.rule key model.keysDown)
 
                 maybeKeyShortcutMsg : Maybe Msg
                 maybeKeyShortcutMsg =
-                    Maybe.map
-                        (\( index, shortcut ) -> shortcut.msg)
-                        maybeKeyShortcutWithIndex
+                    Maybe.map (\( index, shortcut ) -> shortcut.shortcutMsg) maybeKeyShortcutWithIndex
             in
             case maybeKeyShortcutMsg of
                 Just shortcutMsg ->

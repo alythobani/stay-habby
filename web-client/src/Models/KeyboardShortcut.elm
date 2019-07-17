@@ -23,38 +23,53 @@ import Models.Graph as Graph
 import Models.Habit as Habit
 import Models.YmdDate as YmdDate
 import Msg exposing (..)
+import Set
 
 
 type alias KeyboardShortcut =
-    { keys : List Keyboard.Key
-    , msg : Msg
-    , keysStr : String
-    , description : String
+    { rule : Keyboard.Key -> Keyboard.Model -> Bool
+    , shortcutMsg : Msg
+    , ruleStr : String
+    , shortcutDesc : String
     }
 
 
 singleKeyShortcut : Keyboard.Key -> Msg -> String -> KeyboardShortcut
 singleKeyShortcut key msg desc =
-    { keys = [ key ], msg = msg, keysStr = Keyboard.prettyPrintKey key, description = desc }
+    { rule = \keyDown keyCodeSet -> key == keyDown
+    , shortcutMsg = msg
+    , ruleStr = Keyboard.prettyPrintKey key
+    , shortcutDesc = desc
+    }
 
 
-multiKeyShortcut : List Keyboard.Key -> Msg -> String -> KeyboardShortcut
-multiKeyShortcut keys msg desc =
-    { keys = keys
-    , msg = msg
-    , keysStr = String.join " + " (List.map Keyboard.prettyPrintKey keys)
-    , description = desc
+specialKeyShortcut : Keyboard.Key -> Msg -> String -> KeyboardShortcut
+specialKeyShortcut key msg desc =
+    { rule =
+        \keyDown keyCodeSet ->
+            let
+                keysDownList =
+                    keyCodeSet |> Set.toList |> List.map Keyboard.fromCode
+
+                specialKeys =
+                    [ Keyboard.MetaLeft
+                    , Keyboard.MetaRight
+                    , Keyboard.ControlLeft
+                    , Keyboard.ControlRight
+                    , Keyboard.OSLeft
+                    , Keyboard.OSRight
+                    ]
+            in
+            List.any (\specialKey -> List.member specialKey keysDownList) specialKeys && keyDown == key
+    , shortcutMsg = msg
+    , ruleStr = "Ctrl/⌘ + " ++ Keyboard.prettyPrintKey key
+    , shortcutDesc = desc
     }
 
 
 toggleAvailableKeyboardShortcutsScreenShortcut : KeyboardShortcut
 toggleAvailableKeyboardShortcutsScreenShortcut =
-    singleKeyShortcut Keyboard.Slash ToggleAvailableKeyboardShortcutsScreen "Toggle Shortcuts Screen"
-
-
-toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut : KeyboardShortcut
-toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut =
-    multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Slash ] ToggleAvailableKeyboardShortcutsScreen "Toggle Shortcuts Screen"
+    specialKeyShortcut Keyboard.Slash ToggleAvailableKeyboardShortcutsScreen "Toggle Shortcuts Screen"
 
 
 closeFormShortcut : KeyboardShortcut
@@ -74,15 +89,15 @@ darkModeShortcut =
 
 loginFormShortcuts : List KeyboardShortcut
 loginFormShortcuts =
-    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnLoginFormEnterKeydown "Log In"
-    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
+    [ specialKeyShortcut Keyboard.Enter OnLoginFormEnterKeydown "Log In"
+    , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
 
 createUserFormShortcuts : List KeyboardShortcut
 createUserFormShortcuts =
-    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnCreateUserFormEnterKeydown "Create User"
-    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
+    [ specialKeyShortcut Keyboard.Enter OnCreateUserFormEnterKeydown "Create User"
+    , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
 
@@ -109,9 +124,9 @@ errorMessageScreenShortcuts =
 
 addNewHabitScreenShortcuts : List KeyboardShortcut
 addNewHabitScreenShortcuts =
-    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] AddHabitFormSubmit "Submit Form"
+    [ specialKeyShortcut Keyboard.Enter AddHabitFormSubmit "Submit Form"
     , closeFormShortcut
-    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
 
@@ -135,7 +150,7 @@ habitSelectionShortcuts onArrowUp onArrowDown onChooseHabit =
     , singleKeyShortcut Keyboard.ArrowUp onArrowUp "Select Previous Habit"
     , singleKeyShortcut Keyboard.Enter onChooseHabit "Confirm Selected Habit"
     , cancelScreenShortcut
-    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
 
@@ -195,9 +210,9 @@ addNoteHabitSelectionShortcuts =
 
 addNoteScreenShortcuts : List KeyboardShortcut
 addNoteScreenShortcuts =
-    [ multiKeyShortcut [ Keyboard.MetaLeft, Keyboard.Enter ] OnAddNoteSubmit "Submit Note"
+    [ specialKeyShortcut Keyboard.Enter OnAddNoteSubmit "Submit Note"
     , closeFormShortcut
-    , toggleAvailableKeyboardShortcutsScreenMultiKeyShortcut
+    , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
 

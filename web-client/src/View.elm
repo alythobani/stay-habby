@@ -1030,8 +1030,8 @@ renderAvailableKeyboardShortcutsScreen showScreen shortcutList =
         renderKeyboardShortcut shortcut =
             div
                 [ class "shortcut" ]
-                [ div [ class "shortcut-keys" ] [ text shortcut.keysStr ]
-                , div [ class "shortcut-desc" ] [ text shortcut.description ]
+                [ div [ class "shortcut-keys" ] [ text shortcut.ruleStr ]
+                , div [ class "shortcut-desc" ] [ text shortcut.shortcutDesc ]
                 ]
     in
     div

@@ -814,6 +814,9 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        OnAddHabitTemplateClick newAddHabit ->
+            ( { model | addHabit = newAddHabit }, Cmd.none )
+
         OnSelectAddHabitKind habitKind ->
             ( updateAddHabit (\addHabit -> { addHabit | kind = habitKind }), Cmd.none )
 

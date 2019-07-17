@@ -70,6 +70,7 @@ type Msg
     | OnGetAllRemoteDataSuccess Api.AllRemoteData
       -- Add Habit
     | OpenAddHabitForm
+    | OnAddHabitTemplateClick Habit.AddHabitInputData
     | OnSelectAddHabitKind Habit.HabitKind
     | OnAddHabitNameInput String
     | OnAddHabitDescriptionInput String

@@ -334,6 +334,40 @@ body {
           }
         }
 
+        .add-habit {
+          .add-habit-template-habits {
+            .add-habit-template-habits-title {
+              color: white;
+            }
+            .add-habit-template-habits-list {
+              .add-habit-template-habits-list-habit-box {
+                color: $cloud;
+                .habit-amount-complete {
+                  input {
+                    background-color: $shark;
+                    color: $gallery;
+                  }
+                }
+
+                // Template bad habit (dark mode)
+                outline-color: $fire-bush;
+                background-color: black;
+                .frequency-statistic, .current-progress {
+                    color: $tussock;
+                }
+                // Template good habit (dark mode)
+                &.good-habit {
+                  outline-color: $christi;
+                  background-color: black;
+                  .frequency-statistic, .current-progress {
+                      color: $la-palma;
+                  }
+                }
+              }
+            }
+          }
+        }
+
         .add-habit-form {
           background-color: inherit;
           .add-habit-duplicate-habit-name-message {
@@ -606,22 +640,22 @@ body {
 
             &.good-habits {
                 .habit-success {
-                    background-color: rgb(154, 255, 180);
+                    background-color: $granny-smith-apple;
                     border-color:  $de-york;
                 }
                 .habit-failure {
-                    background-color: rgb(166, 166, 255);
+                    background-color: $dull-lavender;
                     border-color:  $blue-ribbon;
                 }
             }
 
             &.bad-habits {
                 .habit-success {
-                    background-color: rgb(255, 206, 128);
+                    background-color: $grandis;
                     border-color:  $casablanca;
                 }
                 .habit-failure {
-                    background-color: rgb(199, 109, 109);
+                    background-color: $contessa;
                     border-color: $red-berry;
                 }
             }
@@ -767,6 +801,117 @@ body {
             .habit-failure {
                 @extend .habit;
             }
+        }
+      }
+
+      .add-habit {
+        .add-habit-background {
+          width: 100%;
+          height: 100%;
+          // background-color: rgba(101, 101, 101, 0.59);
+          cursor: pointer;
+        }
+        .add-habit-template-habits {
+          z-index: 3;
+          display: flex;
+          flex-direction: column;
+          position: absolute;
+          top: 5vh;
+          width: 100%;
+          .add-habit-template-habits-title {
+            color: black;
+            font-size: 30px;
+            margin: 30px auto 30px auto;
+          }
+          .add-habit-template-habits-list {
+            .add-habit-template-habits-list-habit-box {
+                @extend .no-select;
+                float: left;
+                display: inline-block;
+                position: relative;
+                padding: 7px;
+                margin: 15px;
+                width: 325px;
+                height: 120px;
+                box-sizing: border-box;
+                color: black;
+                outline-width: 2px;
+                outline-style: solid;
+
+                // Template bad habit (light mode)
+                background-color: $grandis;
+                outline-color:  $casablanca;
+                // Template good habit (light mode)
+                &.good-habit {
+                  background-color: $granny-smith-apple;
+                  outline-color:  $de-york;
+                }
+
+                &:hover {
+                  cursor: pointer;
+                  outline-width: 4px;
+                  .description {
+                    visibility: visible;
+                  }
+                }
+
+                .name {
+                    font-weight: 600;
+                    max-width: 130px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    float: left;
+                }
+
+                .description {
+                  position: absolute;
+                  top: 30px;
+                  font-size: 12px;
+                  width: 180px;
+                  visibility: hidden;
+                }
+
+                .frequency-stats-list {
+                    float: right;
+                }
+
+                .frequency-statistic {
+                    margin-left: 10px;
+                    height: 17px;
+                    width: 130px;
+                    font-weight: 200;
+                    font-size: 12px;
+                    text-align: right;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .current-progress {
+                    @extend .frequency-statistic;
+                    font-weight: 600;
+                }
+
+                .habit-amount-complete {
+                    box-sizing: border-box;
+                    position: absolute;
+                    bottom: 7px;
+                    border: none;
+                    width: 160px;
+
+                    input  {
+                        box-sizing: border-box;
+                        border: none;
+                        background-color: $gallery;
+                        border-radius: 1px;
+                        height: 25px;
+                        padding: 5px;
+                        width: 100%;
+                    }
+                }
+            }
+          }
         }
       }
 

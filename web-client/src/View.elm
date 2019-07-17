@@ -548,7 +548,59 @@ renderHabitsPanel maybeSelectedYmd rdHabits rdHabitData rdFrequencyStatsList edi
         )
 
 
-renderAddHabitForm : Maybe DialogScreen.DialogScreen -> User.User -> Habit.AddHabitInputData -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit) -> Html Msg
+renderTemplateHabit : Habit.AddHabitInputData -> Html Msg
+renderTemplateHabit addHabit =
+    let
+        ( goalAmountToShow, numDaysLeftToShow ) =
+            case addHabit.frequencyKind of
+                Habit.TotalWeekFrequencyKind ->
+                    ( Maybe.withDefault 0 addHabit.timesPerWeek, 6 )
+
+                Habit.SpecificDayOfWeekFrequencyKind ->
+                    ( Maybe.withDefault 0 addHabit.mondayTimes, 0 )
+
+                Habit.EveryXDayFrequencyKind ->
+                    ( Maybe.withDefault 0 addHabit.times
+                    , case addHabit.days of
+                        Just days ->
+                            days - 1
+
+                        Nothing ->
+                            0
+                    )
+    in
+    div
+        [ classList
+            [ ( "add-habit-template-habits-list-habit-box", True )
+            , ( "good-habit", addHabit.kind == Habit.GoodHabitKind )
+            ]
+        , onClick <| OnAddHabitTemplateClick addHabit
+        ]
+        [ div [ class "name" ] [ text addHabit.name ]
+        , div [ class "description" ] [ text addHabit.description ]
+        , div
+            [ class "frequency-stats-list" ]
+            [ div
+                [ class "current-progress" ]
+                [ text <| "0 out of " ++ String.fromInt goalAmountToShow ++ " " ++ addHabit.unitNamePlural ]
+            , div [ class "frequency-statistic" ] [ text <| "Days left: " ++ String.fromInt numDaysLeftToShow ]
+            , div [ class "frequency-statistic" ] [ text "100%" ]
+            , div [ class "frequency-statistic" ] [ text "Streak: 0" ]
+            , div [ class "frequency-statistic" ] [ text "Best streak: 0" ]
+            , div [ class "frequency-statistic" ] [ text "Total done: 0" ]
+            ]
+        , div
+            [ class "habit-amount-complete" ]
+            [ input [ placeholder <| "0 " ++ addHabit.unitNamePlural ] [] ]
+        ]
+
+
+renderAddHabitForm :
+    Maybe DialogScreen.DialogScreen
+    -> User.User
+    -> Habit.AddHabitInputData
+    -> RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
+    -> Html Msg
 renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
     let
         maybeCreateHabitData =
@@ -562,231 +614,306 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
             let
                 isDuplicateHabitName =
                     List.any (\otherHabit -> (otherHabit |> Habit.getCommonFields |> .name) == addHabit.name) allHabits
+
+                templateHabits : List Habit.AddHabitInputData
+                templateHabits =
+                    [ { addHabit
+                        | name = "Meditation"
+                        , description = "relax my mind"
+                        , unitNameSingular = "minute"
+                        , unitNamePlural = "minutes"
+                        , frequencyKind = Habit.EveryXDayFrequencyKind
+                        , goodHabitTime = Habit.Morning
+                        , kind = Habit.GoodHabitKind
+                        , times = Just 15
+                        , days = Just 1
+                      }
+                    , { addHabit
+                        | name = "Brush and Floss"
+                        , description = "clean dem teeth n gums"
+                        , unitNameSingular = "brush sesh"
+                        , unitNamePlural = "brush seshes"
+                        , frequencyKind = Habit.EveryXDayFrequencyKind
+                        , goodHabitTime = Habit.Morning
+                        , kind = Habit.GoodHabitKind
+                        , times = Just 2
+                        , days = Just 1
+                      }
+                    , { addHabit
+                        | name = "Water"
+                        , description = "HYDRATE FOR VITALITY"
+                        , unitNameSingular = "mL"
+                        , unitNamePlural = "mL"
+                        , frequencyKind = Habit.EveryXDayFrequencyKind
+                        , goodHabitTime = Habit.Anytime
+                        , kind = Habit.GoodHabitKind
+                        , times = Just 3000
+                        , days = Just 1
+                      }
+                    , { addHabit
+                        | name = "Workout"
+                        , description = "break down muscles so they can become stronger"
+                        , unitNameSingular = "session"
+                        , unitNamePlural = "sessions"
+                        , frequencyKind = Habit.SpecificDayOfWeekFrequencyKind
+                        , mondayTimes = Just 1
+                        , tuesdayTimes = Nothing
+                        , wednesdayTimes = Just 1
+                        , thursdayTimes = Nothing
+                        , fridayTimes = Just 1
+                        , saturdayTimes = Nothing
+                        , sundayTimes = Nothing
+                        , goodHabitTime = Habit.Anytime
+                        , kind = Habit.GoodHabitKind
+                      }
+                    , { addHabit
+                        | name = "Caffeine"
+                        , description = "a delicious morning beverage"
+                        , unitNameSingular = "shot"
+                        , unitNamePlural = "shots"
+                        , frequencyKind = Habit.TotalWeekFrequencyKind
+                        , kind = Habit.BadHabitKind
+                        , timesPerWeek = Just 3
+                      }
+                    ]
             in
             div
-                [ classList
-                    [ ( "add-habit-form", True )
-                    , ( "form-is-open", showForm )
-                    ]
-                ]
+                [ class "add-habit" ]
                 [ div
-                    [ classList
-                        [ ( "add-habit-duplicate-habit-name-message", True )
-                        , ( "display-none", not isDuplicateHabitName || not showForm )
-                        ]
+                    [ classList [ ( "add-habit-background", True ), ( "display-none", not showForm ) ]
+                    , onClick OnExitDialogScreen
                     ]
-                    [ text <| "A habit named \"" ++ addHabit.name ++ "\" already exists. Please choose a different name." ]
+                    []
+                , div
+                    [ classList [ ( "add-habit-template-habits", True ), ( "display-none", not showForm ) ] ]
+                    [ div [ class "add-habit-template-habits-title" ] [ text "Habit Templates" ]
+                    , div [ class "add-habit-template-habits-list" ] (List.map renderTemplateHabit templateHabits)
+                    ]
                 , div
                     [ classList
-                        [ ( "add-habit-form-body", True )
-                        , ( "display-none", not showForm )
+                        [ ( "add-habit-form", True )
+                        , ( "form-is-open", showForm )
                         ]
                     ]
                     [ div
-                        [ class "add-habit-form-body-habit-tag-name" ]
-                        [ button
-                            [ classList [ ( "selected", addHabit.kind == Habit.GoodHabitKind ) ]
-                            , onClick <| OnSelectAddHabitKind Habit.GoodHabitKind
+                        [ classList
+                            [ ( "add-habit-duplicate-habit-name-message", True )
+                            , ( "display-none", not isDuplicateHabitName || not showForm )
                             ]
-                            [ text "Good Habit" ]
-                        , button
-                            [ classList [ ( "selected", addHabit.kind == Habit.BadHabitKind ) ]
-                            , onClick <| OnSelectAddHabitKind Habit.BadHabitKind
-                            ]
-                            [ text "Bad Habit" ]
                         ]
-                    , div
-                        [ class "add-habit-form-body-name-and-description" ]
-                        [ input
-                            [ class "add-habit-form-body-name"
-                            , id "add-habit-form-body-name-input"
-                            , placeholder "Name..."
-                            , onInput OnAddHabitNameInput
-                            , value addHabit.name
-                            ]
-                            []
-                        , textarea
-                            [ class "add-habit-form-body-description"
-                            , placeholder "Short description..."
-                            , onInput OnAddHabitDescriptionInput
-                            , value addHabit.description
-                            ]
-                            []
-                        ]
+                        [ text <| "A habit named \"" ++ addHabit.name ++ "\" already exists. Please choose a different name." ]
                     , div
                         [ classList
-                            [ ( "add-habit-form-body-time-of-day", True )
-                            , ( "display-none", addHabit.kind /= Habit.GoodHabitKind )
+                            [ ( "add-habit-form-body", True )
+                            , ( "display-none", not showForm )
                             ]
                         ]
-                        [ button
-                            [ classList [ ( "habit-time-of-day", True ), ( "selected", addHabit.goodHabitTime == Habit.Anytime ) ]
-                            , onClick <| OnSelectAddGoodHabitTime Habit.Anytime
-                            ]
-                            [ text "ANYTIME" ]
-                        , button
-                            [ classList [ ( "habit-time-of-day", True ), ( "selected", addHabit.goodHabitTime == Habit.Morning ) ]
-                            , onClick <| OnSelectAddGoodHabitTime Habit.Morning
-                            ]
-                            [ text "MORNING" ]
-                        , button
-                            [ classList [ ( "habit-time-of-day", True ), ( "selected", addHabit.goodHabitTime == Habit.Evening ) ]
-                            , onClick <| OnSelectAddGoodHabitTime Habit.Evening
-                            ]
-                            [ text "EVENING" ]
-                        ]
-                    , div
-                        [ class "add-habit-form-body-unit-name" ]
-                        [ input
-                            [ class "habit-unit-name-singular"
-                            , placeholder "unit name singular..."
-                            , onInput OnAddHabitUnitNameSingularInput
-                            , value addHabit.unitNameSingular
-                            ]
-                            []
-                        , input
-                            [ class "habit-unit-name-plural"
-                            , placeholder "unit name plural..."
-                            , onInput OnAddHabitUnitNamePluralInput
-                            , value addHabit.unitNamePlural
-                            ]
-                            []
-                        ]
-                    , div
-                        [ class "add-habit-form-body-frequency-tag-name" ]
-                        [ button
-                            [ classList [ ( "selected", addHabit.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
-                            , onClick <| OnAddHabitSelectFrequencyKind Habit.EveryXDayFrequencyKind
-                            ]
-                            [ text "Y Per X Days" ]
-                        , button
-                            [ classList [ ( "selected", addHabit.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
-                            , onClick <| OnAddHabitSelectFrequencyKind Habit.TotalWeekFrequencyKind
-                            ]
-                            [ text "X Per Week" ]
-                        , button
-                            [ classList [ ( "selected", addHabit.frequencyKind == Habit.SpecificDayOfWeekFrequencyKind ) ]
-                            , onClick <| OnAddHabitSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind
-                            ]
-                            [ text "Specific Days of Week" ]
-                        ]
-                    , div
-                        [ classList
-                            [ ( "add-habit-form-body-x-times-per-week", True )
-                            , ( "display-none", addHabit.frequencyKind /= Habit.TotalWeekFrequencyKind )
-                            ]
-                        ]
-                        [ input
-                            [ placeholder <|
-                                if addHabit.unitNamePlural == "" then
-                                    "units"
-
-                                else
-                                    addHabit.unitNamePlural
-                            , onInput OnAddHabitTimesPerWeekInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.timesPerWeek)
-                            ]
-                            []
-                        ]
-                    , div
-                        [ classList
-                            [ ( "add-habit-form-body-specific-days-of-week", True )
-                            , ( "display-none", addHabit.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
-                            ]
-                        ]
-                        [ input
-                            [ placeholder "monday"
-                            , onInput OnAddHabitSpecificDayMondayInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.mondayTimes)
-                            ]
-                            []
-                        , input
-                            [ placeholder "tuesday"
-                            , onInput OnAddHabitSpecificDayTuesdayInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.tuesdayTimes)
-                            ]
-                            []
-                        , input
-                            [ placeholder "wednesday"
-                            , onInput OnAddHabitSpecificDayWednesdayInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.wednesdayTimes)
-                            ]
-                            []
-                        , input
-                            [ placeholder "thursday"
-                            , onInput OnAddHabitSpecificDayThursdayInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.thursdayTimes)
-                            ]
-                            []
-                        , input
-                            [ placeholder "friday"
-                            , onInput OnAddHabitSpecificDayFridayInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.fridayTimes)
-                            ]
-                            []
-                        , input
-                            [ placeholder "saturday"
-                            , onInput OnAddHabitSpecificDaySaturdayInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.saturdayTimes)
-                            ]
-                            []
-                        , input
-                            [ placeholder "sunday"
-                            , onInput OnAddHabitSpecificDaySundayInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.sundayTimes)
-                            ]
-                            []
-                        ]
-                    , div
-                        [ classList
-                            [ ( "add-habit-form-body-x-times-per-y-days", True )
-                            , ( "display-none", addHabit.frequencyKind /= Habit.EveryXDayFrequencyKind )
-                            ]
-                        ]
-                        [ input
-                            [ placeholder <|
-                                if addHabit.unitNamePlural == "" then
-                                    "units"
-
-                                else
-                                    addHabit.unitNamePlural
-                            , onInput OnAddHabitTimesInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.times)
-                            ]
-                            []
-                        , input
-                            [ placeholder "days"
-                            , onInput OnAddHabitDaysInput
-                            , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.days)
-                            ]
-                            []
-                        ]
-                    , case ( maybeCreateHabitData, isDuplicateHabitName ) of
-                        ( Just createHabitData, False ) ->
-                            button
-                                [ class "add-habit-form-submit-button"
-                                , onClick AddHabitFormSubmit
+                        [ div
+                            [ class "add-habit-form-body-habit-tag-name" ]
+                            [ button
+                                [ classList [ ( "selected", addHabit.kind == Habit.GoodHabitKind ) ]
+                                , onClick <| OnSelectAddHabitKind Habit.GoodHabitKind
                                 ]
-                                [ text "Create Habit" ]
+                                [ text "Good Habit" ]
+                            , button
+                                [ classList [ ( "selected", addHabit.kind == Habit.BadHabitKind ) ]
+                                , onClick <| OnSelectAddHabitKind Habit.BadHabitKind
+                                ]
+                                [ text "Bad Habit" ]
+                            ]
+                        , div
+                            [ class "add-habit-form-body-name-and-description" ]
+                            [ input
+                                [ class "add-habit-form-body-name"
+                                , id "add-habit-form-body-name-input"
+                                , placeholder "Name..."
+                                , onInput OnAddHabitNameInput
+                                , value addHabit.name
+                                ]
+                                []
+                            , textarea
+                                [ class "add-habit-form-body-description"
+                                , placeholder "Short description..."
+                                , onInput OnAddHabitDescriptionInput
+                                , value addHabit.description
+                                ]
+                                []
+                            ]
+                        , div
+                            [ classList
+                                [ ( "add-habit-form-body-time-of-day", True )
+                                , ( "display-none", addHabit.kind /= Habit.GoodHabitKind )
+                                ]
+                            ]
+                            [ button
+                                [ classList [ ( "habit-time-of-day", True ), ( "selected", addHabit.goodHabitTime == Habit.Anytime ) ]
+                                , onClick <| OnSelectAddGoodHabitTime Habit.Anytime
+                                ]
+                                [ text "ANYTIME" ]
+                            , button
+                                [ classList [ ( "habit-time-of-day", True ), ( "selected", addHabit.goodHabitTime == Habit.Morning ) ]
+                                , onClick <| OnSelectAddGoodHabitTime Habit.Morning
+                                ]
+                                [ text "MORNING" ]
+                            , button
+                                [ classList [ ( "habit-time-of-day", True ), ( "selected", addHabit.goodHabitTime == Habit.Evening ) ]
+                                , onClick <| OnSelectAddGoodHabitTime Habit.Evening
+                                ]
+                                [ text "EVENING" ]
+                            ]
+                        , div
+                            [ class "add-habit-form-body-unit-name" ]
+                            [ input
+                                [ class "habit-unit-name-singular"
+                                , placeholder "unit name singular..."
+                                , onInput OnAddHabitUnitNameSingularInput
+                                , value addHabit.unitNameSingular
+                                ]
+                                []
+                            , input
+                                [ class "habit-unit-name-plural"
+                                , placeholder "unit name plural..."
+                                , onInput OnAddHabitUnitNamePluralInput
+                                , value addHabit.unitNamePlural
+                                ]
+                                []
+                            ]
+                        , div
+                            [ class "add-habit-form-body-frequency-tag-name" ]
+                            [ button
+                                [ classList [ ( "selected", addHabit.frequencyKind == Habit.EveryXDayFrequencyKind ) ]
+                                , onClick <| OnAddHabitSelectFrequencyKind Habit.EveryXDayFrequencyKind
+                                ]
+                                [ text "Y Per X Days" ]
+                            , button
+                                [ classList [ ( "selected", addHabit.frequencyKind == Habit.TotalWeekFrequencyKind ) ]
+                                , onClick <| OnAddHabitSelectFrequencyKind Habit.TotalWeekFrequencyKind
+                                ]
+                                [ text "X Per Week" ]
+                            , button
+                                [ classList [ ( "selected", addHabit.frequencyKind == Habit.SpecificDayOfWeekFrequencyKind ) ]
+                                , onClick <| OnAddHabitSelectFrequencyKind Habit.SpecificDayOfWeekFrequencyKind
+                                ]
+                                [ text "Specific Days of Week" ]
+                            ]
+                        , div
+                            [ classList
+                                [ ( "add-habit-form-body-x-times-per-week", True )
+                                , ( "display-none", addHabit.frequencyKind /= Habit.TotalWeekFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder <|
+                                    if addHabit.unitNamePlural == "" then
+                                        "units"
 
-                        _ ->
-                            Util.hiddenDiv
-                    ]
-                , button
-                    [ class "add-habit-form-button"
-                    , onClick <|
-                        if showForm then
-                            OnExitDialogScreen
+                                    else
+                                        addHabit.unitNamePlural
+                                , onInput OnAddHabitTimesPerWeekInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.timesPerWeek)
+                                ]
+                                []
+                            ]
+                        , div
+                            [ classList
+                                [ ( "add-habit-form-body-specific-days-of-week", True )
+                                , ( "display-none", addHabit.frequencyKind /= Habit.SpecificDayOfWeekFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder "monday"
+                                , onInput OnAddHabitSpecificDayMondayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.mondayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "tuesday"
+                                , onInput OnAddHabitSpecificDayTuesdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.tuesdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "wednesday"
+                                , onInput OnAddHabitSpecificDayWednesdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.wednesdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "thursday"
+                                , onInput OnAddHabitSpecificDayThursdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.thursdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "friday"
+                                , onInput OnAddHabitSpecificDayFridayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.fridayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "saturday"
+                                , onInput OnAddHabitSpecificDaySaturdayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.saturdayTimes)
+                                ]
+                                []
+                            , input
+                                [ placeholder "sunday"
+                                , onInput OnAddHabitSpecificDaySundayInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.sundayTimes)
+                                ]
+                                []
+                            ]
+                        , div
+                            [ classList
+                                [ ( "add-habit-form-body-x-times-per-y-days", True )
+                                , ( "display-none", addHabit.frequencyKind /= Habit.EveryXDayFrequencyKind )
+                                ]
+                            ]
+                            [ input
+                                [ placeholder <|
+                                    if addHabit.unitNamePlural == "" then
+                                        "units"
 
-                        else
-                            OpenAddHabitForm
-                    ]
-                    [ text <|
-                        if showForm then
-                            "Cancel"
+                                    else
+                                        addHabit.unitNamePlural
+                                , onInput OnAddHabitTimesInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.times)
+                                ]
+                                []
+                            , input
+                                [ placeholder "days"
+                                , onInput OnAddHabitDaysInput
+                                , value <| Maybe.withDefault "" (Maybe.map String.fromInt addHabit.days)
+                                ]
+                                []
+                            ]
+                        , case ( maybeCreateHabitData, isDuplicateHabitName ) of
+                            ( Just createHabitData, False ) ->
+                                button
+                                    [ class "add-habit-form-submit-button"
+                                    , onClick AddHabitFormSubmit
+                                    ]
+                                    [ text "Create Habit" ]
 
-                        else
-                            "Add Habit"
+                            _ ->
+                                Util.hiddenDiv
+                        ]
+                    , button
+                        [ class "add-habit-form-button"
+                        , onClick <|
+                            if showForm then
+                                OnExitDialogScreen
+
+                            else
+                                OpenAddHabitForm
+                        ]
+                        [ text <|
+                            if showForm then
+                                "Cancel"
+
+                            else
+                                "Add Habit"
+                        ]
                     ]
                 ]
 

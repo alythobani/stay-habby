@@ -1895,7 +1895,7 @@ renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
                     Habit.getCommonFields habit
 
                 isValidEditInfo =
-                    Habit.isValidEditInfo editInfo
+                    Habit.isValidEditInfo editInfo habit
             in
             div
                 [ classList

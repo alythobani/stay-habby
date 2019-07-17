@@ -156,11 +156,39 @@ initEditInfoData =
     { name = "", description = "", goodHabitTime = Anytime, unitNameSingular = "", unitNamePlural = "" }
 
 
-{-| Returns True iff this data can be used appropriately in `Api.mutationEditHabitInfo`. I.e. no empty strings.
+{-| Returns True iff this data can be used appropriately in `Api.mutationEditHabitInfo`, i.e. no empty strings,
+and they're not allthe same fields as the original habit.
 -}
-isValidEditInfo : EditInfoInputData -> Bool
-isValidEditInfo editInfo =
-    editInfo.name /= "" && editInfo.description /= "" && editInfo.unitNameSingular /= "" && editInfo.unitNamePlural /= ""
+isValidEditInfo : EditInfoInputData -> Habit -> Bool
+isValidEditInfo editInfo habit =
+    let
+        habitRecord =
+            getCommonFields habit
+
+        hasTimeChanged =
+            case habit of
+                GoodHabit gh ->
+                    editInfo.goodHabitTime /= gh.timeOfDay
+
+                _ ->
+                    False
+
+        hasAnythingChanged =
+            hasTimeChanged
+                || (editInfo.name /= habitRecord.name)
+                || (editInfo.description /= Maybe.withDefault "" habitRecord.description)
+                || (editInfo.unitNameSingular /= habitRecord.unitNameSingular)
+                || (editInfo.unitNamePlural /= habitRecord.unitNamePlural)
+    in
+    hasAnythingChanged
+        && editInfo.name
+        /= ""
+        && editInfo.description
+        /= ""
+        && editInfo.unitNameSingular
+        /= ""
+        && editInfo.unitNamePlural
+        /= ""
 
 
 type CreateHabit

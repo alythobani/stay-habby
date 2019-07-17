@@ -1909,7 +1909,7 @@ renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
                     , div [ class "edit-info-dialog-form-line-break" ] []
                     , div
                         [ class "edit-info-dialog-form-name" ]
-                        [ text "Name: "
+                        [ div [ class "input-title" ] [ text "Name" ]
                         , input
                             [ id "edit-info-dialog-form-name-input"
                             , placeholder habitRecord.name
@@ -1920,10 +1920,10 @@ renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
                         ]
                     , div
                         [ class "edit-info-dialog-form-description" ]
-                        [ text "Description: "
-                        , input
-                            [ placeholder habitRecord.name
-                            , value editInfo.name
+                        [ div [ class "input-title" ] [ text "Description" ]
+                        , textarea
+                            [ placeholder <| Maybe.withDefault "Description" habitRecord.description
+                            , value editInfo.description
                             , onInput OnEditInfoDescriptionInput
                             ]
                             []
@@ -1952,7 +1952,7 @@ renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
                         ]
                     , div
                         [ class "edit-info-dialog-form-unit-name-singular" ]
-                        [ text "Unit Name (Singular): "
+                        [ div [ class "input-title" ] [ text "Unit Name (Singular)" ]
                         , input
                             [ placeholder habitRecord.unitNameSingular
                             , value editInfo.unitNameSingular
@@ -1962,7 +1962,7 @@ renderEditInfoDialog activeDialogScreen maybeHabit editInfo =
                         ]
                     , div
                         [ class "edit-info-dialog-form-unit-name-plural" ]
-                        [ text "Unit Name (Plural): "
+                        [ div [ class "input-title" ] [ text "Unit Name (Plural)" ]
                         , input
                             [ placeholder habitRecord.unitNamePlural
                             , value editInfo.unitNamePlural

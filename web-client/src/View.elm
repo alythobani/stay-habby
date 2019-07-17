@@ -1146,7 +1146,21 @@ renderHabitBox habitStats selectedYmd habitData editingHabitAmountDict habitActi
                 "habit-success"
 
              else
-                "habit-failure"
+                case habit of
+                    Habit.GoodHabit _ ->
+                        "habit-failure"
+
+                    Habit.BadHabit _ ->
+                        case habitStats of
+                            Nothing ->
+                                "habit-success"
+
+                            Just stats ->
+                                if not stats.habitHasStarted then
+                                    "habit-success"
+
+                                else
+                                    "habit-failure"
             )
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]

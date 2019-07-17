@@ -232,14 +232,6 @@ mutationAddHabit createHabit ymd =
         commonFields =
             Habit.getCommonCreateFields createHabit
 
-        startDate =
-            case commonFields.initialFrequency of
-                Habit.TotalWeekFrequency _ ->
-                    YmdDate.getFirstMondayAfterDate ymd
-
-                _ ->
-                    ymd
-
         templateDict =
             Dict.fromList
                 [ ( "type_name"
@@ -270,7 +262,7 @@ mutationAddHabit createHabit ymd =
                         "initial_threshold_frequency"
                   )
                 , ( "initial_frequency_value", frequencyToGraphQLString commonFields.initialFrequency )
-                , ( "frequency_start_date", YmdDate.encodeYmdDate startDate )
+                , ( "frequency_start_date", YmdDate.encodeYmdDate ymd )
                 , ( "habit_output", Habit.graphQLOutputString )
                 ]
 

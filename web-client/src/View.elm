@@ -741,7 +741,7 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                       }
                     , { initAddHabit
                         | name = "Alcohol"
-                        , description = "the hardest drug"
+                        , description = "a psychoactive drug"
                         , unitNameSingular = "unit of alcohol"
                         , unitNamePlural = "units of alcohol"
                         , frequencyKind = Habit.SpecificDayOfWeekFrequencyKind

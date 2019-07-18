@@ -967,16 +967,29 @@ update msg model =
 
                 updatedHabitListsModel =
                     updateHabitListsWithNewHabit habit
+
+                ( newHabitDataModel, newCmd ) =
+                    case ( habit, updatedHabitListsModel.selectedYmd ) of
+                        ( Habit.GoodHabit _, _ ) ->
+                            ( updatedHabitListsModel, Cmd.none )
+
+                        ( Habit.BadHabit bh, Just selectedYmd ) ->
+                            -- If user added a bad habit, start it off today with a data of 0
+                            update (SetHabitData selectedYmd bh.id (Just 0)) updatedHabitListsModel
+
+                        ( _, Nothing ) ->
+                            ( updatedHabitListsModel, Cmd.none )
             in
-            ( { updatedHabitListsModel
+            ( { newHabitDataModel
                 | addHabit = Habit.initAddHabitData
               }
             , case model.user of
                 Just user ->
-                    getFrequencyStats user [ habitRecord.id ]
+                    Cmd.batch
+                        [ getFrequencyStats user [ habitRecord.id ], newCmd ]
 
                 Nothing ->
-                    Cmd.none
+                    newCmd
             )
 
         -- Set Habit Data

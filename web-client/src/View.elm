@@ -731,7 +731,7 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                         , days = Just 1
                       }
                     , { initAddHabit
-                        | name = "Caffeine"
+                        | name = "Coffee"
                         , description = "a delicious morning beverage"
                         , unitNameSingular = "shot of caffeine"
                         , unitNamePlural = "shots of caffeine"
@@ -741,7 +741,7 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                       }
                     , { initAddHabit
                         | name = "Alcohol"
-                        , description = "a psychoactive drug"
+                        , description = "the psychoactive kind"
                         , unitNameSingular = "unit of alcohol"
                         , unitNamePlural = "units of alcohol"
                         , frequencyKind = Habit.SpecificDayOfWeekFrequencyKind

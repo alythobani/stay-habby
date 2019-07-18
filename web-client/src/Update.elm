@@ -456,7 +456,7 @@ update msg model =
                     case lastIndexOfAtSymbolAppearance of
                         Just lastIndex ->
                             ( String.left lastIndex newEmailAddressInput
-                            , String.right (String.length newEmailAddressInput - lastIndex) newEmailAddressInput
+                            , String.right (String.length newEmailAddressInput - (lastIndex + 1)) newEmailAddressInput
                             )
 
                         Nothing ->
@@ -465,7 +465,9 @@ update msg model =
 
                 isNewEmailAddressValid =
                     Maybe.isJust lastIndexOfAtSymbolAppearance
+                        && (String.length localPortionOfAddress >= 1)
                         && (String.length localPortionOfAddress <= 64)
+                        && (String.length domainPortionOfAddress >= 1)
                         && (String.length domainPortionOfAddress <= 256)
             in
             if String.length newEmailAddressInput > 320 || String.contains "<script" newEmailAddressInput then

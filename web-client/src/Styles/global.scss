@@ -636,7 +636,6 @@ body {
 
         .habit-list {
             display: block;
-            overflow: auto;
             margin-left: 10px;
 
             &.good-habits {
@@ -669,11 +668,10 @@ body {
 
             .habit {
                 @extend .no-select;
-                float: left;
                 display: inline-block;
                 position: relative;
                 padding: 7px;
-                margin: 15px 15px 0 2px;
+                margin: 10px 15px 0 2px;
                 width: 325px;
                 height: 120px;
                 box-sizing: border-box;

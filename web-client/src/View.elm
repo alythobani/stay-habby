@@ -36,7 +36,12 @@ view model =
         case model.user of
             Just user ->
                 [ div
-                    [ classList [ ( "logged-in-view", True ), ( "dark-mode", model.darkModeOn ) ] ]
+                    [ classList
+                        [ ( "logged-in-view", True )
+                        , ( "dark-mode", model.darkModeOn )
+                        ]
+                    , onClick OnGlobalClick
+                    ]
                     [ div
                         [ class "panels-container" ]
                         [ renderTopPanel
@@ -395,7 +400,7 @@ renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateD
 
                     else
                         "top-panel-user-actions-dropdown-toggler-default"
-                , onClick ToggleTopPanelUserActionsDropdown
+                , Util.onClickStopPropagation (Just ToggleTopPanelUserActionsDropdown)
                 ]
                 [ text "" ]
             , div
@@ -425,7 +430,7 @@ renderTopPanel maybeSelectedYmd maybeActualYmd darkModeOn errorMessage openDateD
 
                         else
                             "top-panel-date-dropdown-toggler-default"
-                    , onClick ToggleTopPanelDateDropdown
+                    , Util.onClickStopPropagation (Just ToggleTopPanelDateDropdown)
                     ]
                     [ text "" ]
                 , div
@@ -1030,7 +1035,7 @@ habitActionsDropdownDiv dropdown selectedYmd habit suspensions =
 
                 else
                     "actions-dropdown-toggler-default"
-            , onClick <| ToggleHabitActionsDropdown habitRecord.id
+            , Util.onClickStopPropagation (Just <| ToggleHabitActionsDropdown habitRecord.id)
             ]
             [ text "" ]
         , div

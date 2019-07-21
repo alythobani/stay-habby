@@ -44,6 +44,8 @@ type Msg
       -- Time / Date
     | TickMinute Time.Posix
     | OnTimeZoneRetrieval (Result TimeZone.Error ( String, Time.Zone ))
+      -- Global Click
+    | OnGlobalClick
       -- Top Panel Date
     | ToggleTopPanelDateDropdown
     | ChangeSelectedYmd YmdDate.YmdDate

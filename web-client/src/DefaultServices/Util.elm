@@ -11,6 +11,7 @@ module DefaultServices.Util exposing
     , lastElementOfList
     , lastInstanceInArray
     , notEmpty
+    , onClickStopPropagation
     , onKeydown
     , onKeydownPreventDefault
     , onKeydownStopPropagation
@@ -210,6 +211,28 @@ onKeydownStopPropagation keyToMsg =
     stopPropagationOn
         "keydown"
         (Decode.andThen decodeMsgBoolFromCode Keyboard.decodeKey)
+
+
+{-| Event handler for `click` events that also `stopPropagation`.
+
+WARNING: It'll only stop propagation if your message is `Just msg` not `Nothing`.
+
+-}
+onClickStopPropagation : Maybe msg -> Attribute msg
+onClickStopPropagation maybeMsg =
+    let
+        msgBoolDecoder : Decode.Decoder ( msg, Bool )
+        msgBoolDecoder =
+            case maybeMsg of
+                Just msg ->
+                    Decode.succeed ( msg, True )
+
+                Nothing ->
+                    Decode.fail ""
+    in
+    stopPropagationOn
+        "click"
+        msgBoolDecoder
 
 
 {-| Event handler for `keyUp` events that also `stopPropagation`.

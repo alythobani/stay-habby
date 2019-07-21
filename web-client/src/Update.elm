@@ -603,6 +603,16 @@ update msg model =
                     in
                     ( { model | actualYmd = Just currentYmd }, Cmd.none )
 
+        -- Global Click
+        OnGlobalClick ->
+            ( { model
+                | openTopPanelDateDropdown = False
+                , openUserActionsDropdown = False
+                , habitActionsDropdown = Nothing
+              }
+            , Cmd.none
+            )
+
         -- Top Panel Date
         ToggleTopPanelDateDropdown ->
             ( { model

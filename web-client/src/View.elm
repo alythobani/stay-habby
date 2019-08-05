@@ -768,12 +768,13 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                     [ classList [ ( "add-habit-main-section", True ), ( "display-none", not showForm ) ] ]
                     [ div
                         [ classList [ ( "add-habit-template-habits", True ), ( "display-none", not showForm ) ] ]
-                        [ div [ class "add-habit-template-habits-title" ] [ text "Habit Templates" ]
+                        [ div [ class "add-habit-template-habits-title" ] [ text "Choose from a template..." ]
                         , div [ class "add-habit-template-habits-list" ] (List.map renderTemplateHabit templateHabits)
                         ]
                     , div
                         [ classList [ ( "add-habit-form", True ), ( "form-is-open", showForm ) ] ]
-                        [ div
+                        [ div [ class "add-habit-form-title" ] [ text "Or start from scratch..." ]
+                        , div
                             [ classList
                                 [ ( "add-habit-duplicate-habit-name-message", True )
                                 , ( "display-none", not isDuplicateHabitName || not showForm )

@@ -369,6 +369,9 @@ body {
             }
             .add-habit-form {
               background-color: inherit;
+              .add-habit-form-title {
+                color: white;
+              }
               .add-habit-duplicate-habit-name-message {
                 background-color: black;
                 color: red;
@@ -823,8 +826,9 @@ body {
             width: 100%;
             .add-habit-template-habits-title {
               color: black;
-              font-size: 36px;
-              margin: 30px auto 30px auto;
+              font-size: 20px;
+              font-style: italic;
+              margin: 30px auto 10px auto;
             }
             .add-habit-template-habits-list {
               .add-habit-template-habits-list-habit-box {
@@ -926,6 +930,13 @@ body {
             width: 100%;
             padding: 10px;
             background-color: transparent;
+            .add-habit-form-title {
+              color: black;
+              font-size: 20px;
+              font-style: italic;
+              text-align: center;
+              margin: 30px auto 20px auto;
+            }
             .add-habit-duplicate-habit-name-message {
               color: black;
               text-align: center;

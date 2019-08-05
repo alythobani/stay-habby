@@ -111,6 +111,7 @@ type Msg
     | ToggleAvailableKeyboardShortcutsScreen
       -- Dom
     | FocusResult (Result Dom.Error ())
+    | FocusResultNoErr (Result Dom.Error ())
       -- Set Habit Data Shortcut
     | OpenSetHabitDataShortcutHabitSelectionScreen
     | OnSetHabitDataShortcutHabitSelectionFilterTextInput String

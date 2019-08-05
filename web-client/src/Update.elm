@@ -769,7 +769,7 @@ update msg model =
                     update (ChangeSelectedYmd chosenYmd) newDialogScreenModel
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( model, Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr )
 
         -- Top Panel User Actions Dropdown
         ToggleTopPanelUserActionsDropdown ->
@@ -822,7 +822,7 @@ update msg model =
                 , suspendOrResumeHabitSelectionFilteredHabits = habitsArray
                 , graphHabitSelectionFilteredHabits = habitsArray
               }
-            , Cmd.none
+            , Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
             )
 
         -- Add Habit
@@ -950,11 +950,14 @@ update msg model =
                                 allHabits
                     in
                     if isDuplicateHabitName then
-                        ( model, Cmd.none )
+                        ( model, Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr )
 
                     else
                         ( { newDialogScreenModel | addHabit = Habit.initAddHabitData }
-                        , Api.mutationAddHabit createHabitData selectedYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+                        , Cmd.batch
+                            [ Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+                            , Api.mutationAddHabit createHabitData selectedYmd model.apiBaseUrl OnAddHabitFailure OnAddHabitSuccess
+                            ]
                         )
 
                 ( Nothing, _, _ ) ->
@@ -1097,7 +1100,7 @@ update msg model =
                         _ ->
                             RemoteData.Success frequencyStatsList
               }
-            , Cmd.none
+            , Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
             )
 
         -- Habit Actions Dropdowns
@@ -1176,6 +1179,9 @@ update msg model =
 
                 Result.Ok () ->
                     ( model, Cmd.none )
+
+        FocusResultNoErr _ ->
+            ( model, Cmd.none )
 
         -- Set Habit Data Shortcut
         OpenSetHabitDataShortcutHabitSelectionScreen ->
@@ -1257,14 +1263,17 @@ update msg model =
                             switchScreen model Nothing
                     in
                     ( newDialogScreenModel
-                    , Api.mutationSetHabitData
-                        user
-                        selectedYmd
-                        habitId
-                        inputInt
-                        model.apiBaseUrl
-                        OnSetHabitDataFailure
-                        OnSetHabitDataSuccess
+                    , Cmd.batch
+                        [ Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+                        , Api.mutationSetHabitData
+                            user
+                            selectedYmd
+                            habitId
+                            inputInt
+                            model.apiBaseUrl
+                            OnSetHabitDataFailure
+                            OnSetHabitDataSuccess
+                        ]
                     )
 
                 ( _, Nothing, _ ) ->
@@ -1872,14 +1881,17 @@ update msg model =
                             switchScreen model Nothing
                     in
                     ( newDialogScreenModel
-                    , Api.mutationEditHabitGoalFrequencies
-                        user
-                        habitId
-                        newFrequenciesList
-                        habitType
-                        model.apiBaseUrl
-                        OnEditGoalFailure
-                        OnEditGoalSuccess
+                    , Cmd.batch
+                        [ Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+                        , Api.mutationEditHabitGoalFrequencies
+                            user
+                            habitId
+                            newFrequenciesList
+                            habitType
+                            model.apiBaseUrl
+                            OnEditGoalFailure
+                            OnEditGoalSuccess
+                        ]
                     )
 
                 ( Nothing, _, _ ) ->
@@ -2004,14 +2016,17 @@ update msg model =
                                 switchScreen model Nothing
                         in
                         ( newDialogScreenModel
-                        , Api.mutationEditHabitInfo
-                            user
-                            habitId
-                            habitType
-                            model.editInfo
-                            model.apiBaseUrl
-                            OnEditInfoFailure
-                            OnEditInfoSuccess
+                        , Cmd.batch
+                            [ Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+                            , Api.mutationEditHabitInfo
+                                user
+                                habitId
+                                habitType
+                                model.editInfo
+                                model.apiBaseUrl
+                                OnEditInfoFailure
+                                OnEditInfoSuccess
+                            ]
                         )
 
                     else
@@ -2160,14 +2175,17 @@ update msg model =
                             switchScreen model Nothing
                     in
                     ( newDialogScreenModel
-                    , Api.mutationSetHabitDayNote
-                        user
-                        selectedYmd
-                        (habit |> Habit.getCommonFields |> .id)
-                        model.addNoteDialogInput
-                        model.apiBaseUrl
-                        OnAddNoteFailure
-                        OnAddNoteSuccess
+                    , Cmd.batch
+                        [ Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+                        , Api.mutationSetHabitDayNote
+                            user
+                            selectedYmd
+                            (habit |> Habit.getCommonFields |> .id)
+                            model.addNoteDialogInput
+                            model.apiBaseUrl
+                            OnAddNoteFailure
+                            OnAddNoteSuccess
+                        ]
                     )
 
                 _ ->
@@ -2398,13 +2416,16 @@ update msg model =
                         , suspendOrResumeHabitConfirmationMessage = ""
                         , suspendOrResumeHabitNewSuspensions = Nothing
                       }
-                    , Api.mutationEditHabitSuspensions
-                        user
-                        habitRecord.id
-                        newSuspensions
-                        model.apiBaseUrl
-                        OnResumeOrSuspendHabitFailure
-                        OnResumeOrSuspendHabitSuccess
+                    , Cmd.batch
+                        [ Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+                        , Api.mutationEditHabitSuspensions
+                            user
+                            habitRecord.id
+                            newSuspensions
+                            model.apiBaseUrl
+                            OnResumeOrSuspendHabitFailure
+                            OnResumeOrSuspendHabitSuccess
+                        ]
                     )
 
                 ( _, _, Nothing ) ->

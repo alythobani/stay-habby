@@ -958,6 +958,16 @@ body {
                       width: 90px;
                       height: 40px;
                       margin: 0 0 10px 0;
+                      &.selected {
+                        &.good-type {
+                          border-color: $christi;
+                          border-width: 2px;
+                        }
+                        &.bad-type {
+                          border-color: $fire-bush;
+                          border-width: 2px;
+                        }
+                      }
                   }
               }
 

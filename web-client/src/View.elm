@@ -790,12 +790,18 @@ renderAddHabitForm activeDialogScreen user addHabit rdAllHabits =
                             [ div
                                 [ class "add-habit-form-body-habit-tag-name" ]
                                 [ button
-                                    [ classList [ ( "selected", addHabit.kind == Habit.GoodHabitKind ) ]
+                                    [ classList
+                                        [ ( "selected", addHabit.kind == Habit.GoodHabitKind )
+                                        , ( "good-type", True )
+                                        ]
                                     , onClick <| OnSelectAddHabitKind Habit.GoodHabitKind
                                     ]
                                     [ text "Good Habit" ]
                                 , button
-                                    [ classList [ ( "selected", addHabit.kind == Habit.BadHabitKind ) ]
+                                    [ classList
+                                        [ ( "selected", addHabit.kind == Habit.BadHabitKind )
+                                        , ( "bad-type", True )
+                                        ]
                                     , onClick <| OnSelectAddHabitKind Habit.BadHabitKind
                                     ]
                                     [ text "Bad Habit" ]

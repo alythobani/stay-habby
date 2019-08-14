@@ -1100,7 +1100,11 @@ update msg model =
                         _ ->
                             RemoteData.Success frequencyStatsList
               }
-            , Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+            , if model.activeDialogScreen == Nothing then
+                Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr
+
+              else
+                Cmd.none
             )
 
         -- Habit Actions Dropdowns

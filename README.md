@@ -2,7 +2,7 @@
 
 A habit tracking web application, originally started by [Arie Milner](https://github.com/amilner42/habby) (Nov—Dec 2017) and currently only further developed by me (Dec 2017—present).
 
-Way more flexible, user-friendly, and useful than any other habit tracker we've tried... but that's just my opinion ;). Check it out for yourself at https://www.stayhabby.com/
+Start improving your life: https://www.stayhabby.com/
 
 ---
 

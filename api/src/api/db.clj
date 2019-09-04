@@ -47,7 +47,26 @@
           final_habit)
         (assoc final_habit :suspensions [])
         (update final_habit :user_id #(ObjectId. %))
-        (mc/insert-and-return db (:habits collection-names) final_habit)))
+        (mc/insert-and-return db (:habits collection-names) final_habit)
+        (if (contains? final_habit :threshold_frequencies)
+          ; Bad habit
+          (do
+            ; Set habit data of 0 to initialize the bad habit
+            (mc/find-and-modify db
+                                (:habit_data collection-names)
+                                {:date frequency-start-datetime,
+                                 :habit_id (:_id final_habit),
+                                 :user_id (:user_id final_habit)}
+                                {$set {:amount 0}
+                                 $setOnInsert {:_id (ObjectId.),
+                                               :user_id (:user_id final_habit),
+                                               :habit_id (:_id final_habit),
+                                               :date frequency-start-datetime}}
+                                {:upsert true, :return-new true})
+            ; Return the inserted bad habit
+            final_habit)
+          ; Good habit
+          final_habit)))
 
 (defn add-user
   "Attempts to add a user to the database, encrypting the inputted password along the way.

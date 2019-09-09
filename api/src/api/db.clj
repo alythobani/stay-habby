@@ -124,6 +124,15 @@
                         {$set modifiers}
                         {:return-new true})))
 
+(defn set-habit-archived
+  "Sets a habit's `archived` field and returns the modified habit."
+  [{:keys [db user_id habit_id new_archived] :or {db habby_db}}]
+  (mc/find-and-modify db
+                      (:habits collection-names)
+                      {:_id (ObjectId. habit_id) :user_id (ObjectId. user_id)}
+                      {$set {:archived new_archived}}
+                      {:return-new true}))
+
 (defn delete-habit
   "Deletes a habit from the database, returns true if the habit was deleted."
   [{:keys [db habit_id] :or {db habby_db}}]

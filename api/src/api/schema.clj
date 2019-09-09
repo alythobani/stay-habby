@@ -175,6 +175,11 @@
   [context args value]
   (tag-type (db/edit-habit-info args)))
 
+(defn resolve-mutation-set-habit-archived
+  "@refer `db/set-habit-archived`."
+  [context args value]
+  (tag-type (db/set-habit-archived args)))
+
 (defn resolver-map
   []
   {:query/get-habits (create-async-resolver resolve-get-habits)
@@ -199,6 +204,7 @@
    :query/resolve-mutation-edit-habit-suspensions (create-async-resolver resolve-mutation-edit-habit-suspensions)
    :query/resolve-mutation-edit-habit-goal-frequencies (create-async-resolver resolve-mutation-edit-habit-goal-frequencies)
    :query/resolve-mutation-edit-habit-info (create-async-resolver resolve-mutation-edit-habit-info)
+   :query/resolve-mutation-set-habit-archived (create-async-resolver resolve-mutation-set-habit-archived)
    :query/get-habit-day-notes (create-async-resolver resolve-get-habit-day-notes)})
 
 (defn load-schema

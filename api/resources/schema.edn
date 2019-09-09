@@ -66,7 +66,8 @@
                                  :unit_name_plural {:type (non-null String)}
                                  :time_of_day {:type (non-null :habit_time)}
                                  :target_frequencies {:type (non-null (list (non-null :frequency_change_record)))}
-                                 :suspensions {:type (non-null (list (non-null :suspended_interval)))}}}
+                                 :suspensions {:type (non-null (list (non-null :suspended_interval)))}
+                                 :archived {:type (non-null Boolean)}}}
 
            :bad_habit {:description "A bad habit a user is trying to reduce."
                        :fields {:_id {:type (non-null ID)}
@@ -76,7 +77,8 @@
                                 :unit_name_singular {:type (non-null String)}
                                 :unit_name_plural {:type (non-null String)}
                                 :threshold_frequencies {:type (non-null (list (non-null :frequency_change_record)))}
-                                :suspensions {:type (non-null (list (non-null :suspended_interval)))}}}
+                                :suspensions {:type (non-null (list (non-null :suspended_interval)))}
+                                :archived {:type (non-null Boolean)}}}
 
            :habit_day_record {:description "A record of how much a user's habit was performed on a specific day."
                               :fields {:_id {:type (non-null ID)}
@@ -278,10 +280,18 @@
                                                   :new_frequencies {:type (non-null (list (non-null :create_frequency_change_record_data)))}
                                                   :habit_type {:type (non-null String)}}
                                            :resolve :query/resolve-mutation-edit-habit-goal-frequencies}
+
              :edit_habit_info {:type (non-null :habit)
                                :description "Change a user's habit's fields other than its goals/suspensions."
                                :args {:user_id {:type (non-null ID)}
                                       :habit_id {:type (non-null ID)}
                                       :habit_type {:type (non-null String)}
                                       :new_info {:type (non-null :edit_info_data)}}
-                               :resolve :query/resolve-mutation-edit-habit-info}}}
+                               :resolve :query/resolve-mutation-edit-habit-info}
+
+             :set_habit_archived {:type (non-null :habit)
+                                  :description "Set a habit's `archived` field."
+                                  :args {:user_id {:type (non-null ID)}
+                                         :habit_id {:type (non-null ID)}
+                                         :new_archived {:type (non-null Boolean)}}
+                                  :resolve :query/resolve-mutation-set-habit-archived}}}

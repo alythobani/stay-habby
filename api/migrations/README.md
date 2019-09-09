@@ -50,4 +50,4 @@ The rest of this README was written by myself (Aly).
 When working with a local db, it seems the command above can be simplified to:
 `mongo DB_NAME migration-name.migration.js`
 
-**Last run migration:** `3-suspensions-array.migration.js` (up to date)
+**Last run migration:** `5-archived-habit-field.migration.js` (up to date)

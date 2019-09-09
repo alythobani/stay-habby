@@ -10,6 +10,7 @@ module Api exposing
     , mutationEditHabitGoalFrequencies
     , mutationEditHabitInfo
     , mutationEditHabitSuspensions
+    , mutationSetHabitArchived
     , mutationSetHabitData
     , mutationSetHabitDayNote
     , queryAllRemoteData
@@ -600,3 +601,34 @@ mutationEditHabitSuspensions user habitId newSuspensions =
                 |> Util.templater templateDict
     in
     graphQLRequest queryString <| Decode.at [ "data", "edit_habit_suspensions" ] Habit.decodeHabit
+
+
+mutationSetHabitArchived :
+    User.User
+    -> String
+    -> Bool
+    -> String
+    -> (ApiError -> b)
+    -> (Habit.Habit -> b)
+    -> Cmd b
+mutationSetHabitArchived user habitId newArchived =
+    let
+        templateDict =
+            Dict.fromList <|
+                [ ( "user_id", Util.encodeString user.id )
+                , ( "habit_id", Util.encodeString habitId )
+                , ( "new_archived", Util.encodeBool newArchived )
+                , ( "habit_output", Habit.graphQLOutputString )
+                ]
+
+        query =
+            """mutation {
+              set_habit_archived(
+                user_id: {{user_id}},
+                habit_id: {{habit_id}},
+                new_archived: {{new_archived}}
+              ) {{habit_output}}
+            }"""
+                |> Util.templater templateDict
+    in
+    graphQLRequest query (Decode.at [ "data", "set_habit_archived" ] Habit.decodeHabit)

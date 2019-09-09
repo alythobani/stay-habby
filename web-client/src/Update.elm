@@ -79,6 +79,12 @@ switchScreen m newScreen =
                 Just DialogScreen.GraphDialogScreen ->
                     KeyboardShortcut.graphScreenShortcuts
 
+                Just DialogScreen.ArchiveHabitSelectionScreen ->
+                    KeyboardShortcut.archiveHabitSelectionShortcuts
+
+                Just DialogScreen.UnarchiveHabitSelectionScreen ->
+                    KeyboardShortcut.unarchiveHabitSelectionShortcuts
+
                 Nothing ->
                     KeyboardShortcut.mainScreenShortcuts
 
@@ -86,6 +92,14 @@ switchScreen m newScreen =
             case m.allHabits of
                 RemoteData.Success habits ->
                     Array.fromList habits
+
+                _ ->
+                    Array.empty
+
+        resettedFilteredArchivedHabits =
+            case m.archivedHabits of
+                RemoteData.Success archivedHabits ->
+                    Array.fromList archivedHabits
 
                 _ ->
                     Array.empty
@@ -116,6 +130,12 @@ switchScreen m newScreen =
         , graphHabitSelectionFilterText = ""
         , graphHabitSelectionFilteredHabits = resettedFilteredHabits
         , graphHabitSelectionSelectedHabitIndex = 0
+        , archiveHabitSelectionFilterText = ""
+        , archiveHabitSelectionFilteredHabits = resettedFilteredHabits
+        , archiveHabitSelectionSelectedHabitIndex = 0
+        , unarchiveHabitSelectionFilterText = ""
+        , unarchiveHabitSelectionFilteredHabits = resettedFilteredArchivedHabits
+        , unarchiveHabitSelectionSelectedHabitIndex = 0
     }
 
 
@@ -145,17 +165,40 @@ update msg model =
 
                 replaceHabitInArray habitArray =
                     habitArray |> Array.toList |> replaceHabitInList |> Array.fromList
+
+                removeHabitFromList =
+                    List.filter (\oldHabit -> (Habit.getCommonFields oldHabit |> .id) /= (Habit.getCommonFields habit |> .id))
+
+                removeHabitFromArray =
+                    Array.filter (\oldHabit -> (Habit.getCommonFields oldHabit |> .id) /= (Habit.getCommonFields habit |> .id))
             in
-            { model
-                | allHabits =
-                    RemoteData.map
-                        replaceHabitInList
-                        model.allHabits
-                , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
-                , editGoalHabitSelectionFilteredHabits = replaceHabitInArray model.editGoalHabitSelectionFilteredHabits
-                , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
-                , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
-            }
+            if Habit.getCommonFields habit |> .archived then
+                -- Habit is archived
+                { model
+                    | allHabits = RemoteData.map removeHabitFromList model.allHabits
+                    , archivedHabits = RemoteData.map replaceHabitInList model.archivedHabits
+                    , setHabitDataShortcutFilteredHabits = removeHabitFromArray model.setHabitDataShortcutFilteredHabits
+                    , editGoalHabitSelectionFilteredHabits = removeHabitFromArray model.editGoalHabitSelectionFilteredHabits
+                    , addNoteHabitSelectionFilteredHabits = removeHabitFromArray model.addNoteHabitSelectionFilteredHabits
+                    , suspendOrResumeHabitSelectionFilteredHabits = removeHabitFromArray model.suspendOrResumeHabitSelectionFilteredHabits
+                    , graphHabitSelectionFilteredHabits = removeHabitFromArray model.graphHabitSelectionFilteredHabits
+                    , archiveHabitSelectionFilteredHabits = removeHabitFromArray model.archiveHabitSelectionFilteredHabits
+                    , unarchiveHabitSelectionFilteredHabits = replaceHabitInArray model.unarchiveHabitSelectionFilteredHabits
+                }
+
+            else
+                -- Habit is not archived
+                { model
+                    | allHabits = RemoteData.map replaceHabitInList model.allHabits
+                    , archivedHabits = RemoteData.map removeHabitFromList model.archivedHabits
+                    , setHabitDataShortcutFilteredHabits = replaceHabitInArray model.setHabitDataShortcutFilteredHabits
+                    , editGoalHabitSelectionFilteredHabits = replaceHabitInArray model.editGoalHabitSelectionFilteredHabits
+                    , addNoteHabitSelectionFilteredHabits = replaceHabitInArray model.addNoteHabitSelectionFilteredHabits
+                    , suspendOrResumeHabitSelectionFilteredHabits = replaceHabitInArray model.suspendOrResumeHabitSelectionFilteredHabits
+                    , graphHabitSelectionFilteredHabits = replaceHabitInArray model.graphHabitSelectionFilteredHabits
+                    , archiveHabitSelectionFilteredHabits = replaceHabitInArray model.archiveHabitSelectionFilteredHabits
+                    , unarchiveHabitSelectionFilteredHabits = removeHabitFromArray model.unarchiveHabitSelectionFilteredHabits
+                }
 
         getFrequencyStatsOnDate : User.User -> YmdDate.YmdDate -> List String -> Cmd Msg
         getFrequencyStatsOnDate user ymd habitIds =
@@ -235,6 +278,44 @@ update msg model =
 
                 newFilteredHabits =
                     case model.allHabits of
+                        RemoteData.Success habits ->
+                            List.filter habitFilter habits
+
+                        _ ->
+                            []
+
+                oldSelectedHabit =
+                    Array.get oldIndex oldFilteredHabits
+
+                newSelectedHabitIndex =
+                    case oldSelectedHabit of
+                        Just h ->
+                            Maybe.map Tuple.first (Util.firstInstanceInList newFilteredHabits ((==) h))
+                                |> Maybe.withDefault 0
+
+                        Nothing ->
+                            0
+
+                newFilteredHabitsArray =
+                    Array.fromList newFilteredHabits
+            in
+            ( modelUpdater newFilteredHabitsArray newSelectedHabitIndex
+            , Cmd.none
+            )
+
+        updateUnarchiveHabitSelectionFilterTextInput :
+            String
+            -> Int
+            -> Array.Array Habit.Habit
+            -> (Array.Array Habit.Habit -> Int -> Model)
+            -> ( Model, Cmd Msg )
+        updateUnarchiveHabitSelectionFilterTextInput newFilterText oldIndex oldFilteredHabits modelUpdater =
+            let
+                habitFilter habit =
+                    habit |> Habit.getCommonFields |> .name |> String.contains newFilterText
+
+                newFilteredHabits =
+                    case model.archivedHabits of
                         RemoteData.Success habits ->
                             List.filter habitFilter habits
 
@@ -2612,6 +2693,135 @@ update msg model =
 
         OnGraphPointHover maybeHoveredPoint ->
             ( { model | graphHoveredPoint = maybeHoveredPoint }, Cmd.none )
+
+        -- Archive Habits
+        OpenArchiveHabitSelectionScreen ->
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.ArchiveHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
+            , Dom.focus "archive-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnArchiveHabitSelectionFilterTextInput newFilterText ->
+            updateHabitSelectionFilterTextInput
+                newFilterText
+                model.archiveHabitSelectionSelectedHabitIndex
+                model.archiveHabitSelectionFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | archiveHabitSelectionFilterText = newFilterText
+                        , archiveHabitSelectionFilteredHabits = newFilteredHabitsArray
+                        , archiveHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
+
+        OnArchiveHabitSelectionSelectNextHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.archiveHabitSelectionFilteredHabits
+                (model.archiveHabitSelectionSelectedHabitIndex + 1)
+                (\newIndex -> { model | archiveHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnArchiveHabitSelectionSelectPreviousHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.archiveHabitSelectionFilteredHabits
+                (model.archiveHabitSelectionSelectedHabitIndex - 1)
+                (\newIndex -> { model | archiveHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnArchiveHabitSelectionEnterKeydown ->
+            case Array.get model.archiveHabitSelectionSelectedHabitIndex model.archiveHabitSelectionFilteredHabits of
+                Just selectedHabit ->
+                    update (SetHabitArchived selectedHabit True) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        SetHabitArchived habit newArchived ->
+            let
+                newModel =
+                    switchScreen model Nothing
+            in
+            case model.user of
+                Just user ->
+                    ( newModel
+                    , Api.mutationSetHabitArchived
+                        user
+                        (habit |> Habit.getCommonFields |> .id)
+                        newArchived
+                        model.apiBaseUrl
+                        OnSetHabitArchivedFailure
+                        OnSetHabitArchivedSuccess
+                    )
+
+                _ ->
+                    ( { newModel | errorMessage = Just "Error archiving or unarchiving habit: not logged in" }, Cmd.none )
+
+        OnSetHabitArchivedFailure apiError ->
+            ( { model | errorMessage = Just <| "Error archiving or unarchiving habit: " ++ ApiError.toString apiError }
+            , Cmd.none
+            )
+
+        OnSetHabitArchivedSuccess habit ->
+            let
+                updatedHabitListsModel =
+                    updateHabitListsWithNewHabit habit
+            in
+            ( { updatedHabitListsModel
+                | editInfo = Habit.initEditInfoData
+              }
+            , case model.user of
+                Just user ->
+                    getFrequencyStats user [ habit |> Habit.getCommonFields |> .id ]
+
+                Nothing ->
+                    Cmd.none
+            )
+
+        -- Unarchive Habits
+        OpenUnarchiveHabitSelectionScreen ->
+            let
+                newDialogScreenModel =
+                    switchScreen model (Just DialogScreen.UnarchiveHabitSelectionScreen)
+            in
+            ( newDialogScreenModel
+            , Dom.focus "unarchive-habit-selection-filter-text-input"
+                |> Task.attempt FocusResult
+            )
+
+        OnUnarchiveHabitSelectionFilterTextInput newFilterText ->
+            updateUnarchiveHabitSelectionFilterTextInput
+                newFilterText
+                model.unarchiveHabitSelectionSelectedHabitIndex
+                model.unarchiveHabitSelectionFilteredHabits
+                (\newFilteredHabitsArray newSelectedHabitIndex ->
+                    { model
+                        | unarchiveHabitSelectionFilterText = newFilterText
+                        , unarchiveHabitSelectionFilteredHabits = newFilteredHabitsArray
+                        , unarchiveHabitSelectionSelectedHabitIndex = newSelectedHabitIndex
+                    }
+                )
+
+        OnUnarchiveHabitSelectionSelectNextHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.unarchiveHabitSelectionFilteredHabits
+                (model.unarchiveHabitSelectionSelectedHabitIndex + 1)
+                (\newIndex -> { model | unarchiveHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnUnarchiveHabitSelectionSelectPreviousHabit ->
+            updateOnHabitSelectionChangeSelectedHabitIndex
+                model.unarchiveHabitSelectionFilteredHabits
+                (model.unarchiveHabitSelectionSelectedHabitIndex - 1)
+                (\newIndex -> { model | unarchiveHabitSelectionSelectedHabitIndex = newIndex })
+
+        OnUnarchiveHabitSelectionEnterKeydown ->
+            case Array.get model.unarchiveHabitSelectionSelectedHabitIndex model.unarchiveHabitSelectionFilteredHabits of
+                Just selectedHabit ->
+                    update (SetHabitArchived selectedHabit False) model
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 
 extractInt : String -> Maybe Int -> Maybe Int

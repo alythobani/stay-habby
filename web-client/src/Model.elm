@@ -133,4 +133,14 @@ type alias Model =
     , graphGoalIntervals : RemoteData.RemoteData ApiError.ApiError (List HabitGoalIntervalList.HabitGoalInterval)
     , graphIntervalsData : RemoteData.RemoteData ApiError.ApiError (List ( Graph.IntervalSuccessStatus, Graph.GraphData ))
     , graphHoveredPoint : Maybe Graph.Point
+
+    -- Archive Habits
+    , archiveHabitSelectionFilterText : String
+    , archiveHabitSelectionFilteredHabits : Array.Array Habit.Habit
+    , archiveHabitSelectionSelectedHabitIndex : Int
+
+    -- Unarchive Habits
+    , unarchiveHabitSelectionFilterText : String
+    , unarchiveHabitSelectionFilteredHabits : Array.Array Habit.Habit
+    , unarchiveHabitSelectionSelectedHabitIndex : Int
     }

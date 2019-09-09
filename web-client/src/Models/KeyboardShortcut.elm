@@ -3,8 +3,12 @@ module Models.KeyboardShortcut exposing
     , addNewHabitScreenShortcuts
     , addNoteHabitSelectionShortcuts
     , addNoteScreenShortcuts
+    , archiveHabitSelectionShortcuts
+    , cancelScreenShortcut
     , chooseDateScreenShortcuts
+    , closeFormShortcut
     , createUserFormShortcuts
+    , darkModeShortcut
     , editGoalHabitSelectionShortcuts
     , editGoalScreenShortcuts
     , editInfoHabitSelectionShortcuts
@@ -12,12 +16,17 @@ module Models.KeyboardShortcut exposing
     , errorMessageScreenShortcuts
     , graphHabitSelectionShortcuts
     , graphScreenShortcuts
+    , habitSelectionShortcuts
     , loginFormShortcuts
     , mainScreenShortcuts
     , setHabitDataAmountScreenShortcuts
     , setHabitDataHabitSelectionShortcuts
+    , singleKeyShortcut
+    , specialKeyShortcut
     , suspendOrResumeConfirmationScreenShortcuts
     , suspendOrResumeHabitSelectionShortcuts
+    , toggleAvailableKeyboardShortcutsScreenShortcut
+    , unarchiveHabitSelectionShortcuts
     )
 
 import DefaultServices.Keyboard as Keyboard
@@ -113,7 +122,9 @@ mainScreenShortcuts =
     , singleKeyShortcut Keyboard.KeyH OpenAddHabitForm "Add New Habit"
     , singleKeyShortcut Keyboard.KeyI OpenEditInfoHabitSelectionScreen "Edit Info"
     , singleKeyShortcut Keyboard.KeyN OpenAddNoteHabitSelectionDialogScreen "Add Note"
+    , singleKeyShortcut Keyboard.KeyR OpenArchiveHabitSelectionScreen "Archive Habit"
     , singleKeyShortcut Keyboard.KeyS OpenSuspendOrResumeHabitSelectionScreen "Suspend or Resume"
+    , singleKeyShortcut Keyboard.KeyU OpenUnarchiveHabitSelectionScreen "Unarchive Habit"
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
 
@@ -282,3 +293,19 @@ graphScreenShortcuts =
     , darkModeShortcut
     , toggleAvailableKeyboardShortcutsScreenShortcut
     ]
+
+
+archiveHabitSelectionShortcuts : List KeyboardShortcut
+archiveHabitSelectionShortcuts =
+    habitSelectionShortcuts
+        OnArchiveHabitSelectionSelectPreviousHabit
+        OnArchiveHabitSelectionSelectNextHabit
+        OnArchiveHabitSelectionEnterKeydown
+
+
+unarchiveHabitSelectionShortcuts : List KeyboardShortcut
+unarchiveHabitSelectionShortcuts =
+    habitSelectionShortcuts
+        OnUnarchiveHabitSelectionSelectPreviousHabit
+        OnUnarchiveHabitSelectionSelectNextHabit
+        OnUnarchiveHabitSelectionEnterKeydown

@@ -137,6 +137,16 @@ init { apiBaseUrl, currentTime } url key =
       , graphGoalIntervals = RemoteData.NotAsked
       , graphIntervalsData = RemoteData.NotAsked
       , graphHoveredPoint = Nothing
+
+      -- Archive Habits
+      , archiveHabitSelectionFilterText = ""
+      , archiveHabitSelectionFilteredHabits = Array.empty
+      , archiveHabitSelectionSelectedHabitIndex = 0
+
+      -- Unarchive Habits
+      , unarchiveHabitSelectionFilterText = ""
+      , unarchiveHabitSelectionFilteredHabits = Array.empty
+      , unarchiveHabitSelectionSelectedHabitIndex = 0
       }
     , Cmd.batch
         [ Task.attempt OnInitialTimeZoneRetrieval TimeZone.getZone

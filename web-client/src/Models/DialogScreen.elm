@@ -20,3 +20,5 @@ type DialogScreen
     | SuspendOrResumeConfirmationScreen
     | GraphHabitSelectionScreen
     | GraphDialogScreen
+    | ArchiveHabitSelectionScreen
+    | UnarchiveHabitSelectionScreen

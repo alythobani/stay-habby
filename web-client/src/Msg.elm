@@ -198,3 +198,18 @@ type Msg
     | OnGetGraphHabitGoalIntervalListFailure ApiError
     | OnGetGraphHabitGoalIntervalListSuccess Api.QueriedHabitGoalIntervalLists
     | OnGraphPointHover (Maybe Graph.Point)
+      -- Archive Habits
+    | OpenArchiveHabitSelectionScreen
+    | OnArchiveHabitSelectionFilterTextInput String
+    | OnArchiveHabitSelectionSelectNextHabit
+    | OnArchiveHabitSelectionSelectPreviousHabit
+    | OnArchiveHabitSelectionEnterKeydown
+    | SetHabitArchived Habit.Habit Bool
+    | OnSetHabitArchivedFailure ApiError
+    | OnSetHabitArchivedSuccess Habit.Habit
+      -- Unarchive Habits
+    | OpenUnarchiveHabitSelectionScreen
+    | OnUnarchiveHabitSelectionFilterTextInput String
+    | OnUnarchiveHabitSelectionSelectNextHabit
+    | OnUnarchiveHabitSelectionSelectPreviousHabit
+    | OnUnarchiveHabitSelectionEnterKeydown

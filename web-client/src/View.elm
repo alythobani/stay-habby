@@ -145,6 +145,16 @@ view model =
                         model.graphIntervalsData
                         model.darkModeOn
                         model.graphHoveredPoint
+                    , renderArchiveHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.archiveHabitSelectionFilterText
+                        model.archiveHabitSelectionFilteredHabits
+                        model.archiveHabitSelectionSelectedHabitIndex
+                    , renderUnarchiveHabitSelectionScreen
+                        model.activeDialogScreen
+                        model.unarchiveHabitSelectionFilterText
+                        model.unarchiveHabitSelectionFilteredHabits
+                        model.unarchiveHabitSelectionSelectedHabitIndex
                     ]
                 ]
 
@@ -2325,3 +2335,45 @@ renderGraphDialogScreen activeDialogScreen maybeHabit maybeSelectedYmd numDaysTo
             _ ->
                 []
         )
+
+
+renderArchiveHabitSelectionScreen :
+    Maybe DialogScreen.DialogScreen
+    -> String
+    -> Array.Array Habit.Habit
+    -> Int
+    -> Html Msg
+renderArchiveHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen =
+            activeDialogScreen == Just DialogScreen.ArchiveHabitSelectionScreen
+    in
+    renderHabitSelectionScreen
+        showScreen
+        "Archive Habit"
+        "archive-habit-selection-filter-text-input"
+        OnArchiveHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        selectedHabitIndex
+
+
+renderUnarchiveHabitSelectionScreen :
+    Maybe DialogScreen.DialogScreen
+    -> String
+    -> Array.Array Habit.Habit
+    -> Int
+    -> Html Msg
+renderUnarchiveHabitSelectionScreen activeDialogScreen habitSelectionFilterText filteredHabits selectedHabitIndex =
+    let
+        showScreen =
+            activeDialogScreen == Just DialogScreen.UnarchiveHabitSelectionScreen
+    in
+    renderHabitSelectionScreen
+        showScreen
+        "Unarchive Habit"
+        "unarchive-habit-selection-filter-text-input"
+        OnUnarchiveHabitSelectionFilterTextInput
+        habitSelectionFilterText
+        filteredHabits
+        selectedHabitIndex

@@ -75,6 +75,7 @@ type alias GoodHabitRecord =
     , targetFrequencies : List FrequencyChangeRecord
     , timeOfDay : HabitTime
     , suspensions : List SuspendedInterval
+    , archived : Bool
     }
 
 
@@ -87,6 +88,7 @@ type alias BadHabitRecord =
     , unitNamePlural : String
     , thresholdFrequencies : List FrequencyChangeRecord
     , suspensions : List SuspendedInterval
+    , archived : Bool
     }
 
 
@@ -329,10 +331,11 @@ getCommonFields :
         , unitNameSingular : String
         , unitNamePlural : String
         , suspensions : List SuspendedInterval
+        , archived : Bool
         }
 getCommonFields habit =
     case habit of
-        GoodHabit { id, userId, name, description, unitNameSingular, unitNamePlural, suspensions } ->
+        GoodHabit { id, userId, name, description, unitNameSingular, unitNamePlural, suspensions, archived } ->
             { id = id
             , userId = userId
             , name = name
@@ -340,9 +343,10 @@ getCommonFields habit =
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
             , suspensions = suspensions
+            , archived = archived
             }
 
-        BadHabit { id, userId, name, description, unitNameSingular, unitNamePlural, suspensions } ->
+        BadHabit { id, userId, name, description, unitNameSingular, unitNamePlural, suspensions, archived } ->
             { id = id
             , userId = userId
             , name = name
@@ -350,6 +354,7 @@ getCommonFields habit =
             , unitNameSingular = unitNameSingular
             , unitNamePlural = unitNamePlural
             , suspensions = suspensions
+            , archived = archived
             }
 
 
@@ -641,6 +646,7 @@ graphQLOutputString =
             year
           }
         }
+        archived
       }
       ... on bad_habit {
         _id
@@ -692,6 +698,7 @@ graphQLOutputString =
             year
           }
         }
+        archived
       }
     }"""
 
@@ -710,6 +717,7 @@ decodeHabit =
                 |> required "target_frequencies" (Decode.list decodeFrequencyChangeRecord)
                 |> required "time_of_day" decodeHabitTime
                 |> required "suspensions" (Decode.list decodeSuspendedInterval)
+                |> required "archived" Decode.bool
 
         decodeBadHabitRecord =
             Decode.succeed BadHabitRecord
@@ -721,6 +729,7 @@ decodeHabit =
                 |> required "unit_name_plural" Decode.string
                 |> required "threshold_frequencies" (Decode.list decodeFrequencyChangeRecord)
                 |> required "suspensions" (Decode.list decodeSuspendedInterval)
+                |> required "archived" Decode.bool
     in
     Decode.at [ "__typename" ] Decode.string
         |> Decode.andThen

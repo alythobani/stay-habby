@@ -292,6 +292,7 @@ update msg model =
                         Just user ->
                             ( { newModel
                                 | allHabits = RemoteData.Loading
+                                , archivedHabits = RemoteData.Loading
                                 , allHabitData = RemoteData.Loading
                                 , allFrequencyStats = RemoteData.Loading
                                 , allHabitDayNotes = RemoteData.Loading
@@ -399,6 +400,7 @@ update msg model =
                         , loginPageFields = Login.initLoginPageFields
                         , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
                         , allHabits = RemoteData.Loading
+                        , archivedHabits = RemoteData.Loading
                         , allHabitData = RemoteData.Loading
                         , allFrequencyStats = RemoteData.Loading
                         , allHabitDayNotes = RemoteData.Loading
@@ -556,6 +558,7 @@ update msg model =
                         , loginPageFields = Login.initLoginPageFields
                         , keyboardShortcutsList = KeyboardShortcut.mainScreenShortcuts
                         , allHabits = RemoteData.Loading
+                        , archivedHabits = RemoteData.Loading
                         , allHabitData = RemoteData.Loading
                         , allFrequencyStats = RemoteData.Loading
                         , allHabitDayNotes = RemoteData.Loading
@@ -787,6 +790,7 @@ update msg model =
                 , openUserActionsDropdown = False
                 , keyboardShortcutsList = KeyboardShortcut.loginFormShortcuts
                 , allHabits = RemoteData.NotAsked
+                , archivedHabits = RemoteData.NotAsked
                 , allHabitData = RemoteData.NotAsked
                 , allFrequencyStats = RemoteData.NotAsked
                 , allHabitDayNotes = RemoteData.NotAsked
@@ -798,6 +802,7 @@ update msg model =
         OnGetAllRemoteDataFailure apiError ->
             ( { model
                 | allHabits = RemoteData.Failure apiError
+                , archivedHabits = RemoteData.Failure apiError
                 , allHabitData = RemoteData.Failure apiError
                 , allFrequencyStats = RemoteData.Failure apiError
                 , allHabitDayNotes = RemoteData.Failure apiError
@@ -808,11 +813,18 @@ update msg model =
 
         OnGetAllRemoteDataSuccess { habits, habitData, frequencyStatsList, habitDayNotes } ->
             let
+                unarchivedHabits =
+                    List.filter (\habit -> habit |> Habit.getCommonFields |> .archived |> not) habits
+
+                archivedHabits =
+                    List.filter (\habit -> habit |> Habit.getCommonFields |> .archived) habits
+
                 habitsArray =
-                    Array.fromList habits
+                    Array.fromList unarchivedHabits
             in
             ( { model
-                | allHabits = RemoteData.Success habits
+                | allHabits = RemoteData.Success unarchivedHabits
+                , archivedHabits = RemoteData.Success archivedHabits
                 , allHabitData = RemoteData.Success habitData
                 , allFrequencyStats = RemoteData.Success frequencyStatsList
                 , allHabitDayNotes = RemoteData.Success habitDayNotes
@@ -831,9 +843,9 @@ update msg model =
                 newDialogScreenModel =
                     switchScreen model (Just DialogScreen.AddNewHabitScreen)
             in
-            case model.allHabits of
+            case ( model.allHabits, model.archivedHabits ) of
                 -- Only open form if we have a list of habits to double check the new habit's name against (no duplicates allowed)
-                RemoteData.Success _ ->
+                ( RemoteData.Success _, RemoteData.Success _ ) ->
                     ( newDialogScreenModel
                     , Dom.focus "add-habit-form-body-name-input" |> Task.attempt FocusResult
                     )
@@ -935,8 +947,8 @@ update msg model =
             )
 
         AddHabitFormSubmit ->
-            case ( model.selectedYmd, Habit.extractCreateHabit model.user model.addHabit, model.allHabits ) of
-                ( Just selectedYmd, Just createHabitData, RemoteData.Success allHabits ) ->
+            case ( model.selectedYmd, Habit.extractCreateHabit model.user model.addHabit, ( model.allHabits, model.archivedHabits ) ) of
+                ( Just selectedYmd, Just createHabitData, ( RemoteData.Success allHabits, RemoteData.Success archivedHabits ) ) ->
                     let
                         newDialogScreenModel =
                             switchScreen model Nothing
@@ -948,6 +960,12 @@ update msg model =
                                         == (createHabitData |> Habit.getCommonCreateFields |> .name)
                                 )
                                 allHabits
+                                || List.any
+                                    (\otherHabit ->
+                                        (otherHabit |> Habit.getCommonFields |> .name)
+                                            == (createHabitData |> Habit.getCommonCreateFields |> .name)
+                                    )
+                                    archivedHabits
                     in
                     if isDuplicateHabitName then
                         ( model, Dom.focus "first-habit-amount-input" |> Task.attempt FocusResultNoErr )

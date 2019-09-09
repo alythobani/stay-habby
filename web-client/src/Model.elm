@@ -51,6 +51,7 @@ type alias Model =
 
     -- Remote Data
     , allHabits : RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
+    , archivedHabits : RemoteData.RemoteData ApiError.ApiError (List Habit.Habit)
     , allHabitData : RemoteData.RemoteData ApiError.ApiError (List HabitData.HabitData)
     , allFrequencyStats : RemoteData.RemoteData ApiError.ApiError (List FrequencyStats.FrequencyStats)
     , allHabitDayNotes : RemoteData.RemoteData ApiError.ApiError (List HabitDayNote.HabitDayNote)

@@ -56,6 +56,7 @@ init { apiBaseUrl, currentTime } url key =
       -- Remote Data
       , allHabitData = RemoteData.NotAsked
       , allHabits = RemoteData.NotAsked
+      , archivedHabits = RemoteData.NotAsked
       , allFrequencyStats = RemoteData.NotAsked
       , allHabitDayNotes = RemoteData.NotAsked
 

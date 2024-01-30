@@ -6,6 +6,9 @@ var ExtractTextPlugin = require("extract-text-webpack-plugin");
 var HtmlWebpackPlugin = require("html-webpack-plugin");
 var CopyWebpackPlugin = require("copy-webpack-plugin");
 
+const LOCAL_GRAPHQL_URL = "http://localhost:8888/graphql";
+const AWS_GRAPHQL_URL = "https://stayhabbyserver.xyz/graphql";
+
 const prod = "production";
 const dev = "development";
 
@@ -57,9 +60,7 @@ var commonConfig = {
       },
     }),
     new webpack.DefinePlugin({
-      __WEBPACK_CONSTANT_API_BASE_URL__: JSON.stringify(
-        "https://stayhabbyserver.xyz/graphql"
-      ),
+      __WEBPACK_CONSTANT_API_BASE_URL__: JSON.stringify(LOCAL_GRAPHQL_URL),
     }),
     new HtmlWebpackPlugin({
       template: "src/index.html",

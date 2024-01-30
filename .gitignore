@@ -1,2 +1,5 @@
 *.DS_Store
 *.pem
+data-backups/
+*~
+.*.un~

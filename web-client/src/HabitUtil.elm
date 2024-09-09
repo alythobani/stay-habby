@@ -1,4 +1,4 @@
-module HabitUtil exposing (Comparator, HabitStatsPair, compareByAll, compareHabitsByCompletion, compareHabitsByCurrentGoalProgress, compareHabitsByCurrentGoalRemaining, compareHabitsByDaysLeft, compareHabitsByHabitHasStarted, findFrequencyStatsForHabit, isHabitCurrentFragmentSuccessful, isHabitCurrentlySuspended, sortHabitsByCurrentFragment, splitHabitsByCurrentlySuspended)
+module HabitUtil exposing (Comparator, HabitStatsPair, compareByAll, compareHabitsByCompletion, compareHabitsByCurrentGoalProgress, compareHabitsByCurrentGoalRemaining, compareHabitsByDaysLeft, compareHabitsByHabitHasStarted, findFrequencyStatsForHabit, isHabitCurrentFragmentSuccessful, isHabitCurrentlySuspended, sortHabitsByCurrentFragment, splitHabitsByCurrentlySuspended, doesHabitCurrentlyHaveFailedStreak)
 
 {-| Module for useful Habit operations
 -}
@@ -20,6 +20,15 @@ isHabitCurrentFragmentSuccessful habit frequencyStats =
             Habit.BadHabit _ ->
                 frequencyStats.currentFragmentTotal <= frequencyStats.currentFragmentGoal
 
+
+{- Returns whether the habit currently has a failed streak, i.e. a streak of 0 unless the habit has just started or is suspended. -}
+doesHabitCurrentlyHaveFailedStreak : FrequencyStats.FrequencyStats -> Bool
+doesHabitCurrentlyHaveFailedStreak frequencyStats =
+    if not frequencyStats.habitHasStarted || frequencyStats.totalFragments == 0 || frequencyStats.currentlySuspended  then
+        False
+
+    else
+        frequencyStats.currentFragmentStreak == 0
 
 findFrequencyStatsForHabit : Habit.Habit -> List FrequencyStats.FrequencyStats -> Maybe FrequencyStats.FrequencyStats
 findFrequencyStatsForHabit habit frequencyStats =

@@ -803,6 +803,11 @@ body {
             .habit-failure {
                 @extend .habit;
             }
+            .streak-failure {
+              // Add a red border shadow
+              border-color: $red-berry;
+              box-shadow: 1px 1px 10px 3px $red-berry;
+            }
         }
       }
 

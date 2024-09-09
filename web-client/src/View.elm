@@ -1120,6 +1120,14 @@ renderHabitBox habitStats selectedYmd habitData editingHabitAmountDict habitActi
         actionsDropdown =
             habitActionsDropdown == Just habitRecord.id
 
+        hasFailedStreak =
+            case habitStats of
+                Nothing ->
+                    False
+
+                Just stats ->
+                    HabitUtil.doesHabitCurrentlyHaveFailedStreak stats
+
         isCurrentFragmentSuccessful =
             case habitStats of
                 Nothing ->
@@ -1184,6 +1192,7 @@ renderHabitBox habitStats selectedYmd habitData editingHabitAmountDict habitActi
                                 else
                                     "habit-failure"
             )
+            , classList [("streak-failure", hasFailedStreak)]
         ]
         [ div [ class "habit-name" ] [ text habitRecord.name ]
         , habitActionsDropdownDiv actionsDropdown selectedYmd habit habitRecord.suspensions
